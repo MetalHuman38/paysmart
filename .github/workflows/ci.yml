@@ -19,7 +19,10 @@ jobs:
       - name: ⬇️ Checkout repo via SSH
         uses: actions/checkout@v4
         with:
-          ssh-key: ${{ secrets.PAYSMART_SSH_KEY }}
+          ssh-key: ${{ secrets.PAYSMART_CI_KEY }}
+          persist-credentials: true
+          ssh-strict: false
+          fetch-depth: 0
 
       - name: 🛠️ Setup JDK
         uses: actions/setup-java@v3

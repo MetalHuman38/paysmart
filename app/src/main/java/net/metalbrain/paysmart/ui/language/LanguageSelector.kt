@@ -30,6 +30,7 @@ fun LanguageSelector(
         "it" to "🇮🇹 Italiano",
         "ja" to "🇯🇵 日本語",
         "ko" to "🇰🇷 한국어",
+        "zh" to "zh 한국어"
     )
 
     Box {

@@ -27,6 +27,7 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+/.google-services.json
 
 /functions/node_modules
 /functions/.vscode
@@ -91,6 +92,8 @@ firestore.indexes.json
 firestore.rules
 storage.rules
 database.rules.json
+
+**/google-services.json
 
 ###############################
 # Firebase Hosting

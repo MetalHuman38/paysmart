@@ -1,0 +1,34 @@
+# .github/workflows/ci.yml
+name: Paysmart CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧹 Clean workspace
+        run: rm -rf *
+
+      - name: ⬇️ Checkout repo via SSH
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.PAYSMART_SSH_KEY }}
+
+      - name: 🛠️ Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🤖 Build Project (Gradle)
+        run: ./gradlew clean build
+
+      - name: ✅ Run Unit Tests
+        run: ./gradlew test

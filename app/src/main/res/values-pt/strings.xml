@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">PAYSMART</string>
+    <string name="create_account">Crie uma conta</string>
+    <string name="log_in">Conecte-se</string>
+    <string name="select_language">Selecione seu idioma preferido</string>
+    <string name="language_description">Você pode alterar o idioma nas configurações do seu perfil após fazer login.</string>
+    <string name="continue_text">Continuar</string>
+</resources>

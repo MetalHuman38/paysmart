@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">PAYSMART</string>
+    <string name="create_account">建立一個帳戶</string>
+    <string name="log_in">登入</string>
+    <string name="select_language">選擇您的首選語言</string>
+    <string name="language_description">登入後，您可以在個人資料設定中變更語言</string>
+    <string name="continue_text">繼續</string>
+</resources>

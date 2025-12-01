@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">PAYSMART</string>
+    <string name="create_account">アカウントを作成す</string>
+    <string name="log_in">ログイン</string>
+    <string name="select_language">希望の言語を選択してください</string>
+    <string name="language_description">サインインすると、プロフィール設定で言語を変更できます。</string>
+    <string name="continue_text">続く</string>
+</resources>

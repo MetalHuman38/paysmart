@@ -1,0 +1,133 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+gradle-wrapper.jar
+/.gradle
+/captures/
+/gradlew
+/gradlew.bat
+GeneratedPluginRegistrant.java
+.cxx/
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/to/reference-keystore
+key.properties
+**/*.keystore
+**/*.jks
+
+/functions/node_modules
+/functions/.vscode
+
+###############################
+# Global ignores
+###############################
+
+# Windows
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+
+# vscode
+.vscode/
+
+###############################
+# Android / Gradle
+###############################
+.gradle/
+build/
+**/build/
+
+# Android Studio project files
+.idea/
+*.ipr
+*.iws
+
+# NDK / CMake
+.externalNativeBuild/
+
+# Gradle wrapper
+gradlew
+gradlew.bat
+gradle/
+
+###############################
+# Keystores (security)
+###############################
+*.keystore
+*.jks
+
+###############################
+# Firebase (root)
+###############################
+
+.firebase/
+database-debug.log
+firestore-debug.log
+pubsub-debug.log
+
+firebase-debug.log
+storage-debug.log
+
+# Firestore / RTDB metadata
+firestore.indexes.json
+firestore.rules
+storage.rules
+database.rules.json
+
+###############################
+# Firebase Hosting
+###############################
+
+public/
+hosting/
+
+###############################
+# Node.js (functions/)
+###############################
+
+functions/node_modules/
+functions/lib/
+functions/dist/
+functions/*.local
+functions/.vscode/
+
+###############################
+# Kotlin Lint / Detekt
+###############################
+
+**/build/reports/
+
+###############################
+# Project-level tools
+###############################
+
+# Do NOT ignore python scripts for git hooks
+# but ignore compiled caches:
+android/tools/hooks/*.tmp
+android/tools/hooks/*.cache
+
+###############################
+# Editor swap files
+###############################
+
+*.swp
+*.swo
+*.tmp

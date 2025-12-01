@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "285308278238",
+    "project_id": "paysmart-7ee79",
+    "storage_bucket": "paysmart-7ee79.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:285308278238:android:9540029ee75ca4b54bb94f",
+        "android_client_info": {
+          "package_name": "net.metalbrain.paysmart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBT0icMOptPg6qrbk5Oz9uW1RA70NYr8vU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

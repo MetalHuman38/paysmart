@@ -19,7 +19,7 @@ jobs:
       - name: ⬇️ Checkout repo via SSH
         uses: actions/checkout@v4
         with:
-          ssh-key: ${{ secrets.PAYSMART_CI_KEY }}
+          ssh-key: ${{ secrets.PAYSMART_PB_KEY }}
           persist-credentials: true
           ssh-strict: false
           fetch-depth: 0

@@ -27,7 +27,7 @@ fun StartupScreen(
     navController: NavController,
     onLoginClick: () -> Unit,
     onCreateAccountClick: () -> Unit,
-    viewModel: LanguageViewModel
+    viewModel: LanguageViewModel,
 ) {
     val context = LocalContext.current
     val currentLang by viewModel.currentLanguage.collectAsState()

@@ -1,8 +1,19 @@
 <resources>
-    <string name="app_name">PAYSMART</string>
+    <string name="app_name">PaySmart</string>
     <string name="create_account">アカウントを作成す</string>
     <string name="log_in">ログイン</string>
     <string name="select_language">希望の言語を選択してください</string>
     <string name="language_description">サインインすると、プロフィール設定で言語を変更できます。</string>
+    <string name="search_hint">検索</string>
+    <string name="lang_english_uk">英語（UK）</string>
+    <string name="lang_english_us">英語（US）</string>
+    <string name="lang_german">ドイツ語（Deutsch）</string>
+    <string name="lang_french">フランス語（Français）</string>
+    <string name="lang_chinese">中国語（中文）</string>
+    <string name="lang_portuguese">ポルトガル語（Português）</string>
+    <string name="lang_spanish">スペイン語（Español）</string>
+    <string name="lang_italian">イタリア語（Italiano）</string>
+    <string name="lang_japanese">日本語（日本語）</string>
+    <string name="lang_korean">韓国語（한국어）</string>
     <string name="continue_text">続く</string>
 </resources>

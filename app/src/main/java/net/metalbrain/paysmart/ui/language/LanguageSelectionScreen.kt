@@ -43,7 +43,7 @@ fun LanguageSelectionScreen(
 
     val filteredLanguages = remember(search) {
         supportedLanguages.filter {
-            it.name.contains(search, ignoreCase = true)
+            it.nameRes.toString().contains(search, ignoreCase = true)
         }
     }
 
@@ -97,8 +97,8 @@ fun LanguageSelectionScreen(
             OutlinedTextField(
                 value = search,
                 onValueChange = { search = it },
-                placeholder = { Text("Search") },
-                leadingIcon = {
+                placeholder = { Text(stringResource(R.string.search_hint)) },
+                        leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = null)
                 },
                 modifier = Modifier
@@ -129,7 +129,7 @@ fun LanguageSelectionScreen(
                         Spacer(Modifier.width(12.dp))
 
                         Text(
-                            text = language.name,
+                            text = stringResource(id = language.nameRes),
                             modifier = Modifier.weight(1f),
                             fontSize = 16.sp
                         )

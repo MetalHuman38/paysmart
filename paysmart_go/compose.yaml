@@ -1,0 +1,37 @@
+name: paysmart-go
+
+services:
+  func:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    image: paysmart-go:dev
+    working_dir: /app
+    # Run with go run for instant rebuilds when files change
+    command: ["go", "run", "./cmd/paysmartd"]
+    environment:
+      # Must match your registered function name
+      - FUNCTION_TARGET=api
+      # Expose the same port your main.go uses
+      - PORT=8080
+      # From inside Docker, use host.docker.internal to reach your host (Windows-friendly)
+      - BASE_URL=http://host.docker.internal:8080
+    volumes:
+      # Mount source for live edits
+      - ./:/app
+      # Cache modules and build artifacts across runs for speed
+      - gocache:/go/pkg/mod
+      - gobuild:/root/.cache/go-build
+    ports:
+      - "8080:8080"
+    networks:
+      - volt
+
+volumes:
+  gocache:
+  gobuild:
+
+networks:
+  volt:
+    driver: bridge

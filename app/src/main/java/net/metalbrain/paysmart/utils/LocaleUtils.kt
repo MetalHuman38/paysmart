@@ -2,7 +2,6 @@ package net.metalbrain.paysmart.utils
 
 import android.content.Context
 import android.content.res.Configuration
-import android.os.Build
 import java.util.Locale
 
 object LocaleUtils {

@@ -111,6 +111,13 @@ functions/lib/
 functions/dist/
 functions/*.local
 functions/.vscode/
+functions/.env.paysmart-7ee79
+functions/.env.sample
+functions/.gcloudignore
+
+.env
+gradle.properties
+
 
 ###############################
 # Kotlin Lint / Detekt

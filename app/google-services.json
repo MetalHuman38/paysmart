@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "285308278238",
+    "firebase_url": "https://paysmart-7ee79-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "paysmart-7ee79",
     "storage_bucket": "paysmart-7ee79.firebasestorage.app"
   },
@@ -12,7 +13,36 @@
           "package_name": "net.metalbrain.paysmart"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "285308278238-bvoenph0qm0lk2mapmj68e5hrvle3ecm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.metalbrain.paysmart",
+            "certificate_hash": "20c22ec22794d509a6ae00d647f61ca35c82ac00"
+          }
+        },
+        {
+          "client_id": "285308278238-m8pd136c2lptmlrh43d6svum4vaicvl8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.metalbrain.paysmart",
+            "certificate_hash": "1dfc433a1e9d19c915e8ebe6ae8b4c77f224885e"
+          }
+        },
+        {
+          "client_id": "285308278238-qrk4nj45buc10i0hbbi26nfjkuo0i492.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.metalbrain.paysmart",
+            "certificate_hash": "90c5f769f4b275860376cd32374f45fde185de81"
+          }
+        },
+        {
+          "client_id": "285308278238-43rog12vseckpu8qn67dn67nruk8s613.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBT0icMOptPg6qrbk5Oz9uW1RA70NYr8vU"
@@ -20,7 +50,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "285308278238-43rog12vseckpu8qn67dn67nruk8s613.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

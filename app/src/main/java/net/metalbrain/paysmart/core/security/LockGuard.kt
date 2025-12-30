@@ -15,7 +15,7 @@ fun LockGuard(
     val isLocked by viewModel.isLocked.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.checkIfLocked(idleMinutes)
+        viewModel.checkIfLocked()
     }
 
     if (isLocked) {

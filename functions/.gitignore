@@ -8,3 +8,8 @@ typings/
 # Node.js dependency directory
 node_modules/
 *.local
+
+.env.local
+.env.sample
+.env.paysmart-7ee79
+request.json

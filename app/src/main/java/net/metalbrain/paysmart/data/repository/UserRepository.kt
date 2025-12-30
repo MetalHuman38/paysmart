@@ -18,12 +18,7 @@ interface UserProfileRepository {
      */
     suspend fun upsertNewUser(user: AuthUserModel, providerId: String)
 
-    /**
-     * Update progress flags for a user.
-     *
-     * @param uid The user ID to update.
-     */
-    suspend fun updateProgressFlags(uid: String, progressFlags: Map<String, Boolean>)
+    suspend fun getOnce(uid: String): AuthUserModel?
 
     /**
      * Update the `lastSignedIn` timestamp for a user.

@@ -3,11 +3,12 @@ package net.metalbrain.paysmart.data.repository
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import net.metalbrain.paysmart.domain.LanguageRepository
 
-class LanguageRepositoryImpl(
+class LanguageRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<androidx.datastore.preferences.core.Preferences>
 ) : LanguageRepository {
 

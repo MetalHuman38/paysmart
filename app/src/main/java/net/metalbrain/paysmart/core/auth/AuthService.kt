@@ -3,22 +3,20 @@ package net.metalbrain.paysmart.core.auth
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.tasks.await
+import net.metalbrain.paysmart.data.repository.AuthProvider
 import net.metalbrain.paysmart.data.repository.AuthRepository
-import net.metalbrain.paysmart.data.repository.SignInProvider
 
 class AuthService(
     private val repo: AuthRepository,
     private val hooks: List<AuthHook> = emptyList()
 ) {
 
-    suspend fun signIn(provider: SignInProvider): AuthResult {
+    suspend fun signIn(provider: AuthProvider): AuthResult {
         var credential: AuthCredential? = null
 
         try {
             credential = provider.getCredential()
         } catch (e: Exception) {
-            // If your provider throws WebProviderRequired or other types, catch here.
-            // On Android, web-based popups like `signInWithPopup` aren't supported.
             throw e
         }
 
@@ -50,7 +48,7 @@ class AuthService(
         return userCred
     }
 
-    suspend fun link(provider: SignInProvider) {
+    suspend fun link(provider: AuthProvider) {
         val currentUser = repo.currentUser ?: throw IllegalStateException("No user to link.")
         val credential = provider.getCredential()
         currentUser.linkWithCredential(credential).await()
@@ -62,7 +60,7 @@ class AuthService(
 
     // Hook runners
     private suspend fun runBeforeSignIn(
-        provider: SignInProvider,
+        provider: AuthProvider,
         credential: AuthCredential?
     ): HookDecision {
         val context = HookContext(
@@ -94,7 +92,7 @@ class AuthService(
         }
     }
 
-    private fun extractEmail(provider: SignInProvider, credential: AuthCredential?): String? {
+    private fun extractEmail(provider: AuthProvider, credential: AuthCredential?): String? {
         // You can inspect your provider type if needed
         return null
     }

@@ -2,116 +2,131 @@ package net.metalbrain.paysmart.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
+import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.domain.model.Country
 import net.metalbrain.paysmart.domain.model.supportedCountries
-import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.utils.rememberDebouncedState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountryPickerDialog(
+fun CountryPickerBottomSheet(
     onDismiss: () -> Unit,
     onCountrySelected: (Country) -> Unit
 ) {
-    var search by remember { mutableStateOf("") }
-    val context = LocalContext.current
-    val countries = remember(search) {
-        supportedCountries.filter {
-            val countryName = context.getString(it.nameRes)
-            countryName.contains(search, ignoreCase = true)
+    val coroutineScope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false
+    )
+
+    var rawSearch by remember { mutableStateOf("") }
+    val debouncedSearch by rememberDebouncedState(rawSearch, 300L)
+
+    // Sort and filter countries — done during composition for recomposition on locale change
+    val countriesGrouped = supportedCountries
+        .map { country -> country to stringResource(country.nameRes) }
+        .sortedBy { it.second }
+        .filter { (_, name) ->
+            name.contains(debouncedSearch, ignoreCase = true)
         }
-    }
+        .groupBy { (_, name) ->
+            name.first().uppercaseChar()
+        }.toSortedMap()
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(24.dp),
-            tonalElevation = 4.dp,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(WindowInsets.systemBars.asPaddingValues())
-                .padding(top = Dimens.mediumSpacing)
-                .padding(bottom = Dimens.mediumSpacing)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        tonalElevation = 8.dp,
+    ) {
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = stringResource(R.string.select_country),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    IconButton(onClick = onDismiss) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = null)
-                    }
-                }
-
-                OutlinedTextField(
-                    value = search,
-                    onValueChange = { search = it },
-                    placeholder = { Text(stringResource(R.string.search_hint)) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    modifier = Modifier.fillMaxWidth()
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stringResource(R.string.select_country),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
                 )
+                IconButton(onClick = onDismiss) {
+                    Icon(Icons.Default.Close, contentDescription = null)
+                }
+            }
 
-                Spacer(Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-                LazyColumn {
-                    items(countries) { country ->
+            // Search field
+            OutlinedTextField(
+                value = rawSearch,
+                onValueChange = { rawSearch = it },
+                placeholder = { Text(stringResource(R.string.search_hint)) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Country list
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            ) {
+                countriesGrouped.forEach { (initial, group) ->
+                    stickyHeader {
+                        Text(
+                            text = initial.toString(),
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        )
+                    }
+
+                    items(group) { (country, localizedName) ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onCountrySelected(country) }
+                                .clickable {
+                                    coroutineScope.launch {
+                                        onCountrySelected(country)
+                                        onDismiss()
+                                    }
+                                }
                                 .padding(vertical = 12.dp)
                         ) {
                             Image(
-                                painter = painterResource(id = country.flagRes),
+                                painter = painterResource(country.flagRes),
                                 contentDescription = null,
                                 modifier = Modifier.size(28.dp)
                             )
                             Spacer(Modifier.width(12.dp))
                             Text(
-                                text = stringResource(id = country.nameRes),
+                                text = localizedName,
                                 modifier = Modifier.weight(1f)
                             )
                             Text(text = country.dialCode)

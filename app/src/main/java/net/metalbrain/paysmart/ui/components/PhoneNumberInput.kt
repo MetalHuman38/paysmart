@@ -76,13 +76,9 @@ fun PhoneNumberInput(
             placeholder = { Text(text = stringResource(R.string.phone_place_holder)) },
             modifier = Modifier.weight(1f),
             singleLine = true,
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.Transparent,
-                focusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = Color.LightGray,
                 cursorColor = MaterialTheme.colorScheme.primary
             )
         )

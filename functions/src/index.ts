@@ -1,32 +1,45 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+import * as admin from "firebase-admin";
+import { onRequest, onCall } from "firebase-functions/v2/https";
+import { APP } from "./config/globals.js";
+import { buildApp } from "./server.js";
+import { logger } from "firebase-functions";
+import { RESEND_API_KEY } from "./config/params.js";
 
-import {setGlobalOptions} from "firebase-functions";
-import {onRequest} from "firebase-functions/https";
-import * as logger from "firebase-functions/logger";
+// Initialize Admin SDK exactly once
+if (admin.apps.length === 0) {
+  admin.initializeApp();
+}
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+// HTTP API function
+export const api = onRequest(
+  {
+    region: APP.region,
+    secrets: [RESEND_API_KEY],
+    cors: false,
+  },
+  (req, res) => {
+    const app = buildApp();
+    return app(req, res);
+  }
+);
 
-export const helloWorld = onRequest((request, response) => {
-  logger.info("Hello logs!", {structuredData: true});
-  response.send("Hello from Firebase!");
-});
+// Auth Blocking Triggers
+export { beforeCreate } from "./triggers/beforeCreate.trigger.js";
+export { beforeSignIn } from "./triggers/beforeSignIn.trigger.js";
+
+// Security Firestore Trigger
+export { seedSecurityOnUserCreate, ensureSecurityDoc } from "./security.js";
+
+// Simple echo callable function for testing
+export const echo = onCall(
+  {
+    region: APP.region,
+    enforceAppCheck: true
+  },
+  (req) => {
+    return { data: req.data, appId: req.app?.appId || null };
+  }
+);
+
+logger.info(`Function "api" initialized in region: ${APP.region}`);

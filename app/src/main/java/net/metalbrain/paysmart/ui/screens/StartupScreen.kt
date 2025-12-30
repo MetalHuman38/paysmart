@@ -2,8 +2,6 @@ package net.metalbrain.paysmart.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +18,7 @@ import net.metalbrain.paysmart.ui.animate.AnimatedLottieBackground
 import net.metalbrain.paysmart.ui.viewmodel.LanguageViewModel
 import net.metalbrain.paysmart.utils.LocaleUtils
 import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.ui.components.LanguageSelector
 import net.metalbrain.paysmart.ui.theme.Dimens
 
 @Composable
@@ -51,22 +50,12 @@ fun StartupScreen(
                     .align(Alignment.TopEnd),
                 horizontalArrangement = Arrangement.End
             ) {
-                OutlinedButton(
-                    onClick = { navController.navigate(Screen.Language.route) },
-                    shape = RoundedCornerShape(50),
-                    contentPadding = PaddingValues(
-                        horizontal = Dimens.mediumSpacing,
-                        vertical = Dimens.smallSpacing
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Language,
-                        contentDescription = "Select Language",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(getLanguageDisplay(currentLang), fontSize = 14.sp)
-                }
+                LanguageSelector(
+                    currentLanguage = currentLang,
+                    onClick = {
+                        navController.navigate(Screen.Language.routeWithOrigin("startup"))
+                    }
+                )
             }
 
             Column(

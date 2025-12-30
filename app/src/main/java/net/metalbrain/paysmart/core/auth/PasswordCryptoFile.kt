@@ -1,37 +1,53 @@
 package net.metalbrain.paysmart.core.auth
 
 import android.content.Context
-import androidx.security.crypto.EncryptedFile.Builder
-import androidx.security.crypto.EncryptedFile.FileEncryptionScheme
-import androidx.security.crypto.MasterKey
+import com.google.crypto.tink.Aead
+import com.google.crypto.tink.integration.android.AndroidKeysetManager
+import com.google.crypto.tink.aead.AeadConfig
+import com.google.crypto.tink.integration.android.AndroidKeystoreKmsClient
+import com.google.crypto.tink.aead.AeadKeyTemplates
 import java.io.File
 
 class PasswordCryptoFile(private val context: Context) {
 
     private val fileName = "encrypted_password.dat"
+    private val keysetAlias = "paysmart_password_key"
+    private val prefFile = "paysmart_secure_keys"
 
-    private val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
+    init {
+        // Initialize Tink
+        AeadConfig.register()
+    }
+
+    private val aead: Aead by lazy {
+        AndroidKeysetManager.Builder()
+            .withKeyTemplate(AeadKeyTemplates.AES256_GCM)
+            .withSharedPref(context, keysetAlias, prefFile)
+            .withMasterKeyUri(AndroidKeystoreKmsClient.PREFIX + keysetAlias)
+            .build()
+            .keysetHandle.getPrimitive(Aead::class.java)
+    }
 
     private val file: File = File(context.filesDir, fileName)
 
-    private val encryptedFile = Builder(
-        context,
-        file,
-        masterKey,
-        FileEncryptionScheme.AES256_GCM_HKDF_4KB
-    ).build()
-
-    fun write(content: String) {
-        encryptedFile.openFileOutput().use {
-            it.write(content.toByteArray(Charsets.UTF_8))
-        }
+    fun write(plainText: String) {
+        val encrypted = aead.encrypt(
+            plainText.toByteArray(Charsets.UTF_8),
+            null // No associated data
+        )
+        file.writeBytes(encrypted)
     }
 
     fun read(): String? {
         if (!file.exists()) return null
-        return encryptedFile.openFileInput().bufferedReader().use { it.readText() }
+        val encrypted = file.readBytes()
+        return try {
+            val decrypted = aead.decrypt(encrypted, null)
+            decrypted.toString(Charsets.UTF_8)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null // decryption failed (tampering or key mismatch)
+        }
     }
 
     fun clear() {

@@ -67,34 +67,13 @@ func beforeCreate(deps *auth.Deps) http.HandlerFunc {
 			return
 		}
 
-		// Email checks for non-federated
-		if provider == "password" || provider == "emaillink" || provider == "email" {
-			rawEmail, _ := user["email"].(string)
-			email, domain := splitEmail(rawEmail)
-			if email == "" {
-				httpx.Deny(w, 400, "invalid-argument", "Email is arequired for email/password sign up.")
-				return
-			}
-			if _, blocked := deps.Cfg.BlockedEmails[email]; blocked {
-				httpx.Deny(w, 403, "permission-denied", "Email is blocked.")
-				return
-			}
-			if isDisposable(deps.Cfg, email) {
-				httpx.Deny(w, 422, "invalid-argument", "Disposable email addresses are not allowed.")
-				return
-			}
-			if len(deps.Cfg.AllowedEmailDomains) > 0 {
-				if _, ok := deps.Cfg.AllowedEmailDomains[domain]; !ok {
-					httpx.Deny(w, 403, "permission-denied", fmt.Sprintf("Domain '%s' is not allowed.", domain))
-					return
-				}
-			}
+		// Provider checks.
+		updates, err := validateCredentials(deps, provider, user)
+		if err != nil {
+			httpx.Deny(w, err.Code, err.Type, err.Message)
+			return
 		}
-
-		updates := map[string]any{
-			"displayName":  user["displayName"],
-			"customClaims": map[string]any{"role": "user"},
-		}
+		updates["displayName"] = user["displayName"]
 
 		if time.Since(start) > 6500*time.Millisecond {
 			httpx.Deny(w, 503, "deadline-exceeded", "Sign up check took too long.")

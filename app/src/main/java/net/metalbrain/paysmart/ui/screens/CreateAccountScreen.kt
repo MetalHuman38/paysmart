@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.ui.components.HaveAnAccount
 import net.metalbrain.paysmart.ui.components.PhoneAlreadyRegisteredSheet
@@ -49,10 +51,13 @@ fun CreateAccountScreen(
     onContinue: () -> Unit,
     onBackClicked: () -> Unit
 ) {
-    var showCountryDialog by remember { mutableStateOf(false) }
+
+    var showCountryPicker by remember { mutableStateOf(false) }
     val selectedCountry by viewModel.selectedCountry
     var showAlreadyRegisteredSheet by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
 
     if (showAlreadyRegisteredSheet) {
         ModalBottomSheet(
@@ -116,7 +121,7 @@ fun CreateAccountScreen(
             selectedCountry = selectedCountry,
             phoneNumber = viewModel.phoneNumber,
             onPhoneNumberChange = viewModel::onPhoneNumberChanged,
-            onFlagClick = { showCountryDialog = true }
+            onFlagClick = { showCountryPicker = true }
         )
 
         Spacer(Modifier.height(18.dp))
@@ -151,12 +156,8 @@ fun CreateAccountScreen(
                 onCheckedChange = { viewModel.onToggleTerms() }
             )
             TermsAndPrivacyText(
-                onTermsClicked = {
-                    // Navigate or open URL
-                },
-                onPrivacyClicked = {
-                    // Navigate or open URL
-                }
+                onTermsClicked = {},
+                onPrivacyClicked = {}
             )
         }
 
@@ -166,13 +167,19 @@ fun CreateAccountScreen(
         PrimaryButton(
             text = stringResource(R.string.continue_text),
             onClick = {
-                viewModel.startPhoneVerification(
-                    activity = context as Activity,
-                    // Navigate to OTP screen
-                    onSuccess = { onContinue() },
-                    // Show error message
-                    onError = { error -> Log.e("PhoneAuth", error.message ?: "Unknown error") }
-                )
+                scope.launch {
+                    viewModel.startPhoneVerification(
+                        activity = context as Activity,
+                        onSuccess = onContinue,
+                        onPhoneAlreadyRegistered = {
+                            // 👇 This is the lambda we pass to show the bottom sheet
+                            showAlreadyRegisteredSheet = true
+                        },
+                        onError = { error ->
+                            Log.e("PhoneAuth", error.message ?: "Unknown error")
+                        }
+                    )
+                }
             },
             enabled = viewModel.acceptedTerms && viewModel.isPhoneValid()
         )
@@ -190,14 +197,14 @@ fun CreateAccountScreen(
         )
     }
 
-    // 🌍 Country Picker Dialog
-    if (showCountryDialog) {
-        CountryPickerDialog(
-            onDismiss = { showCountryDialog = false },
-            onCountrySelected = {
-                viewModel.onCountrySelected(it)
-                showCountryDialog = false
+    if (showCountryPicker) {
+        CountryPickerBottomSheet(
+            onDismiss = { showCountryPicker = false },
+            onCountrySelected = { selected ->
+                viewModel.onCountrySelected(selected)
+                showCountryPicker = false
             }
         )
     }
+
 }

@@ -20,7 +20,8 @@ import net.metalbrain.paysmart.domain.model.UserStatus
 class OTPViewModel @Inject constructor(
     private val phoneVerifier: PhoneVerifier,
     private val auth: FirebaseAuth,
-    private val userRepo: UserProfileRepository
+    private val userRepo: UserProfileRepository,
+    private val phoneDraftStore: PhoneDraftStore
 ) : ViewModel() {
     private val _state = MutableStateFlow(OTPState())
 
@@ -62,7 +63,21 @@ class OTPViewModel @Inject constructor(
                 val result = phoneVerifier.submitOtp(code)
                 Log.d("OTP", "OTP verification result: $result")
                 result.fold(
-                    onSuccess = { onSuccess() },
+                    onSuccess = {
+                        val phoneNumber = auth.currentUser?.phoneNumber
+                        if (!phoneNumber.isNullOrBlank()) {
+                            viewModelScope.launch {
+                                phoneDraftStore.saveDraft(
+                                    PhoneDraft(
+                                        e164 = phoneNumber,
+                                        verificationId = null,
+                                        verified = true
+                                    )
+                                )
+                            }
+                        }
+                        onSuccess()
+                    },
                     onFailure = { e -> onError(e) }
                 )
                 timerJob?.cancel()
@@ -79,7 +94,7 @@ class OTPViewModel @Inject constructor(
         }
     }
 
-    fun createUserRecordIfNeeded(onDone: () -> Unit = {}) {
+    fun upsertUserAfterOtp(onDone: () -> Unit = {}) {
         val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
 
         val authUser = AuthUserModel(
@@ -89,10 +104,10 @@ class OTPViewModel @Inject constructor(
             emailVerified = firebaseUser.isEmailVerified,
             providerIds = firebaseUser.providerData.map { it.providerId },
             status = UserStatus.Unverified,
-
-            hasVerifiedEmail = false,
-            hasAddedHomeAddress = false,
-            hasVerifiedIdentity = false
+            tenantId = firebaseUser.tenantId,
+            photoURL = firebaseUser.photoUrl?.toString(),
+            displayName = firebaseUser.displayName,
+            email = firebaseUser.email,
         )
 
         viewModelScope.launch {

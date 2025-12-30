@@ -5,35 +5,28 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import net.metalbrain.paysmart.core.security.SecurityPrefs
-import net.metalbrain.paysmart.data.repository.PasscodeRepository
+import net.metalbrain.paysmart.domain.security.SecuritySettingsManager
 
 @HiltViewModel
 class SecurityViewModel @Inject constructor(
-    private val passcodeRepository: PasscodeRepository
+    private val securityManager: SecuritySettingsManager
 ) : ViewModel() {
 
     private val _isLocked = MutableStateFlow(false)
     val isLocked: StateFlow<Boolean> = _isLocked
 
-    fun checkIfLocked(idleThresholdMinutes: Int) {
-        val lastUnlock = SecurityPrefs.lastUnlockTimestamp
-        val now = System.currentTimeMillis()
-        val timeoutMillis = idleThresholdMinutes * 60 * 1000
-
-        _isLocked.value = (now - lastUnlock) > timeoutMillis && passcodeRepository.hasPasscode()
+    fun checkIfLocked() {
+        _isLocked.value = securityManager.isLocked()
     }
 
     fun unlockSession() {
-        SecurityPrefs.lastUnlockTimestamp = System.currentTimeMillis()
+        securityManager.unlockSession()
         _isLocked.value = false
     }
 
-    fun clearPasscode() {
-        passcodeRepository.clear()
-    }
+    fun verify(passcode: String): Boolean = securityManager.verifyPasscode(passcode)
 
-    fun hasPasscode(): Boolean = passcodeRepository.hasPasscode()
+    fun hasPasscode(): Boolean = securityManager.hasPasscode()
 
-    fun verify(passcode: String): Boolean = passcodeRepository.verify(passcode)
+    fun clearPasscode() = securityManager.clearPasscode()
 }

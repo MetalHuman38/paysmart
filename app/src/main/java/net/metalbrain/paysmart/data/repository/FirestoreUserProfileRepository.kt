@@ -1,7 +1,7 @@
 package net.metalbrain.paysmart.data.repository
 
-import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
+import android.util.Log
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -14,7 +14,7 @@ import net.metalbrain.paysmart.domain.model.AuthUserModel
 import net.metalbrain.paysmart.utils.normalizeProvider
 
 class FirestoreUserProfileRepository @Inject constructor(
-    private val firestore: FirebaseFirestore
+    firestore: FirebaseFirestore
 ) : UserProfileRepository {
 
     private val users = firestore.collection("users")
@@ -22,10 +22,17 @@ class FirestoreUserProfileRepository @Inject constructor(
     override fun watchByUid(uid: String): Flow<AuthUserModel?> = callbackFlow {
         val listener = users.document(uid).addSnapshotListener { snapshot, _ ->
             val data = snapshot?.data
-            trySend(data?.let { AuthUserModel.fromMap(it) }).isSuccess
+            data?.let { AuthUserModel.fromMap(it).copy(uid = uid) }
+            trySend(snapshot?.toAuthUserModel())
         }
         awaitClose { listener.remove() }
     }
+
+    override suspend fun getOnce(uid: String): AuthUserModel? {
+        val snap = users.document(uid).get().await()
+        return snap.toAuthUserModel()
+    }
+
 
     override suspend fun upsertNewUser(user: AuthUserModel, providerId: String) {
         val docRef = users.document(user.uid)
@@ -37,61 +44,27 @@ class FirestoreUserProfileRepository @Inject constructor(
             put("email", user.email)
             put("emailVerified", user.emailVerified)
             put("isAnonymous", user.isAnonymous)
-            put("status", user.status.name.lowercase()) // Optional: lowercase for consistent Firestore queries
+            put("status", user.status.name.lowercase())
             put("providerIds", user.providerIds)
             put("createdAt", FieldValue.serverTimestamp())
             put("lastSignedIn", FieldValue.serverTimestamp())
-            put("hasVerifiedEmail", user.hasVerifiedEmail)
-            put("hasAddedHomeAddress", user.hasAddedHomeAddress)
-            put("hasVerifiedIdentity", user.hasVerifiedIdentity)
-            put("hasLocalPassword", user.hasLocalPassword)
-            put("localPasswordSetAt", user.localPasswordSetAt)
-
-
-            user.displayName?.takeIf { it.isNotBlank() }?.let { put("displayName", it) }
-            user.photoURL?.takeIf { it.startsWith("http") }?.let { put("photoURL", it) }
-            user.phoneNumber?.takeIf { it.isNotBlank() }?.let { put("phoneNumber", it) }
-            user.tenantId?.takeIf { it.isNotBlank() }?.let { put("tenantId", it) }
+            put("displayName", user.displayName ?: FieldValue.delete())
+            put("photoURL", user.photoURL?.takeIf { it.startsWith("http") } ?: FieldValue.delete())
+            put("phoneNumber", user.phoneNumber ?: FieldValue.delete())
+            put("tenantId", user.tenantId ?: FieldValue.delete())
         }
+
+        Log.d("UserRepo", "Creating user record: $data")
 
         docRef.set(data, SetOptions.merge()).await()
     }
 
-
-    override suspend fun updateProgressFlags(uid: String, progressFlags: Map<String, Boolean>) {
-        if (progressFlags.isEmpty()) return
-        users.document(uid).update(progressFlags).await()
-    }
-
-    private suspend fun updateProgressFlagsInternal(
-        uid: String,
-        hasVerifiedEmail: Boolean? = null,
-        hasAddedHomeAddress: Boolean? = null,
-        hasVerifiedIdentity: Boolean? = null
-    ) {
-        val updates = mutableMapOf<String, Any>()
-
-        hasVerifiedEmail?.let { updates["hasVerifiedEmail"] = it }
-        hasAddedHomeAddress?.let { updates["hasAddedHomeAddress"] = it }
-        hasVerifiedIdentity?.let { updates["hasVerifiedIdentity"] = it }
-
-        if (updates.isNotEmpty()) {
-            users.document(uid).update(updates).await()
-        }
-    }
-
-    private fun setLocalPasswordFlag(value: Boolean) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val userDoc = FirebaseFirestore.getInstance().collection("users").document(uid)
-
-        val update = mutableMapOf<String, Any>("hasLocalPassword" to value)
-        if (value) update["localPasswordSetAt"] = Timestamp.now()
-
-        userDoc.set(update, SetOptions.merge())
-    }
-
-
     override suspend fun touchLastSignedIn(uid: String) {
         users.document(uid).update("lastSignedIn", FieldValue.serverTimestamp()).await()
     }
+}
+
+fun DocumentSnapshot.toAuthUserModel(): AuthUserModel? {
+    val data = data ?: return null
+    return AuthUserModel.fromMap(data).copy(uid = id)
 }

@@ -15,8 +15,8 @@ type Config struct {
 	AuthGate            bool
 	BaseURL             string
 	DisposablePatterns  []*regexp.Regexp
-
-	ProjectID string
+	BlockedPhones       map[string]struct{}
+	ProjectID           string
 }
 
 func mustEnvCSVSet(name string, lower bool) map[string]struct{} {
@@ -67,6 +67,7 @@ func Load() *Config {
 		AllowedTenants:      mustEnvCSVSet("ALLOWED_TENANTS", false),
 		AuthGate:            true,
 		DisposablePatterns:  compileRegexList(os.Getenv("DISPOSABLE_PATTERNS")),
+		BlockedPhones:       mustEnvCSVSet("BLOCKED_PHONES", false),
 		BaseURL:             os.Getenv("BASE_URL"),
 		ProjectID:           os.Getenv("GCP_PROJECT"),
 	}

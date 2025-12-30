@@ -39,5 +39,20 @@ class SecurePasswordRepository @Inject constructor(
         return ok
     }
 
+    override suspend fun hasPassword(): Boolean {
+        return file.exists()
+    }
+
+    override suspend fun changePassword(old: String, new: String): Boolean {
+        val stored = file.read() ?: return false
+
+        if (!hasher.verify(old, stored)) return false
+
+        val newHash = hasher.hash(new)
+        file.write(newHash)
+
+        return true
+    }
+
     override suspend fun clear() = file.clear()
 }

@@ -17,7 +17,7 @@ import net.metalbrain.paysmart.R
 @Composable
 fun DontHaveAnAccount(
     modifier: Modifier = Modifier,
-    onSignInClicked: () -> Unit
+    onSignUpClicked: () -> Unit
 ) {
     Row(modifier = modifier) {
         Text(
@@ -33,11 +33,10 @@ fun DontHaveAnAccount(
                         textDecoration = TextDecoration.Underline
                     )
                 ) {
-                    append(stringResource(R.string.sign_in))
                 }
             },
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.clickable { onSignInClicked() }
+            modifier = Modifier.clickable { onSignUpClicked() }
         )
     }
 }

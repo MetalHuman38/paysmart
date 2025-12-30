@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import net.metalbrain.paysmart.core.auth.AuthPolicyHandler
 import javax.inject.Inject
 import net.metalbrain.paysmart.domain.model.Country
 import net.metalbrain.paysmart.domain.model.supportedCountries
@@ -18,33 +19,48 @@ import net.metalbrain.paysmart.phone.PhoneVerifier
 
 @HiltViewModel
 class CreateAccountViewModel @Inject constructor(
+    private val authPolicyHandler: AuthPolicyHandler,
     private val phoneVerifier: PhoneVerifier
 ) : ViewModel() {
 
     private val _selectedCountry = mutableStateOf(supportedCountries.first())
     val selectedCountry: State<Country> = _selectedCountry
 
+
     fun startPhoneVerification(
         activity: Activity,
         onSuccess: () -> Unit,
+        onPhoneAlreadyRegistered: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
-        val e164 = selectedCountry.value.dialCode + phoneNumber
+        val e164 = getFullPhoneNumber()
         viewModelScope.launch {
+
             try {
+                val exists = authPolicyHandler.isPhoneAlreadyRegistered(e164)
+                if (exists) {
+                    onPhoneAlreadyRegistered()
+                    return@launch
+                }
                 if (phoneVerifier is PhoneAuthHandler) {
                     phoneVerifier.setCallbacks(
                         onCodeSent = {
                             onSuccess()
                         },
                         onError = { error ->
-                            onError(error)
+                            // 🔥 Detect if the error came from beforeCreate
+                            if (error.message?.contains(
+                                    "already-exists",
+                                    ignoreCase = true
+                                ) == true
+                            ) {
+                                onPhoneAlreadyRegistered()
+                            } else {
+                                onError(error)
+                            }
                         }
                     )
-                } else {
-                    Log.w("PhoneAuth", "PhoneVerifier is not PhoneAuthHandler. Callbacks not set.")
                 }
-
                 phoneVerifier.start(e164, activity)
 
             } catch (e: Exception) {
@@ -53,6 +69,11 @@ class CreateAccountViewModel @Inject constructor(
         }
     }
 
+    fun getFullPhoneNumber(): String {
+        return (selectedCountry.value.dialCode + phoneNumber)
+            .replace(" ", "")
+            .trim()
+    }
 
     var phoneNumber by mutableStateOf("")
         private set

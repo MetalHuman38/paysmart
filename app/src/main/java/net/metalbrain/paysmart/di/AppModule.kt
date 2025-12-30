@@ -12,14 +12,18 @@ import dagger.Binds
 import dagger.Provides
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import net.metalbrain.paysmart.Env
+import net.metalbrain.paysmart.core.auth.AuthApiConfig
+import net.metalbrain.paysmart.core.auth.AuthHook
+import net.metalbrain.paysmart.core.auth.AuthPolicyHandler
+import net.metalbrain.paysmart.core.auth.AuthService
+import net.metalbrain.paysmart.core.auth.PasswordPolicyHandler
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.FirebaseAuthRepository
 import net.metalbrain.paysmart.data.repository.FirestoreUserProfileRepository
@@ -28,7 +32,9 @@ import net.metalbrain.paysmart.data.repository.PasscodeRepository
 import net.metalbrain.paysmart.data.repository.PasswordRepository
 import net.metalbrain.paysmart.data.repository.SecurePasswordRepository
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
+import net.metalbrain.paysmart.data.security.DefaultSecurityManager
 import net.metalbrain.paysmart.domain.LanguageRepository
+import net.metalbrain.paysmart.domain.security.SecuritySettingsManager
 import net.metalbrain.paysmart.phone.PhoneAuthHandler
 import net.metalbrain.paysmart.phone.PhoneDraft
 import net.metalbrain.paysmart.phone.PhoneDraftStore
@@ -38,6 +44,24 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideAuthApiConfig(): AuthApiConfig {
+        return AuthApiConfig(
+            baseUrl = Env.authBase,
+            attachApiPrefix = false
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthService(
+        authRepository: AuthRepository,
+        hooks: List<AuthHook>
+    ): AuthService {
+        return AuthService(authRepository, hooks)
+    }
 
     @Provides
     @Singleton
@@ -94,6 +118,28 @@ object AppModule {
 
     @Module
     @InstallIn(SingletonComponent::class)
+    object AuthPolicyModule {
+
+        @Provides
+        @Singleton
+        fun provideAuthPolicyHandler(): AuthPolicyHandler {
+            return AuthPolicyHandler()
+        }
+    }
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object PasswordPolicyModule {
+
+        @Provides
+        @Singleton
+        fun providePasswordPolicyHandler(): PasswordPolicyHandler {
+            return PasswordPolicyHandler()
+        }
+    }
+
+    @Module
+    @InstallIn(SingletonComponent::class)
     abstract class RepositoryModule {
 
         @Binds
@@ -126,6 +172,16 @@ object AppModule {
                 impl: SecurePasswordRepository
             ): PasswordRepository
         }
+
+        @Module
+        @InstallIn(SingletonComponent::class)
+        abstract class SecurityBindingModule {
+            @Binds
+            abstract fun bindSecurityManager(
+                impl: DefaultSecurityManager
+            ): SecuritySettingsManager
+        }
+
     }
 
 }

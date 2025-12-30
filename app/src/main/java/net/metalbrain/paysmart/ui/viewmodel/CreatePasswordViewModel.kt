@@ -8,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import net.metalbrain.paysmart.core.auth.PasswordPolicyHandler
 import net.metalbrain.paysmart.data.repository.PasswordRepository
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
 import javax.inject.Inject
@@ -15,14 +17,16 @@ import javax.inject.Inject
 @HiltViewModel
 class CreatePasswordViewModel @Inject constructor(
     private val passwordRepo: PasswordRepository,
-    private val userProfileRepository: UserProfileRepository
+    private val userProfileRepository: UserProfileRepository,
+    private val passwordPolicyHandler: PasswordPolicyHandler
 ) : ViewModel() {
 
     data class UiState(
         val password: String = "",
         val confirmPassword: String = "",
         val showPassword: Boolean = false,
-        val loading: Boolean = false
+        val loading: Boolean = false,
+        val errorMessage: String? = null
     )
 
     private val _uiState = MutableStateFlow(UiState())
@@ -46,30 +50,38 @@ class CreatePasswordViewModel @Inject constructor(
             try {
                 val password = _uiState.value.password
 
-                // Set secure password (EncryptedFile + hashing)
+                // ✅ 1. Validate required state
+                val user = FirebaseAuth.getInstance().currentUser
+                if (user == null) {
+                    Log.w("CreatePasswordViewModel", "User not logged in")
+                    throw IllegalStateException("User not authenticated")
+                }
+
+                // ✅ 2. Store password securely (locally)
                 passwordRepo.setPassword(password)
 
-                // Update Firestore flag ✅
-                val uid = getCurrentUserUid()
-                if (uid != null) {
-                    userProfileRepository.updateProgressFlags(
-                        uid = uid,
-                        progressFlags = mapOf(
-                            "hasLocalPassword" to true
-                        )
-                    )
+                // ✅ 3. Notify server to mark passwordEnabled = true
+                val idToken = user.getIdToken(false).await().token
+                val serverUpdated = passwordPolicyHandler.setPasswordEnabled(idToken ?: "")
+
+                if (!serverUpdated) {
+                    Log.w("CreatePasswordViewModel", "Server did not confirm passwordEnabled flag")
+                    // Optionally retry later or show a warning
                 }
+
+                // ✅ 4. Update user profile (optional)
+                userProfileRepository.touchLastSignedIn(uid = user.uid)
 
                 onSuccess()
             } catch (e: Exception) {
                 Log.e("CreatePasswordViewModel", "Failed to save password", e)
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Failed to save password. Please try again."
+                )
             } finally {
                 _uiState.value = _uiState.value.copy(loading = false)
             }
         }
     }
 
-    private fun getCurrentUserUid(): String? {
-        return FirebaseAuth.getInstance().currentUser?.uid
-    }
 }

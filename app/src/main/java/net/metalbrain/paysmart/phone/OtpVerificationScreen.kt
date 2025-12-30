@@ -1,4 +1,4 @@
-package net.metalbrain.paysmart.ui.auth
+package net.metalbrain.paysmart.phone
 
 import net.metalbrain.paysmart.ui.components.OtpTextFieldRow
 import androidx.activity.compose.LocalActivity
@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import net.metalbrain.paysmart.phone.OTPViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -141,7 +140,7 @@ fun OtpVerificationScreen(
                     code = code,
                     onSuccess = {
                         submitting = false
-                        viewModel.createUserRecordIfNeeded()
+                        viewModel.upsertUserAfterOtp()
                         onContinue()
                     },
                     onError = { e ->

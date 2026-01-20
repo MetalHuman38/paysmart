@@ -2,22 +2,23 @@ package net.metalbrain.paysmart.core.auth
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 
-class PasswordHasher {
+class PasswordHasher: BcryptPasswordHasher {
 
     companion object {
         private const val BCRYPT_COST = 12
         private const val EXPECTED_VERSION = $$"$2y$"
     }
 
-    fun hash(plain: String): String {
+     override fun hash(plain: String): String {
         return BCrypt.withDefaults().hashToString(BCRYPT_COST, plain.toCharArray())
     }
 
-    fun verify(plain: String, hashed: String): Boolean {
+
+    override fun verify(plain: String, hashed: String): Boolean {
         return BCrypt.verifyer().verify(plain.toCharArray(), hashed).verified
     }
 
-    fun needsRehash(hashed: String): Boolean {
+    override fun needsRehash(hashed: String): Boolean {
         // Check if the stored hash uses different cost or version
         val cost = extractCost(hashed)
         val version = hashed.take(4) // "$2y$"

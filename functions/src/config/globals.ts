@@ -18,8 +18,8 @@ const DEFAULT_ALLOWED = [
   "http://127.0.0.1:5173",
   "http://localhost:8080",
   "http://127.0.0.1:8080",
-  "https://voltpay.metalbrain.net",
-  "https://metalbrain.net"
+  "https://pay-smart.net",
+
 ];
 
 // Security configuration loaded from environment variables

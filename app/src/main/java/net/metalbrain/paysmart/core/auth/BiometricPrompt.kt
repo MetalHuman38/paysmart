@@ -5,6 +5,7 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import net.metalbrain.paysmart.utils.FailureCounter
 import java.util.concurrent.Executor
 
 object BiometricHelper {
@@ -20,7 +21,9 @@ object BiometricHelper {
         title: String,
         subtitle: String,
         onSuccess: () -> Unit,
-        onError: (String) -> Unit
+        onError: (String) -> Unit,
+        onFailureLimitReached: (() -> Unit)? = null,
+        failureCounter: FailureCounter = FailureCounter()
     ) {
         val executor: Executor = ContextCompat.getMainExecutor(activity)
         val prompt = BiometricPrompt(activity, executor,

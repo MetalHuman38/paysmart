@@ -4,8 +4,12 @@ data class AuthApiConfig(
     val baseUrl: String,
     val checkPhoneOrEmail: String = "/auth/check-email-or-phone",
     val checkIfPhoneAlreadyExist: String = "/auth/check-phone",
+    val setBiometricEnabled: String = "/auth/setBiometricEnabled",
+    val getBiometricEnabled: String = "/auth/getBiometricEnabled",
     val setPasswordEnabled: String = "/auth/setPasswordEnabled",
     val getPasswordEnabled: String = "/auth/getPasswordEnabled",
+    val setPassCodeEnabled: String = "/auth/setPassCodeEnabled",
+    val getPassCodeEnabled: String = "/auth/getPassCodeEnabled",
     val generateEmailVerificationHandler: String = "/auth/generate",
     val checkEmailVerificationStatusHandler: String = "/auth/status",
     val usersEnsurePath: String = "/users/ensure",
@@ -21,9 +25,17 @@ data class AuthApiConfig(
     
     val checkIfPhoneAlreadyExistUrl get() = "$apiBase$checkIfPhoneAlreadyExist"
 
+    val setBiometricEnabledUrl get() = "$apiBase$setBiometricEnabled"
+
+    val getBiometricEnabledUrl get() = "$apiBase$getBiometricEnabled"
+    
     val setPasswordEnabledUrl get() = "$apiBase$setPasswordEnabled"
 
     val getPasswordEnabledUrl get() = "$apiBase$getPasswordEnabled"
+
+    val setPassCodeEnabledUrl get() = "$apiBase$setPassCodeEnabled"
+
+    val getPassCodeEnabledUrl get() = "$apiBase$getPassCodeEnabled"
 
     val generateEmailVerificationHandlerUrl get() = "$apiBase$generateEmailVerificationHandler"
 

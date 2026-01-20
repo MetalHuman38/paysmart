@@ -47,13 +47,8 @@ class PasswordPolicyClient(
             .get()
             .build()
 
-        Log.d("PasswordPolicyClient", "Sending isPasswordEnabled request: $request")
-
         httpClient.newCall(request).execute().use { response ->
-            Log.d("PasswordPolicyClient", "Response: $response")
-
             if (!response.isSuccessful) {
-                Log.w("PasswordPolicyClient", "isPasswordEnabled failed: ${response.code}")
                 return@withContext false
             }
 

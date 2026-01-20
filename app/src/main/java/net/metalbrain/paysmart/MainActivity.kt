@@ -1,34 +1,43 @@
 package net.metalbrain.paysmart
 
+import android.app.ComponentCaller
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.fragment.app.FragmentActivity
 import dagger.hilt.android.AndroidEntryPoint
+import net.metalbrain.paysmart.core.locale.LocaleManager
 import net.metalbrain.paysmart.ui.AppNavGraph
+import net.metalbrain.paysmart.ui.LocalizedAppWrapper
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
-import net.metalbrain.paysmart.utils.LocaleUtils
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     override fun attachBaseContext(base: Context) {
-        val langCode = base.getSharedPreferences("app_settings", MODE_PRIVATE)
-            .getString("selected_language", "en") ?: "en"
-        val localizedContext = LocaleUtils.setAppLocale(base, langCode)
-        super.attachBaseContext(localizedContext)
+        super.attachBaseContext(LocaleManager.applyLocale(base))
+    }
+
+    override fun onNewIntent(intent: Intent, caller: ComponentCaller) {
+        super.onNewIntent(intent)
+        setIntent(intent)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             PaysmartTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    AppNavGraph()
+                    LocalizedAppWrapper {
+                        AppNavGraph()
+                    }
                 }
             }
         }

@@ -5,6 +5,14 @@ import * as admin from "firebase-admin";
 export async function beforeCreatePolicy(event: AuthBlockingEvent) {
   const user = event.data;
 
+  if (!user?.phoneNumber) {
+    // Allow only phone-based sign-up
+    throw new HttpsError(
+      "permission-denied",
+      "You must sign up with a verified phone number first."
+    );
+  }
+
   if (!user?.email && !user?.phoneNumber) {
     throw new HttpsError("invalid-argument", "Email or phone required");
   }

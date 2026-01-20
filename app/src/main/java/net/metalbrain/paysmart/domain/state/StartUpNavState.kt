@@ -5,6 +5,8 @@ sealed class StartupNavState {
     object RequireAuth : StartupNavState()
     object RequirePasscode : StartupNavState()
 
+    object RequireBiometricOptIn : StartupNavState()
     object RequirePasswordSetup: StartupNavState()
+
     object App : StartupNavState()
 }

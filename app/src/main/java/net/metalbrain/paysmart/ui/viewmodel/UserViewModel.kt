@@ -9,7 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.data.repository.AuthRepository
-import net.metalbrain.paysmart.data.repository.PasscodeRepository
+import net.metalbrain.paysmart.data.repository.SecurityRepository
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
 import net.metalbrain.paysmart.domain.model.asOnboardingState
 import net.metalbrain.paysmart.domain.state.OnboardingState
@@ -20,12 +20,12 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val userProfileRepository: UserProfileRepository,
-    private val securityRepo: SecurityCloudRepository,
-    private val passcodeRepo: PasscodeRepository
+    private val securityRepository: SecurityRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UserUiState>(UserUiState.Loading)
     val uiState: StateFlow<UserUiState> = _uiState.asStateFlow()
+
     private val securitySettings = MutableStateFlow<SecuritySettings?>(null)
 
     val onboardingState: StateFlow<OnboardingState> =
@@ -33,15 +33,13 @@ class UserViewModel @Inject constructor(
             .map { it?.asOnboardingState() ?: OnboardingState() }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.Lazily,
+                started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = OnboardingState()
             )
-
 
     init {
         observeAuthChanges()
     }
-
 
     private fun observeAuthChanges() {
         viewModelScope.launch {
@@ -52,10 +50,8 @@ class UserViewModel @Inject constructor(
                 }
 
                 val user = authRepository.currentUser
-                Log.d("UserViewModel", "Attempting create for user: ${user?.uid}")
                 val uid = user?.uid
 
-                // 🔐 Defensive check — user could be a zombie
                 if (uid.isNullOrBlank()) {
                     _uiState.value = UserUiState.Unauthenticated
                     return@collectLatest
@@ -64,40 +60,29 @@ class UserViewModel @Inject constructor(
                 try {
                     userProfileRepository.watchByUid(uid).collectLatest { profile ->
                         if (profile == null || profile.uid.isBlank()) {
-                            Log.d("UserViewModel", "Profile snapshot: $profile")
-                            Log.w("UserViewModel", "No valid profile found., uid: $uid")
                             _uiState.value = UserUiState.Unauthenticated
                         } else {
-                            val settings = securityRepo.getSettings(uid)
-                            securitySettings.value = settings
+                            loadSecuritySettings()
                             _uiState.value = UserUiState.ProfileLoaded(profile)
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("UserViewModel", "Error watching user profile", e)
-                    _uiState.value = UserUiState.Error(e.message ?: "Unknown error")
+                    _uiState.value = UserUiState.Error(
+                        e.message ?: "Failed to load user profile"
+                    )
                 }
             }
         }
     }
 
-
-    suspend fun getSecuritySettings(): SecuritySettings? {
-        val user = authRepository.currentUser ?: return null
-        return securityRepo.getSettings(user.uid)
-    }
-
-    fun shouldLock(lockAfterMinutes: Int?): Boolean {
-        val minutes = lockAfterMinutes ?: return false
-        return passcodeRepo.isLockRequired(minutes)
-    }
-
-    fun showPasscodePrompt(): Boolean {
-        return passcodeRepo.promptForPasscode()
-    }
-
-    fun hasLocalPasscode(): Boolean {
-        return passcodeRepo.hasPasscode()
+    private suspend fun loadSecuritySettings() {
+        securityRepository
+            .getSettings()
+            .onSuccess { securitySettings.value = it }
+            .onFailure {
+                // optional: log or fallback
+                Log.e("UserViewModel", "Failed to load security settings", it)
+            }
     }
 
     fun signOut() {

@@ -13,7 +13,7 @@ export const MAIL_FROM = defineString("MAIL_FROM", {
 });
 
 export const VERIFY_URL = defineString("VERIFY_URL", {
-  default: "https://metalbrain.net/verify",
+  default: "https://pay-smart.net/verify",
 });
 
 export const SEND_REAL_EMAILS = defineString("SEND_REAL_EMAILS", {

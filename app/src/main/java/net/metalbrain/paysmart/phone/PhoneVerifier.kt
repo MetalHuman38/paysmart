@@ -8,6 +8,9 @@ interface PhoneVerifier {
 
     suspend fun resend(e164: String, activity: Activity): Result<Unit>
 
+    fun getVerificationId(): String?
+
+
     fun cancel()
 
     fun setCallbacks(

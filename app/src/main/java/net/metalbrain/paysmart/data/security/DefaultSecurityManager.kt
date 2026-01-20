@@ -1,42 +1,43 @@
 package net.metalbrain.paysmart.data.security
 
-import net.metalbrain.paysmart.core.security.SecurityPrefs
+import kotlinx.coroutines.flow.first
+import net.metalbrain.paysmart.core.security.SecurityPreference
 import net.metalbrain.paysmart.data.repository.PasscodeRepository
-import net.metalbrain.paysmart.data.repository.SecurityCloudRepository
 import net.metalbrain.paysmart.domain.model.SecuritySettings
 import net.metalbrain.paysmart.domain.security.SecuritySettingsManager
 import javax.inject.Inject
 
 class DefaultSecurityManager @Inject constructor(
     private val passcodeRepository: PasscodeRepository,
-    private val cloudRepository: SecurityCloudRepository
+    private val securityPrefs: SecurityPreference
 ) : SecuritySettingsManager {
 
-    override suspend fun getCloudSettings(uid: String): SecuritySettings? {
-        return cloudRepository.getSettings(uid)
+    override suspend fun getCloudSettings(): SecuritySettings? {
+        return securityPrefs.cloudSecuritySettingsFlow.first()
     }
 
-    override fun isLocked(): Boolean {
-        val lastUnlock = SecurityPrefs.lastUnlockTimestamp
+    override suspend fun isLocked(): Boolean {
+        val lastUnlock = securityPrefs.lastUnlockFlow.first()
+        val lockAfterMinutes = securityPrefs.lockAfterMinutesFlow.first()
         val now = System.currentTimeMillis()
-        val timeoutMillis = SecurityPrefs.lockAfterMinutes * 60 * 1000
+        val timeoutMillis = lockAfterMinutes * 60 * 1000
 
-        return (now - lastUnlock) > timeoutMillis && passcodeRepository.hasPasscode()
+        return (now - lastUnlock) > timeoutMillis &&
+                passcodeRepository.hasPasscode()
     }
 
-    override fun unlockSession() {
-        SecurityPrefs.lastUnlockTimestamp = System.currentTimeMillis()
+    override suspend fun unlockSession() {
+        securityPrefs.updateLastUnlock()
     }
 
-    override fun verifyPasscode(passcode: String): Boolean {
-        return passcodeRepository.verify(passcode)
-    }
 
-    override fun hasPasscode(): Boolean {
-        return passcodeRepository.hasPasscode()
-    }
+    override suspend fun verifyPasscode(passcode: String): Boolean =
+        passcodeRepository.verify(passcode)
 
-    override fun clearPasscode() {
+    override suspend fun hasPasscode(): Boolean =
+        passcodeRepository.hasPasscode()
+
+    override suspend fun clearPasscode() {
         passcodeRepository.clear()
     }
 }

@@ -1,9 +1,10 @@
 package net.metalbrain.paysmart.domain.model
+import androidx.annotation.Keep
 
 import androidx.annotation.StringRes
 import net.metalbrain.paysmart.R
 
-// Language.kt
+@Keep
 data class Language(
     val code: String,
     @get:StringRes @param:StringRes val nameRes: Int,

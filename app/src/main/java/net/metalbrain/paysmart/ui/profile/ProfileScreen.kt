@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.ui.profile
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -35,13 +36,15 @@ fun ProfileScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+//            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.Center
         ) {
             // 🧑 Profile Avatar, Name, Email
             ProfileHeader(
                 displayName = user.displayName,
+                photoURL = user.photoURL,
                 email = user.email,
-                isVerified = true, // 🔐 optional check on your side
+                isVerified = true,
             )
 
             // 📋 Menu List

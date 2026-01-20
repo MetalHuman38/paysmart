@@ -12,11 +12,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun EmailInputField(
+    modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String = "Email",
     isError: Boolean = false,
-    modifier: Modifier = Modifier
+
 ) {
     OutlinedTextField(
         value = value,

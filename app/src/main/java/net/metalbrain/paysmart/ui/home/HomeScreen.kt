@@ -6,54 +6,54 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import net.metalbrain.paysmart.domain.state.UserUiState
+import androidx.navigation.NavHostController
 import net.metalbrain.paysmart.ui.Screen
-import net.metalbrain.paysmart.ui.screens.UnauthenticatedScreen
-import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
+import net.metalbrain.paysmart.ui.viewmodel.SecurityViewModel
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun HomeScreen(
-    navController: NavController,
+    navController: NavHostController,
     modifier: Modifier = Modifier,
-    viewModel: UserViewModel
+    viewModel: SecurityViewModel
+
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val security by viewModel.securitySettings.collectAsState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        bottomBar = { HomeBottomNavigation() }
+        bottomBar = { HomeBottomNavigation(
+            navController = navController
+        ) }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            when (val state = uiState) {
-                is UserUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(
-                    Alignment.Center))
-                is UserUiState.Unauthenticated -> UnauthenticatedScreen()
-                is UserUiState.ProfileLoaded -> HomeContent(
-                    user = state.user,
-                    onProfileClick = {
-                        navController.navigate(Screen.ProfileScreen.route)
-                    },
-                    onVerifyEmailClick = {
-                        navController.navigate(Screen.AddEmail.route)
-                    },
-                    onAddAddressClick = {
-                        navController.navigate(Screen.AddEmail.route)
-                    },
-                    onVerifyIdentityClick = {
-                        navController.navigate(Screen.AddEmail.route)
-                    },
+            when {
+                security == null -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
 
-                    viewModel = viewModel
-                )
-                is UserUiState.Error -> Text("Error: ${state.message}")
+                else -> {
+                    HomeContent(
+                        security = security!!,
+                        onProfileClick = {
+                            navController.navigate(Screen.ProfileScreen.route)
+                        },
+                        onVerifyEmailClick = {
+                            navController.navigate(Screen.AddEmail.route)
+                        },
+                        onAddAddressClick = {
+                            navController.navigate(Screen.AddEmail.route)
+                        },
+                        onVerifyIdentityClick = {
+                            navController.navigate(Screen.AddEmail.route)
+                        }
+                    )
+                }
             }
         }
     }

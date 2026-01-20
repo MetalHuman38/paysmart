@@ -1,5 +1,8 @@
 package net.metalbrain.paysmart.ui.viewmodel
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -9,36 +12,30 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import net.metalbrain.paysmart.core.auth.FederatedLinkingHandler
 import net.metalbrain.paysmart.core.auth.PasswordPolicyHandler
-import net.metalbrain.paysmart.data.repository.PasswordRepository
+import net.metalbrain.paysmart.domain.auth.SocialAuthUseCase
 import javax.inject.Inject
 import net.metalbrain.paysmart.domain.model.Country
 import net.metalbrain.paysmart.domain.model.supportedCountries
-import net.metalbrain.paysmart.phone.PhoneDraft
-import net.metalbrain.paysmart.phone.PhoneDraftStore
+import net.metalbrain.paysmart.domain.usecase.EmailLinkUseCase
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val phoneDraftStore: PhoneDraftStore,
     private val passwordPolicyHandler: PasswordPolicyHandler,
-    private val federatedLinkingHandler: FederatedLinkingHandler,
-    private val passwordRepo: PasswordRepository
+    private val socialAuth: SocialAuthUseCase,
+    private val emailLinkUseCase: EmailLinkUseCase,
 ) : ViewModel() {
 
     private val _selectedCountry = mutableStateOf(supportedCountries.first())
 
-    private val _phoneDraft = MutableStateFlow(PhoneDraft())
-
     val selectedCountry: State<Country> = _selectedCountry
 
     var phoneNumber by mutableStateOf("")
+
+    val email = mutableStateOf("")
 
     var loginError by mutableStateOf<String?>(null)
         private set
@@ -50,110 +47,124 @@ class LoginViewModel @Inject constructor(
         loginError = null
     }
 
-    fun attemptLogin(onSuccess: () -> Unit) {
+    fun handleGoogleSignIn(
+        credential: AuthCredential,
+        onSuccess: () -> Unit,
+        onError: (Throwable) -> Unit
+    ) {
         viewModelScope.launch {
             loading = true
             loginError = null
-
-            try {
-                // ✅ Get cached phone draft once
-                val phoneDraft = phoneDraftStore.draft.first()
-                Log.d("LoginViewModel", "PhoneDraft: $phoneDraft")
-
-                val cachedPhone = phoneDraft.e164
-                Log.d("LoginViewModel", "Cached Phone: $cachedPhone")
-                if (cachedPhone.isNullOrBlank()) {
-                    loginError = "No cached phone number"
-                    return@launch
-                }
-
-                // ✅ Verify password
-                val passwordOk = passwordRepo.verify(password.value)
-                if (!passwordOk) {
-                    loginError = "Invalid password"
-                    return@launch
-                }
-
-                // ✅ Optional online checks
-                val user = FirebaseAuth.getInstance().currentUser
-                if (user != null) {
-                    val idToken = user.getIdToken(false).await().token
+            val result = socialAuth.signInWithGoogle(credential)
+            result.onSuccess {
+                // Optional password policy check
+                try {
+                    val idToken = FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token
                     if (!idToken.isNullOrBlank()) {
                         val passwordEnabled = passwordPolicyHandler.getPasswordEnabled(idToken)
                         if (!passwordEnabled) {
-                            loginError = "Password login not enabled for this account"
-                            return@launch
+                            Log.w("LoginViewModel", "Password login not enabled (optional)")
                         }
                     }
+                } catch (e: Exception) {
+                    Log.w("LoginViewModel", "Failed to fetch claims", e)
                 }
-
-                // ✅ Success
                 onSuccess()
-
-            } catch (e: Exception) {
-                loginError = "Login failed: ${e.localizedMessage ?: "Unknown error"}"
-            } finally {
-                loading = false
+            }.onFailure {
+                Log.e("LoginViewModel", "Google sign-in failed", it)
+                onError(it)
             }
+
+            loading = false
         }
     }
 
-    fun handleGoogleSignInSuccess(credential: AuthCredential, onSuccess: () -> Unit) {
+    fun linkFederatedCredential(
+        credential: AuthCredential,
+        onSuccess: () -> Unit,
+        onError: (Throwable) -> Unit
+    ) {
+        viewModelScope.launch {
+            loading = true
+            val result = socialAuth.linkCredential(credential)
+            result.onSuccess { onSuccess() }
+                .onFailure { onError(it) }
+            loading = false
+        }
+    }
+
+    fun handleFacebookLogin(
+        activity: Activity,
+        onSuccess: () -> Unit,
+        onError: (Throwable) -> Unit
+    ) {
         viewModelScope.launch {
             loading = true
             loginError = null
 
-            try {
-                val auth = FirebaseAuth.getInstance()
-
-                // Attempt sign-in
-                val result = auth.signInWithCredential(credential).await()
-                val user = result.user ?: throw Exception("No user returned from sign-in")
-
-                val email = user.email
-                val phone = user.phoneNumber
-
-                // 🔍 Check if account already exists (via backend)
-                val existingProviders = federatedLinkingHandler.checkFederatedAccountExists(email, phone)
-
-                if (existingProviders.isNotEmpty()) {
-                    Log.d("LoginViewModel", "🧠 Account already exists with providers: $existingProviders")
-                }
-
-                // 🔐 Check if password login is enabled
-                val idToken = user.getIdToken(false).await().token
-                if (!idToken.isNullOrBlank()) {
-                    val passwordEnabled = passwordPolicyHandler.getPasswordEnabled(idToken)
-                    if (!passwordEnabled) {
-                        Log.w("LoginViewModel", "Password login is not enabled for this account")
-                        // Not necessarily a blocking error
-                    }
-                }
-
-                Log.d("LoginViewModel", "✅ Google Sign-In successful. UID: ${user.uid}")
-                // Continue to home / dashboard
+            val result = socialAuth.signInWithFacebook(activity)
+            result.onSuccess {
                 onSuccess()
-
-
-            } catch (e: FirebaseAuthUserCollisionException) {
-                // 🔁 Credential is already linked to a different account
-                Log.e("LoginViewModel", "⚠️ Account linking collision", e)
-                loginError = "This account is already in use. Try signing in instead."
-
-            } catch (e: Exception) {
-                Log.e("LoginViewModel", "❌ Google Sign-In failed", e)
-                loginError = "Google Sign-In failed: ${e.localizedMessage ?: "Unknown error"}"
-
-            } finally {
-                loading = false
+            }.onFailure {
+                loginError = "Facebook Sign-In failed: ${it.localizedMessage ?: "Unknown error"}"
+                onError(it)
             }
+
+            loading = false
         }
     }
 
 
-    fun handleGoogleSignInError(e: Exception) {
-        loginError = "Google Sign-In failed: ${e.localizedMessage ?: "Unknown error"}"
+
+
+    fun sendMagicLink(
+        context: Context,
+        email: String,
+        onSuccess: () -> Unit,
+        onError: (Throwable) -> Unit
+        ) {
+        val currentEmail = email.trim()
+        if (currentEmail.isBlank()) {
+            onError(IllegalArgumentException("Email is required"))
+            return
+        }
+            viewModelScope.launch {
+                try {
+                    emailLinkUseCase.sendMagicLink(context, email)
+                    onSuccess()
+                } catch (e: Exception) {
+                    onError(e)
+                }
+            }
+        }
+
+    fun handleEmailLoginFromIntent(
+            email: String,
+            intent: Intent,
+            onSuccess: () -> Unit,
+            onError: (Throwable) -> Unit
+        ) {
+            viewModelScope.launch {
+                loading = true
+                try {
+                    val user = emailLinkUseCase.handleEmailLinkIntent(email, intent)
+                    Log.d("LoginViewModel", "✅ Magic link sign-in success. UID: ${user.uid}")
+                    onSuccess()
+                } catch (e: Exception) {
+                    Log.e("LoginViewModel", "❌ Magic link sign-in failed", e)
+                    loginError = "Magic link sign-in failed"
+                    onError(e)
+                } finally {
+                    loading = false
+                }
+            }
     }
+
+
+    fun handleEmailLoginFromIntentError(e: Exception) {
+        loginError = "Magic link sign-in failed"
+    }
+
 
 
     private val _password = mutableStateOf("")

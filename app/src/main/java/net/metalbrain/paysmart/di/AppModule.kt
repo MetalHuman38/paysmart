@@ -24,17 +24,23 @@ import net.metalbrain.paysmart.core.auth.AuthHook
 import net.metalbrain.paysmart.core.auth.AuthPolicyHandler
 import net.metalbrain.paysmart.core.auth.AuthService
 import net.metalbrain.paysmart.core.auth.PasswordPolicyHandler
+import net.metalbrain.paysmart.core.security.SecurityPreference
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.FirebaseAuthRepository
 import net.metalbrain.paysmart.data.repository.FirestoreUserProfileRepository
 import net.metalbrain.paysmart.data.repository.LanguageRepositoryImpl
-import net.metalbrain.paysmart.data.repository.PasscodeRepository
 import net.metalbrain.paysmart.data.repository.PasswordRepository
 import net.metalbrain.paysmart.data.repository.SecurePasswordRepository
+import net.metalbrain.paysmart.data.repository.SecurityCloudRepository
+import net.metalbrain.paysmart.data.repository.SecurityRepository
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
 import net.metalbrain.paysmart.data.security.DefaultSecurityManager
 import net.metalbrain.paysmart.domain.LanguageRepository
+import net.metalbrain.paysmart.domain.auth.FirebaseUserManager
+import net.metalbrain.paysmart.domain.auth.UserManager
 import net.metalbrain.paysmart.domain.security.SecuritySettingsManager
+import net.metalbrain.paysmart.domain.usecase.DefaultSecurityUseCase
+import net.metalbrain.paysmart.domain.usecase.SecurityUseCase
 import net.metalbrain.paysmart.phone.PhoneAuthHandler
 import net.metalbrain.paysmart.phone.PhoneDraft
 import net.metalbrain.paysmart.phone.PhoneDraftStore
@@ -83,6 +89,7 @@ object AppModule {
     fun provideLanguageRepository(
         dataStore: DataStore<Preferences>
     ): LanguageRepository = LanguageRepositoryImpl(dataStore)
+
 
     @Module
     @InstallIn(SingletonComponent::class)
@@ -159,9 +166,20 @@ object AppModule {
 
         @Provides
         @Singleton
-        fun providePasscodeRepository(
+        fun provideSecurityPrefs(
             @ApplicationContext context: Context
-        ): PasscodeRepository = PasscodeRepository(context)
+        ): SecurityPreference = SecurityPreference(context)
+
+        @Module
+        @InstallIn(SingletonComponent::class)
+        abstract class AuthBindingModule {
+
+            @Binds
+            @Singleton
+            abstract fun bindUserManager(
+                impl: FirebaseUserManager
+            ): UserManager
+        }
 
         @Module
         @InstallIn(SingletonComponent::class)
@@ -175,13 +193,28 @@ object AppModule {
 
         @Module
         @InstallIn(SingletonComponent::class)
+        abstract class UseCaseBindingModule {
+
+            @Binds
+            @Singleton
+            abstract fun bindSecurityUseCase(
+                impl: DefaultSecurityUseCase
+            ): SecurityUseCase
+        }
+
+        @Module
+        @InstallIn(SingletonComponent::class)
         abstract class SecurityBindingModule {
             @Binds
             abstract fun bindSecurityManager(
                 impl: DefaultSecurityManager
             ): SecuritySettingsManager
-        }
 
+            @Binds
+            abstract fun bindSecurityRepository(
+                impl: SecurityCloudRepository
+            ): SecurityRepository
+        }
     }
 
 }

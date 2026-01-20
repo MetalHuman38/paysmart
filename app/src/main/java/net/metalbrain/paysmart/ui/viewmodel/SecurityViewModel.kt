@@ -1,32 +1,72 @@
 package net.metalbrain.paysmart.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import net.metalbrain.paysmart.domain.security.SecuritySettingsManager
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import net.metalbrain.paysmart.core.auth.PassCodePolicyHandler
+import net.metalbrain.paysmart.domain.model.SecuritySettings
+import net.metalbrain.paysmart.domain.usecase.SecurityUseCase
 
 @HiltViewModel
 class SecurityViewModel @Inject constructor(
-    private val securityManager: SecuritySettingsManager
+    private val useCase: SecurityUseCase,
+    private val policyHandler: PassCodePolicyHandler
 ) : ViewModel() {
+
+    val securitySettings: StateFlow<SecuritySettings?> =
+        useCase.settingsFlow
 
     private val _isLocked = MutableStateFlow(false)
     val isLocked: StateFlow<Boolean> = _isLocked
 
-    fun checkIfLocked() {
-        _isLocked.value = securityManager.isLocked()
+    init {
+        viewModelScope.launch {
+            useCase.fetchCloudSettings()
+            checkIfLocked()
+        }
     }
 
-    fun unlockSession() {
-        securityManager.unlockSession()
+    suspend fun fetchSecuritySettings() {
+        useCase.fetchCloudSettings()
+        checkIfLocked()
+    }
+
+    suspend fun markPasscodeEnabledOnServer() {
+        policyHandler.setPassCodeEnabled(
+            FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token
+                ?: ""
+        )
+    }
+
+    suspend fun getPasscodeEnabledOnServer(): Boolean {
+        return policyHandler.getPasswordEnabled(
+            FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token
+                ?: ""
+        )
+    }
+
+
+    suspend fun checkIfLocked() {
+        _isLocked.value = useCase.isLocked()
+    }
+
+    suspend fun unlockSession() {
+        useCase.unlockSession()
         _isLocked.value = false
     }
 
-    fun verify(passcode: String): Boolean = securityManager.verifyPasscode(passcode)
+    suspend fun verify(passcode: String): Boolean =
+        useCase.verifyPasscode(passcode)
 
-    fun hasPasscode(): Boolean = securityManager.hasPasscode()
+    suspend fun hasPasscode(): Boolean =
+        useCase.hasPasscode()
 
-    fun clearPasscode() = securityManager.clearPasscode()
+    suspend fun clearPasscode() =
+        useCase.clearPasscode()
 }

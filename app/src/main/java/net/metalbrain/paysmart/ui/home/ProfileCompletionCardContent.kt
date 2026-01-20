@@ -20,8 +20,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,45 +28,37 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import net.metalbrain.paysmart.domain.model.AuthUserModel
-import net.metalbrain.paysmart.domain.model.hasAddedHomeAddress
-import net.metalbrain.paysmart.domain.model.hasVerifiedEmail
-import net.metalbrain.paysmart.domain.model.hasVerifiedIdentity
-import net.metalbrain.paysmart.domain.state.UserUiState
+import net.metalbrain.paysmart.domain.model.SecuritySettings
+import net.metalbrain.paysmart.domain.model.hasCompletedAddress
+import net.metalbrain.paysmart.domain.model.hasCompletedEmailVerification
+import net.metalbrain.paysmart.domain.model.hasCompletedIdentity
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.CardDimensions
 import net.metalbrain.paysmart.ui.theme.Dimens
-import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 
-@Composable
 @OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun ProfileCompletionCardContent(
-    user: AuthUserModel,
+    security: SecuritySettings,
     onVerifyEmailClick: () -> Unit,
     onAddAddressClick: () -> Unit,
-    onVerifyIdentityClick: () -> Unit,
-    viewModel: UserViewModel
+    onVerifyIdentityClick: () -> Unit
 ) {
     val completed = listOf(
-        user.hasVerifiedEmail,
-        user.hasAddedHomeAddress,
-        user.hasVerifiedIdentity
+        security.hasCompletedEmailVerification,
+        security.hasCompletedAddress,
+        security.hasCompletedIdentity
     ).count { it }
 
     val total = 3
+    val progressPercent = completed.toFloat() / total
+    val progressLabel = "${(progressPercent * 100).toInt()}%"
 
-    val progressPercent = (completed.toFloat() / total)
-    val uiState by viewModel.uiState.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val showSheet = remember { mutableStateOf(false) }
 
-    // 🔁 Animate sheet open
     LaunchedEffect(showSheet.value) {
-        if (showSheet.value) {
-            sheetState.show() // 👈 Smooth animated expansion
-        } else {
-            sheetState.hide()
-        }
+        if (showSheet.value) sheetState.show() else sheetState.hide()
     }
 
     if (showSheet.value) {
@@ -76,18 +66,19 @@ fun ProfileCompletionCardContent(
             onDismissRequest = { showSheet.value = false },
             sheetState = sheetState
         ) {
-            // 🧩 This is your full account setup sheet
             AccountSetupSheetContent(
-                user = (uiState as? UserUiState.ProfileLoaded)?.user ?: return@ModalBottomSheet,
-                onAddAddressClick = { /* navigate to address */ },
-                onVerifyIdentityClick = { /* navigate to identity */ }
+                security = security,
+                onAddAddressClick = { /* TODO: navigate to address */ },
+                onVerifyIdentityClick = { /* TODO: navigate to identity */ }
             )
         }
     }
 
+    // Header Row
     Row(
-        modifier = Modifier.fillMaxWidth()
-        .padding(Dimens.smallScreenPadding),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimens.smallScreenPadding, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -102,70 +93,68 @@ fun ProfileCompletionCardContent(
         }
     }
 
-
+    // Card
     Card(
         shape = RoundedCornerShape(24.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(CardDimensions.smallCardPadding),
-        elevation = CardDefaults.cardElevation(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            disabledContainerColor = MaterialTheme.colorScheme.surface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface
-        ),
-
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
-
         Column(
             modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Progress Circle
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            // Circular progress
+            Box(contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(
                     progress = { progressPercent },
-                    strokeWidth = 6.dp,
                     modifier = Modifier.size(72.dp),
-                    color = Color(0xFF00C853) // Green
+                    strokeWidth = 6.dp,
+                    color = Color(0xFF00C853)
                 )
                 Text(
-                    text = "${progressPercent}\nCOMPLETED",
+                    text = progressLabel,
                     style = MaterialTheme.typography.labelMedium,
                     textAlign = TextAlign.Center
                 )
             }
 
             Text(
-                text = "Finish setting up your account.",
+                text = "Finish setting up your account",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center
             )
 
-            // Steps List
-            ProfileStepItem("Verify your email", user.hasVerifiedEmail)
-            ProfileStepItem("Add your home address", user.hasAddedHomeAddress)
-            ProfileStepItem("Verify your identity", user.hasVerifiedIdentity)
+            // Steps
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                ProfileStepItem("Verify your email", security.hasCompletedEmailVerification)
+                ProfileStepItem("Add your home address", security.hasCompletedAddress)
+                ProfileStepItem("Verify your identity", security.hasCompletedIdentity)
+            }
 
-            // CTA Button
+            // CTA
             when {
-                !user.hasVerifiedEmail -> {
+                !security.hasCompletedEmailVerification -> {
                     PrimaryButton(
                         text = "Verify email",
                         modifier = Modifier.fillMaxWidth(),
                         onClick = onVerifyEmailClick
                     )
                 }
-                !user.hasAddedHomeAddress -> {
+                !security.hasCompletedAddress -> {
                     PrimaryButton(
                         text = "Add address",
                         modifier = Modifier.fillMaxWidth(),
                         onClick = onAddAddressClick
                     )
                 }
-
-                !user.hasVerifiedIdentity -> {
+                !security.hasCompletedIdentity -> {
                     PrimaryButton(
                         text = "Verify identity",
                         modifier = Modifier.fillMaxWidth(),
@@ -173,7 +162,7 @@ fun ProfileCompletionCardContent(
                     )
                 }
                 else -> {
-
+                    // All done!
                 }
             }
         }

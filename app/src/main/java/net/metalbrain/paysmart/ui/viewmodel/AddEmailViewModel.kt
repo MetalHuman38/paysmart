@@ -10,11 +10,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import net.metalbrain.paysmart.core.auth.EmailVerificationHandler
+import net.metalbrain.paysmart.email.EmailDraft
+import net.metalbrain.paysmart.email.EmailDraftStore
 import javax.inject.Inject
 
 @HiltViewModel
 class AddEmailViewModel @Inject constructor(
-    private val emailVerificationHandler: EmailVerificationHandler
+    private val emailVerificationHandler: EmailVerificationHandler,
+    private val emailDraftStore: EmailDraftStore
 ) : ViewModel() {
 
     data class EmailUiState(
@@ -35,13 +38,14 @@ class AddEmailViewModel @Inject constructor(
         )
     }
 
-    fun sendVerificationEmail(onSuccess: () -> Unit) {
+    fun sendVerificationEmail(
+        onSuccess: () -> Unit
+    ) {
         val state = _uiState.value
         if (!state.emailValid || state.loading) return
 
         viewModelScope.launch {
             _uiState.value = state.copy(loading = true, error = null)
-
             try {
                 val user = FirebaseAuth.getInstance().currentUser
                     ?: error("User not logged in")
@@ -56,11 +60,14 @@ class AddEmailViewModel @Inject constructor(
 
                 if (!ok) error("Failed to send verification email")
 
+                emailDraftStore.saveDraft(
+                    EmailDraft(email = state.email, verified = false)
+                )
+
                 onSuccess()
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    error = e.message ?: "Failed to send email"
-                )
+                _uiState.value = _uiState.value.copy(email = "Failed to send verification email")
+                e.printStackTrace()
             } finally {
                 _uiState.value = _uiState.value.copy(loading = false)
             }

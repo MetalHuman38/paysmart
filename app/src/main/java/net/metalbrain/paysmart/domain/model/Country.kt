@@ -1,9 +1,11 @@
 package net.metalbrain.paysmart.domain.model
+import androidx.annotation.Keep
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import net.metalbrain.paysmart.R
 
+@Keep
 data class Country(
     // Default
     val isoCode: String, // e.g., "de", "gb"

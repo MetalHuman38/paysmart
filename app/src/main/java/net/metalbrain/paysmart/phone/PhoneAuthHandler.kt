@@ -80,6 +80,8 @@ class PhoneAuthHandler(
         return Result.success(Unit)
     }
 
+    override fun getVerificationId(): String? = storedVerificationId
+
     override fun cancel() {
         storedVerificationId = null
         resendingToken = null

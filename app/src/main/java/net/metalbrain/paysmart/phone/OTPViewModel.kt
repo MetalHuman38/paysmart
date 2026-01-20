@@ -10,11 +10,11 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
 import net.metalbrain.paysmart.domain.model.AuthUserModel
-import net.metalbrain.paysmart.domain.model.UserStatus
 
 @HiltViewModel
 class OTPViewModel @Inject constructor(
@@ -23,6 +23,16 @@ class OTPViewModel @Inject constructor(
     private val userRepo: UserProfileRepository,
     private val phoneDraftStore: PhoneDraftStore
 ) : ViewModel() {
+
+    data class UiState(
+        val loading: Boolean = false,
+        val errorMessage: String? = null
+    )
+
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow<UiState> = _uiState
+
+
     private val _state = MutableStateFlow(OTPState())
 
     private val _formattedPhoneNumber = MutableStateFlow("")
@@ -59,6 +69,7 @@ class OTPViewModel @Inject constructor(
         onError: (Throwable) -> Unit
     ) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(loading = true)
             try {
                 val result = phoneVerifier.submitOtp(code)
                 Log.d("OTP", "OTP verification result: $result")
@@ -101,9 +112,7 @@ class OTPViewModel @Inject constructor(
             uid = firebaseUser.uid,
             phoneNumber = firebaseUser.phoneNumber,
             isAnonymous = firebaseUser.isAnonymous,
-            emailVerified = firebaseUser.isEmailVerified,
             providerIds = firebaseUser.providerData.map { it.providerId },
-            status = UserStatus.Unverified,
             tenantId = firebaseUser.tenantId,
             photoURL = firebaseUser.photoUrl?.toString(),
             displayName = firebaseUser.displayName,

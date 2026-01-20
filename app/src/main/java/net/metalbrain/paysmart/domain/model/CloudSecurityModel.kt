@@ -2,35 +2,67 @@ package net.metalbrain.paysmart.domain.model
 
 import net.metalbrain.paysmart.domain.state.OnboardingState
 import com.google.firebase.Timestamp
+import androidx.annotation.Keep
+
+@Keep
+enum class UserStatus {
+    Unverified,
+    Verified,
+    KycPending
+}
 
 data class SecuritySettings(
-    val passcodeEnabled: Boolean? = false,
-    val passwordEnabled: Boolean? = false,
-    val biometricsRequired: Boolean? = false,
-    val hasAddedHomeAddress: Boolean? = null,
+    // Core auth
+    var passcodeEnabled: Boolean? = false,
+    var passwordEnabled: Boolean? = false,
+    var biometricsRequired: Boolean? = true,
+
+    // Address
+    var hasAddedHomeAddress: Boolean? = null,
+
+
     // Email verification (UI-facing only)
-    val hasVerifiedEmail: Boolean = false,
-    val emailVerificationSentAt: Timestamp? = null,
+    var hasVerifiedEmail: Boolean = false,
+    var emailVerificationSentAt: Timestamp? = null,
     var emailToVerify: String? = null,
     var emailVerificationAttemptsToday: Int = 0,
 
-    // Identity verification control
-    val hasVerifiedIdentity: Boolean? = null,
+    // Identity verification
+    var hasVerifiedIdentity: Boolean? = null,
 
-    // Local security control
-    val localPassCodeSetAt: Timestamp? = null,
-    val localPasswordSetAt: Timestamp? = null,
-    val lockAfterMinutes: Int? = 5,
+    // Local security
+    var localPassCodeSetAt: Timestamp? = null,
+    var localPasswordSetAt: Timestamp? = null,
+    var lockAfterMinutes: Int? = 5,
 
-    // Compliance control
-    val tosAcceptedAt: Timestamp? = null,
-    val kycStatus: String? = null,
+    // Compliance
+    var tosAcceptedAt: Timestamp? = null,
+    var kycStatus: String? = null,
 
-    // Onboarding control
-    val onboardingRequired: Map<String, Boolean>? = null,
-    val onboardingCompleted: Map<String, Boolean>? = null,
-    val updatedAt: Timestamp? = null,
+    // Onboarding
+    var onboardingRequired: Map<String, Boolean>? = null,
+    var onboardingCompleted: Map<String, Boolean>? = null,
+
+    // Metadata
+    var updatedAt: Timestamp? = null,
 )
+
+fun SecuritySettings.deriveUserStatus(): UserStatus {
+    return when {
+        hasVerifiedIdentity == true -> UserStatus.KycPending
+        hasVerifiedEmail -> UserStatus.Verified
+        else -> UserStatus.Unverified
+    }
+}
+
+val SecuritySettings.hasCompletedEmailVerification: Boolean
+    get() = hasVerifiedEmail
+
+val SecuritySettings.hasCompletedAddress: Boolean
+    get() = hasAddedHomeAddress == true
+
+val SecuritySettings.hasCompletedIdentity: Boolean
+    get() = hasVerifiedIdentity == true
 
 fun SecuritySettings.asOnboardingState(): OnboardingState {
     return OnboardingState(

@@ -16,6 +16,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import net.metalbrain.paysmart.ui.screens.AppLoadingScreen
+import net.metalbrain.paysmart.ui.screens.LoadingState
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -33,6 +35,14 @@ fun OtpVerificationScreen(
     val activity = LocalActivity.current
     var submitting by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    // 🌀 Show animated spinner while loading
+    if (uiState.loading) {
+        LoadingState(message = "Creating your account....")
+        return
+    }
 
     var timeLeft by remember { mutableIntStateOf(60) }
 

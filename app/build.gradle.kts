@@ -2,29 +2,27 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.kapt")
     id("com.google.gms.google-services")
-    kotlin("kapt")
-    id ("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.kotlin.android)
 }
 
 
 android {
     namespace = "net.metalbrain.paysmart"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
+    ndkVersion = "29.0.14206865"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     kotlin {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget = JvmTarget.fromTarget("21")
         }
     }
 
@@ -36,9 +34,20 @@ android {
         applicationId = "net.metalbrain.paysmart"
         minSdk = 33
         targetSdk = 36
-        versionCode = 3
+        versionCode = 7
         versionName = "1.0.0"
         testInstrumentationRunner = "net.metalbrain.paysmart.HiltTestRunner"
+
+        ndk {
+            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     signingConfigs {
@@ -61,12 +70,17 @@ android {
 
     buildTypes {
         getByName("debug") {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("debug")
             buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:5001/paysmart-7ee79/europe-west2/api\"")
             buildConfigField("String", "FUNCTION_API_URL", "\"http://10.0.2.2:8080\"")
             buildConfigField("Boolean", "IS_LOCAL", "true")
+            manifestPlaceholders["networkSecurityConfig"] = "@xml/network_security_config_debug"
         }
         getByName("release") {
             isMinifyEnabled = true
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -75,6 +89,7 @@ android {
             buildConfigField("String", "API_BASE_URL", "\"https://europe-west2-paysmart-7ee79.cloudfunctions.net/api\"")
             buildConfigField("String", "FUNCTION_API_URL", "\"https://europe-west2-paysmart-7ee79.cloudfunctions.net\"")
             buildConfigField("Boolean", "IS_LOCAL", "false")
+            manifestPlaceholders["networkSecurityConfig"] = "@xml/network_security_config_release"
 
         }
     }
@@ -105,11 +120,10 @@ dependencies {
     implementation(libs.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.runner)
     implementation(libs.googleid)
-    implementation(libs.play.services.auth)
     testImplementation(libs.hilt.android.testing)
     testImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.hilt.android.testing)
-    kaptTest(libs.hilt.compiler)
+
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.arch.core.testing)
     implementation(libs.navigation.compose)
@@ -117,6 +131,11 @@ dependencies {
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.store)
+
+    // Facebook
+    implementation(libs.facebook.login)
+    implementation(libs.facebook.core)
+
 
     // Credential Manager (Google Sign-In, Passkeys, etc.)
     implementation(libs.androidx.credentials)
@@ -135,10 +154,12 @@ dependencies {
     testImplementation(libs.coroutines.test)
     testImplementation(libs.mockk)
 
-    // Android Instrumented tests
-    androidTestImplementation(libs.hilt.android.testing)
+    // Kapt
     kapt(libs.hilt.compiler)
     kaptAndroidTest(libs.hilt.compiler)
+
+    // Android Instrumented tests
+    androidTestImplementation(libs.hilt.android.testing)
     androidTestAnnotationProcessor(libs.hilt.compiler)
     androidTestImplementation(libs.androidx.junit)
     testImplementation(libs.arch.core.testing)
@@ -164,5 +185,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
-
 }

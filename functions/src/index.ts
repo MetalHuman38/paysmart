@@ -2,7 +2,6 @@ import * as admin from "firebase-admin";
 import { onRequest, onCall } from "firebase-functions/v2/https";
 import { APP } from "./config/globals.js";
 import { buildApp } from "./server.js";
-import { logger } from "firebase-functions";
 import { RESEND_API_KEY } from "./config/params.js";
 
 // Initialize Admin SDK exactly once
@@ -41,5 +40,3 @@ export const echo = onCall(
     return { data: req.data, appId: req.app?.appId || null };
   }
 );
-
-logger.info(`Function "api" initialized in region: ${APP.region}`);

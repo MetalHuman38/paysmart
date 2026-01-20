@@ -91,7 +91,7 @@ export async function facebookDataDeletionHandler(
     : { notes: ["no uid mapping found; no action taken"] };
 
   const confirmationCode = crypto.randomBytes(8).toString("hex");
-  const statusUrl = `https://metalbrain.net/data-deletion?code=${confirmationCode}`;
+  const statusUrl = `https://pay-smart.net/data-deletion?code=${confirmationCode}`;
 
   await writeDeletionLog(
     appScopedUserId,

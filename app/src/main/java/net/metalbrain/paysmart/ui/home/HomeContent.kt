@@ -9,22 +9,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import net.metalbrain.paysmart.domain.model.AuthUserModel
-import net.metalbrain.paysmart.domain.model.hasAddedHomeAddress
-import net.metalbrain.paysmart.domain.model.hasVerifiedEmail
-import net.metalbrain.paysmart.domain.model.hasVerifiedIdentity
+import net.metalbrain.paysmart.domain.model.SecuritySettings
+import net.metalbrain.paysmart.domain.model.hasCompletedEmailVerification
+import net.metalbrain.paysmart.domain.model.hasCompletedAddress
+import net.metalbrain.paysmart.domain.model.hasCompletedIdentity
 import net.metalbrain.paysmart.ui.account.AccountsHeader
 import net.metalbrain.paysmart.ui.theme.Dimens
-import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 
 @Composable
 fun HomeContent(
-    user: AuthUserModel,
+    security: SecuritySettings,
     onProfileClick: () -> Unit,
     onVerifyEmailClick: () -> Unit,
     onAddAddressClick: () -> Unit,
     onVerifyIdentityClick: () -> Unit,
-    viewModel: UserViewModel
 ) {
 
     val showBalance = remember { mutableStateOf(true) }
@@ -46,14 +44,14 @@ fun HomeContent(
 
 
         // 🧩 Profile Completion Card (only if needed)
-        if (!user.hasVerifiedEmail || !user.hasAddedHomeAddress || !user.hasVerifiedIdentity) {
+        if (!security.hasCompletedEmailVerification ||
+            !security.hasCompletedAddress ||
+            !security.hasCompletedIdentity) {
             item { ProfileCompletionCard(
-                user = user,
+                security = security,
                 onVerifyEmailClick = onVerifyEmailClick,
                 onAddAddressClick = onAddAddressClick,
                 onVerifyIdentityClick = onVerifyIdentityClick,
-                viewModel = viewModel
-
             )
             }
         }
@@ -65,19 +63,5 @@ fun HomeContent(
             )
         }
 
-        // 💰 My Accounts Section
-        item {
-            AccountInfoSection()
-        }
-
-        // 🔁 Transactions Placeholder
-        item {
-            TransactionsSection()
-        }
-
-        // 🔁 Exchange Rate Mock Section
-        item {
-            ExchangeRateCard()
-        }
     }
 }

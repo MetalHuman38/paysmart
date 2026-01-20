@@ -1,23 +1,20 @@
 package net.metalbrain.paysmart.ui.home
 
 import androidx.compose.runtime.Composable
-import net.metalbrain.paysmart.domain.model.AuthUserModel
-import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
+import net.metalbrain.paysmart.domain.model.SecuritySettings
 
 @Composable
 fun ProfileCompletionCard(
-    user: AuthUserModel,
+    security: SecuritySettings,
     onVerifyEmailClick: () -> Unit,
     onAddAddressClick: () -> Unit,
-    onVerifyIdentityClick: () -> Unit,
-    viewModel: UserViewModel
+    onVerifyIdentityClick: () -> Unit
 ) {
 
     ProfileCompletionCardContent(
-        user,
+        security = security,
         onVerifyEmailClick = onVerifyEmailClick,
         onAddAddressClick = onAddAddressClick,
-        onVerifyIdentityClick = onVerifyIdentityClick,
-        viewModel = viewModel
+        onVerifyIdentityClick = onVerifyIdentityClick
     )
 }

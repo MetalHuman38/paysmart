@@ -42,9 +42,7 @@ class FirestoreUserProfileRepository @Inject constructor(
         val data = buildMap {
             put("authProvider", normalizedProvider)
             put("email", user.email)
-            put("emailVerified", user.emailVerified)
             put("isAnonymous", user.isAnonymous)
-            put("status", user.status.name.lowercase())
             put("providerIds", user.providerIds)
             put("createdAt", FieldValue.serverTimestamp())
             put("lastSignedIn", FieldValue.serverTimestamp())

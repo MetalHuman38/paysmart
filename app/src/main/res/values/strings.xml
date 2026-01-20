@@ -4,7 +4,16 @@
     <string name="or">Or</string>
     <string name="create_account">Create an account</string>
     <string name="log_in">Log in</string>
-    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="continue_with_passkey">Continue with Passkey</string>
+    <string name="continue_with_email">Continue with Email</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="continue_with_facebook">Continue with Facebook</string>
+    <string name="thank_you_for_creating_account">Thank you for creating an account</string>
+    <string name="link_federated_account">For added security, please verify at least one additional login method.</string>
+    <string name="skip_federated_linking">Skip linking for now</string>
+    <string name="facebook_app_id" translatable="false">1020451610284513</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb1020451610284513</string>
+    <string name="facebook_client_token" translatable="false">b24f1d490075bf2f6795ece09e922519</string>
     <string name="select_language">Select your preferred language</string>
     <string name="language_description">You can change the language in your profile settings when you have signed in.</string>
     <string name="search_hint">Search</string>
@@ -29,6 +38,7 @@
     <string name="country_spain">Spain</string>
     <string name="country_portugal">Portugal</string>
     <string name="continue_text">Continue</string>
+    <string name="ok" translatable="false">OK</string>
     <string name="error">Error</string>
     <string name="phone_already_registered_message">This phone number is linked to an existing Paysmart account. Please login to continue.</string>
     <string name="dismiss">Dismiss</string>
@@ -51,14 +61,16 @@
     <string name="sign_in">Sign In</string>
     <string name="log_in_to_paySmart">Log in to Paysmart</string>
     <string name="enter_your_password">Enter your password</string>
+    <string name="to_access_your_account">To access your paysmart account, please enter your password.</string>
     <string name="trouble_loggin_in">Trouble login in?</string>
     <string name="recover_your_account">Recover your account</string>
     <string name="forgot_password_title">Forgot your password?</string>
     <string name="create_secure_password">Create a secure password</string>
     <string name="enter_secure_password">Enter a secure password with at-least 8 characters, including uppercase and lowercase letters, numbers and special characters.</string>
+    <string name="enter_your_passcode">Enter your passcode</string>
     <string name="forgot_password_description">Change your password to recover your account.</string>
     <string name="change_password">Change Password</string>
-    <string name="set_up_your_pass_code">Set up your pass code</string>
+    <string name="set_up_your_pass_code">Set up your passcode</string>
     <string name="passcode_use_to_unlock">This 4–6 digit code is used to unlock your app and confirm actions locally.</string>
     <string name="change_phone_title">Change your phone number</string>
     <string name="change_phone_description">Lost access to my phone number? Change your phone number without losing access to your account.</string>
@@ -66,7 +78,14 @@
     <string name="verify_your_email">Verify your email to keep your account secured.</string>
     <string name="why_verifying_your_email">Verifying your email helps you safely recover your account if you lose access to your phone. We will also send secure communication to your email address.</string>
     <string name="send_verification">Send verification</string>
+    <string name="verify_an_email">Verify an email</string>
+    <string name="how_this_works">Why add an extra verification method?</string>
+    <string name="how_this_works_desc">Linking a second method like Google, Facebook, or email helps you recover access if you lose your primary login. It also keeps your account more secure from unauthorized access. We recommend setting this up before continuing.</string>
     <string name="dont_have_account">Don\'t have an account?</string>
     <string name="sign_up">Sign Up</string>
     <string name="forgot_password">Sign In</string>
+    <string name="Secure_your_account">Secure your account</string>
+    <string name="add_passcode_title">Add a passcode to keep your money and personal information safe. Only you will be able to access your PaySmart account.</string>
+    <string name="add_passcode_advisory_text">Setting up a passcode is required to protect your PaySmart account and financial data. It helps ensure only you can access your funds, even if your device is lost or stolen.</string>
+    <string name="set_up_passcode">Set up passcode</string>
 </resources>

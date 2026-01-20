@@ -31,6 +31,7 @@ key.properties
 
 /functions/node_modules
 /functions/.vscode
+/functions/service.yaml
 
 ###############################
 # Global ignores
@@ -118,6 +119,9 @@ functions/.gcloudignore
 .env
 gradle.properties
 
+# Firebase config (Android)
+app/google-services.json
+
 
 ###############################
 # Kotlin Lint / Detekt
@@ -128,6 +132,15 @@ gradle.properties
 ###############################
 # Project-level tools
 ###############################
+
+###############################
+# C++ Openssl lib
+###############################
+app/src/main/cpp/CMakeLists.txt
+app/src/main/cpp/build-openssl.sh
+app/src/main/cpp/build_openssl.sh
+app/src/main/cpp/openssl/
+
 
 # Do NOT ignore python scripts for git hooks
 # but ignore compiled caches:

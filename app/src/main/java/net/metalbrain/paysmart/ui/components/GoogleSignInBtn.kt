@@ -29,8 +29,8 @@ import net.metalbrain.paysmart.core.auth.providers.GoogleAuthProvider
 fun GoogleSignInBtn(
     modifier: Modifier = Modifier,
     launcher: ManagedActivityResultLauncher<Intent, ActivityResult>? = null,
-    onSignInSuccess: (AuthCredential) -> Unit,
-    onSignInError: (Exception) -> Unit
+    onCredentialReceived: (AuthCredential) -> Unit,
+    onError: (Throwable) -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -40,9 +40,9 @@ fun GoogleSignInBtn(
             coroutineScope.launch {
                 try {
                     val credential = GoogleAuthProvider.getGoogleCredential(context, launcher)
-                    onSignInSuccess(credential)
+                    onCredentialReceived(credential)
                 } catch (e: Exception) {
-                    onSignInError(e)
+                    onError(e)
                 }
             }
         },
@@ -61,6 +61,6 @@ fun GoogleSignInBtn(
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = stringResource(R.string.sign_in_with_google))
+        Text(text = stringResource(R.string.continue_with_google))
     }
 }

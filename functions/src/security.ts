@@ -1,9 +1,12 @@
 // src/functions/security.ts
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { setGlobalOptions } from "firebase-functions/v2/options";
 import { onRequest } from "firebase-functions/v2/https";
 import { initDeps } from "./dependencies.js";
 import { FieldValue } from "firebase-admin/firestore";
 import * as admin from "firebase-admin";
+
+setGlobalOptions({ region: "europe-west2" });
 
 const REGION = "europe-west2" as const;
 
@@ -41,7 +44,7 @@ export const seedSecurityOnUserCreate = onDocumentCreated(
         tx.set(secRef, {
           passcodeEnabled: false,
           passwordEnabled: false,
-          biometricsRequired: false,
+          biometricsRequired: true,
           lockAfterMinutes: 5,
           onboardingRequired: DEFAULT_ONBOARDING_REQUIRED,
           onboardingCompleted: {},

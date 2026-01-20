@@ -12,20 +12,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import net.metalbrain.paysmart.domain.model.AuthUserModel
-import net.metalbrain.paysmart.domain.model.hasAddedHomeAddress
-import net.metalbrain.paysmart.domain.model.hasVerifiedEmail
-import net.metalbrain.paysmart.domain.model.hasVerifiedIdentity
+import net.metalbrain.paysmart.domain.model.SecuritySettings
+import net.metalbrain.paysmart.domain.model.hasCompletedAddress
+import net.metalbrain.paysmart.domain.model.hasCompletedEmailVerification
+import net.metalbrain.paysmart.domain.model.hasCompletedIdentity
 import net.metalbrain.paysmart.ui.components.CircularProgressWithText
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.components.SetupStep
 
+
+
 @Composable
 fun AccountSetupSheetContent(
-    user: AuthUserModel,
+    security: SecuritySettings,
     onAddAddressClick: () -> Unit,
     onVerifyIdentityClick: () -> Unit
 ) {
+    val totalSteps = 4
+    val completedSteps = listOf(
+        true, // Always completed: "Open a PaySmart account"
+        security.hasCompletedEmailVerification,
+        security.hasCompletedAddress,
+        security.hasCompletedIdentity
+    ).count { it }
+
+    val progress = completedSteps.toFloat() / totalSteps
+    val label = "$completedSteps/$totalSteps"
+    val subLabel = if (completedSteps == totalSteps) "ALL DONE" else "COMPLETED"
 
     Column(
         modifier = Modifier
@@ -33,11 +46,11 @@ fun AccountSetupSheetContent(
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Progress circle
+        // Progress circle — center-aligned
         CircularProgressWithText(
-            progress = 0.5f,
-            label = "2/4",
-            subLabel = "COMPLETED"
+            progress = progress,
+            label = label,
+            subLabel = subLabel
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -57,31 +70,27 @@ fun AccountSetupSheetContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Steps list — checkbox and text
-        SetupStep(
-            label = "Open a PaySmart account",
-            done = true
-        )
-        SetupStep(
-            label = "Verify your email",
-            done = user.hasVerifiedEmail
-        )
-        SetupStep(
-            label = "Add your home address",
-            done = user.hasAddedHomeAddress,
-            onClick = onAddAddressClick
-        )
-        SetupStep(
-            label = "Verify your identity",
-            done = user.hasVerifiedIdentity,
-            onClick = onVerifyIdentityClick
-        )
+        // Steps list
+        SetupStep(label = "Open a PaySmart account", done = true)
+        SetupStep(label = "Verify your email", done = security.hasCompletedEmailVerification)
+        SetupStep(label = "Add your home address", done = security.hasCompletedAddress, onClick = onAddAddressClick)
+        SetupStep(label = "Verify your identity", done = security.hasCompletedIdentity, onClick = onVerifyIdentityClick)
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        // CTA — change based on status
+        val buttonLabel = when {
+            !security.hasCompletedAddress -> "Add address"
+            !security.hasCompletedIdentity -> "Verify identity"
+            else -> "Continue"
+        }
+
         PrimaryButton(
-            text = "Add address",
-            onClick = onAddAddressClick,
+            text = buttonLabel,
+            onClick = {
+                if (!security.hasCompletedAddress) onAddAddressClick()
+                else if (!security.hasCompletedIdentity) onVerifyIdentityClick()
+            },
             modifier = Modifier.fillMaxWidth()
         )
     }

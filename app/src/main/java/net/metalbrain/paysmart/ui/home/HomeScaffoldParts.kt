@@ -13,14 +13,6 @@ fun AccountInfoSection() {
 }
 
 
-@Composable
-fun TransactionsSection() {
-    Text(
-        text = "🔁 No transaction activity yet.",
-        style = MaterialTheme.typography.bodyMedium
-    )
-}
-
 
 @Composable
 fun ExchangeRateCard() {

@@ -88,7 +88,7 @@ class VerifyPasscodeViewModel @Inject constructor(
         }
     }
 
-    private fun validatePasscode() {
+    private suspend fun validatePasscode() {
         val input = _passcode.value
         val isValid = repo.verify(input)
 

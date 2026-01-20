@@ -3,15 +3,15 @@ package net.metalbrain.paysmart.data.repository
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
-import net.metalbrain.paysmart.core.auth.PasswordHasher
+import net.metalbrain.paysmart.core.auth.BcryptPasswordHasher
 import net.metalbrain.paysmart.core.auth.PasswordCryptoFile
 
 class SecurePasswordRepository @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
+    private val hasher: BcryptPasswordHasher
 ) : PasswordRepository {
 
     private val file = PasswordCryptoFile(context)
-    private val hasher = PasswordHasher()
 
     override suspend fun setPassword(plain: String) {
         if (file.exists()) {

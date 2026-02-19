@@ -13,6 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+gradle.properties
 
 gradle-wrapper.jar
 /.gradle
@@ -117,7 +118,6 @@ functions/.env.sample
 functions/.gcloudignore
 
 .env
-gradle.properties
 
 # Firebase config (Android)
 app/google-services.json

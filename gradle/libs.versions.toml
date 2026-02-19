@@ -1,0 +1,137 @@
+[versions]
+agp = "8.13.1"
+coilCompose = "2.7.0"
+kotlin = "2.2.10"
+room = "2.8.4"
+sqlite = "2.6.2"
+ksp = "2.3.4"
+coreKtx = "1.17.0"
+junit = "4.13.2"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+lifecycleRuntimeKtx = "2.10.0"
+activityCompose = "1.12.4"
+composeBom = "2026.02.00"
+firebase-bom = "34.9.0"
+credentials = "1.5.0"
+hilt = "2.58"
+runtime = "1.10.3"
+foundationLayout = "1.10.3"
+lottie = "6.7.1"
+datastoreCore = "1.2.0"
+transportRuntime = "4.0.0"
+datastorePreferencesCore = "1.2.0"
+cronetEmbedded = "143.7445.0"
+ui = "1.10.3"
+foundation = "1.10.3"
+uiUnit = "1.10.3"
+firebaseAppcheckDebug = "19.0.2"
+libphonenumber = "9.0.24"
+material3 = "1.4.0"
+bcrypt = "0.10.2"
+securitycrypto = "1.1.0"
+biometric = "1.1.0"
+firebase-functions = "21.2.1"
+kotlin-coroutines-play-services = "1.10.2"
+coroutines = "1.10.2"
+mockk = "1.14.9"
+hilt-android-testing = "2.59"
+runner = "1.7.0"
+googleid = "1.2.0"
+facebook-login = "18.1.3"
+
+[libraries]
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
+androidx-room-rxjava2 = { group = "androidx.room", name = "room-rxjava2", version.ref = "room" }
+androidx-room-guava = { group = "androidx.room", name = "room-guava", version.ref = "room" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
+
+# Sqlite
+androidx-sqlite-core = { group = "androidx.sqlite", name = "sqlite-ktx", version.ref = "sqlite"}
+
+# Compiler - for KSP
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+coil-compose-v270 = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.8" }
+hilt-lifecycle-viewmodel-compose = { group = "androidx.hilt", name = "hilt-lifecycle-viewmodel-compose", version = "1.3.0" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.7" }
+bcrypt = { module = "at.favre.lib:bcrypt", version.ref = "bcrypt" }
+security-crypto = { module = "androidx.security:security-crypto", version.ref = "securitycrypto" }
+biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
+tink = { group = "com.google.crypto.tink", name = "tink-android", version = "1.20.0" }
+firebase-functions = { module = "com.google.firebase:firebase-functions-ktx", version.ref = "firebase-functions" }
+kotlin-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlin-coroutines-play-services" }
+
+
+
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
+androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
+exoplayer = { module = "androidx.media3:media3-exoplayer", version = "1.9.2" }
+exoplayer-ui = { module = "androidx.media3:media3-ui", version = "1.9.2" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
+transport-runtime = { group = "com.google.android.datatransport", name = "transport-runtime", version.ref = "transportRuntime" }
+androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "datastorePreferencesCore" }
+
+hilt-core = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCore" }
+cronet-embedded = { group = "org.chromium.net", name = "cronet-embedded", version.ref = "cronetEmbedded" }
+
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-store = { group = "com.google.firebase", name = "firebase-firestore" }
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
+
+facebook-login = { group = "com.facebook.android", name = "facebook-login", version.ref = "facebook-login" }
+facebook-core = { group = "com.facebook.android", name = "facebook-core", version.ref = "facebook-login" }
+
+
+androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-compose-ui-unit = { group = "androidx.compose.ui", name = "ui-unit", version.ref = "uiUnit" }
+firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug", version.ref = "firebaseAppcheckDebug" }
+libphonenumber = { group = "com.googlecode.libphonenumber", name = "libphonenumber", version.ref = "libphonenumber" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+
+# Hilt Testing
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt-android-testing" }
+
+arch-core-testing = { module = "androidx.arch.core:core-testing", version = "2.2.0" }
+
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+
+
+# Coroutines Test
+coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+
+# MockK
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+
+[plugins]
+dotenv = { id = "co.uzzu.dotenv.gradle", version = "4.0.0" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -72,7 +72,7 @@ class MainActivity : FragmentActivity() {
             val sessionState by sessionStateManager.sessionState.collectAsState()
             Log.d("MainActivity", "sessionState: $sessionState")
             val localSecurityState by securityViewModel.localSecurityState.collectAsState()
-            Log.d("MainActivity", "localSecurityState: $localSecurityState")
+            Log.d("MainActivity", "localSecurityState Data: $localSecurityState")
             val localSettings = (localSecurityState as? LocalSecurityState.Ready)?.settings
             val hasUnlockMethod = localSettings?.let {
                 it.biometricsEnabled || it.passcodeEnabled || it.passwordEnabled

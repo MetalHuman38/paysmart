@@ -26,27 +26,33 @@ fun CurrencyFilterSheet(
     onSelect: (Set<String>) -> Unit
 ) {
     val options = listOf("Successful", "In Progress", "Failed", "Cancelled")
-    val state = remember { mutableStateOf(selected.toMutableSet()) }
+    val state = remember { mutableStateOf(selected.toSet()) }
 
     Column(Modifier.padding(16.dp)) {
         Text("Select status", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(16.dp))
 
         options.forEach { status ->
+            val isSelected = state.value.contains(status)
+
             Row(
                 Modifier
                     .fillMaxWidth()
                     .clickable {
-                        if (state.value.contains(status)) state.value.remove(status)
-                        else state.value.add(status)
+                        state.value = if (isSelected) {
+                            state.value - status
+                        } else {
+                            state.value + status
+                        }
                     },
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Checkbox(checked = state.value.contains(status), onCheckedChange = null)
+                Checkbox(checked = isSelected, onCheckedChange = null)
                 Spacer(Modifier.width(8.dp))
                 Text(status)
             }
         }
+
 
         Spacer(Modifier.height(24.dp))
 

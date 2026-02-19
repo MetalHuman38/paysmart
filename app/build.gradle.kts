@@ -1,12 +1,14 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    id("org.jetbrains.kotlin.kapt")
+    alias(libs.plugins.ksp)
+    id("androidx.room")
+    id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id("com.google.dagger.hilt.android")
-    alias(libs.plugins.kotlin.android)
 }
 
 
@@ -19,10 +21,17 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-
+    
     kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.fromTarget("21")
+        }
+    }
+
+    bundle {
+        language {
+            @Suppress("UnstableApiUsage")
+            enableSplit = false
         }
     }
 
@@ -41,6 +50,16 @@ android {
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
         }
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += mapOf(
+                    "room.schemaLocation" to "$projectDir/schemas",
+                    "room.incremental" to "true",
+                    "room.expandProjection" to "true"
+                )
+            }
+        }
     }
 
     externalNativeBuild {
@@ -56,6 +75,7 @@ android {
             val storePassword = project.findProperty("RELEASE_STORE_PASSWORD") as? String
             val keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as? String
             val keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as? String
+
 
             if (storeFilePath != null && storePassword != null && keyAlias != null && keyPassword != null) {
                 storeFile = file(storeFilePath)
@@ -86,8 +106,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "API_BASE_URL", "\"https://europe-west2-paysmart-7ee79.cloudfunctions.net/api\"")
-            buildConfigField("String", "FUNCTION_API_URL", "\"https://europe-west2-paysmart-7ee79.cloudfunctions.net\"")
+            buildConfigField("String", "API_BASE_URL", "\"https.europe-west2-paysmart-7ee79.cloudfunctions.net/api\"")
+            buildConfigField("String", "FUNCTION_API_URL", "\"https.europe-west2-paysmart-7ee79.cloudfunctions.net\"")
             buildConfigField("Boolean", "IS_LOCAL", "false")
             manifestPlaceholders["networkSecurityConfig"] = "@xml/network_security_config_release"
 
@@ -98,6 +118,11 @@ android {
         compose = true
     }
 }
+
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -116,19 +141,27 @@ dependencies {
     implementation(libs.exoplayer.ui)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.lottie.compose)
-    implementation(libs.hilt.core)
-    implementation(libs.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.runner)
     implementation(libs.googleid)
+
+    // Hilt
+    implementation(libs.hilt.core)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
+
+    // Hilt Testing
     testImplementation(libs.hilt.android.testing)
-    testImplementation(libs.hilt.android.testing)
+    kspTest(libs.hilt.compiler)
     androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
 
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.arch.core.testing)
     implementation(libs.navigation.compose)
     implementation(libs.cronet.embedded)
+
     implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.store)
 
@@ -154,13 +187,10 @@ dependencies {
     testImplementation(libs.coroutines.test)
     testImplementation(libs.mockk)
 
-    // Kapt
-    kapt(libs.hilt.compiler)
-    kaptAndroidTest(libs.hilt.compiler)
+    // Ksp
+    ksp(libs.androidx.room.compiler)
 
     // Android Instrumented tests
-    androidTestImplementation(libs.hilt.android.testing)
-    androidTestAnnotationProcessor(libs.hilt.compiler)
     androidTestImplementation(libs.androidx.junit)
     testImplementation(libs.arch.core.testing)
     androidTestImplementation(libs.mockk.android)
@@ -173,10 +203,30 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.androidx.material3)
 
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+
+    // Sqlite
+    implementation(libs.androidx.sqlite.core)
+
+
+
+    // optional
+    implementation(libs.androidx.room.paging)
+    implementation(libs.androidx.room.guava)
+    implementation(libs.androidx.room.rxjava2) // or rxjava3
+    testImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.room.testing)
+
+
     implementation(libs.datastore.preferences)
     implementation(libs.transport.runtime)
     implementation(libs.androidx.datastore.preferences.core)
+
+    
     testImplementation(libs.junit)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

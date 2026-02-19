@@ -83,4 +83,5 @@
     <string name="add_passcode_title">비밀번호를 추가하여 돈과 개인 정보를 안전하게 보호하세요. PaySmart 계정은 본인만 이용할 수 있습니다.</string>
     <string name="add_passcode_advisory_text">PaySmart 계정과 금융 데이터를 보호하려면 비밀번호를 설정해야 합니다. 이렇게 하면 기기를 분실하거나 도난당한 경우에도 본인만 자금에 액세스할 수 있습니다.</string>
     <string name="set_up_passcode">비밀번호 설정</string>
+    <string name="set_up_biometric">생체 인증 설정</string>
 </resources>

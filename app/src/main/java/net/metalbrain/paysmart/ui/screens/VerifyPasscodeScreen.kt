@@ -43,6 +43,7 @@ fun VerifyPasscodeScreen(
     val passcode by viewModel.passcode.collectAsState()
     val error by viewModel.error.collectAsState()
     val biometricPrompt by viewModel.biometricPrompt.collectAsState()
+    val verified by viewModel.verified.collectAsState()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -74,6 +75,13 @@ fun VerifyPasscodeScreen(
                     }
                 }
             )
+        }
+    }
+
+    LaunchedEffect(verified) {
+        if (verified) {
+            viewModel.onVerifiedConsumed()
+            onVerified()
         }
     }
 

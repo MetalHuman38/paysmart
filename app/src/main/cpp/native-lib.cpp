@@ -34,6 +34,7 @@ Java_net_metalbrain_paysmart_data_native_NativeBridge_deriveKeyFromCpp(
     return result;
 }
 
+
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_net_metalbrain_paysmart_data_native_NativePasswordBridge_hashPassword(

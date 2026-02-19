@@ -10,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -18,15 +17,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
-import net.metalbrain.paysmart.ui.viewmodel.SecurityViewModel
 import net.metalbrain.paysmart.R
-import net.metalbrain.paysmart.domain.model.AuthUserModel
 import net.metalbrain.paysmart.ui.components.PrimaryButton
-import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
+import net.metalbrain.paysmart.ui.viewmodel.SecurityViewModel
+
+
+
 
 @Composable
 fun PasscodePrompt(
-    user: AuthUserModel,
     onVerified: () -> Unit
 ) {
     var code by remember { mutableStateOf("") }
@@ -41,12 +40,6 @@ fun PasscodePrompt(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        // User Info
-        Text(
-            text = "Hi ${user.displayName ?: "there"}",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
-        )
 
         Spacer(modifier = Modifier.height(8.dp))
 

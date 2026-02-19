@@ -1,16 +1,16 @@
 package net.metalbrain.paysmart.ui.viewmodel
 
 import android.util.Log
-import net.metalbrain.paysmart.data.repository.SecurityCloudRepository
-import net.metalbrain.paysmart.domain.model.SecuritySettings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.data.repository.AuthRepository
-import net.metalbrain.paysmart.data.repository.SecurityRepository
+import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
+import net.metalbrain.paysmart.domain.model.SecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.asOnboardingState
 import net.metalbrain.paysmart.domain.state.OnboardingState
 import net.metalbrain.paysmart.domain.state.UserUiState
@@ -19,17 +19,70 @@ import javax.inject.Inject
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userProfileRepository: UserProfileRepository,
-    private val securityRepository: SecurityRepository
+    userProfileRepository: UserProfileRepository,
+    private val profileCacheRepository: UserProfileCacheRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UserUiState>(UserUiState.Loading)
-    val uiState: StateFlow<UserUiState> = _uiState.asStateFlow()
+    // By using `stateIn` with `SharingStarted.WhileSubscribed`, we ensure that the
+    // upstream flow from `watchByUid` (and its Firestore listener) is only active when
+    // there's a UI component actively collecting `uiState`. This prevents the
+    // "ENHANCE_YOUR_CALM" error from Firestore.
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<UserUiState> = authRepository.authChanges
+        .flatMapLatest { isLoggedIn ->
+            if (!isLoggedIn) {
+                flowOf<UserUiState>(UserUiState.Unauthenticated)
+            } else {
+                val authUser = authRepository.currentUser
+                val uid = authUser?.uid
+                if (uid == null) {
+                    flowOf<UserUiState>(UserUiState.Unauthenticated)
+                } else {
+                    flow<UserUiState> {
+                        profileCacheRepository.ensureSeed(
+                            uid = uid,
+                            displayName = authUser.displayName,
+                            email = authUser.email,
+                            phoneNumber = authUser.phoneNumber,
+                            photoURL = authUser.photoUrl?.toString()
+                        )
 
-    private val securitySettings = MutableStateFlow<SecuritySettings?>(null)
+                        val remoteFlow = userProfileRepository.watchByUid(uid)
+                            .onEach { remote ->
+                                if (remote != null) {
+                                    profileCacheRepository.upsertFromRemote(remote)
+                                }
+                            }
+
+                        combine(
+                            profileCacheRepository.observeByUid(uid),
+                            remoteFlow
+                        ) { local, remote ->
+                            remote ?: local
+                        }.map { profile ->
+                            profile?.let { UserUiState.ProfileLoaded(it) } ?: UserUiState.Loading
+                        }.collect { next ->
+                            emit(next)
+                        }
+                    }
+                }
+            }
+        }
+        .catch { e ->
+            Log.e("UserViewModel", "Error observing auth/profile", e)
+            emit(UserUiState.Error(e.message ?: "Failed to load user profile"))
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = UserUiState.Loading
+        )
+
+    private val _securitySettings = MutableStateFlow<SecuritySettingsModel?>(null)
+    val securitySettings: StateFlow<SecuritySettingsModel?> = _securitySettings.asStateFlow()
 
     val onboardingState: StateFlow<OnboardingState> =
-        securitySettings
+        _securitySettings
             .map { it?.asOnboardingState() ?: OnboardingState() }
             .stateIn(
                 scope = viewModelScope,
@@ -38,51 +91,16 @@ class UserViewModel @Inject constructor(
             )
 
     init {
-        observeAuthChanges()
-    }
-
-    private fun observeAuthChanges() {
+        // Trigger loading security settings only when the user logs in.
         viewModelScope.launch {
-            authRepository.authChanges.collectLatest { isLoggedIn ->
-                if (!isLoggedIn) {
-                    _uiState.value = UserUiState.Unauthenticated
-                    return@collectLatest
+            uiState
+                .map { if (it is UserUiState.ProfileLoaded) it.user else null }
+                .filterNotNull()
+                .map { it.uid }
+                .distinctUntilChanged() // Ensures this runs only once per user
+                .collectLatest { _ ->
                 }
-
-                val user = authRepository.currentUser
-                val uid = user?.uid
-
-                if (uid.isNullOrBlank()) {
-                    _uiState.value = UserUiState.Unauthenticated
-                    return@collectLatest
-                }
-
-                try {
-                    userProfileRepository.watchByUid(uid).collectLatest { profile ->
-                        if (profile == null || profile.uid.isBlank()) {
-                            _uiState.value = UserUiState.Unauthenticated
-                        } else {
-                            loadSecuritySettings()
-                            _uiState.value = UserUiState.ProfileLoaded(profile)
-                        }
-                    }
-                } catch (e: Exception) {
-                    _uiState.value = UserUiState.Error(
-                        e.message ?: "Failed to load user profile"
-                    )
-                }
-            }
         }
-    }
-
-    private suspend fun loadSecuritySettings() {
-        securityRepository
-            .getSettings()
-            .onSuccess { securitySettings.value = it }
-            .onFailure {
-                // optional: log or fallback
-                Log.e("UserViewModel", "Failed to load security settings", it)
-            }
     }
 
     fun signOut() {

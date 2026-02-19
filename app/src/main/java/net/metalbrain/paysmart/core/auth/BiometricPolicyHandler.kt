@@ -21,14 +21,4 @@ class BiometricPolicyHandler @Inject constructor() {
             false
         }
     }
-
-    suspend fun getBiometricEnabled(idToken: String): Boolean {
-        return try {
-            client.isBiometricEnabled(idToken)
-        } catch (e: Exception) {
-            Log.e("BiometricPolicyHandler", "Failed to call isBiometricEnabled", e)
-            false
-        }
-    }
-
 }

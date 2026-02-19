@@ -5,6 +5,11 @@
   ],
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
     "outDir": "lib",
     "sourceMap": true,
     "declaration": true,

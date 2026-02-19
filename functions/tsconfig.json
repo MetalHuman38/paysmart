@@ -11,7 +11,16 @@
     "rootDir": "./src",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017"
+    "target": "es2017",
+    "isolatedModules": true,
+    "lib": ["es2017"],
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@security/*": ["src/security/src/*"],
+      "@api/*": ["src/api/src/*"],
+      "@auth": ["src/auth/src/*"]
+    }
   },
   "compileOnSave": true,
   "include": [

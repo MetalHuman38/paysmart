@@ -1,14 +1,11 @@
 package net.metalbrain.paysmart.ui
 
-import android.app.Activity
+
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.LocalActivity
-import net.metalbrain.paysmart.ui.home.HomeScreen
-import net.metalbrain.paysmart.SecuredApp
 import net.metalbrain.paysmart.ui.language.LanguageSelectionScreen
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -18,29 +15,31 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import net.metalbrain.paysmart.domain.model.AuthUserModel
+import net.metalbrain.paysmart.domain.auth.state.LocalSecurityState
 import net.metalbrain.paysmart.domain.model.supportedLanguages
-import net.metalbrain.paysmart.domain.state.StartupNavState
 import net.metalbrain.paysmart.domain.state.UserUiState
 import net.metalbrain.paysmart.phone.OTPViewModel
 import net.metalbrain.paysmart.phone.OtpVerificationScreen
 import net.metalbrain.paysmart.phone.ReauthOtpScreen
 import net.metalbrain.paysmart.phone.ReauthOtpViewModel
-import net.metalbrain.paysmart.ui.home.TransactionsScreen
+import net.metalbrain.paysmart.ui.home.screen.HomeScreen
+import net.metalbrain.paysmart.ui.transactions.screen.TransactionsScreen
 import net.metalbrain.paysmart.ui.profile.ProfileScreen
-import net.metalbrain.paysmart.ui.screens.AccountProtectionScreen
+import net.metalbrain.paysmart.ui.screens.AccountProtectionContent
 import net.metalbrain.paysmart.ui.screens.AddEmailScreen
 import net.metalbrain.paysmart.ui.screens.BiometricOptInScreen
+import net.metalbrain.paysmart.ui.screens.BiometricSessionUnlock
 import net.metalbrain.paysmart.ui.screens.CreateAccountScreen
 import net.metalbrain.paysmart.ui.screens.CreateLocalPasswordScreen
 import net.metalbrain.paysmart.ui.screens.EmailSentScreen
 import net.metalbrain.paysmart.ui.screens.EmailVerificationSuccessScreen
 import net.metalbrain.paysmart.ui.screens.EnterPasswordScreen
 import net.metalbrain.paysmart.ui.screens.FederatedLinkingScreen
+import net.metalbrain.paysmart.ui.help.screen.HelpScreen
 import net.metalbrain.paysmart.ui.screens.LoginScreen
 import net.metalbrain.paysmart.ui.screens.RecoverAccountScreen
+import net.metalbrain.paysmart.ui.referral.screen.ReferralScreen
 import net.metalbrain.paysmart.ui.screens.SetPasscodeScreen
 import net.metalbrain.paysmart.ui.screens.SplashScreen
 import net.metalbrain.paysmart.ui.screens.StartupScreen
@@ -52,18 +51,28 @@ import net.metalbrain.paysmart.ui.viewmodel.EnterPasswordViewModel
 import net.metalbrain.paysmart.ui.viewmodel.LanguageViewModel
 import net.metalbrain.paysmart.ui.viewmodel.LoginViewModel
 import net.metalbrain.paysmart.ui.viewmodel.PasscodeViewModel
+import net.metalbrain.paysmart.ui.help.viewmodel.HelpViewModel
+import net.metalbrain.paysmart.ui.referral.viewmodel.ReferralViewModel
 import net.metalbrain.paysmart.ui.viewmodel.SecurityViewModel
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
+import net.metalbrain.paysmart.core.session.SessionViewModel
 import net.metalbrain.paysmart.utils.formatPhoneNumberForDisplay
+import androidx.compose.runtime.LaunchedEffect
 
 
 sealed class Screen(val route: String) {
 
-    object StartUpGuard : Screen("startup_guard")
+    object Splash : Screen("splash")
 
     object Startup : Screen("startup")
 
+    object SecurityGate: Screen("security_gate")
+
+
     object BiometricOptIn: Screen("biometric_opt_in")
+
+    object RequireSessionUnlock: Screen("require_session_unlock")
+
 
     object Language : Screen("language?origin={origin}") {
         fun routeWithOrigin(origin: String): String = "language?origin=$origin"
@@ -106,6 +115,10 @@ sealed class Screen(val route: String) {
 
     object Transactions: Screen("transactions")
 
+    object Referral: Screen("referral")
+
+    object Help: Screen("help")
+
 
     object OtpVerification : Screen("otp_verification/{dialCode}/{phoneNumber}") {
         fun routeWithArgs(dialCode: String, phoneNumber: String): String {
@@ -116,83 +129,16 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppNavGraph(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController,
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.StartUpGuard.route
+        startDestination = Screen.Home.route
     ) {
 
-
-        composable(Screen.StartUpGuard.route) {
-            when (val state = startupGuard()) {
-                StartupNavState.Splash -> SplashScreen(
-                    navController = navController,
-                    viewModel = hiltViewModel()
-                )
-
-                StartupNavState.RequireAuth -> StartupScreen(
-                    navController = navController,
-                    onLoginClick = { navController.navigate(Screen.Login.route) },
-                    onCreateAccountClick = { navController.navigate(Screen.CreateAccount.route) },
-                    viewModel = hiltViewModel()
-                )
-
-                StartupNavState.RequireBiometricOptIn -> {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(Screen.BiometricOptIn.route) {
-                            popUpTo(Screen.StartUpGuard.route) { inclusive = true }
-                        }
-                    }
-
-                }
-
-                StartupNavState.RequirePasscode -> {
-                    // ✅ Navigate to Passcode setup screen
-                    LaunchedEffect(Unit) {
-                        navController.navigate(Screen.SetUpPassCode.route) {
-                            popUpTo(Screen.StartUpGuard.route) { inclusive = true }
-                        }
-                    }
-                }
-
-                StartupNavState.RequirePasswordSetup -> {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(Screen.CreatePassword.route) {
-                            popUpTo(Screen.StartUpGuard.route) { inclusive = true }
-                        }
-                    }
-                }
-
-                StartupNavState.App -> {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.StartUpGuard.route) { inclusive = true }
-                        }
-                    }
-                }
-            }
+        composable(Screen.Splash.route) {
+            SplashScreen()
         }
-
-        composable(Screen.BiometricOptIn.route) {
-            val viewModel: BiometricOptInViewModel = hiltViewModel()
-            val activity = LocalActivity.current as FragmentActivity
-            BiometricOptInScreen(
-                activity = activity,
-                idToken = "",
-                onSuccess = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.BiometricOptIn.route) { inclusive = true }
-                    }
-                },
-                onSkip = {
-                    navController.navigate(Screen.Home.route)
-                },
-                viewModel = viewModel
-            )
-        }
-
-
 
         composable(Screen.Startup.route) {
             val viewModel: LanguageViewModel = hiltViewModel()
@@ -206,6 +152,69 @@ fun AppNavGraph(
                 },
                 viewModel = viewModel,
             )
+        }
+
+        composable(Screen.ProtectAccount.route) {
+            AccountProtectionContent(
+                onSetPasscodeClick = {
+                    navController.navigate(Screen.SetUpPassCode.route)
+                },
+                onSetBiometricClick = {
+                    navController.navigate(Screen.BiometricOptIn.route)
+                }
+            )
+        }
+
+        composable(Screen.BiometricOptIn.route) {
+            val viewModel: BiometricOptInViewModel = hiltViewModel()
+            val activity = LocalActivity.current as FragmentActivity
+            BiometricOptInScreen(
+                activity = activity,
+                viewModel = viewModel,
+                onSuccess = {
+                    navController.navigate(Screen.LinkFederatedAccount.route) {
+                        popUpTo(Screen.ProtectAccount.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        composable(Screen.RequireSessionUnlock.route) {
+            val securityViewModel: SecurityViewModel = hiltViewModel()
+            val sessionViewModel: SessionViewModel = hiltViewModel()
+            val localSettings by securityViewModel.localSecuritySettings.collectAsState()
+
+            val onUnlocked = {
+                sessionViewModel.unlockSession {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.RequireSessionUnlock.route) { inclusive = true }
+                    }
+                }
+            }
+
+            when {
+                localSettings?.biometricsEnabled == true -> {
+                    BiometricSessionUnlock(onUnlock = onUnlocked)
+                }
+
+                localSettings?.passcodeEnabled == true -> {
+                    VerifyPasscodeScreen(onVerified = onUnlocked)
+                }
+
+                localSettings?.passwordEnabled == true -> {
+                    val enterPasswordViewModel: EnterPasswordViewModel = hiltViewModel()
+                    EnterPasswordScreen(
+                        viewModel = enterPasswordViewModel,
+                        onPasswordCorrect = onUnlocked
+                    )
+                }
+
+                else -> {
+                    LaunchedEffect(Unit) {
+                        onUnlocked()
+                    }
+                }
+            }
         }
 
         composable(
@@ -269,7 +278,7 @@ fun AppNavGraph(
             OtpVerificationScreen(
                 phoneNumber = formattedNumber,
                 onContinue = {
-                    navController.navigate(Screen.LinkFederatedAccount.route) {
+                    navController.navigate(Screen.ProtectAccount.route) {
                         popUpTo(Screen.OtpVerification.route) { inclusive = true }
                     }
                 },
@@ -295,29 +304,20 @@ fun AppNavGraph(
             )
         }
 
-        composable(Screen.ProtectAccount.route) {
-            AccountProtectionScreen(
-                onSetPasscodeClick = { navController.navigate(Screen.SetUpPassCode.route) {
-                        popUpTo(Screen.ProtectAccount.route) { inclusive = true }
-                    }
-                },
-            )
-        }
-
         composable(Screen.LinkFederatedAccount.route) {
             FederatedLinkingScreen(
                 viewModel = hiltViewModel(),
                 onSkip = {
                     navController.navigate(Screen.CreatePassword.route) {
-                        popUpTo(Screen.LinkFederatedAccount.route) { inclusive = true }
+                        popUpTo(Screen.SecurityGate.route) { inclusive = true }
                     }
                 },
-                onGoogleLinkSuccess = { navController.navigate(Screen.ProtectAccount.route) {
+                onGoogleLinkSuccess = { navController.navigate(Screen.CreatePassword.route) {
                         popUpTo(Screen.LinkFederatedAccount.route) { inclusive = true }
                     }
                 },
                 onFacebookLinkSuccess = {
-                    navController.navigate(Screen.ProtectAccount.route) {
+                    navController.navigate(Screen.CreatePassword.route) {
                         popUpTo(Screen.LinkFederatedAccount.route) { inclusive = true }
                     }
                 },
@@ -354,11 +354,11 @@ fun AppNavGraph(
 
         composable(Screen.Reauthenticate.route) {
             val viewModel: ReauthOtpViewModel = hiltViewModel()
-            val activity = LocalActivity
+            val activity = LocalActivity.current as FragmentActivity
 
             ReauthOtpScreen(
                 viewModel = viewModel,
-                activity = activity.current as Activity,
+                activity = activity,
                 onSuccess = {
                     navController.navigate(Screen.EnterPassword.route) {
                         popUpTo(Screen.Reauthenticate.route) { inclusive = true }
@@ -399,7 +399,7 @@ fun AppNavGraph(
             CreateLocalPasswordScreen(
                 viewModel = viewModel,
                 onDone = {
-                    navController.navigate(Screen.ProtectAccount.route)
+                    navController.navigate(Screen.Home.route)
                 }
             )
         }
@@ -410,7 +410,7 @@ fun AppNavGraph(
                 viewModel = passCodeviewModel,
                 onPasscodeSet = {
                     Log.d("SetPasscodeScreen", "onPasscodeSet invoked")
-                    navController.navigate(Screen.Home.route) {
+                    navController.navigate(Screen.CreatePassword.route) {
                         popUpTo(Screen.SetUpPassCode.route) { inclusive = true }
                     }
                 }
@@ -455,21 +455,9 @@ fun AppNavGraph(
         }
 
         composable(Screen.Home.route) {
-            val securityViewModel: SecurityViewModel = hiltViewModel()
-            val userViewModel: UserViewModel = hiltViewModel()
-            val uiState by userViewModel.uiState.collectAsState()
-
-            val user = (uiState as? UserUiState.ProfileLoaded)?.user ?: AuthUserModel()
-
-            SecuredApp(
-                viewModel = securityViewModel,
-                user = user
-            ) {
-                HomeScreen(
-                    navController = navController,
-                    viewModel = securityViewModel
-                )
-            }
+            HomeScreen(
+                navController = navController,
+            )
         }
 
         composable(Screen.Transactions.route){
@@ -478,13 +466,34 @@ fun AppNavGraph(
             )
         }
 
+        composable(Screen.Referral.route) {
+            val referralViewModel: ReferralViewModel = hiltViewModel()
+            ReferralScreen(
+                navController = navController,
+                viewModel = referralViewModel
+            )
+        }
+
+        composable(Screen.Help.route) {
+            val helpViewModel: HelpViewModel = hiltViewModel()
+            HelpScreen(
+                navController = navController,
+                viewModel = helpViewModel
+            )
+        }
+
         composable(Screen.ProfileScreen.route) {
             val userViewModel: UserViewModel = hiltViewModel()
+            val securityViewModel: SecurityViewModel = hiltViewModel()
             val state by userViewModel.uiState.collectAsState()
+            val localSecurityState by securityViewModel.localSecurityState.collectAsState()
+            val verifiedFromServer =
+                (localSecurityState as? LocalSecurityState.Ready)?.settings?.hasVerifiedEmail == true
 
             if (state is UserUiState.ProfileLoaded) {
                 ProfileScreen(
                     user = (state as UserUiState.ProfileLoaded).user,
+                    isVerified = verifiedFromServer,
                     viewModel = userViewModel,
                     onLogout = {
                         navController.navigate(Screen.Startup.route) {

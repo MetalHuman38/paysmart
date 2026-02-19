@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -53,7 +52,6 @@ fun FederatedLinkingScreen(
     viewModel: LoginViewModel,
 ) {
     val activity = LocalActivity.current
-    val coroutineScope = rememberCoroutineScope()
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         // No-op
     }
@@ -89,11 +87,10 @@ fun FederatedLinkingScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.thank_you_for_creating_account),
-//                        style = MaterialTheme.typography.headlineMedium,
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 28.sp
+                            fontSize = 32.sp
                         ),
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
@@ -101,7 +98,8 @@ fun FederatedLinkingScreen(
                     Text(
                         text = stringResource(R.string.link_federated_account),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 16.dp),
                     )
 
                     Spacer(Modifier.height(32.dp))
@@ -189,7 +187,8 @@ fun FederatedLinkingScreen(
                 }
 
             }
-            Spacer(modifier =  Modifier.height(16.dp))
+
+            Spacer(Modifier.weight(1f))
             // PaySmart and Logo
             Row(
                 modifier = Modifier

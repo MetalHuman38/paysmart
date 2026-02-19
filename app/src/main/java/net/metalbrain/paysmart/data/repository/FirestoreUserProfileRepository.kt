@@ -14,7 +14,7 @@ import net.metalbrain.paysmart.domain.model.AuthUserModel
 import net.metalbrain.paysmart.utils.normalizeProvider
 
 class FirestoreUserProfileRepository @Inject constructor(
-    firestore: FirebaseFirestore
+    firestore: FirebaseFirestore,
 ) : UserProfileRepository {
 
     private val users = firestore.collection("users")

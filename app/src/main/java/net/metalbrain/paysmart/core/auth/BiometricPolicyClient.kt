@@ -23,7 +23,7 @@ class BiometricPolicyClient(
      */
     suspend fun markBiometricEnabled(idToken: String): Boolean = withContext(Dispatchers.IO) {
         val request = Request.Builder()
-            .url(config.setBiometricEnabled)
+            .url(config.setBiometricEnabledUrl)
             .header("Authorization", "Bearer $idToken")
             .post("{}".toRequestBody("application/json".toMediaTypeOrNull()))
             .build()
@@ -42,7 +42,7 @@ class BiometricPolicyClient(
      */
     suspend fun isBiometricEnabled(idToken: String): Boolean = withContext(Dispatchers.IO) {
         val request = Request.Builder()
-            .url(config.getPasswordEnabledUrl)
+            .url(config.getBiometricEnabledUrl)
             .header("Authorization", "Bearer $idToken")
             .get()
             .build()

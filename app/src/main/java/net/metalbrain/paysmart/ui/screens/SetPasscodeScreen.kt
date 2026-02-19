@@ -6,17 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -35,22 +28,14 @@ fun SetPasscodeScreen(
 
     // 🌀 Show animated spinner while loading
     if (uiState.loading) {
-        AppLoadingScreen(message = "Saving your passcode..")
+        LoadingState(message = "Saving your passcode..")
         return
     }
 
     val passcode = uiState.passcode
     val confirm = uiState.confirmPasscode
-    val passcodeSet by viewModel.passcodeSet.collectAsState()
     var showPasscode by remember { mutableStateOf(false) }
     var showConfirmPasscode by remember { mutableStateOf(false) }
-
-    LaunchedEffect(passcodeSet) {
-        if (passcodeSet) {
-            Log.d("SetPasscodeScreen", "onPasscodeSet invoked")
-            onPasscodeSet()
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -108,7 +93,8 @@ fun SetPasscodeScreen(
             text = "Save passcode",
             onClick = {
                 Log.d("SetPasscodeScreen", "Save button clicked")
-                viewModel.submitPasscode(onSuccess = onPasscodeSet) },
+                viewModel.submitPasscode(onSuccess = onPasscodeSet)
+                      },
             enabled = passcode.length >= 4 && passcode == confirm,
             modifier = Modifier.fillMaxWidth()
         )

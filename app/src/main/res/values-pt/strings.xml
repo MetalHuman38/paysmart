@@ -83,4 +83,5 @@
     <string name="add_passcode_title">Adicione uma senha para manter seu dinheiro e informações pessoais em segurança. Somente você poderá acessar sua conta PaySmart.</string>
     <string name="add_passcode_advisory_text">É necessário configurar uma senha para proteger sua conta e seus dados financeiros do PaySmart. Isso ajuda a garantir que somente você possa acessar seus fundos, mesmo que seu dispositivo seja perdido ou roubado.</string>
     <string name="set_up_passcode">Configurar senha</string>
+    <string name="set_up_biometric">Configurar biometria</string>
 </resources>

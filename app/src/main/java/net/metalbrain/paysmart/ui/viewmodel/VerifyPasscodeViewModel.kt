@@ -33,6 +33,9 @@ class VerifyPasscodeViewModel @Inject constructor(
     private val _biometricPrompt = MutableStateFlow(false)
     val biometricPrompt: StateFlow<Boolean> = _biometricPrompt
 
+    private val _verified = MutableStateFlow(false)
+    val verified: StateFlow<Boolean> = _verified
+
     private val maxAttempts = 5
     private var failedAttempts = 0
     private var isLocked = false
@@ -76,6 +79,7 @@ class VerifyPasscodeViewModel @Inject constructor(
                 _error.value = null
                 _attempts.value = 0
                 _passcode.value = ""
+                _verified.value = true
                 // You can emit success state or navigate
             } else {
                 _error.value = "Incorrect passcode"
@@ -133,5 +137,9 @@ class VerifyPasscodeViewModel @Inject constructor(
 
     fun onBiometricDismissed() {
         _biometricPrompt.value = false
+    }
+
+    fun onVerifiedConsumed() {
+        _verified.value = false
     }
 }

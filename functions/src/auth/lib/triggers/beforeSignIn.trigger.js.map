@@ -1,0 +1,1 @@
+{"version":3,"file":"beforeSignIn.trigger.js","sourceRoot":"","sources":["../../src/triggers/beforeSignIn.trigger.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,kBAAkB,EAAE,MAAM,gCAAgC,CAAC;AACpE,OAAO,EAAE,GAAG,EAAE,MAAM,sBAAsB,CAAC;AAC3C,OAAO,EAAE,kBAAkB,EAAE,MAAM,+BAA+B,CAAC;AAEnE,MAAM,CAAC,MAAM,YAAY,GAA0C,kBAAkB,CACnF,EAAE,MAAM,EAAE,GAAG,CAAC,MAAM,EAAE,EACtB,kBAAkB,CACnB,CAAC"}

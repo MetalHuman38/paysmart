@@ -83,4 +83,5 @@
     <string name="add_passcode_title">Ajoutez un code d\'accès pour protéger votre argent et vos informations personnelles. Vous seul pourrez accéder à votre compte PaySmart.</string>
     <string name="add_passcode_advisory_text">La configuration d\'un code d\'accès est requise pour protéger votre compte PaySmart et vos données financières. Cela garantit que vous seul pouvez accéder à vos fonds, même si votre appareil est perdu ou volé.</string>
     <string name="set_up_passcode">Configurer le code d\'accès</string>
+    <string name="set_up_biometric">Configurer la biométrie</string>
 </resources>

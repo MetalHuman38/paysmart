@@ -1,9 +1,10 @@
 package net.metalbrain.paysmart.core.auth
 
-data class AuthApiConfig(
+data class AuthApiConfig (
     val baseUrl: String,
     val checkPhoneOrEmail: String = "/auth/check-email-or-phone",
     val checkIfPhoneAlreadyExist: String = "/auth/check-phone",
+    val allowFederatedLinking: String = "/auth/allowFederatedLinking",
     val setBiometricEnabled: String = "/auth/setBiometricEnabled",
     val getBiometricEnabled: String = "/auth/getBiometricEnabled",
     val setPasswordEnabled: String = "/auth/setPasswordEnabled",
@@ -12,6 +13,7 @@ data class AuthApiConfig(
     val getPassCodeEnabled: String = "/auth/getPassCodeEnabled",
     val generateEmailVerificationHandler: String = "/auth/generate",
     val checkEmailVerificationStatusHandler: String = "/auth/status",
+    val getSecuritySettings: String = "/auth/getSecuritySettings",
     val usersEnsurePath: String = "/users/ensure",
     val attachApiPrefix: Boolean = false
 ) {
@@ -25,6 +27,8 @@ data class AuthApiConfig(
     
     val checkIfPhoneAlreadyExistUrl get() = "$apiBase$checkIfPhoneAlreadyExist"
 
+    val allowFederatedLinkingUrl get() = "$apiBase$allowFederatedLinking"
+    
     val setBiometricEnabledUrl get() = "$apiBase$setBiometricEnabled"
 
     val getBiometricEnabledUrl get() = "$apiBase$getBiometricEnabled"
@@ -40,6 +44,8 @@ data class AuthApiConfig(
     val generateEmailVerificationHandlerUrl get() = "$apiBase$generateEmailVerificationHandler"
 
     val checkEmailVerificationStatusHandlerUrl get() = "$apiBase$checkEmailVerificationStatusHandler"
+
+    val getSecuritySettingsUrl get() = "$apiBase$getSecuritySettings"
     
     val usersEnsureUrl get() = "$apiBase$usersEnsurePath"
 

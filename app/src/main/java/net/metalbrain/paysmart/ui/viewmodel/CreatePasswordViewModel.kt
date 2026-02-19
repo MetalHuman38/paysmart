@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import net.metalbrain.paysmart.core.auth.PasswordPolicyHandler
 import net.metalbrain.paysmart.data.repository.PasswordRepository
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
 import javax.inject.Inject
@@ -18,7 +17,6 @@ import javax.inject.Inject
 class CreatePasswordViewModel @Inject constructor(
     private val passwordRepo: PasswordRepository,
     private val userProfileRepository: UserProfileRepository,
-    private val passwordPolicyHandler: PasswordPolicyHandler
 ) : ViewModel() {
 
     data class UiState(
@@ -56,18 +54,11 @@ class CreatePasswordViewModel @Inject constructor(
                     Log.w("CreatePasswordViewModel", "User not logged in")
                     throw IllegalStateException("User not authenticated")
                 }
-
-                // ✅ 2. Store password securely (locally)
-                passwordRepo.setPassword(password)
-
-                // ✅ 3. Notify server to mark passwordEnabled = true
+                // ✅ 2. Notify server to mark passwordEnabled = true
                 val idToken = user.getIdToken(false).await().token
-                val serverUpdated = passwordPolicyHandler.setPasswordEnabled(idToken ?: "")
 
-                if (!serverUpdated) {
-                    Log.w("CreatePasswordViewModel", "Server did not confirm passwordEnabled flag")
-                    // Optionally retry later or show a warning
-                }
+                // ✅ 3. Store password securely (locally)
+                passwordRepo.setPassword(password, idToken ?: "")
 
                 // ✅ 4. Update user profile (optional)
                 userProfileRepository.touchLastSignedIn(uid = user.uid)

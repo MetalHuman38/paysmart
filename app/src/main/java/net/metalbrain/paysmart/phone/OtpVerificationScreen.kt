@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import net.metalbrain.paysmart.ui.screens.AppLoadingScreen
 import net.metalbrain.paysmart.ui.screens.LoadingState
 
 @OptIn(ExperimentalComposeUiApi::class)

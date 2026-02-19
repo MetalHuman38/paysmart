@@ -2,6 +2,7 @@ package net.metalbrain.paysmart.core.auth
 
 import android.content.Context
 import com.google.crypto.tink.Aead
+import com.google.crypto.tink.RegistryConfiguration
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.integration.android.AndroidKeystoreKmsClient
@@ -25,7 +26,7 @@ class PasswordCryptoFile(private val context: Context) {
             .withSharedPref(context, keysetAlias, prefFile)
             .withMasterKeyUri(AndroidKeystoreKmsClient.PREFIX + keysetAlias)
             .build()
-            .keysetHandle.getPrimitive(Aead::class.java)
+            .keysetHandle.getPrimitive(RegistryConfiguration.get(), Aead::class.java)
     }
 
     private val file: File = File(context.filesDir, fileName)

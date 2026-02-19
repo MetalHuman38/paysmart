@@ -15,16 +15,25 @@ import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import net.metalbrain.paysmart.core.auth.PasswordPolicyHandler
+import net.metalbrain.paysmart.data.repository.AuthRepository
+import net.metalbrain.paysmart.data.repository.SecurityRepository
 import net.metalbrain.paysmart.domain.auth.SocialAuthUseCase
 import javax.inject.Inject
 import net.metalbrain.paysmart.domain.model.Country
 import net.metalbrain.paysmart.domain.model.supportedCountries
 import net.metalbrain.paysmart.domain.usecase.EmailLinkUseCase
 
+
+
+enum class GoogleAuthIntent {
+    SIGN_IN,
+    LINK_PROVIDER
+}
+
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val passwordPolicyHandler: PasswordPolicyHandler,
+    private val authRepository: AuthRepository,
+    private val security: SecurityRepository,
     private val socialAuth: SocialAuthUseCase,
     private val emailLinkUseCase: EmailLinkUseCase,
 ) : ViewModel() {
@@ -49,35 +58,37 @@ class LoginViewModel @Inject constructor(
 
     fun handleGoogleSignIn(
         credential: AuthCredential,
+        intent: GoogleAuthIntent,
         onSuccess: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
+        Log.d("LoginViewModel", "handleGoogleSignIn: intent=$intent")
         viewModelScope.launch {
             loading = true
             loginError = null
-            val result = socialAuth.signInWithGoogle(credential)
-            result.onSuccess {
-                // Optional password policy check
-                try {
-                    val idToken = FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token
-                    if (!idToken.isNullOrBlank()) {
-                        val passwordEnabled = passwordPolicyHandler.getPasswordEnabled(idToken)
-                        if (!passwordEnabled) {
-                            Log.w("LoginViewModel", "Password login not enabled (optional)")
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.w("LoginViewModel", "Failed to fetch claims", e)
-                }
-                onSuccess()
-            }.onFailure {
-                Log.e("LoginViewModel", "Google sign-in failed", it)
-                onError(it)
-            }
 
-            loading = false
+            try {
+                socialAuth.signInWithGoogle(credential).getOrThrow()
+                Log.d(
+                    "LoginViewModel",
+                    "Google auth successful (intent=$intent, uid=${authRepository.currentUser?.uid})"
+                )
+                onSuccess()
+            } catch (e: Exception) {
+                Log.e("LoginViewModel", "Google auth failed (intent=$intent)", e)
+                loginError = if (e.message?.contains("Federated login requires verified phone number") == true) {
+                    "Please create an account with a phone number before signing in with Google."
+                } else {
+                    e.localizedMessage
+                }
+                onError(e)
+            } finally {
+                loading = false
+            }
         }
     }
+
+
 
     fun linkFederatedCredential(
         credential: AuthCredential,
@@ -86,11 +97,40 @@ class LoginViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             loading = true
-            val result = socialAuth.linkCredential(credential)
-            result.onSuccess { onSuccess() }
-                .onFailure { onError(it) }
-            loading = false
+            loginError = null
+            try {
+                prepareFederatedLinking()
+                val result = socialAuth.linkCredential(credential)
+                result.onSuccess {
+                    Log.d("LoginViewModel", "Successfully linked federated credential.")
+                    onSuccess()
+                }
+                .onFailure {
+                    Log.e("LoginViewModel", "Failed to link federated credential.", it)
+                    loginError = it.localizedMessage
+                    onError(it)
+                }
+            } catch (e: Exception) {
+                Log.e("LoginViewModel", "An exception occurred during federated linking.", e)
+                loginError = e.localizedMessage
+                onError(e)
+            } finally {
+                loading = false
+            }
         }
+    }
+
+    suspend fun prepareFederatedLinking() {
+        val user = FirebaseAuth.getInstance().currentUser
+            ?: throw IllegalStateException("No authenticated user to link credentials")
+        val idToken = user.getIdToken(false).await().token
+            ?: throw IllegalStateException("Token missing")
+
+        val result = security.allowFederatedLinking(idToken)
+        result.getOrElse { cause ->
+            throw IllegalStateException("Unable to authorize federated credential linking", cause)
+        }
+        Log.d("LoginViewModel", "prepareFederatedLinking: enabled=true")
     }
 
     fun handleFacebookLogin(
@@ -104,6 +144,24 @@ class LoginViewModel @Inject constructor(
 
             val result = socialAuth.signInWithFacebook(activity)
             result.onSuccess {
+                try {
+                    // Just ensure we actually have a valid session
+                    val session = authRepository.getCurrentSession()
+                        ?: run {
+                            Log.w("LoginViewModel", "Facebook sign-in succeeded but no session available yet")
+                            onSuccess() // still proceed
+                            loading = false
+                            return@launch
+                        }
+
+                    Log.d(
+                        "LoginViewModel",
+                        "Facebook sign-in successful for uid=${session.user.uid}"
+                    )
+                } catch (e: Exception) {
+                    Log.w("LoginViewModel", "Session retrieval after FaceBook sign-in failed", e)
+                    // Don't block login because of this — still proceed
+                }
                 onSuccess()
             }.onFailure {
                 loginError = "Facebook Sign-In failed: ${it.localizedMessage ?: "Unknown error"}"
@@ -113,6 +171,9 @@ class LoginViewModel @Inject constructor(
             loading = false
         }
     }
+
+
+
 
 
 
@@ -177,15 +238,7 @@ class LoginViewModel @Inject constructor(
         phoneNumber = value
     }
 
-    fun onPasswordChanged(value: String) {
-        _password.value = value
-    }
-
     fun onCountrySelected(country: Country) {
         _selectedCountry.value = country
-    }
-
-    fun togglePasswordVisibility() {
-        _isPasswordVisible.value = !_isPasswordVisible.value
     }
 }

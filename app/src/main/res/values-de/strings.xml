@@ -83,4 +83,5 @@
     <string name="add_passcode_title">Füge einen Passcode hinzu, um dein Geld und deine persönlichen Daten zu schützen. Nur du wirst auf dein PaySmart-Konto zugreifen können.</string>
     <string name="add_passcode_advisory_text">Das Einrichten eines Passcodes ist erforderlich, um Ihr PaySmart-Konto und Ihre Finanzdaten zu schützen. Es hilft sicherzustellen, dass nur Sie auf Ihre Gelder zugreifen können, auch wenn Ihr Gerät verloren geht oder gestohlen wird.</string>
     <string name="set_up_passcode">Passcode einrichten</string>
+    <string name="set_up_biometric">Biometrik einrichten</string>
 </resources>

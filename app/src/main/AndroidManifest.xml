@@ -34,7 +34,7 @@
 
 
         <activity
-            android:name=".MainActivity"
+            android:name="net.metalbrain.paysmart.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Paysmart">
 

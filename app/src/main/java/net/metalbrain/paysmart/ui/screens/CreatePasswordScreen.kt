@@ -54,7 +54,7 @@ fun CreateLocalPasswordScreen(
 
     // 🌀 Show animated spinner while loading
     if (uiState.loading) {
-        AppLoadingScreen(message = "Saving your password...")
+        LoadingState(message = "Saving your password...")
         return
     }
 

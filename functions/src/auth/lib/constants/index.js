@@ -1,0 +1,20 @@
+export const SECURITY_SETTINGS_COLLECTION = {
+    allowFederatedLinking: false,
+    passcodeEnabled: false,
+    passwordEnabled: false,
+    biometricsRequired: false,
+    biometricsEnabled: false,
+    biometricsEnabledAt: null,
+    lockAfterMinutes: 5,
+    onboardingRequired: {},
+    onboardingCompleted: {},
+    emailToVerify: null,
+    emailVerificationSentAt: null,
+    emailVerificationAttemptsToday: 0,
+    hasVerifiedEmail: false,
+    hasAddedHomeAddress: false,
+    hasVerifiedIdentity: false,
+    localPassCodeSetAt: null,
+    localPasswordSetAt: null,
+};
+//# sourceMappingURL=index.js.map

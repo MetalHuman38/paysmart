@@ -5,15 +5,19 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import net.metalbrain.paysmart.core.auth.BcryptPasswordHasher
 import net.metalbrain.paysmart.core.auth.PasswordCryptoFile
+import net.metalbrain.paysmart.core.auth.PasswordPolicyHandler
+import net.metalbrain.paysmart.core.security.SecurityPreference
 
 class SecurePasswordRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val hasher: BcryptPasswordHasher
+    private val hasher: BcryptPasswordHasher,
+    private val securityPreference: SecurityPreference,
+    private val passwordPolicyHandler: PasswordPolicyHandler
 ) : PasswordRepository {
 
     private val file = PasswordCryptoFile(context)
 
-    override suspend fun setPassword(plain: String) {
+    override suspend fun setPassword(plain: String, idToken: String) {
         if (file.exists()) {
             val currentHash = file.read() ?: throw IllegalStateException("File exists but unreadable")
             if (!hasher.verify(plain, currentHash)) {
@@ -26,6 +30,16 @@ class SecurePasswordRepository @Inject constructor(
         } else {
             val newHash = hasher.hash(plain)
             file.write(newHash)
+        }
+
+        val serverAccepted = passwordPolicyHandler.setPasswordEnabled(idToken)
+        val updated = securityPreference
+            .loadLocalSecurityState()
+            .copy(passwordEnabled = serverAccepted)
+        securityPreference.saveLocalSecurityState(updated)
+
+        if (!serverAccepted) {
+            throw IllegalStateException("Server failed to acknowledge password enablement")
         }
     }
 

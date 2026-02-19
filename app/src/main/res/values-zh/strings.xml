@@ -83,4 +83,5 @@
     <string name="add_passcode_title">設定密碼，保障您的資金和個人資訊安全。只有您本人才能存取您的PaySmart帳戶。</string>
     <string name="add_passcode_advisory_text">設定密碼是保護您的 PaySmart 帳戶和財務資料的必要步驟。即使您的設備遺失或被盜，也能確保只有您本人才能存取您的資金。</string>
     <string name="set_up_passcode">設定密碼</string>
+    <string name="set_up_biometric">設定生物識別</string>
 </resources>

@@ -51,6 +51,7 @@ import net.metalbrain.paysmart.ui.components.LanguageSelector
 import net.metalbrain.paysmart.ui.components.PhoneNumberInput
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.viewmodel.GoogleAuthIntent
 import net.metalbrain.paysmart.ui.viewmodel.LanguageViewModel
 import net.metalbrain.paysmart.ui.viewmodel.LoginViewModel
 import net.metalbrain.paysmart.utils.extractSimpleBackendError
@@ -254,7 +255,12 @@ fun LoginScreen(
             launcher = googleLauncher,
             modifier = Modifier.fillMaxWidth(),
             onCredentialReceived = {
-                viewModel.handleGoogleSignIn(it, onContinue) { e ->
+                viewModel.handleGoogleSignIn(
+                    it,
+                    GoogleAuthIntent.SIGN_IN,
+                    {
+                    onContinue()
+                }) { e ->
                     backendError.value = extractSimpleBackendError(e)
                 }
             },

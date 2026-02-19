@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -7,11 +8,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.data.repository.PasswordRepository
+import net.metalbrain.paysmart.data.repository.SecurePasswordRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class EnterPasswordViewModel @Inject constructor(
-    private val passwordRepo: PasswordRepository
+    private val passwordRepo: PasswordRepository,
+    private val securePasswordRepository: SecurePasswordRepository
 ) : ViewModel() {
 
     data class UiState(
@@ -37,6 +40,8 @@ class EnterPasswordViewModel @Inject constructor(
 
                 if (isValid) {
                     _uiState.value = _uiState.value.copy(success = true)
+                    val checkStorageStatus = securePasswordRepository.hasPassword()
+                    Log.d("EnterPasswordViewModel", "Password storage status: $checkStorageStatus")
                     onSuccess()
                 } else {
                     _uiState.value = _uiState.value.copy(errorMessage = "Incorrect password.")

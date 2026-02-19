@@ -15,13 +15,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
 import net.metalbrain.paysmart.domain.model.AuthUserModel
+import net.metalbrain.paysmart.domain.room.RoomUseCase
 
 @HiltViewModel
 class OTPViewModel @Inject constructor(
     private val phoneVerifier: PhoneVerifier,
     private val auth: FirebaseAuth,
     private val userRepo: UserProfileRepository,
-    private val phoneDraftStore: PhoneDraftStore
+    private val phoneDraftStore: PhoneDraftStore,
+    private val roomUseCase: RoomUseCase
 ) : ViewModel() {
 
     data class UiState(
@@ -62,6 +64,17 @@ class OTPViewModel @Inject constructor(
             }
         }
     }
+
+
+    suspend fun waitUntilRoomIsReady(timeoutMillis: Long = 1000): Boolean {
+        val start = System.currentTimeMillis()
+        while (System.currentTimeMillis() - start < timeoutMillis) {
+            if (roomUseCase.isReady()) return true
+            delay(100)
+        }
+        return false
+    }
+
 
     fun verifyOtp(
         code: String,
@@ -107,7 +120,6 @@ class OTPViewModel @Inject constructor(
 
     fun upsertUserAfterOtp(onDone: () -> Unit = {}) {
         val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
-
         val authUser = AuthUserModel(
             uid = firebaseUser.uid,
             phoneNumber = firebaseUser.phoneNumber,

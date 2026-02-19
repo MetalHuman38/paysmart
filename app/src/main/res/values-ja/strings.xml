@@ -83,4 +83,5 @@
     <string name="add_passcode_title">パスコードを追加して、お金と個人情報を安全に保ちます。あなただけがPaySmartアカウントにアクセスできます。</string>
     <string name="add_passcode_advisory_text">PaySmartアカウントと財務データを保護するには、パスコードを設定する必要があります。これにより、デバイスを紛失したり盗まれたりした場合でも、あなただけが資金にアクセスできるようになります。</string>
     <string name="set_up_passcode">パスコードを設定する</string>
+    <string name="set_up_biometric">生体認証を設定する</string>
 </resources>

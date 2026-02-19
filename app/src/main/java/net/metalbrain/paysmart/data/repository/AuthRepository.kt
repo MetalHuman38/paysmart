@@ -10,6 +10,10 @@ interface AuthRepository {
     val isLoggedIn: Boolean
     val currentUser: FirebaseUser?
 
+    suspend fun getCurrentSession(): AuthSession?
+
+    suspend fun getCurrentSessionOrThrow(): AuthSession
+
     suspend fun checkPhoneAlreadyRegistered(phone: String): Boolean
 
     suspend fun isPhoneUnique(phone: String): Boolean

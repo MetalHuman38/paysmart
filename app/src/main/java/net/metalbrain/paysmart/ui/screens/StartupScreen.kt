@@ -77,7 +77,7 @@ fun StartupScreen(
                     Text(
                         text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.headlineLarge.copy(
-                            fontSize = 40.sp,
+                            fontSize = 38.sp,
                             fontWeight = FontWeight.Bold,
                         ),
                         color = Color.Black

@@ -32,6 +32,29 @@ class FirebaseAuthRepository @Inject constructor(
     override val currentUser: FirebaseUser?
         get() = firebaseAuth.currentUser
 
+    override suspend fun getCurrentSession(): AuthSession? {
+        val user = firebaseAuth.currentUser ?: return null
+        return try {
+            val tokenResult = user.getIdToken(false).await()
+            val token = tokenResult.token ?: return null
+            AuthSession(user, token)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    override suspend fun getCurrentSessionOrThrow(): AuthSession {
+        val user = firebaseAuth.currentUser
+            ?: throw IllegalStateException("User is not logged in")
+
+        val tokenResult = user.getIdToken(false).await()
+        val token = tokenResult.token
+            ?: throw IllegalStateException("Failed to get ID token")
+        return AuthSession(user, token)
+    }
+
+
     override suspend fun isPhoneUnique(phone: String): Boolean {
         return try {
             FirebaseFunctions.getInstance()

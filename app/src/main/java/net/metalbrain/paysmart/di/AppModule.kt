@@ -16,6 +16,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.Env
@@ -24,20 +25,17 @@ import net.metalbrain.paysmart.core.auth.AuthHook
 import net.metalbrain.paysmart.core.auth.AuthPolicyHandler
 import net.metalbrain.paysmart.core.auth.AuthService
 import net.metalbrain.paysmart.core.auth.PasswordPolicyHandler
-import net.metalbrain.paysmart.core.security.SecurityPreference
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.FirebaseAuthRepository
 import net.metalbrain.paysmart.data.repository.FirestoreUserProfileRepository
 import net.metalbrain.paysmart.data.repository.LanguageRepositoryImpl
 import net.metalbrain.paysmart.data.repository.PasswordRepository
 import net.metalbrain.paysmart.data.repository.SecurePasswordRepository
-import net.metalbrain.paysmart.data.repository.SecurityCloudRepository
 import net.metalbrain.paysmart.data.repository.SecurityRepository
+import net.metalbrain.paysmart.data.repository.SecurityRepositoryInterface
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
 import net.metalbrain.paysmart.data.security.DefaultSecurityManager
 import net.metalbrain.paysmart.domain.LanguageRepository
-import net.metalbrain.paysmart.domain.auth.FirebaseUserManager
-import net.metalbrain.paysmart.domain.auth.UserManager
 import net.metalbrain.paysmart.domain.security.SecuritySettingsManager
 import net.metalbrain.paysmart.domain.usecase.DefaultSecurityUseCase
 import net.metalbrain.paysmart.domain.usecase.SecurityUseCase
@@ -45,11 +43,24 @@ import net.metalbrain.paysmart.phone.PhoneAuthHandler
 import net.metalbrain.paysmart.phone.PhoneDraft
 import net.metalbrain.paysmart.phone.PhoneDraftStore
 import net.metalbrain.paysmart.phone.PhoneVerifier
+import net.metalbrain.paysmart.utils.AppCoroutineScope
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object CoroutineScopeModule {
+
+        @Provides
+        @Singleton
+        @AppCoroutineScope
+        fun provideAppCoroutineScope(): CoroutineScope {
+            return CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        }
+    }
 
     @Provides
     @Singleton
@@ -68,21 +79,6 @@ object AppModule {
     ): AuthService {
         return AuthService(authRepository, hooks)
     }
-
-    @Provides
-    @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
-
-    @Provides
-    @Singleton
-    fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
-
-    @Provides
-    @Singleton
-    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create {
-            context.preferencesDataStoreFile("paysmart_settings")
-        }
 
     @Provides
     @Singleton
@@ -164,23 +160,6 @@ object AppModule {
     @InstallIn(SingletonComponent::class)
     object SecurityModule {
 
-        @Provides
-        @Singleton
-        fun provideSecurityPrefs(
-            @ApplicationContext context: Context
-        ): SecurityPreference = SecurityPreference(context)
-
-        @Module
-        @InstallIn(SingletonComponent::class)
-        abstract class AuthBindingModule {
-
-            @Binds
-            @Singleton
-            abstract fun bindUserManager(
-                impl: FirebaseUserManager
-            ): UserManager
-        }
-
         @Module
         @InstallIn(SingletonComponent::class)
         abstract class PasswordBindingModule {
@@ -212,8 +191,8 @@ object AppModule {
 
             @Binds
             abstract fun bindSecurityRepository(
-                impl: SecurityCloudRepository
-            ): SecurityRepository
+                impl: SecurityRepository
+            ): SecurityRepositoryInterface
         }
     }
 

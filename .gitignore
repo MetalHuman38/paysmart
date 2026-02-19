@@ -154,3 +154,11 @@ android/tools/hooks/*.cache
 *.swp
 *.swo
 *.tmp
+
+# Keep Gradle wrapper tracked for CI
+!/gradlew
+!/gradlew.bat
+!/gradle/
+!/gradle/wrapper/
+!/gradle/wrapper/gradle-wrapper.jar
+!/gradle/wrapper/gradle-wrapper.properties

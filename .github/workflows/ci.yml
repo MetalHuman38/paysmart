@@ -28,6 +28,16 @@ jobs:
       - name: ⚙️ Ensure Gradle wrapper is executable
         run: chmod +x ./gradlew
 
+      - name: 🔐 Restore google-services.json
+        env:
+          GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON_B64 }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON_B64" ]; then
+            echo "Missing secret GOOGLE_SERVICES_JSON_B64"
+            exit 1
+          fi
+          echo "$GOOGLE_SERVICES_JSON_B64" | base64 --decode > app/google-services.json
+
       - name: 🔎 Android Lint
         run: ./gradlew :app:lintDebug --no-daemon
 
@@ -50,6 +60,16 @@ jobs:
 
       - name: ⚙️ Ensure Gradle wrapper is executable
         run: chmod +x ./gradlew
+
+      - name: 🔐 Restore google-services.json
+        env:
+          GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON_B64 }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON_B64" ]; then
+            echo "Missing secret GOOGLE_SERVICES_JSON_B64"
+            exit 1
+          fi
+          echo "$GOOGLE_SERVICES_JSON_B64" | base64 --decode > app/google-services.json
 
       - name: 🤖 Build Project (Gradle)
         run: ./gradlew clean assemble --no-daemon

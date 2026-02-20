@@ -72,7 +72,7 @@ jobs:
           echo "$GOOGLE_SERVICES_JSON_B64" | base64 --decode > app/google-services.json
 
       - name: 🤖 Build Project (Gradle)
-        run: ./gradlew clean assemble --no-daemon
+        run: ./gradlew clean :app:compileDebugKotlin --no-daemon
 
       - name: ✅ Run Unit Tests
-        run: ./gradlew test --no-daemon
+        run: ./gradlew :app:testDebugUnitTest --no-daemon

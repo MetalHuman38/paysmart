@@ -162,3 +162,8 @@ android/tools/hooks/*.cache
 !/gradle/wrapper/
 !/gradle/wrapper/gradle-wrapper.jar
 !/gradle/wrapper/gradle-wrapper.properties
+
+# Keep native build definitions tracked, but keep OpenSSL payload excluded
+!/app/src/main/cpp/CMakeLists.txt
+!/app/src/main/cpp/build-openssl.sh
+!/app/src/main/cpp/build_openssl.sh

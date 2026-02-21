@@ -26,12 +26,6 @@ fun SetPasscodeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // 🌀 Show animated spinner while loading
-    if (uiState.loading) {
-        LoadingState(message = "Saving your passcode..")
-        return
-    }
-
     val passcode = uiState.passcode
     val confirm = uiState.confirmPasscode
     var showPasscode by remember { mutableStateOf(false) }
@@ -96,6 +90,8 @@ fun SetPasscodeScreen(
                 viewModel.submitPasscode(onSuccess = onPasscodeSet)
                       },
             enabled = passcode.length >= 4 && passcode == confirm,
+            isLoading = uiState.loading,
+            loadingText = "Saving...",
             modifier = Modifier.fillMaxWidth()
         )
 

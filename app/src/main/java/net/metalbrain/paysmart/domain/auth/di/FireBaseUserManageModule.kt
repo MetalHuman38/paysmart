@@ -1,6 +1,5 @@
 package net.metalbrain.paysmart.domain.auth.di
 
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

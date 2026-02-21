@@ -1,14 +1,10 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
     id("androidx.room")
-    id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
-    id("com.google.dagger.hilt.android")
 }
 
 
@@ -22,12 +18,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
     
-    kotlin {
-        compilerOptions {
-            jvmTarget = JvmTarget.fromTarget("21")
-        }
-    }
-
     bundle {
         language {
             @Suppress("UnstableApiUsage")

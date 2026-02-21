@@ -38,7 +38,7 @@ class UserViewModel @Inject constructor(
                 if (uid == null) {
                     flowOf<UserUiState>(UserUiState.Unauthenticated)
                 } else {
-                    flow<UserUiState> {
+                    flow {
                         profileCacheRepository.ensureSeed(
                             uid = uid,
                             displayName = authUser.displayName,
@@ -79,7 +79,7 @@ class UserViewModel @Inject constructor(
         )
 
     private val _securitySettings = MutableStateFlow<SecuritySettingsModel?>(null)
-    val securitySettings: StateFlow<SecuritySettingsModel?> = _securitySettings.asStateFlow()
+
 
     val onboardingState: StateFlow<OnboardingState> =
         _securitySettings

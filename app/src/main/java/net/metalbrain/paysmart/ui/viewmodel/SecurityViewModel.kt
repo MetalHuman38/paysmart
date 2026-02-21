@@ -1,6 +1,5 @@
 package net.metalbrain.paysmart.ui.viewmodel
 
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +20,6 @@ import net.metalbrain.paysmart.domain.auth.state.AuthState
 import net.metalbrain.paysmart.domain.auth.state.LocalSecurityState
 import net.metalbrain.paysmart.domain.auth.state.PostAuthState
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
-import net.metalbrain.paysmart.domain.security.SecurityPolicyEngine
 import net.metalbrain.paysmart.domain.usecase.SecurityUseCase
 
 @HiltViewModel
@@ -30,7 +28,6 @@ class SecurityViewModel @Inject constructor(
     private val syncManager: SecuritySyncManager,
     private val baseSessionUseCase: BaseSessionUseCase,
     private val securityPreference: SecurityPreference,
-    private val policyEngine: SecurityPolicyEngine,
     private val userManager: UserManager,
     sessionStateManager: SessionStateManager
 ) : ViewModel() {
@@ -105,10 +102,6 @@ class SecurityViewModel @Inject constructor(
                 LocalSecurityState.Loading
             )
 
-    val isLocked: StateFlow<Boolean> = policyEngine.currentState
-        .map { it.sessionLocked }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-
     fun initializeSession() {
         viewModelScope.launch {
             try {
@@ -119,31 +112,6 @@ class SecurityViewModel @Inject constructor(
                 e.printStackTrace()
             }
         }
-    }
-
-    suspend fun checkIfLocked() {
-        val shouldLock = policyEngine.evaluateSecurityPolicy()
-        if (shouldLock) {
-            policyEngine.lockSession()
-        }
-    }
-
-
-
-    suspend fun promptBiometric(
-        activity: FragmentActivity,
-        onSuccess: (() -> Unit)? = null,
-        onFailure: (() -> Unit)? = null
-    ) {
-        policyEngine.promptBiometric(
-            activity = activity,
-            onSuccess = {
-                onSuccess?.invoke()
-            },
-            onFailure = {
-                onFailure?.invoke()
-            }
-        )
     }
 
     suspend fun verify(passcode: String): Boolean =

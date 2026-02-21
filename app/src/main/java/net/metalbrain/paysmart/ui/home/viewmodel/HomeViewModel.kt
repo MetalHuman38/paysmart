@@ -21,6 +21,7 @@ import net.metalbrain.paysmart.domain.auth.state.AuthState
 import net.metalbrain.paysmart.domain.model.Transaction
 import net.metalbrain.paysmart.ui.home.state.HomeBalanceSnapshot
 import net.metalbrain.paysmart.ui.home.state.HomeUiState
+import net.metalbrain.paysmart.ui.home.state.RewardEarnedSnapshot
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -42,7 +43,7 @@ class HomeViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.WhileSubscribed(5_000),
+            started = SharingStarted.WhileSubscribed(5_000),
             initialValue = null
         )
 
@@ -56,13 +57,15 @@ class HomeViewModel @Inject constructor(
             security = localSecurity,
             recentTransactions = transactions.take(3),
             balanceSnapshot = HomeBalanceSnapshot(
-                balancesByCurrency = wallet?.balancesByCurrency ?: emptyMap(),
-                rewardsPoints = wallet?.rewardsPoints ?: 0.0
+                balancesByCurrency = wallet?.balancesByCurrency ?: emptyMap()
+            ),
+            rewardEarned = RewardEarnedSnapshot(
+                points = wallet?.rewardsPoints ?: 0.0
             )
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.Companion.WhileSubscribed(5_000),
+        started = SharingStarted.WhileSubscribed(5_000),
         initialValue = HomeUiState()
     )
 

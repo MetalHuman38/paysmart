@@ -1,4 +1,4 @@
-package net.metalbrain.paysmart.ui.screens
+package net.metalbrain.paysmart.ui.account.recovery.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
-import net.metalbrain.paysmart.ui.components.RecoveryOptionItem
+import net.metalbrain.paysmart.ui.account.recovery.components.RecoveryOptionItem
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)

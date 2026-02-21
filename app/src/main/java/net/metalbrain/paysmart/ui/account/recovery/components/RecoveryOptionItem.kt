@@ -1,4 +1,4 @@
-package net.metalbrain.paysmart.ui.components
+package net.metalbrain.paysmart.ui.account.recovery.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

@@ -1,9 +1,13 @@
 package net.metalbrain.paysmart.ui.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -12,31 +16,35 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import net.metalbrain.paysmart.R
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.ui.components.AuthScreenSubtitle
+import net.metalbrain.paysmart.ui.components.AuthScreenTitle
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.components.RequirementsList
 import net.metalbrain.paysmart.ui.components.StrengthMeter
@@ -49,134 +57,168 @@ fun CreateLocalPasswordScreen(
     viewModel: CreatePasswordViewModel = hiltViewModel(),
     onDone: () -> Unit
 ) {
-    LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val showContent = remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
-    // 🌀 Show animated spinner while loading
-    if (uiState.loading) {
-        LoadingState(message = "Saving your password...")
-        return
+    val password = uiState.password
+    val confirmPassword = uiState.confirmPassword
+    val checks = remember(password) { evaluatePassword(password) }
+    val allGood = checks.allPassed && password == confirmPassword
+
+    LaunchedEffect(Unit) {
+        showContent.value = true
     }
 
-    val pw = uiState.password
-    val pw2 = uiState.confirmPassword
-    val checks = remember(pw) { evaluatePassword(pw) }
-    val allGood = checks.allPassed && pw == pw2
-
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(WindowInsets.systemBars.asPaddingValues())
-            .padding(top = Dimens.largeScreenPadding)
-            .padding(horizontal = Dimens.screenPadding)
-
-    ){
-//
-        Text(stringResource(
-            id = R.string.create_secure_password),
-            style = MaterialTheme.typography.headlineMedium,
-            fontSize = 24.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-
-        )
-
-        Spacer(Modifier.height(8.dp))
-//        Text("This password is stored only on your device and used to authorize transactions.")
-        Text(stringResource(
-            id = R.string.enter_secure_password),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
-
-        )
-
-        Spacer(Modifier.height(24.dp))
-        OutlinedTextField(
-            value = pw,
-            onValueChange = viewModel::onPasswordChanged,
-            label = { Text("Password") },
-            visualTransformation = if (uiState.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                IconButton(onClick = viewModel::togglePasswordVisibility) {
-                    Icon(
-                        imageVector = if (uiState.showPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = "Toggle"
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.32f),
+                        MaterialTheme.colorScheme.background
                     )
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(12.dp))
-        StrengthMeter(checks)
-
-        Spacer(Modifier.height(12.dp))
-        OutlinedTextField(
-            value = pw2,
-            onValueChange = viewModel::onConfirmPasswordChanged,
-            label = { Text("Confirm password") },
-            isError = pw2.isNotBlank() && pw != pw2,
-            visualTransformation = if (uiState.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                IconButton(onClick = viewModel::togglePasswordVisibility) {
-                    Icon(
-                        imageVector = if (uiState.showPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = "Toggle"
-                    )
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(12.dp))
-        RequirementsList(checks)
-
-
-
-        if (!uiState.errorMessage.isNullOrBlank()) {
-            Text(
-                text = uiState.errorMessage!!,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
-
-        Spacer(Modifier.height(28.dp))
-
-        PrimaryButton(
-            text = "Create password",
-            onClick = {
-                viewModel.submitPassword(onSuccess = onDone)
-            },
-            enabled = allGood,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.weight(1f))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 24.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_paysmart_logo),
-                contentDescription = "PaySmart Logo",
-                modifier = Modifier.height(34.dp)
-            )
-
-            Spacer(modifier = Modifier.width(2.dp))
-
-            Text(
-                text = "PaySmart",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
+            .padding(WindowInsets.systemBars.asPaddingValues())
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(horizontal = Dimens.screenPadding, vertical = 20.dp)
+        ) {
+            AnimatedVisibility(
+                visible = showContent.value,
+                enter = fadeIn(animationSpec = tween(durationMillis = 320)) +
+                    slideInVertically(
+                        initialOffsetY = { -it / 5 },
+                        animationSpec = tween(durationMillis = 320)
+                    )
+            ) {
+                Column {
+                    AuthScreenTitle(text = stringResource(R.string.create_secure_password))
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    AuthScreenSubtitle(text = stringResource(R.string.enter_secure_password))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            AnimatedVisibility(
+                visible = showContent.value,
+                enter = fadeIn(animationSpec = tween(durationMillis = 420, delayMillis = 80)) +
+                    slideInVertically(
+                        initialOffsetY = { it / 8 },
+                        animationSpec = tween(durationMillis = 420, delayMillis = 80)
+                    )
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(22.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 2.dp,
+                    shadowElevation = 8.dp,
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 16.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = viewModel::onPasswordChanged,
+                            label = { Text(stringResource(R.string.password_placeholder)) },
+                            singleLine = true,
+                            visualTransformation = if (uiState.showPassword) {
+                                VisualTransformation.None
+                            } else {
+                                PasswordVisualTransformation()
+                            },
+                            trailingIcon = {
+                                IconButton(onClick = viewModel::togglePasswordVisibility) {
+                                    Icon(
+                                        imageVector = if (uiState.showPassword) {
+                                            Icons.Default.Visibility
+                                        } else {
+                                            Icons.Default.VisibilityOff
+                                        },
+                                        contentDescription = stringResource(R.string.toggle_password_visibility)
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+                        StrengthMeter(checks)
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        OutlinedTextField(
+                            value = confirmPassword,
+                            onValueChange = viewModel::onConfirmPasswordChanged,
+                            label = { Text(stringResource(R.string.confirm_password_label)) },
+                            singleLine = true,
+                            isError = confirmPassword.isNotBlank() && password != confirmPassword,
+                            visualTransformation = if (uiState.showPassword) {
+                                VisualTransformation.None
+                            } else {
+                                PasswordVisualTransformation()
+                            },
+                            trailingIcon = {
+                                IconButton(onClick = viewModel::togglePasswordVisibility) {
+                                    Icon(
+                                        imageVector = if (uiState.showPassword) {
+                                            Icons.Default.Visibility
+                                        } else {
+                                            Icons.Default.VisibilityOff
+                                        },
+                                        contentDescription = stringResource(R.string.toggle_password_visibility)
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+                        RequirementsList(checks)
+
+                        if (!uiState.errorMessage.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = uiState.errorMessage!!,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            AnimatedVisibility(
+                visible = showContent.value,
+                enter = fadeIn(animationSpec = tween(durationMillis = 480, delayMillis = 140))
+            ) {
+                PrimaryButton(
+                    text = stringResource(R.string.create_password_cta),
+                    onClick = { viewModel.submitPassword(onSuccess = onDone) },
+                    enabled = allGood,
+                    isLoading = uiState.loading,
+                    loadingText = stringResource(R.string.create_password_loading),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }

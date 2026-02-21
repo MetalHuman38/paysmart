@@ -65,8 +65,12 @@
     <string name="trouble_loggin_in">Trouble login in?</string>
     <string name="recover_your_account">Recover your account</string>
     <string name="forgot_password_title">Forgot your password?</string>
-    <string name="create_secure_password">Create a secure password</string>
-    <string name="enter_secure_password">Enter a secure password with at-least 8 characters, including uppercase and lowercase letters, numbers and special characters.</string>
+    <string name="create_secure_password">Create your secure password</string>
+    <string name="enter_secure_password">Use 12+ characters with uppercase, lowercase, a number, and a symbol to keep your account protected.</string>
+    <string name="confirm_password_label">Confirm password</string>
+    <string name="create_password_cta">Create password</string>
+    <string name="create_password_loading">Creating secure password...</string>
+    <string name="toggle_password_visibility">Toggle password visibility</string>
     <string name="enter_your_passcode">Enter your passcode</string>
     <string name="forgot_password_description">Change your password to recover your account.</string>
     <string name="change_password">Change Password</string>

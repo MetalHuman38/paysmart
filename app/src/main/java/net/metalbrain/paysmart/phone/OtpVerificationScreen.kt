@@ -16,7 +16,9 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.screens.LoadingState
+import net.metalbrain.paysmart.ui.screens.rememberStabilizedLoading
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -36,9 +38,10 @@ fun OtpVerificationScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val uiState by viewModel.uiState.collectAsState()
+    val showLoading = rememberStabilizedLoading(uiState.loading)
 
     // 🌀 Show animated spinner while loading
-    if (uiState.loading) {
+    if (showLoading) {
         LoadingState(message = "Creating your account....")
         return
     }
@@ -139,7 +142,7 @@ fun OtpVerificationScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Button(
+        PrimaryButton(
             onClick = {
                 val code = otpDigits.joinToString("")
                 submitting = true
@@ -158,13 +161,14 @@ fun OtpVerificationScreen(
                     }
                 )
             },
-            enabled = isOtpComplete && !submitting,
+            enabled = isOtpComplete,
+            isLoading = submitting,
+            loadingText = "Verifying...",
+            text = "Continue",
                     modifier = Modifier
                          .fillMaxWidth()
                          .height(52.dp)
-        ) {
-            Text(if (submitting) "Verifying..." else "Continue")
-        }
+        )
 
         if (errorMessage != null) {
             Text(

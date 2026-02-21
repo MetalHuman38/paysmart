@@ -6,6 +6,6 @@ interface PasswordRepository {
 
     suspend fun hasPassword(): Boolean
 
-    suspend fun changePassword(old: String, new: String): Boolean
+    suspend fun changePassword(old: String, new: String, idToken: String): Boolean
     suspend fun clear()
 }

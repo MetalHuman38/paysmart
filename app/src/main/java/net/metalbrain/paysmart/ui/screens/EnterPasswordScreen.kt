@@ -15,7 +15,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +38,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.viewmodel.EnterPasswordViewModel
 
 @Composable
@@ -117,18 +117,19 @@ fun EnterPasswordScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // 🚀 Continue button
-                Button(
+                PrimaryButton(
                     onClick = {
                         viewModel.submit(
                             onSuccess = onPasswordCorrect
                         ) },
-                    enabled = uiState.password.isNotBlank() && !uiState.loading,
+                    enabled = uiState.password.isNotBlank(),
+                    isLoading = uiState.loading,
+                    loadingText = "Checking...",
+                    text = "Continue",
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
-                ) {
-                    Text("Continue")
-                }
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))

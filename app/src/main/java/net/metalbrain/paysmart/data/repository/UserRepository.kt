@@ -20,6 +20,8 @@ interface UserProfileRepository {
 
     suspend fun getOnce(uid: String): AuthUserModel?
 
+    suspend fun updatePhoneNumber(uid: String, phoneNumber: String)
+
     /**
      * Update the `lastSignedIn` timestamp for a user.
      *

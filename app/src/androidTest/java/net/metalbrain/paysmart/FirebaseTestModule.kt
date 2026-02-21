@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.components.SingletonComponent
 import net.metalbrain.paysmart.di.AppModule
+import net.metalbrain.paysmart.di.FirebaseModule
 import dagger.hilt.testing.TestInstallIn
 import io.mockk.mockk
 
@@ -13,7 +14,7 @@ import io.mockk.mockk
 @Module
 @TestInstallIn(
     components = [SingletonComponent::class],
-    replaces = [AppModule::class]
+    replaces = [AppModule::class, FirebaseModule::class]
 )
 object FirebaseTestModule {
 

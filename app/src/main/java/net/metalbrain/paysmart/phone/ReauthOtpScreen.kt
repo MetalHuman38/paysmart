@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.screens.AppLoadingScreen
+import net.metalbrain.paysmart.ui.screens.rememberStabilizedLoading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +41,7 @@ fun ReauthOtpScreen(
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val showLoading = rememberStabilizedLoading(uiState.isLoading)
     val code by viewModel.code
     LaunchedEffect(Unit) {
         Log.d("ReauthOtpScreen", "LaunchedEffect triggered")
@@ -47,7 +49,7 @@ fun ReauthOtpScreen(
     }
 
     // 🌀 Show animated spinner while loading
-    if (uiState.isLoading) {
+    if (showLoading && code.isBlank()) {
         AppLoadingScreen(message = "Signing in...")
         return
     }
@@ -89,6 +91,8 @@ fun ReauthOtpScreen(
 
             PrimaryButton(
                 text = "Verify",
+                isLoading = uiState.isLoading,
+                loadingText = "Verifying...",
                 onClick = { viewModel.reauthWithCode(onSuccess) },
                 enabled = code.length == 6,
                 modifier = Modifier.fillMaxWidth()

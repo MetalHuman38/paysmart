@@ -160,6 +160,8 @@ class WalletBalanceRepository @Inject constructor(
         val rewardsPoints = parseDouble(
             data["rewardsPoints"]
                 ?: data["rewardPoints"]
+                ?: data["rewardEarnedPoints"]
+                ?: data["rewardsEarned"]
                 ?: data["rewards"]
                 ?: data["points"]
         ) ?: 0.0

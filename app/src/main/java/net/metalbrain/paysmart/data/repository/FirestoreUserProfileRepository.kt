@@ -33,6 +33,16 @@ class FirestoreUserProfileRepository @Inject constructor(
         return snap.toAuthUserModel()
     }
 
+    override suspend fun updatePhoneNumber(uid: String, phoneNumber: String) {
+        users.document(uid).set(
+            mapOf(
+                "phoneNumber" to phoneNumber,
+                "lastSignedIn" to FieldValue.serverTimestamp()
+            ),
+            SetOptions.merge()
+        ).await()
+    }
+
 
     override suspend fun upsertNewUser(user: AuthUserModel, providerId: String) {
         val docRef = users.document(user.uid)

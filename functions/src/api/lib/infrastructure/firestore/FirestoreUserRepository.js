@@ -20,5 +20,11 @@ export class FirestoreUserRepository {
             createdAt: FieldValue.serverTimestamp(),
         });
     }
+    async updatePhoneNumber(uid, phoneNumber) {
+        await this.firestore.collection("users").doc(uid).set({
+            phoneNumber,
+            lastSignedIn: FieldValue.serverTimestamp(),
+        }, { merge: true });
+    }
 }
 //# sourceMappingURL=FirestoreUserRepository.js.map

@@ -56,6 +56,7 @@ fun CreateAccountScreen(
     var showCountryPicker by remember { mutableStateOf(false) }
     val selectedCountry by viewModel.selectedCountry
     var showAlreadyRegisteredSheet by remember { mutableStateOf(false) }
+    var isSubmitting by remember { mutableStateOf(false) }
     val activity = LocalActivity.current
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -173,21 +174,29 @@ fun CreateAccountScreen(
         PrimaryButton(
             text = stringResource(R.string.continue_text),
             onClick = {
+                isSubmitting = true
                 scope.launch {
                     viewModel.startPhoneVerification(
                         activity = activity,
-                        onSuccess = onContinue,
+                        onSuccess = {
+                            isSubmitting = false
+                            onContinue()
+                        },
                         onPhoneAlreadyRegistered = {
                             // 👇 This is the lambda we pass to show the bottom sheet
+                            isSubmitting = false
                             showAlreadyRegisteredSheet = true
                         },
                         onError = { error ->
+                            isSubmitting = false
                             Log.e("PhoneAuth", error.message ?: "Unknown error")
                         }
                     )
                 }
             },
-            enabled = viewModel.acceptedTerms && viewModel.isPhoneValid()
+            enabled = viewModel.acceptedTerms && viewModel.isPhoneValid(),
+            isLoading = isSubmitting,
+            loadingText = "Sending OTP..."
         )
 
         // Space

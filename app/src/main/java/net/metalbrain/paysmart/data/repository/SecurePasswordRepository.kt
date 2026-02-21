@@ -57,15 +57,31 @@ class SecurePasswordRepository @Inject constructor(
         return file.exists()
     }
 
-    override suspend fun changePassword(old: String, new: String): Boolean {
+    override suspend fun changePassword(old: String, new: String, idToken: String): Boolean {
         val stored = file.read() ?: return false
-
         if (!hasher.verify(old, stored)) return false
 
-        val newHash = hasher.hash(new)
-        file.write(newHash)
+        val previousState = securityPreference.loadLocalSecurityState()
+        val nextHash = hasher.hash(new)
+        file.write(nextHash)
 
-        return true
+        return try {
+            val serverAccepted = passwordPolicyHandler.setPasswordEnabled(idToken)
+            if (!serverAccepted) {
+                file.write(stored)
+                securityPreference.saveLocalSecurityState(previousState)
+                return false
+            }
+
+            securityPreference.saveLocalSecurityState(
+                previousState.copy(passwordEnabled = true)
+            )
+            true
+        } catch (e: Exception) {
+            file.write(stored)
+            securityPreference.saveLocalSecurityState(previousState)
+            throw e
+        }
     }
 
     override suspend fun clear() = file.clear()

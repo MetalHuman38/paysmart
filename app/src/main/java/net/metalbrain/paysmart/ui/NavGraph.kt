@@ -23,7 +23,9 @@ import net.metalbrain.paysmart.phone.OTPViewModel
 import net.metalbrain.paysmart.phone.OtpVerificationScreen
 import net.metalbrain.paysmart.phone.ReauthOtpScreen
 import net.metalbrain.paysmart.phone.ReauthOtpViewModel
+import net.metalbrain.paysmart.ui.home.screen.BalanceDetailsScreen
 import net.metalbrain.paysmart.ui.home.screen.HomeScreen
+import net.metalbrain.paysmart.ui.home.screen.RewardDetailsScreen
 import net.metalbrain.paysmart.ui.transactions.screen.TransactionsScreen
 import net.metalbrain.paysmart.ui.profile.ProfileScreen
 import net.metalbrain.paysmart.ui.screens.AccountProtectionContent
@@ -38,7 +40,9 @@ import net.metalbrain.paysmart.ui.screens.EnterPasswordScreen
 import net.metalbrain.paysmart.ui.screens.FederatedLinkingScreen
 import net.metalbrain.paysmart.ui.help.screen.HelpScreen
 import net.metalbrain.paysmart.ui.screens.LoginScreen
-import net.metalbrain.paysmart.ui.screens.RecoverAccountScreen
+import net.metalbrain.paysmart.ui.account.recovery.screen.RecoverAccountScreen
+import net.metalbrain.paysmart.ui.account.recovery.screen.ChangePasswordRecoveryScreen
+import net.metalbrain.paysmart.ui.account.recovery.screen.ChangePhoneRecoveryScreen
 import net.metalbrain.paysmart.ui.referral.screen.ReferralScreen
 import net.metalbrain.paysmart.ui.screens.SetPasscodeScreen
 import net.metalbrain.paysmart.ui.screens.SplashScreen
@@ -47,17 +51,20 @@ import net.metalbrain.paysmart.ui.screens.VerifyPasscodeScreen
 import net.metalbrain.paysmart.ui.viewmodel.BiometricOptInViewModel
 import net.metalbrain.paysmart.ui.viewmodel.CreateAccountViewModel
 import net.metalbrain.paysmart.ui.viewmodel.CreatePasswordViewModel
+import net.metalbrain.paysmart.ui.account.recovery.viewmodel.ChangePasswordViewModel
 import net.metalbrain.paysmart.ui.viewmodel.EnterPasswordViewModel
 import net.metalbrain.paysmart.ui.viewmodel.LanguageViewModel
 import net.metalbrain.paysmart.ui.viewmodel.LoginViewModel
 import net.metalbrain.paysmart.ui.viewmodel.PasscodeViewModel
 import net.metalbrain.paysmart.ui.help.viewmodel.HelpViewModel
 import net.metalbrain.paysmart.ui.referral.viewmodel.ReferralViewModel
+import net.metalbrain.paysmart.ui.account.recovery.viewmodel.ChangePhoneRecoveryViewModel
 import net.metalbrain.paysmart.ui.viewmodel.SecurityViewModel
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 import net.metalbrain.paysmart.core.session.SessionViewModel
 import net.metalbrain.paysmart.utils.formatPhoneNumberForDisplay
 import androidx.compose.runtime.LaunchedEffect
+import java.util.Locale
 
 
 sealed class Screen(val route: String) {
@@ -100,7 +107,11 @@ sealed class Screen(val route: String) {
 
     object Login : Screen("login")
 
-    object Reauthenticate: Screen("reauthenticate")
+    object Reauthenticate: Screen("reauthenticate?target={target}") {
+        const val baseRoute = "reauthenticate"
+        fun routeWithTarget(target: String): String =
+            "reauthenticate?target=${Uri.encode(target)}"
+    }
 
     object EnterPassword: Screen("enter_password")
 
@@ -108,10 +119,28 @@ sealed class Screen(val route: String) {
     object ProfileScreen : Screen("profile")
 
 
-    object RecoverAccount : Screen("recover_account")
+    object RecoverAccount : Screen("recover_account?origin={origin}") {
+        fun routeWithOrigin(origin: String): String = "recover_account?origin=$origin"
+    }
+    object ChangePasswordRecovery : Screen("recover_account/change_password")
+    object ChangePhoneRecovery : Screen("recover_account/change_phone")
 
 
     object Home : Screen("home")
+
+    object BalanceDetails : Screen("wallet_balance/{currency}/{amount}") {
+        fun routeWithArgs(currency: String, amount: Double): String {
+            val formattedAmount = String.format(Locale.US, "%.2f", amount)
+            return "wallet_balance/${Uri.encode(currency)}/${Uri.encode(formattedAmount)}"
+        }
+    }
+
+    object RewardDetails : Screen("reward_earned/{points}") {
+        fun routeWithPoints(points: Double): String {
+            val formattedPoints = String.format(Locale.US, "%.2f", points)
+            return "reward_earned/${Uri.encode(formattedPoints)}"
+        }
+    }
 
     object Transactions: Screen("transactions")
 
@@ -341,7 +370,7 @@ fun AppNavGraph(
                     }
                 },
                 onForgotPassword = {
-                    navController.navigate(Screen.RecoverAccount.route)
+                    navController.navigate(Screen.RecoverAccount.routeWithOrigin("login"))
                 },
                 onSignUp = {
                     navController.navigate(Screen.CreateAccount.route)
@@ -352,16 +381,33 @@ fun AppNavGraph(
             )
         }
 
-        composable(Screen.Reauthenticate.route) {
+        composable(
+            route = Screen.Reauthenticate.route,
+            arguments = listOf(
+                navArgument("target") {
+                    defaultValue = ""
+                }
+            )
+        ) { backStackEntry ->
             val viewModel: ReauthOtpViewModel = hiltViewModel()
             val activity = LocalActivity.current as FragmentActivity
+            val recoveryTarget = backStackEntry.arguments
+                ?.getString("target")
+                ?.takeIf { it.isNotBlank() }
+                ?.let(Uri::decode)
 
             ReauthOtpScreen(
                 viewModel = viewModel,
                 activity = activity,
                 onSuccess = {
-                    navController.navigate(Screen.EnterPassword.route) {
-                        popUpTo(Screen.Reauthenticate.route) { inclusive = true }
+                    if (recoveryTarget != null) {
+                        navController.navigate(recoveryTarget) {
+                            popUpTo(Screen.Reauthenticate.route) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(Screen.EnterPassword.route) {
+                            popUpTo(Screen.Reauthenticate.route) { inclusive = true }
+                        }
                     }
                 },
                 onBack = {
@@ -384,12 +430,60 @@ fun AppNavGraph(
 
 
 
-        composable(Screen.RecoverAccount.route) {
+        composable(
+            route = Screen.RecoverAccount.route,
+            arguments = listOf(
+                navArgument("origin") {
+                    defaultValue = "in_app"
+                }
+            )
+        ) { backStackEntry ->
+            val origin = backStackEntry.arguments?.getString("origin") ?: "in_app"
             RecoverAccountScreen(
                 onBackClick = { navController.popBackStack() },
                 onHelpClick = { /* Show Help Dialog or Navigate */ },
-                onChangePasswordClick = { /* Change password */ },
-                onChangePhoneClick = { /* Change phone number */ }
+                onChangePasswordClick = {
+                    if (origin == "login") {
+                        navController.navigate(
+                            Screen.Reauthenticate.routeWithTarget(
+                                Screen.ChangePasswordRecovery.route
+                            )
+                        )
+                    } else {
+                        navController.navigate(Screen.ChangePasswordRecovery.route)
+                    }
+                },
+                onChangePhoneClick = {
+                    if (origin == "login") {
+                        navController.navigate(
+                            Screen.Reauthenticate.routeWithTarget(
+                                Screen.ChangePhoneRecovery.route
+                            )
+                        )
+                    } else {
+                        navController.navigate(Screen.ChangePhoneRecovery.route)
+                    }
+                }
+            )
+        }
+
+        composable(Screen.ChangePasswordRecovery.route) {
+            val viewModel: ChangePasswordViewModel = hiltViewModel()
+            ChangePasswordRecoveryScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.ChangePhoneRecovery.route) {
+            val viewModel: ChangePhoneRecoveryViewModel = hiltViewModel()
+            val activity = LocalActivity.current as FragmentActivity
+            ChangePhoneRecoveryScreen(
+                viewModel = viewModel,
+                activity = activity,
+                onBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() }
             )
         }
 
@@ -457,6 +551,35 @@ fun AppNavGraph(
         composable(Screen.Home.route) {
             HomeScreen(
                 navController = navController,
+            )
+        }
+
+        composable(
+            route = Screen.BalanceDetails.route,
+            arguments = listOf(
+                navArgument("currency") { type = NavType.StringType },
+                navArgument("amount") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val currency = Uri.decode(backStackEntry.arguments?.getString("currency") ?: "GBP")
+            val amount = Uri.decode(backStackEntry.arguments?.getString("amount") ?: "0.00")
+            BalanceDetailsScreen(
+                currencyCode = currency,
+                amountLabel = amount,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.RewardDetails.route,
+            arguments = listOf(
+                navArgument("points") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val points = Uri.decode(backStackEntry.arguments?.getString("points") ?: "0.00")
+            RewardDetailsScreen(
+                pointsLabel = points,
+                onBack = { navController.popBackStack() }
             )
         }
 

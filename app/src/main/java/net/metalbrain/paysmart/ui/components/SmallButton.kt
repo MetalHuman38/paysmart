@@ -13,8 +13,8 @@ fun SmallTextButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.primary,
-    contentColor: Color = Color.Cyan,
+    containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
     cornerRadius: Int = 20
 ) {
     TextButton(

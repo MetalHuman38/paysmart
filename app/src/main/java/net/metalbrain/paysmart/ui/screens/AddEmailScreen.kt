@@ -43,12 +43,6 @@ fun AddEmailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // 🌀 Global loading screen
-    if (uiState.loading) {
-        AppLoadingScreen(message = "Sending verification email…")
-        return
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -96,6 +90,8 @@ fun AddEmailScreen(
                 }
             },
             enabled = uiState.emailValid,
+            isLoading = uiState.loading,
+            loadingText = "Sending...",
             modifier = Modifier.fillMaxWidth()
         )
 

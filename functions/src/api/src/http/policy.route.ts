@@ -11,6 +11,7 @@ import { passwordEnabledHandler } from "../handlers/passwordEnabled.js";
 import { allowFederatedLinkingHandler } from "../handlers/allowFederatedLinking.js";
 import { checkEmailVerificationStatusHandler, generateEmailVerificationHandler } from "../handlers/emailVerificationHandlers.js";
 import { checkPhoneAvailabilityHandler } from "../handlers/checkPhoneAvailabilityHandler.js";
+import { confirmPhoneChangedHandler } from "../handlers/confirmPhoneChanged.js";
 
 export function mountAuthPolicyRoutes(app: Express) {
 
@@ -38,6 +39,12 @@ export function mountAuthPolicyRoutes(app: Express) {
 
   app.post("/auth/allowFederatedLinking", requireActiveSession, allowFederatedLinkingHandler);
   app.options("/auth/allowFederatedLinking", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post("/auth/confirmPhoneChanged", requireActiveSession, confirmPhoneChangedHandler);
+  app.options("/auth/confirmPhoneChanged", (_, res) => {
     corsify(res);
     res.status(204).end();
   });

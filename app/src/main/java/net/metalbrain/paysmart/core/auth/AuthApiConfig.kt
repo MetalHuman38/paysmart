@@ -9,6 +9,7 @@ data class AuthApiConfig (
     val getBiometricEnabled: String = "/auth/getBiometricEnabled",
     val setPasswordEnabled: String = "/auth/setPasswordEnabled",
     val getPasswordEnabled: String = "/auth/getPasswordEnabled",
+    val confirmPhoneChanged: String = "/auth/confirmPhoneChanged",
     val setPassCodeEnabled: String = "/auth/setPassCodeEnabled",
     val getPassCodeEnabled: String = "/auth/getPassCodeEnabled",
     val generateEmailVerificationHandler: String = "/auth/generate",
@@ -36,6 +37,8 @@ data class AuthApiConfig (
     val setPasswordEnabledUrl get() = "$apiBase$setPasswordEnabled"
 
     val getPasswordEnabledUrl get() = "$apiBase$getPasswordEnabled"
+
+    val confirmPhoneChangedUrl get() = "$apiBase$confirmPhoneChanged"
 
     val setPassCodeEnabledUrl get() = "$apiBase$setPassCodeEnabled"
 

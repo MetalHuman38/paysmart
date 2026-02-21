@@ -102,8 +102,10 @@ fun BiometricSessionUnlock(
         Spacer(modifier = Modifier.height(24.dp))
 
         PrimaryButton(
-            enabled = !isLoading,
-            text = if (isLoading) "Authenticating..." else "Unlock",
+            enabled = true,
+            text = "Unlock",
+            isLoading = isLoading,
+            loadingText = "Authenticating...",
             onClick = { 
                 viewModel.authenticateBiometric(
                     activity = activity,

@@ -21,4 +21,14 @@ export class FirestoreUserRepository implements UserRepository {
       createdAt: FieldValue.serverTimestamp(),
     });
   }
+
+  async updatePhoneNumber(uid: string, phoneNumber: string): Promise<void> {
+    await this.firestore.collection("users").doc(uid).set(
+      {
+        phoneNumber,
+        lastSignedIn: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+  }
 }

@@ -1,18 +1,13 @@
 package net.metalbrain.paysmart.di
 
-import android.content.Context
 import android.util.Log
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.core.DataStore
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Binds
 import dagger.Provides
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -72,6 +72,7 @@ fun LoginScreen(
     val selectedCountry by viewModel.selectedCountry
     val phoneNumber = viewModel.phoneNumber
     val password by viewModel.password
+    val isAuthLoading = viewModel.loading
     val currentLang by languageViewModel.currentLanguage.collectAsState()
     var showCountryPicker by remember { mutableStateOf(false) }
     val backendError = remember { mutableStateOf<String?>(null) }
@@ -162,7 +163,7 @@ fun LoginScreen(
                     val phone = viewModel.phoneNumber
                     if (phone.isNotBlank()) {
                         reauthOtpViewModel.startReauthFlow(activity)
-                        navController.navigate(Screen.Reauthenticate.route)
+                        navController.navigate(Screen.Reauthenticate.baseRoute)
                     } else {
                         reauthOtpViewModel.errorHandled()
                     }
@@ -172,7 +173,9 @@ fun LoginScreen(
             },
             text = stringResource(R.string.continue_text),
             modifier = Modifier.fillMaxWidth(),
-            enabled = phoneNumber.isNotBlank()
+            enabled = phoneNumber.isNotBlank(),
+            isLoading = isAuthLoading,
+            loadingText = "Please wait..."
         )
 
         Spacer(Modifier.height(12.dp))
@@ -246,7 +249,9 @@ fun LoginScreen(
                     }
                 )
             },
-            onError = { /* optional: fallback error handler */ }
+            onError = { /* optional: fallback error handler */ },
+            enabled = !isAuthLoading,
+            isLoading = isAuthLoading
         )
 
         Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
@@ -254,6 +259,8 @@ fun LoginScreen(
         GoogleSignInBtn(
             launcher = googleLauncher,
             modifier = Modifier.fillMaxWidth(),
+            enabled = !isAuthLoading,
+            isLoading = isAuthLoading,
             onCredentialReceived = {
                 viewModel.handleGoogleSignIn(
                     it,
@@ -275,6 +282,8 @@ fun LoginScreen(
         FacebookSignInButton(
             activity = activity ?: return,
             modifier = Modifier.fillMaxWidth(),
+            enabled = !isAuthLoading,
+            isLoading = isAuthLoading,
             onClick = {
                 viewModel.handleFacebookLogin(
                     activity = activity,

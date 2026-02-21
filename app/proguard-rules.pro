@@ -11,6 +11,9 @@
 -keep class dagger.hilt.android.internal.** { *; }
 -keep class * extends dagger.hilt.internal.aggregatedroot.AggregatedRoot { *; }
 -keep class * extends dagger.hilt.internal.processedrootsentinel.ProcessedRootSentinel { *; }
+-keep class dagger.hilt.internal.aggregatedroot.codegen.** { *; }
+-keep class dagger.hilt.internal.processedrootsentinel.codegen.** { *; }
+-keep class hilt_aggregated_deps.** { *; }
 
 -keep class * extends dagger.hilt.android.internal.managers.ActivityComponentManager { *; }
 -keep class * extends dagger.hilt.android.internal.managers.FragmentComponentManager { *; }

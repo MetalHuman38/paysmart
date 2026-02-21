@@ -27,7 +27,6 @@ import net.metalbrain.paysmart.domain.usecase.EmailLinkUseCase
 
 enum class GoogleAuthIntent {
     SIGN_IN,
-    LINK_PROVIDER
 }
 
 @HiltViewModel
@@ -51,10 +50,6 @@ class LoginViewModel @Inject constructor(
 
     var loading by mutableStateOf(false)
         private set
-
-    fun resetError() {
-        loginError = null
-    }
 
     fun handleGoogleSignIn(
         credential: AuthCredential,
@@ -224,6 +219,7 @@ class LoginViewModel @Inject constructor(
 
     fun handleEmailLoginFromIntentError(e: Exception) {
         loginError = "Magic link sign-in failed"
+        e.localizedMessage
     }
 
 

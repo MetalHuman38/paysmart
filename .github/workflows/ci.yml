@@ -76,3 +76,6 @@ jobs:
 
       - name: ✅ Run Unit Tests
         run: ./gradlew :app:testDebugUnitTest --no-daemon
+
+      - name: 🛡️ Verify Release R8 Shrinking
+        run: ./gradlew :app:minifyReleaseWithR8 --no-daemon

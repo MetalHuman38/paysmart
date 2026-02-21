@@ -55,6 +55,8 @@ __pycache__/
 # Android / Gradle
 ###############################
 .gradle/
+.gradle-user-home/
+.kotlin/
 build/
 **/build/
 
@@ -70,6 +72,7 @@ build/
 gradlew
 gradlew.bat
 gradle/
+.gradle-user-home
 
 ###############################
 # Keystores (security)

@@ -15,15 +15,15 @@ fun SecondaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    containerColor: Color = MaterialTheme.colorScheme.secondary,
-    contentColor: Color = Color.White,
+    containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
 ) {
     Button(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier
             .fillMaxWidth()
-            .height(22.dp),
+            .height(40.dp),
         shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,

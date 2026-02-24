@@ -7,6 +7,7 @@ import dagger.hilt.android.testing.UninstallModules
 import jakarta.inject.Inject
 import net.metalbrain.paysmart.data.native.RoomNativeBridge
 import net.metalbrain.paysmart.di.AppModule
+import net.metalbrain.paysmart.phone.di.PhoneModule
 import net.metalbrain.paysmart.utils.RoomKeyProvider
 import org.junit.Assert.*
 import org.junit.Before
@@ -15,7 +16,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-@UninstallModules(AppModule::class, AppModule.PhoneModule::class)
+@UninstallModules(AppModule::class, PhoneModule::class)
 class RoomNativeBridgeTest {
 
     @get:Rule
@@ -85,6 +86,7 @@ class RoomNativeBridgeTest {
             fail("Expected IllegalArgumentException for unsupported key length") // 👈 clearer failure
         } catch (e: IllegalArgumentException) {
             // expected
+            e.localizedMessage
         }
     }
 }

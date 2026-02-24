@@ -12,6 +12,11 @@ import { allowFederatedLinkingHandler } from "../handlers/allowFederatedLinking.
 import { checkEmailVerificationStatusHandler, generateEmailVerificationHandler } from "../handlers/emailVerificationHandlers.js";
 import { checkPhoneAvailabilityHandler } from "../handlers/checkPhoneAvailabilityHandler.js";
 import { confirmPhoneChangedHandler } from "../handlers/confirmPhoneChanged.js";
+import { lookupAddressHandler } from "../handlers/lookupAddress.js";
+import { setHomeAddressVerifiedHandler } from "../handlers/setHomeAddressVerified.js";
+import { identityUploadSessionHandler } from "../handlers/identityUploadSession.js";
+import { identityUploadCommitHandler } from "../handlers/identityUploadCommit.js";
+import { identityUploadPayloadHandler } from "../handlers/identityUploadPayload.js";
 
 export function mountAuthPolicyRoutes(app: Express) {
 
@@ -45,6 +50,36 @@ export function mountAuthPolicyRoutes(app: Express) {
 
   app.post("/auth/confirmPhoneChanged", requireActiveSession, confirmPhoneChangedHandler);
   app.options("/auth/confirmPhoneChanged", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post("/auth/lookupAddress", requireActiveSession, lookupAddressHandler);
+  app.options("/auth/lookupAddress", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post("/auth/setHomeAddressVerified", requireActiveSession, setHomeAddressVerifiedHandler);
+  app.options("/auth/setHomeAddressVerified", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post("/auth/identity/upload/session", requireActiveSession, identityUploadSessionHandler);
+  app.options("/auth/identity/upload/session", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post("/auth/identity/upload/commit", requireActiveSession, identityUploadCommitHandler);
+  app.options("/auth/identity/upload/commit", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post("/auth/identity/upload/payload", requireActiveSession, identityUploadPayloadHandler);
+  app.options("/auth/identity/upload/payload", (_, res) => {
     corsify(res);
     res.status(204).end();
   });

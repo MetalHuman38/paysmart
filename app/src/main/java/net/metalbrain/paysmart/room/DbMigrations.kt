@@ -54,4 +54,40 @@ object DbMigrations {
             )
         }
     }
+
+    val MIGRATION_4_5: Migration = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE user_profile_cache ADD COLUMN dateOfBirth TEXT")
+            db.execSQL("ALTER TABLE user_profile_cache ADD COLUMN addressLine1 TEXT")
+            db.execSQL("ALTER TABLE user_profile_cache ADD COLUMN addressLine2 TEXT")
+            db.execSQL("ALTER TABLE user_profile_cache ADD COLUMN city TEXT")
+            db.execSQL("ALTER TABLE user_profile_cache ADD COLUMN country TEXT")
+            db.execSQL("ALTER TABLE user_profile_cache ADD COLUMN postalCode TEXT")
+        }
+    }
+
+    val MIGRATION_5_6: Migration = object : Migration(5, 6) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS fx_quote_cache (
+                    cacheKey TEXT NOT NULL,
+                    userId TEXT NOT NULL,
+                    sourceCurrency TEXT NOT NULL,
+                    targetCurrency TEXT NOT NULL,
+                    sourceAmount REAL NOT NULL,
+                    method TEXT NOT NULL,
+                    rate REAL NOT NULL,
+                    recipientAmount REAL NOT NULL,
+                    feesJson TEXT NOT NULL,
+                    guaranteeSeconds INTEGER NOT NULL,
+                    arrivalSeconds INTEGER NOT NULL,
+                    rateSource TEXT NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    PRIMARY KEY(cacheKey)
+                )
+                """.trimIndent()
+            )
+        }
+    }
 }

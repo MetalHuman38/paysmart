@@ -41,8 +41,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import net.metalbrain.paysmart.R
-import net.metalbrain.paysmart.phone.ReauthOtpViewModel
+import net.metalbrain.paysmart.phone.viewModel.ReauthOtpViewModel
 import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.ui.components.AccountSwitchPrompt
+import net.metalbrain.paysmart.ui.components.AccountSwitchVariant
 import net.metalbrain.paysmart.ui.components.BackendErrorModal
 import net.metalbrain.paysmart.ui.components.EmailSignInBtn
 import net.metalbrain.paysmart.ui.components.FacebookSignInButton
@@ -52,7 +54,7 @@ import net.metalbrain.paysmart.ui.components.PhoneNumberInput
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.ui.viewmodel.GoogleAuthIntent
-import net.metalbrain.paysmart.ui.viewmodel.LanguageViewModel
+import net.metalbrain.paysmart.ui.language.viewmodel.LanguageViewModel
 import net.metalbrain.paysmart.ui.viewmodel.LoginViewModel
 import net.metalbrain.paysmart.utils.extractSimpleBackendError
 
@@ -71,7 +73,6 @@ fun LoginScreen(
 ) {
     val selectedCountry by viewModel.selectedCountry
     val phoneNumber = viewModel.phoneNumber
-    val password by viewModel.password
     val isAuthLoading = viewModel.loading
     val currentLang by languageViewModel.currentLanguage.collectAsState()
     var showCountryPicker by remember { mutableStateOf(false) }
@@ -117,7 +118,7 @@ fun LoginScreen(
             LanguageSelector(
                 currentLanguage = currentLang,
                 onClick = {
-                    navController.navigate(Screen.Language.routeWithOrigin("login"))
+                    navController.navigate(Screen.Language.routeWithOrigin(Screen.Origin.LOGIN))
                 }
             )
         }
@@ -291,6 +292,16 @@ fun LoginScreen(
                     onError = { backendError.value = extractSimpleBackendError(it) }
                 )
             }
+        )
+        Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
+
+        // Dont have an account?
+        AccountSwitchPrompt(
+            variant = AccountSwitchVariant.DONT_HAVE_ACCOUNT,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 8.dp),
+            onActionClick = onSignUp,
         )
 
 

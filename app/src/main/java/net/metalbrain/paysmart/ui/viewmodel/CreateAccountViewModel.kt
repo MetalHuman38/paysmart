@@ -13,8 +13,7 @@ import net.metalbrain.paysmart.core.auth.AuthPolicyHandler
 import javax.inject.Inject
 import net.metalbrain.paysmart.domain.model.Country
 import net.metalbrain.paysmart.domain.model.supportedCountries
-import net.metalbrain.paysmart.phone.PhoneAuthHandler
-import net.metalbrain.paysmart.phone.PhoneVerifier
+import net.metalbrain.paysmart.phone.data.PhoneVerifier
 
 @HiltViewModel
 class CreateAccountViewModel @Inject constructor(
@@ -45,25 +44,20 @@ class CreateAccountViewModel @Inject constructor(
                     onPhoneAlreadyRegistered()
                     return@launch
                 }
-                if (phoneVerifier is PhoneAuthHandler) {
-                    phoneVerifier.setCallbacks(
-                        onCodeSent = {
-                            onSuccess()
-                        },
-                        onError = { error ->
-                            // 🔥 Detect if the error came from beforeCreate
-                            if (error.message?.contains(
-                                    "already-exists",
-                                    ignoreCase = true
-                                ) == true
-                            ) {
-                                onPhoneAlreadyRegistered()
-                            } else {
-                                onError(error)
-                            }
+
+                phoneVerifier.setCallbacks(
+                    onCodeSent = {
+                        onSuccess()
+                    },
+                    onError = { error ->
+                        // Detect if this came from duplicate phone checks in auth hooks.
+                        if (error.message?.contains("already-exists", ignoreCase = true) == true) {
+                            onPhoneAlreadyRegistered()
+                        } else {
+                            onError(error)
                         }
-                    )
-                }
+                    }
+                )
                 phoneVerifier.start(e164, activity)
 
             } catch (e: Exception) {
@@ -90,14 +84,6 @@ class CreateAccountViewModel @Inject constructor(
     var acceptedMarketing by mutableStateOf(false)
         private set
 
-    var confirmPassword by mutableStateOf("")
-        private set
-
-    var firstName by mutableStateOf("")
-        private set
-
-    var lastName by mutableStateOf("")
-        private set
 
     var gender by mutableStateOf("")
         private set
@@ -108,14 +94,6 @@ class CreateAccountViewModel @Inject constructor(
     var acceptedTerms by mutableStateOf(false)
         private set
 
-    fun onEmailChanged(value: String) {
-        email = value
-    }
-
-    fun onPasswordChanged(value: String) {
-        password = value
-    }
-
     fun onToggleMarketing() {
         acceptedMarketing = !acceptedMarketing
     }
@@ -124,14 +102,7 @@ class CreateAccountViewModel @Inject constructor(
         return phoneNumber.trim().length >= 8
     }
 
-    fun isEmailValid(): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
-
-    fun isPasswordValid(): Boolean {
-        return password.length >= 6
-    }
-
+    
     fun onCountrySelected(country: Country) {
         _selectedCountry.value = country
     }

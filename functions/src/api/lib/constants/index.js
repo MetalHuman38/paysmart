@@ -15,6 +15,7 @@ export const getDefaultSecuritySettings = () => ({
     hasVerifiedEmail: false,
     hasAddedHomeAddress: false,
     hasVerifiedIdentity: false,
+    kycStatus: null,
     localPassCodeSetAt: null,
     localPasswordSetAt: null,
     updatedAt: FieldValue.serverTimestamp(),

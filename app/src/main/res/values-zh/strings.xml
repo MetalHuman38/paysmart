@@ -63,6 +63,10 @@
     <string name="forgot_password_description">變更您的密碼以恢復您的帳戶。</string>
     <string name="create_secure_password">建立安全密碼</string>
     <string name="enter_secure_password">輸入一個至少包含 8 個字元的安全密碼，其中包括大小寫字母、數字和特殊字元。</string>
+    <string name="confirm_password_label">確認密碼</string>
+    <string name="create_password_cta">建立密碼</string>
+    <string name="create_password_loading">正在建立安全密碼…</string>
+    <string name="toggle_password_visibility">隱藏密碼</string>
     <string name="set_up_your_pass_code">設定您的密碼</string>
     <string name="enter_your_passcode">輸入您的密碼</string>
     <string name="passcode_use_to_unlock">此 4–6 位數代碼用於解鎖您的應用程式並在本地確認操作。</string>
@@ -84,4 +88,166 @@
     <string name="add_passcode_advisory_text">設定密碼是保護您的 PaySmart 帳戶和財務資料的必要步驟。即使您的設備遺失或被盜，也能確保只有您本人才能存取您的資金。</string>
     <string name="set_up_passcode">設定密碼</string>
     <string name="set_up_biometric">設定生物識別</string>
+
+    <string name="common_back">返回</string>
+    <string name="common_navigate">打开</string>
+    <string name="common_never">从不</string>
+    <string name="common_verified">已验证</string>
+    <string name="common_not_verified">未验证</string>
+    <string name="common_completed">已完成</string>
+    <string name="common_required">必需</string>
+
+    <string name="profile_title">个人资料</string>
+    <string name="profile_logout">登出</string>
+    <string name="profile_version_format">版本: %1$s (%2$d)</string>
+    <string name="profile_default_name">PaySmart 用户</string>
+    <string name="profile_photo_content_description">个人资料照片</string>
+    <string name="profile_verified_status_content_description">已验证状态</string>
+    <string name="profile_pending_status_content_description">验证待定状态</string>
+    <string name="profile_verified_account_label">已验证帐户</string>
+    <string name="profile_pending_account_label">验证待定</string>
+
+    <string name="profile_menu_account_information_title">帐户信息</string>
+    <string name="profile_menu_account_information_subtitle">关于您的帐户的信息</string>
+    <string name="profile_menu_security_privacy_title">安全和隐私</string>
+    <string name="profile_menu_security_privacy_subtitle">确保您的帐户安全</string>
+    <string name="profile_menu_connected_accounts_title">管理已连接的帐户</string>
+    <string name="profile_menu_connected_accounts_subtitle">已连接的外部帐户</string>
+    <string name="profile_menu_help_support_title">帮助和支持</string>
+    <string name="profile_menu_help_support_subtitle">需要帮助吗？我们在这里</string>
+    <string name="profile_menu_about_title">关于</string>
+    <string name="profile_menu_about_subtitle">关于此应用程序的信息</string>
+
+    <string name="profile_security_privacy_description">管理帐户保护、登录选项和隐私控制。</string>
+    <string name="profile_connected_accounts_description">查看和管理已关联的提供商，例如 Google、Facebook 和电子邮件。</string>
+    <string name="profile_about_description">应用程序信息、版本详细信息和法律参考。</string>
+
+    <string name="profile_account_information_title">帐户信息</string>
+    <string name="profile_account_info_profile_subtitle">个人详细信息和个人资料偏好</string>
+    <string name="profile_account_info_limits_subtitle">验证驱动的帐户限制</string>
+    <string name="profile_account_info_statement_subtitle">交易历史和对帐单条目</string>
+    <string name="profile_language_title">语言</string>
+    <string name="profile_account_info_language_subtitle">选择您的首选语言</string>
+
+    <string name="profile_details_title">个人资料详细信息</string>
+    <string name="profile_details_loading_message">正在从本地缓存加载个人资料详细信息。</string>
+    <string name="profile_locked_title">个人资料已锁定</string>
+    <string name="profile_locked_message">由于您的帐户已经过验证，您无法编辑此个人资料。如果您需要进行更改，请联系客户支持。</string>
+    <string name="profile_incomplete_title">完成您的个人资料设置</string>
+    <string name="profile_incomplete_description">您的帐户设置不完整。完成以下步骤以完成验证。</string>
+    <string name="profile_status_locked">已锁定</string>
+    <string name="profile_status_incomplete">不完整</string>
+    <string name="profile_status_complete">完成</string>
+    <string name="profile_field_full_name">全名</string>
+    <string name="profile_field_date_of_birth">出生日期</string>
+    <string name="profile_field_address_line_1">地址行 1</string>
+    <string name="profile_field_address_line_2">地址行 2</string>
+    <string name="profile_field_city">城市</string>
+    <string name="profile_field_email">电子邮件地址</string>
+    <string name="profile_field_phone_number">电话号码</string>
+    <string name="profile_field_country">国家</string>
+    <string name="profile_field_postal_code">邮政编码 / ZIP 编码</string>
+    <string name="profile_field_not_provided">未提供</string>
+    <string name="profile_missing_verified_email">验证您的电子邮件</string>
+    <string name="profile_missing_home_address">添加并验证您的家庭住址</string>
+    <string name="profile_missing_identity">完成身份验证</string>
+    <string name="profile_action_verify_email">验证电子邮件</string>
+    <string name="profile_action_complete_address">完成地址设置</string>
+    <string name="profile_action_verify_identity">验证身份</string>
+    <string name="profile_action_review_profile">查看个人资料详细信息</string>
+    <string name="profile_onboarding_ready_title">个人资料设置已完成</string>
+    <string name="profile_onboarding_ready_description">您的个人资料验证已完成。继续以保护您的账户。</string>
+    <string name="profile_onboarding_continue_action">继续进行安全设置</string>
+
+    <string name="account_limits_title">帐户限制</string>
+    <string name="account_limits_current_tier">当前等级</string>
+    <string name="account_limits_tier_restricted">受限</string>
+    <string name="account_limits_tier_standard">标准</string>
+    <string name="account_limits_tier_enhanced">增强</string>
+    <string name="account_limits_identity_status">身份验证</string>
+    <string name="account_limits_address_status">地址验证</string>
+    <string name="account_limits_email_status">电子邮件验证</string>
+    <string name="account_limits_last_synced">上次同步: %1$s</string>
+    <string name="account_limits_info_note">限制源自当前的验证状态，并在成功同步后更新。</string>
+
+    <string name="account_statement_title">帐户对帐单</string>
+    <string name="account_statement_empty">尚无对帐单条目。</string>
+    <string name="account_statement_amount_format">%1$s %2$s %3$.2f</string>
+    <string name="account_statement_datetime_format">%1$s %2$s</string>
+    <string name="account_statement_status_format">状态: %1$s</string>
+
+    <string name="address_resolver_title">解析住家地址</string>
+    <string name="address_resolver_map_title">確認地址</string>
+    <string name="address_resolver_final_title">最終確認</string>
+    <string name="address_resolver_subtitle">輸入住址資訊與郵遞區號，我們會透過地圖服務解析可驗證地址。</string>
+    <string name="address_resolver_map_subtitle">請在地圖上確認已解析的地址。</string>
+    <string name="address_resolver_final_subtitle">儲存前請檢查並編輯您的地址資料。</string>
+    <string name="address_resolver_house_label">門牌 / 建築</string>
+    <string name="address_resolver_postcode_label">郵遞區號</string>
+    <string name="address_resolver_country_label">國家代碼 (ISO-2)</string>
+    <string name="address_resolver_lookup_action">解析地址</string>
+    <string name="address_resolver_result_title">解析結果</string>
+    <string name="address_resolver_line1_label">地址第 1 行</string>
+    <string name="address_resolver_city_label">城市</string>
+    <string name="address_resolver_state_region_label">州 / 地區</string>
+    <string name="address_resolver_country_code_label">國家</string>
+    <string name="address_resolver_postcode_short_label">郵遞區號</string>
+    <string name="address_resolver_coordinates_label">座標</string>
+    <string name="address_resolver_source_label">提供者</string>
+    <string name="address_resolver_confirm_action">使用此地址</string>
+    <string name="address_resolver_six_months_question">您在此地址居住超過 6 個月嗎？</string>
+    <string name="address_resolver_no_action">否</string>
+    <string name="address_resolver_yes_action">是</string>
+    <string name="address_resolver_edit_on_map_action">返回地圖確認</string>
+
+    <string name="identity_resolver_title">身分驗證</string>
+    <string name="identity_resolver_subtitle">身分驗證是帳戶額度與高風險操作前的最後設定步驟。</string>
+    <string name="identity_resolver_plan_title">驗證流程</string>
+    <string name="identity_resolver_plan_step_1">1. 拍攝政府核發的身分證件。</string>
+    <string name="identity_resolver_plan_step_2">2. 確認姓名與出生日期與個人資料一致。</string>
+    <string name="identity_resolver_plan_step_3">3. 進行自拍/活體檢測並提交。</string>
+    <string name="identity_resolver_done_action">返回設定</string>
+    <string name="identity_resolver_country_title">签发国家</string>
+    <string name="identity_resolver_country_selected">%1$s (%2$s)</string>
+    <string name="identity_resolver_document_unavailable_format">%1$s（不可用）</string>
+    <string name="identity_resolver_capture_hint">拍摄指引：%1$s（%2$s 边框）</string>
+    <string name="identity_resolver_frame_passport">护照</string>
+    <string name="identity_resolver_frame_card">卡片</string>
+    <string name="identity_resolver_frame_generic">通用</string>
+    <string name="identity_resolver_document_not_accepted">当前不接受此类证件。</string>
+    <string name="identity_resolver_document_not_supported">此类证件可被接受，但该版本尚未启用上传。</string>    <string name="identity_resolver_capture_validating">正在校验拍摄内容...</string>
+    <string name="identity_resolver_capture_fallback_action">改用文件</string>
+    <string name="identity_resolver_camera_permission_required">需要相机权限才能拍摄您的证件。</string>
+    <string name="identity_resolver_camera_permission_action">允许相机</string>
+    <string name="identity_resolver_camera_capture_action">拍摄证件</string>
+    <string name="identity_resolver_camera_capturing">拍摄中...</string>
+    <string name="identity_resolver_capture_step">拍摄证件</string>
+    <string name="identity_resolver_encrypt_step">在设备上加密</string>
+    <string name="identity_resolver_upload_step">上传加密负载</string>
+    <string name="identity_resolver_attest_step">生成设备证明</string>
+    <string name="identity_resolver_commit_step">提交验证请求</string>
+    <string name="identity_resolver_document_type_title">证件类型</string>
+    <string name="identity_resolver_document_type_passport">护照</string>
+    <string name="identity_resolver_document_type_drivers_license">驾照</string>
+    <string name="identity_resolver_document_type_national_id">国民身份证</string>
+    <string name="identity_resolver_selected_file">已选择：%1$s（%2$s）</string>
+    <string name="identity_resolver_capture_document_action">拍摄/选择证件</string>
+    <string name="identity_resolver_replace_document_action">替换证件</string>
+    <string name="identity_resolver_submit_action">提交加密验证</string>
+    <string name="identity_resolver_status_pending">待处理</string>
+    <string name="identity_resolver_status_in_progress">进行中</string>
+    <string name="identity_resolver_status_completed">已完成</string>
+    <string name="identity_resolver_status_failed">失败</string>
+    <string name="identity_resolver_completed_message">身份上传已提交。验证正在等待审核。</string>
+    <string name="add_money_title">Add money</string>
+    <string name="add_money_subtitle">Top up your wallet with Stripe PaymentSheet (sandbox).</string>
+    <string name="add_money_amount_label">Amount</string>
+    <string name="add_money_currency_label">Currency</string>
+    <string name="add_money_payment_sheet_action">Open Stripe PaymentSheet</string>
+    <string name="add_money_refresh_action">I completed payment, refresh status</string>
+    <string name="add_money_session_id">Session: %1$s</string>
+    <string name="add_money_status_value">Status: %1$s</string>
 </resources>
+
+
+

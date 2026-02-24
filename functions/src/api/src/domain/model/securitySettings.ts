@@ -14,6 +14,7 @@ export interface SecuritySettingsModel {
   hasVerifiedEmail: boolean;
   hasAddedHomeAddress: boolean;
   hasVerifiedIdentity: boolean;
+  kycStatus?: string | null;
   localPassCodeSetAt: FirebaseFirestore.Timestamp | null;
   localPasswordSetAt: FirebaseFirestore.Timestamp | null;
   updatedAt: FirebaseFirestore.FieldValue;

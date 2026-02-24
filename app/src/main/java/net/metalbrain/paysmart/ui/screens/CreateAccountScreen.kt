@@ -36,7 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.R
-import net.metalbrain.paysmart.ui.components.HaveAnAccount
+import net.metalbrain.paysmart.ui.components.AccountSwitchPrompt
+import net.metalbrain.paysmart.ui.components.AccountSwitchVariant
 import net.metalbrain.paysmart.ui.components.PhoneAlreadyRegisteredSheet
 import net.metalbrain.paysmart.ui.components.PhoneNumberInput
 import net.metalbrain.paysmart.ui.components.PrimaryButton
@@ -49,7 +50,9 @@ import net.metalbrain.paysmart.ui.viewmodel.CreateAccountViewModel
 @Composable
 fun CreateAccountScreen(
     viewModel: CreateAccountViewModel,
-    onContinue: () -> Unit,
+    onVerificationContinue: () -> Unit,
+    onGetHelpClicked: () -> Unit,
+    onSignInClicked: () -> Unit,
     onBackClicked: () -> Unit
 ) {
 
@@ -103,7 +106,7 @@ fun CreateAccountScreen(
 
             SmallTextButton(
                 text = stringResource(R.string.get_help),
-                onClick = onContinue,
+                onClick = onGetHelpClicked,
             )
         }
 
@@ -180,7 +183,7 @@ fun CreateAccountScreen(
                         activity = activity,
                         onSuccess = {
                             isSubmitting = false
-                            onContinue()
+                            onVerificationContinue()
                         },
                         onPhoneAlreadyRegistered = {
                             // 👇 This is the lambda we pass to show the bottom sheet
@@ -204,11 +207,12 @@ fun CreateAccountScreen(
 
 
         // Have an account? Sign In
-        HaveAnAccount(
+        AccountSwitchPrompt(
+            variant = AccountSwitchVariant.HAVE_ACCOUNT,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 8.dp),
-            onSignInClicked = onContinue
+            onActionClick = onSignInClicked,
         )
     }
 

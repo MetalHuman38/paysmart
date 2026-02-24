@@ -10,6 +10,13 @@ data class AuthApiConfig (
     val setPasswordEnabled: String = "/auth/setPasswordEnabled",
     val getPasswordEnabled: String = "/auth/getPasswordEnabled",
     val confirmPhoneChanged: String = "/auth/confirmPhoneChanged",
+    val lookupAddress: String = "/auth/lookupAddress",
+    val setHomeAddressVerified: String = "/auth/setHomeAddressVerified",
+    val identityUploadSession: String = "/auth/identity/upload/session",
+    val identityUploadPayload: String = "/auth/identity/upload/payload",
+    val identityUploadCommit: String = "/auth/identity/upload/commit",
+    val identityImageAttestation: String = "/auth/identity/image/attestation",
+    val addMoneySession: String = "/payments/add-money/session",
     val setPassCodeEnabled: String = "/auth/setPassCodeEnabled",
     val getPassCodeEnabled: String = "/auth/getPassCodeEnabled",
     val generateEmailVerificationHandler: String = "/auth/generate",
@@ -39,6 +46,24 @@ data class AuthApiConfig (
     val getPasswordEnabledUrl get() = "$apiBase$getPasswordEnabled"
 
     val confirmPhoneChangedUrl get() = "$apiBase$confirmPhoneChanged"
+
+    val lookupAddressUrl get() = "$apiBase$lookupAddress"
+
+    val setHomeAddressVerifiedUrl get() = "$apiBase$setHomeAddressVerified"
+
+    val identityUploadSessionUrl get() = "$apiBase$identityUploadSession"
+
+    val identityUploadCommitUrl get() = "$apiBase$identityUploadCommit"
+
+    val identityUploadPayloadUrl get() = "$apiBase$identityUploadPayload"
+
+    val identityImageAttestationUrl get() = "$apiBase$identityImageAttestation"
+
+    val addMoneySessionUrl get() = "$apiBase$addMoneySession"
+
+    fun addMoneySessionStatusUrl(sessionId: String): String {
+        return "$apiBase$addMoneySession/${sessionId.trim()}"
+    }
 
     val setPassCodeEnabledUrl get() = "$apiBase$setPassCodeEnabled"
 

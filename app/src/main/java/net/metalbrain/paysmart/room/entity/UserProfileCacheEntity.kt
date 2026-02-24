@@ -10,5 +10,11 @@ data class UserProfileCacheEntity(
     val photoURL: String? = null,
     val email: String? = null,
     val phoneNumber: String? = null,
+    val dateOfBirth: String? = null,
+    val addressLine1: String? = null,
+    val addressLine2: String? = null,
+    val city: String? = null,
+    val country: String? = null,
+    val postalCode: String? = null,
     val updatedAt: Long = System.currentTimeMillis()
 )

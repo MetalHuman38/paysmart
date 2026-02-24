@@ -10,8 +10,10 @@ import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
+import net.metalbrain.paysmart.domain.model.ProfileDetailsDraft
 import net.metalbrain.paysmart.domain.model.SecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.asOnboardingState
+import net.metalbrain.paysmart.domain.model.hasCompleteAccountInformation
 import net.metalbrain.paysmart.domain.state.OnboardingState
 import net.metalbrain.paysmart.domain.state.UserUiState
 import javax.inject.Inject
@@ -58,7 +60,9 @@ class UserViewModel @Inject constructor(
                             profileCacheRepository.observeByUid(uid),
                             remoteFlow
                         ) { local, remote ->
-                            remote ?: local
+                            // Room is authoritative for profile rendering to support offline edits
+                            // and staged local detail collection before remote sync.
+                            local ?: remote
                         }.map { profile ->
                             profile?.let { UserUiState.ProfileLoaded(it) } ?: UserUiState.Loading
                         }.collect { next ->
@@ -77,6 +81,18 @@ class UserViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = UserUiState.Loading
         )
+
+    val isProfileDetailsComplete: StateFlow<Boolean> =
+        uiState
+            .map { state ->
+                val profile = (state as? UserUiState.ProfileLoaded)?.user
+                profile?.hasCompleteAccountInformation() == true
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = false
+            )
 
     private val _securitySettings = MutableStateFlow<SecuritySettingsModel?>(null)
 
@@ -106,6 +122,13 @@ class UserViewModel @Inject constructor(
     fun signOut() {
         viewModelScope.launch {
             authRepository.signOut()
+        }
+    }
+
+    fun saveProfileDetailsDraft(draft: ProfileDetailsDraft) {
+        viewModelScope.launch {
+            val uid = authRepository.currentUser?.uid ?: return@launch
+            profileCacheRepository.upsertLocalProfileDetails(uid, draft)
         }
     }
 }

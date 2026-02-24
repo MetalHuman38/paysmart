@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import net.metalbrain.paysmart.ui.viewmodel.AddEmailViewModel
 @Composable
 fun AddEmailScreen(
     navController: NavController,
+    returnRoute: String = Screen.Home.route,
     viewModel: AddEmailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -83,8 +85,10 @@ fun AddEmailScreen(
             text = stringResource(R.string.send_verification),
             onClick = {
                 viewModel.sendVerificationEmail {
+                    val targetRoute =
+                        "${Screen.EmailSent.routeWithEmail(uiState.email)}?returnRoute=${Uri.encode(returnRoute)}"
                     navController.navigate(
-                        Screen.EmailSent.routeWithEmail(uiState.email)
+                        targetRoute
                     )
                     viewModel.onEmailChanged("")
                 }

@@ -4,6 +4,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import net.metalbrain.paysmart.domain.model.AuthUserModel
+import net.metalbrain.paysmart.domain.model.ProfileDetailsDraft
 import net.metalbrain.paysmart.room.doa.UserProfileCacheDao
 import net.metalbrain.paysmart.room.entity.UserProfileCacheEntity
 
@@ -37,13 +38,47 @@ class UserProfileCacheRepository @Inject constructor(
     }
 
     suspend fun upsertFromRemote(user: AuthUserModel) {
+        val existing = dao.getByUserId(user.uid)
+
         dao.upsert(
             UserProfileCacheEntity(
                 userId = user.uid,
-                displayName = resolveDisplayName(user.displayName, user.phoneNumber),
-                email = user.email,
-                phoneNumber = user.phoneNumber,
-                photoURL = user.photoURL
+                displayName = user.displayName?.takeIf { it.isNotBlank() }
+                    ?: existing?.displayName
+                    ?: resolveDisplayName(user.displayName, user.phoneNumber),
+                email = user.email ?: existing?.email,
+                phoneNumber = user.phoneNumber ?: existing?.phoneNumber,
+                photoURL = user.photoURL ?: existing?.photoURL,
+                dateOfBirth = user.dateOfBirth ?: existing?.dateOfBirth,
+                addressLine1 = user.addressLine1 ?: existing?.addressLine1,
+                addressLine2 = user.addressLine2 ?: existing?.addressLine2,
+                city = user.city ?: existing?.city,
+                country = user.country ?: existing?.country,
+                postalCode = user.postalCode ?: existing?.postalCode,
+            )
+        )
+    }
+
+    suspend fun upsertLocalProfileDetails(uid: String, details: ProfileDetailsDraft) {
+        val existing = dao.getByUserId(uid)
+        val displayName = details.fullName?.takeIf { it.isNotBlank() }
+            ?: existing?.displayName
+            ?: resolveDisplayName(rawDisplayName = null, phoneNumber = details.phoneNumber)
+
+        dao.upsert(
+            UserProfileCacheEntity(
+                userId = uid,
+                displayName = displayName,
+                photoURL = existing?.photoURL,
+                email = details.email ?: existing?.email,
+                phoneNumber = details.phoneNumber ?: existing?.phoneNumber,
+                dateOfBirth = details.dateOfBirth ?: existing?.dateOfBirth,
+                addressLine1 = details.addressLine1 ?: existing?.addressLine1,
+                addressLine2 = details.addressLine2 ?: existing?.addressLine2,
+                city = details.city ?: existing?.city,
+                country = details.country ?: existing?.country,
+                postalCode = details.postalCode ?: existing?.postalCode,
+                updatedAt = System.currentTimeMillis()
             )
         )
     }
@@ -71,6 +106,12 @@ private fun UserProfileCacheEntity.toDomain(): AuthUserModel {
         displayName = displayName,
         photoURL = photoURL,
         email = email,
-        phoneNumber = phoneNumber
+        phoneNumber = phoneNumber,
+        dateOfBirth = dateOfBirth,
+        addressLine1 = addressLine1,
+        addressLine2 = addressLine2,
+        city = city,
+        country = country,
+        postalCode = postalCode
     )
 }

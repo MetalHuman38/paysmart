@@ -7,11 +7,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.ui.theme.ButtonTokens
 
 @Composable
 fun PrimaryButton(
@@ -23,14 +27,17 @@ fun PrimaryButton(
     loadingText: String? = null,
     containerColor: Color = MaterialTheme.colorScheme.primary,
     contentColor: Color = Color.White,
+    shape: Shape = RoundedCornerShape(ButtonTokens.cornerRadius),
+    height: Dp = ButtonTokens.height,
 ) {
     Button(
         onClick = onClick,
         enabled = enabled && !isLoading,
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp),
-        shape = MaterialTheme.shapes.medium,
+            .height(height),
+        shape = shape,
+        contentPadding = ButtonTokens.contentPadding,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor,

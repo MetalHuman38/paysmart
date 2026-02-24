@@ -19,4 +19,6 @@ interface SecurityRepositoryInterface {
     ): Result<Unit>
 
     suspend fun allowFederatedLinking(idToken: String): Result<Unit>
+
+    suspend fun setHomeAddressVerified(userId: String, idToken: String): Result<Unit>
 }

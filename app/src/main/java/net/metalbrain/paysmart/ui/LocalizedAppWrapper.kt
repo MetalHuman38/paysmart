@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import net.metalbrain.paysmart.core.locale.LocaleManager
-import net.metalbrain.paysmart.ui.viewmodel.LanguageViewModel
+import net.metalbrain.paysmart.ui.language.viewmodel.LanguageViewModel
 
 @Composable
 fun LocalizedAppWrapper(

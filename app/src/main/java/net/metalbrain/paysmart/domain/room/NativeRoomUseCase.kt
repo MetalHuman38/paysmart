@@ -40,32 +40,6 @@ class NativeRoomUseCase @Inject constructor(
         dao.upsert(SecuritySettingsEntity(userId, encrypted, salt = "")) // salt currently unused in AES-GCM
     }
 
-//    override suspend fun saveSecuritySettings(userId: String, model: SecuritySettingsModel) {
-//        val json = gson.toJson(model)
-//        val salt = encryptor.generateSaltBase64()
-//
-//        val keyBytes = roomPassphraseRepository.getRoomKey()
-//        val keyB64 = encryptor.encode(keyBytes)
-//
-//
-//        val encrypted = RoomNativeBridge.encryptString(json, keyB64)
-//
-//        Log.d("RoomUseCase", "🔐 Saving encrypted settings for user=$userId")
-//        Log.d("RoomUseCase", "  → JSON=$json")
-//        Log.d("RoomUseCase", "  → Encrypted=$encrypted")
-//
-//        dao.upsert(SecuritySettingsEntity(userId, encrypted, salt))
-//    }
-
-//    override suspend fun getSecuritySettings(userId: String): SecuritySettingsModel? {
-//        val entity = dao.getByUserId(userId) ?: return null
-//
-//        val keyBytes = roomPassphraseRepository.getRoomKey()
-//        val keyB64 = encryptor.encode(keyBytes)
-//
-//        val decrypted = RoomNativeBridge.decryptString(entity.jsonData, keyB64)
-//        return gson.fromJson(decrypted, SecuritySettingsModel::class.java)
-//    }
 
     override suspend fun getSecuritySettings(userId: String): SecuritySettingsModel? {
         val entity = dao.getByUserId(userId) ?: return null

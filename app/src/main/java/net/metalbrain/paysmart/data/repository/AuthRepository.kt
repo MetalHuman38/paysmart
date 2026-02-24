@@ -19,7 +19,9 @@ interface AuthRepository {
     suspend fun isPhoneUnique(phone: String): Boolean
 
     suspend fun signInAnonymously(): AuthResult
+
     suspend fun signInWithCredential(credential: AuthCredential): AuthResult
+    
     suspend fun linkWithCredential(credential: AuthCredential): AuthResult
 
     suspend fun signOut()

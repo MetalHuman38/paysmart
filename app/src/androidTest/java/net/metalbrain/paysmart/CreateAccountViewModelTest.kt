@@ -9,15 +9,16 @@ import javax.inject.Inject
 import junit.framework.TestCase.assertEquals
 import net.metalbrain.paysmart.core.auth.AuthPolicyHandler
 import net.metalbrain.paysmart.di.AppModule
+import net.metalbrain.paysmart.phone.di.PhoneModule
 import net.metalbrain.paysmart.domain.model.Country
-import net.metalbrain.paysmart.phone.PhoneVerifier
+import net.metalbrain.paysmart.phone.data.PhoneVerifier
 import net.metalbrain.paysmart.ui.viewmodel.CreateAccountViewModel
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-@UninstallModules(AppModule::class, AppModule.PhoneModule::class)
+@UninstallModules(AppModule::class, PhoneModule::class)
 class CreateAccountViewModelTest {
 
     @get:Rule

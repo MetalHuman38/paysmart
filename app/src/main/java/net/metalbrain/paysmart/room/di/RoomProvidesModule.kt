@@ -10,6 +10,7 @@ import dagger.hilt.components.SingletonComponent
 import net.metalbrain.paysmart.room.DbMigrations
 import net.metalbrain.paysmart.room.EncryptedAppDatabase
 import net.metalbrain.paysmart.room.doa.AuthSessionLogDao
+import net.metalbrain.paysmart.room.doa.FxQuoteCacheDao
 import net.metalbrain.paysmart.room.doa.SecureTokenDao
 import net.metalbrain.paysmart.room.doa.SecuritySettingsDao
 import net.metalbrain.paysmart.room.doa.UserProfileCacheDao
@@ -39,7 +40,9 @@ object RoomProvidesModule {
             .addMigrations(
                 DbMigrations.MIGRATION_1_2,
                 DbMigrations.MIGRATION_2_3,
-                DbMigrations.MIGRATION_3_4
+                DbMigrations.MIGRATION_3_4,
+                DbMigrations.MIGRATION_4_5,
+                DbMigrations.MIGRATION_5_6
             )
             .fallbackToDestructiveMigration(false)
             .build()
@@ -63,4 +66,8 @@ object RoomProvidesModule {
     @Provides
     fun provideUserProfileCacheDao(db: EncryptedAppDatabase): UserProfileCacheDao =
         db.userProfileCacheDao()
+
+    @Provides
+    fun provideFxQuoteCacheDao(db: EncryptedAppDatabase): FxQuoteCacheDao =
+        db.fxQuoteCacheDao()
 }

@@ -6,12 +6,15 @@ import { mountHealthRoutes } from "./http/health.route.js";
 import { mountRecaptchaRoutes } from "./http/recaptcha.route.js";
 import { mountAuthPolicyRoutes } from "./http/policy.route.js";
 import { mountPhoneCheckRoutes } from "./http/policy.js";
+import { mountFxRoutes } from "./http/fx.route.js";
+import { mountPaymentsRoutes, mountPaymentsWebhookRoute } from "./http/payment.route.js";
 import { facebookDataDeletionHandler } from "./facebookDataDeletion.js";
 import { requireAppCheck } from "./config/appcheck.js";
 import { checkEmailOrPhone } from "./checkEmailOrPhone.js";
 export function buildApp() {
     const app = express();
     app.set("trust proxy", 1); // behind Cloud LB
+    mountPaymentsWebhookRoute(app);
     app.use(express.json({ limit: "1mb" }));
     app.use(express.urlencoded({ extended: true }));
     app.use(express.text({ type: "text/*", limit: "1mb" }));
@@ -20,7 +23,9 @@ export function buildApp() {
     mountAuthPolicyRoutes(app);
     mountHealthRoutes(app);
     mountRecaptchaRoutes(app);
+    mountFxRoutes(app);
     mountPhoneCheckRoutes(app);
+    mountPaymentsRoutes(app);
     app.use(bodyParser.text({ type: "*/*" }));
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());

@@ -1,9 +1,5 @@
 package net.metalbrain.paysmart.di
 
-import android.util.Log
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.core.DataStore
-import com.google.firebase.auth.FirebaseAuth
 import dagger.Binds
 import dagger.Provides
 import dagger.Module
@@ -12,8 +8,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.Env
 import net.metalbrain.paysmart.core.auth.AuthApiConfig
 import net.metalbrain.paysmart.core.auth.AuthHook
@@ -23,21 +17,15 @@ import net.metalbrain.paysmart.core.auth.PasswordPolicyHandler
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.FirebaseAuthRepository
 import net.metalbrain.paysmart.data.repository.FirestoreUserProfileRepository
-import net.metalbrain.paysmart.data.repository.LanguageRepositoryImpl
 import net.metalbrain.paysmart.data.repository.PasswordRepository
 import net.metalbrain.paysmart.data.repository.SecurePasswordRepository
 import net.metalbrain.paysmart.data.repository.SecurityRepository
 import net.metalbrain.paysmart.data.repository.SecurityRepositoryInterface
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
 import net.metalbrain.paysmart.data.security.DefaultSecurityManager
-import net.metalbrain.paysmart.domain.LanguageRepository
 import net.metalbrain.paysmart.domain.security.SecuritySettingsManager
 import net.metalbrain.paysmart.domain.usecase.DefaultSecurityUseCase
 import net.metalbrain.paysmart.domain.usecase.SecurityUseCase
-import net.metalbrain.paysmart.phone.PhoneAuthHandler
-import net.metalbrain.paysmart.phone.PhoneDraft
-import net.metalbrain.paysmart.phone.PhoneDraftStore
-import net.metalbrain.paysmart.phone.PhoneVerifier
 import net.metalbrain.paysmart.utils.AppCoroutineScope
 import javax.inject.Singleton
 
@@ -73,45 +61,6 @@ object AppModule {
         hooks: List<AuthHook>
     ): AuthService {
         return AuthService(authRepository, hooks)
-    }
-
-    @Provides
-    @Singleton
-    fun provideLanguageRepository(
-        dataStore: DataStore<Preferences>
-    ): LanguageRepository = LanguageRepositoryImpl(dataStore)
-
-
-    @Module
-    @InstallIn(SingletonComponent::class)
-    object PhoneModule {
-
-        @Provides
-        @Singleton
-        fun providePhoneVerifier(
-            phoneDraftStore: PhoneDraftStore
-        ): PhoneVerifier {
-            val state = MutableStateFlow(PhoneDraft())
-            val scope = CoroutineScope(Dispatchers.Main)
-
-            // Sync latest draft to flow
-            scope.launch {
-                phoneDraftStore.draft.collect {
-                    state.value = it
-                }
-                Log.d("PhoneAuth", "Phone verifier initialized")
-            }
-            return PhoneAuthHandler(
-                FirebaseAuth.getInstance(),
-                scope,
-                state
-            ).apply {
-                setCallbacks(
-                    onCodeSent = { Log.d("PhoneAuth", "Code sent!") },
-                    onError = { Log.e("PhoneAuth", "Error: ${it.message}") }
-                )
-            }
-        }
     }
 
     @Module

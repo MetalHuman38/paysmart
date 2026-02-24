@@ -1,23 +1,28 @@
 package net.metalbrain.paysmart.ui.home.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import net.metalbrain.paysmart.ui.components.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
@@ -26,10 +31,10 @@ import net.metalbrain.paysmart.domain.model.hasCompletedAddress
 import net.metalbrain.paysmart.domain.model.hasCompletedEmailVerification
 import net.metalbrain.paysmart.domain.model.hasCompletedIdentity
 import net.metalbrain.paysmart.ui.account.components.AccountsHeader
+import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.home.card.EmptyActivityCard
 import net.metalbrain.paysmart.ui.home.card.HomeBalanceSummaryCard
 import net.metalbrain.paysmart.ui.home.card.RewardEarnedSummaryCard
-import net.metalbrain.paysmart.ui.home.data.HomeQuickAction
 import net.metalbrain.paysmart.ui.home.state.HomeBalanceSnapshot
 import net.metalbrain.paysmart.ui.home.state.RewardEarnedSnapshot
 import net.metalbrain.paysmart.ui.home.extensions.ProfileCompletionCard
@@ -43,8 +48,8 @@ fun HomeContent(
     onTransactionsClick: () -> Unit,
     onBalanceCardClick: () -> Unit,
     onRewardCardClick: () -> Unit,
-    onSecurityClick: () -> Unit,
     onLinkAccountClick: () -> Unit,
+    onAddMoneyClick: () -> Unit,
     onVerifyEmailClick: () -> Unit,
     onAddAddressClick: () -> Unit,
     onVerifyIdentityClick: () -> Unit,
@@ -102,14 +107,49 @@ fun HomeContent(
         }
 
         item {
-            HomeQuickActions(
-                actions = listOf(
-                    HomeQuickAction("Transactions", Icons.Filled.SwapHoriz, onTransactionsClick),
-                    HomeQuickAction("Profile", Icons.Filled.Person, onProfileClick),
-                    HomeQuickAction("Re-auth", Icons.Filled.Lock, onSecurityClick),
-                    HomeQuickAction("Link", Icons.Filled.Link, onLinkAccountClick)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedButton(
+                    onClick = onTransactionsClick,
+                    modifier = Modifier.weight(1f),
+                    text = "Send Money",
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    borderColor = MaterialTheme.colorScheme.primary,
+                    borderWidth = 1.dp,
+                    elevation = null
                 )
-            )
+
+                PrimaryButton(
+                    text = "Add money",
+                    onClick = onAddMoneyClick,
+                    modifier = Modifier.weight(1f),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
+
+                Surface(
+                    modifier = Modifier.size(44.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline
+                    ),
+                    tonalElevation = 1.dp
+                ) {
+                    IconButton(onClick = onLinkAccountClick) {
+                        Icon(
+                            imageVector = Icons.Filled.MoreHoriz,
+                            contentDescription = "More actions",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
         }
 
         if (localSettings != null && showCompletionCard) {

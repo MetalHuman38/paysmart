@@ -3,12 +3,14 @@ package net.metalbrain.paysmart.data.repository
 import android.util.Log
 import net.metalbrain.paysmart.domain.model.SecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.toObject
 import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
 import net.metalbrain.paysmart.core.auth.AllowFederatedLinkingHandler
+import net.metalbrain.paysmart.core.auth.HomeAddressPolicyHandler
 import net.metalbrain.paysmart.core.auth.SecuritySettingsHandler
 import net.metalbrain.paysmart.core.security.SecurityMigrationFlags
 import net.metalbrain.paysmart.core.security.SecurityParity
@@ -21,6 +23,7 @@ class SecurityRepository @Inject constructor(
     private val roomUseCase: RoomUseCase,
     private val securityPolicyHandler: SecuritySettingsHandler,
     private val allowFederatedLinkingHandler: AllowFederatedLinkingHandler,
+    private val homeAddressPolicyHandler: HomeAddressPolicyHandler,
     private val securityPreference: SecurityPreference,
     private val securityParity: SecurityParity
 ) : SecurityRepositoryInterface {
@@ -197,6 +200,46 @@ class SecurityRepository @Inject constructor(
                     IllegalStateException("Unable to enable federated linking policy")
                 )
             }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun setHomeAddressVerified(userId: String, idToken: String): Result<Unit> {
+        return try {
+            val enabled = homeAddressPolicyHandler.setHomeAddressVerified(idToken)
+            if (!enabled) {
+                return Result.failure(
+                    IllegalStateException("Unable to update home address verification on server")
+                )
+            }
+
+            // Keep the UI responsive even if downstream sync work is delayed.
+            val currentLocal = securityPreference.loadLocalSecurityState()
+            securityPreference.saveLocalSecurityState(
+                currentLocal.copy(
+                    hasAddedHomeAddress = true,
+                    lastSynced = System.currentTimeMillis()
+                )
+            )
+
+            val syncResult = syncSecuritySettings(userId, idToken)
+            if (syncResult.isFailure) {
+                Log.w(
+                    TAG,
+                    "setHomeAddressVerified: server write succeeded but sync failed; applying Room fallback",
+                    syncResult.exceptionOrNull()
+                )
+
+                val roomCurrent = roomUseCase.getSecuritySettings(userId)
+                val fallback = (roomCurrent ?: SecuritySettingsModel()).copy(
+                    hasAddedHomeAddress = true,
+                    updatedAt = Timestamp.now()
+                )
+                roomUseCase.saveSecuritySettings(userId, fallback)
+            }
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

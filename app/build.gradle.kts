@@ -50,6 +50,11 @@ android {
                 )
             }
         }
+
+        val mapsApiKey = (project.findProperty("MAPS_API_KEY") as? String)
+            ?: (project.findProperty("ADDRESS_VALIDATION_API_KEY") as? String)
+            ?: ""
+        manifestPlaceholders["googleMapsApiKey"] = mapsApiKey
     }
 
     externalNativeBuild {
@@ -65,9 +70,10 @@ android {
             val storePassword = project.findProperty("RELEASE_STORE_PASSWORD") as? String
             val keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as? String
             val keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as? String
+            val addressValidatonApiKey = project.findProperty("ADDRESS_VALIDATION_API_KEY") as? String
 
 
-            if (storeFilePath != null && storePassword != null && keyAlias != null && keyPassword != null) {
+            if (storeFilePath != null && storePassword != null && keyAlias != null && keyPassword != null && addressValidatonApiKey != null) {
                 storeFile = file(storeFilePath)
                 this.storePassword = storePassword
                 this.keyAlias = keyAlias
@@ -86,6 +92,9 @@ android {
             buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:5001/paysmart-7ee79/europe-west2/api\"")
             buildConfigField("String", "FUNCTION_API_URL", "\"http://10.0.2.2:8080\"")
             buildConfigField("Boolean", "IS_LOCAL", "true")
+            buildConfigField("Boolean", "PHONE_PNV_PREVIEW_ENABLED", "true")
+            buildConfigField("String", "IDENTITY_IMAGE_DETECTION_MODE", "\"on_device\"")
+            buildConfigField("Boolean", "IDENTITY_IMAGE_DETECTION_FAIL_OPEN", "true")
             manifestPlaceholders["networkSecurityConfig"] = "@xml/network_security_config_debug"
         }
         getByName("release") {
@@ -99,6 +108,9 @@ android {
             buildConfigField("String", "API_BASE_URL", "\"https.europe-west2-paysmart-7ee79.cloudfunctions.net/api\"")
             buildConfigField("String", "FUNCTION_API_URL", "\"https.europe-west2-paysmart-7ee79.cloudfunctions.net\"")
             buildConfigField("Boolean", "IS_LOCAL", "false")
+            buildConfigField("Boolean", "PHONE_PNV_PREVIEW_ENABLED", "false")
+            buildConfigField("String", "IDENTITY_IMAGE_DETECTION_MODE", "\"on_device\"")
+            buildConfigField("Boolean", "IDENTITY_IMAGE_DETECTION_FAIL_OPEN", "true")
             manifestPlaceholders["networkSecurityConfig"] = "@xml/network_security_config_release"
 
         }
@@ -133,6 +145,12 @@ dependencies {
     implementation(libs.lottie.compose)
     implementation(libs.androidx.runner)
     implementation(libs.googleid)
+    implementation(libs.google.play.services.maps)
+    implementation(libs.stripe.android)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
 
     // Hilt
     implementation(libs.hilt.core)

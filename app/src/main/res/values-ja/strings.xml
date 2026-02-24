@@ -63,6 +63,10 @@
     <string name="forgot_password_description">パスワードを変更してアカウントを復旧してください。</string>
     <string name="create_secure_password">安全なパスワードを作成する</string>
     <string name="enter_secure_password">8文字以上で、大文字、小文字、数字、特殊文字を含む安全なパスワードを入力してください。</string>
+    <string name="confirm_password_label">パスワードの確認</string>
+    <string name="create_password_cta">パスワードを作成する</string>
+    <string name="create_password_loading">パスワードを作成中…</string>
+    <string name="toggle_password_visibility">パスワードの表示を切り替えます</string>
     <string name="set_up_your_pass_code">パスコードを設定する</string>
     <string name="enter_your_passcode">パスコードを入力してください</string>
     <string name="passcode_use_to_unlock">この4〜6桁のコードは、アプリのロックを解除し、ローカルで操作を確認するために使用されます。</string>
@@ -84,4 +88,166 @@
     <string name="add_passcode_advisory_text">PaySmartアカウントと財務データを保護するには、パスコードを設定する必要があります。これにより、デバイスを紛失したり盗まれたりした場合でも、あなただけが資金にアクセスできるようになります。</string>
     <string name="set_up_passcode">パスコードを設定する</string>
     <string name="set_up_biometric">生体認証を設定する</string>
+
+    <string name="common_back">戻る</string>
+    <string name="common_navigate">開く</string>
+    <string name="common_never">絶対に</string>
+    <string name="common_verified">確認済み</string>
+    <string name="common_not_verified">未確認</string>
+    <string name="common_completed">完了</string>
+    <string name="common_required">必須</string>
+
+    <string name="profile_title">プロフィール</string>
+    <string name="profile_logout">ログアウト</string>
+    <string name="profile_version_format">バージョン: %1$s (%2$d)</string>
+    <string name="profile_default_name">PaySmart ユーザー</string>
+    <string name="profile_photo_content_description">プロフィール画像</string>
+    <string name="profile_verified_status_content_description">ステータス</string>
+    <string name="profile_pending_status_content_description">ステータス確認中</string>
+    <string name="profile_verified_account_label">確認済みのアカウント</string>
+    <string name="profile_pending_account_label">検証が保留中です</string>
+
+    <string name="profile_menu_account_information_title">アカウント情報</string>
+    <string name="profile_menu_account_information_subtitle">アカウントに関する情報</string>
+    <string name="profile_menu_security_privacy_title">セキュリティとプライバシー</string>
+    <string name="profile_menu_security_privacy_subtitle">アカウントを安全に保つ</string>
+    <string name="profile_menu_connected_accounts_title">接続済みアカウントの管理</string>
+    <string name="profile_menu_connected_accounts_subtitle">接続済みの外部アカウント</string>
+    <string name="profile_menu_help_support_title">ヘルプとサポート</string>
+    <string name="profile_menu_help_support_subtitle">お困りですか？私たちがお手伝いします</string>
+    <string name="profile_menu_about_title">約</string>
+    <string name="profile_menu_about_subtitle">このアプリに関する情報</string>
+
+    <string name="profile_security_privacy_description">アカウントの保護、サインインオプション、プライバシー管理を管理します。</string>
+    <string name="profile_connected_accounts_description">Google、Facebook、メールなどのリンクされたプロバイダーを確認および管理します。</string>
+    <string name="profile_about_description">アプリ情報、バージョン詳細、および法的参照。</string>
+
+    <string name="profile_account_information_title">アカウント情報</string>
+    <string name="profile_account_info_profile_subtitle">個人情報とプロフィールの設定</string>
+    <string name="profile_account_info_limits_subtitle">検証主導のアカウント制限</string>
+    <string name="profile_account_info_statement_subtitle">取引履歴と明細書のエントリ</string>
+    <string name="profile_language_title">言語</string>
+    <string name="profile_account_info_language_subtitle">希望の言語を選択してください</string>
+
+    <string name="profile_details_title">プロフィールの詳細</string>
+    <string name="profile_details_loading_message">ローカルキャッシュからプロフィールの詳細を読み込んでいます。</string>
+    <string name="profile_locked_title">プロフィールはロックされています</string>
+    <string name="profile_locked_message">アカウントがすでに検証されているため、このプロフィールを編集することはできません。変更が必要な場合は、カスタマーサポートにお問い合わせください。</string>
+    <string name="profile_incomplete_title">プロフィール設定を完了してください</string>
+    <string name="profile_incomplete_description">アカウントのセットアップが不完全です。検証を完了するには、次の手順を完了してください。</string>
+    <string name="profile_status_locked">ロックされています</string>
+    <string name="profile_status_incomplete">不完全</string>
+    <string name="profile_status_complete">完了</string>
+    <string name="profile_field_full_name">氏名</string>
+    <string name="profile_field_date_of_birth">生年月日</string>
+    <string name="profile_field_address_line_1">住所1</string>
+    <string name="profile_field_address_line_2">住所2</string>
+    <string name="profile_field_city">市</string>
+    <string name="profile_field_email">メールアドレス</string>
+    <string name="profile_field_phone_number">電話番号</string>
+    <string name="profile_field_country">国</string>
+    <string name="profile_field_postal_code">郵便番号/ ZIPコード</string>
+    <string name="profile_field_not_provided">提供されていません</string>
+    <string name="profile_missing_verified_email">メールアドレスを確認してください</string>
+    <string name="profile_missing_home_address">自宅の住所を追加して確認してください</string>
+    <string name="profile_missing_identity">本人確認を完了してください</string>
+    <string name="profile_action_verify_email">メールを確認する</string>
+    <string name="profile_action_complete_address">住所の設定を完了する</string>
+    <string name="profile_action_verify_identity">本人確認</string>
+    <string name="profile_action_review_profile">プロフィールの詳細を確認する</string>
+    <string name="profile_onboarding_ready_title">プロフィール設定が完了しました</string>
+    <string name="profile_onboarding_ready_description">プロフィールの確認が完了しました。続行してアカウントのセキュリティ設定を行ってください。</string>
+    <string name="profile_onboarding_continue_action">セキュリティ設定へ進む</string>
+
+    <string name="account_limits_title">アカウントの制限</string>
+    <string name="account_limits_current_tier">現在のティア</string>
+    <string name="account_limits_tier_restricted">制限付き</string>
+    <string name="account_limits_tier_standard">標準</string>
+    <string name="account_limits_tier_enhanced">拡張</string>
+    <string name="account_limits_identity_status">本人確認</string>
+    <string name="account_limits_address_status">住所確認</string>
+    <string name="account_limits_email_status">メール確認</string>
+    <string name="account_limits_last_synced">最終同期: %1$s</string>
+    <string name="account_limits_info_note">制限は現在の検証ステータスから導き出され、正常な同期後に更新されます。</string>
+
+    <string name="account_statement_title">アカウント明細書</string>
+    <string name="account_statement_empty">明細書のエントリはまだありません。</string>
+    <string name="account_statement_amount_format">%1$s %2$s %3$.2f</string>
+    <string name="account_statement_datetime_format">%1$s %2$s</string>
+    <string name="account_statement_status_format">ステータス: %1$s</string>
+
+    <string name="address_resolver_title">自宅住所の解決</string>
+    <string name="address_resolver_map_title">住所を確認</string>
+    <string name="address_resolver_final_title">最終確認</string>
+    <string name="address_resolver_subtitle">家の情報と郵便番号を入力してください。地図プロバイダーから確認済みの住所を解決します。</string>
+    <string name="address_resolver_map_subtitle">地図で解決された住所を確認してください。</string>
+    <string name="address_resolver_final_subtitle">保存する前に住所情報を確認・編集してください。</string>
+    <string name="address_resolver_house_label">家/建物</string>
+    <string name="address_resolver_postcode_label">郵便番号</string>
+    <string name="address_resolver_country_label">国コード (ISO-2)</string>
+    <string name="address_resolver_lookup_action">住所を解決</string>
+    <string name="address_resolver_result_title">解決された住所</string>
+    <string name="address_resolver_line1_label">住所1</string>
+    <string name="address_resolver_city_label">市</string>
+    <string name="address_resolver_state_region_label">都道府県 / 地域</string>
+    <string name="address_resolver_country_code_label">国</string>
+    <string name="address_resolver_postcode_short_label">郵便番号</string>
+    <string name="address_resolver_coordinates_label">座標</string>
+    <string name="address_resolver_source_label">プロバイダー</string>
+    <string name="address_resolver_confirm_action">この住所を使用する</string>
+    <string name="address_resolver_six_months_question">この住所に6か月以上住んでいますか？</string>
+    <string name="address_resolver_no_action">いいえ</string>
+    <string name="address_resolver_yes_action">はい</string>
+    <string name="address_resolver_edit_on_map_action">地図確認に戻る</string>
+
+    <string name="identity_resolver_title">本人確認</string>
+    <string name="identity_resolver_subtitle">本人確認は、アカウントの制限とリスクの高いアクションの最終設定手順です。</string>
+    <string name="identity_resolver_plan_title">確認フロー</string>
+    <string name="identity_resolver_plan_step_1">1. 政府発行の身分証明書をキャプチャします。</string>
+    <string name="identity_resolver_plan_step_2">2. 名前と生年月日がプロフィールと一致することを確認します。</string>
+    <string name="identity_resolver_plan_step_3">3. セルフィー/ライブネス検証を実行して送信します。</string>
+    <string name="identity_resolver_done_action">セットアップに戻る</string>
+    <string name="identity_resolver_country_title">発行国</string>
+    <string name="identity_resolver_country_selected">%1$s (%2$s)</string>
+    <string name="identity_resolver_document_unavailable_format">%1$s（利用不可）</string>
+    <string name="identity_resolver_capture_hint">撮影ガイド: %1$s（%2$s フレーム）</string>
+    <string name="identity_resolver_frame_passport">パスポート</string>
+    <string name="identity_resolver_frame_card">カード</string>
+    <string name="identity_resolver_frame_generic">汎用</string>
+    <string name="identity_resolver_document_not_accepted">この書類タイプは現在受け付けていません。</string>
+    <string name="identity_resolver_document_not_supported">この書類タイプは受け付けていますが、このビルドではアップロード未対応です。</string>    <string name="identity_resolver_capture_validating">撮影を検証しています...</string>
+    <string name="identity_resolver_capture_fallback_action">代わりにファイルを使用</string>
+    <string name="identity_resolver_camera_permission_required">書類を撮影するにはカメラ権限が必要です。</string>
+    <string name="identity_resolver_camera_permission_action">カメラを許可</string>
+    <string name="identity_resolver_camera_capture_action">書類を撮影</string>
+    <string name="identity_resolver_camera_capturing">撮影中…</string>
+    <string name="identity_resolver_capture_step">書類を撮影</string>
+    <string name="identity_resolver_encrypt_step">端末で暗号化</string>
+    <string name="identity_resolver_upload_step">暗号化ペイロードをアップロード</string>
+    <string name="identity_resolver_attest_step">端末アテステーションを生成</string>
+    <string name="identity_resolver_commit_step">確認リクエストを確定</string>
+    <string name="identity_resolver_document_type_title">書類タイプ</string>
+    <string name="identity_resolver_document_type_passport">パスポート</string>
+    <string name="identity_resolver_document_type_drivers_license">運転免許証</string>
+    <string name="identity_resolver_document_type_national_id">国民ID</string>
+    <string name="identity_resolver_selected_file">選択済み: %1$s（%2$s）</string>
+    <string name="identity_resolver_capture_document_action">書類を撮影/選択</string>
+    <string name="identity_resolver_replace_document_action">書類を差し替え</string>
+    <string name="identity_resolver_submit_action">暗号化された確認を送信</string>
+    <string name="identity_resolver_status_pending">保留</string>
+    <string name="identity_resolver_status_in_progress">進行中</string>
+    <string name="identity_resolver_status_completed">完了</string>
+    <string name="identity_resolver_status_failed">失敗</string>
+    <string name="identity_resolver_completed_message">本人確認のアップロードを送信しました。確認は審査待ちです。</string>
+    <string name="add_money_title">Add money</string>
+    <string name="add_money_subtitle">Top up your wallet with Stripe PaymentSheet (sandbox).</string>
+    <string name="add_money_amount_label">Amount</string>
+    <string name="add_money_currency_label">Currency</string>
+    <string name="add_money_payment_sheet_action">Open Stripe PaymentSheet</string>
+    <string name="add_money_refresh_action">I completed payment, refresh status</string>
+    <string name="add_money_session_id">Session: %1$s</string>
+    <string name="add_money_status_value">Status: %1$s</string>
 </resources>
+
+
+

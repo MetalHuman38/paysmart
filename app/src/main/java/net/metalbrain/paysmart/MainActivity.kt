@@ -47,6 +47,7 @@ class MainActivity : FragmentActivity() {
     @Inject
     lateinit var authSessionLogRepository: AuthSessionLogRepository
 
+
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(LocaleManager.applyLocale(base))
     }
@@ -80,8 +81,8 @@ class MainActivity : FragmentActivity() {
             val lockAfterMinutes = (localSettings?.lockAfterMinutes ?: 5).coerceAtLeast(1)
             val idleLockEnabled =
                 authState is AuthState.Authenticated &&
-                    postAuthState is PostAuthState.Ready &&
-                    hasUnlockMethod
+                        postAuthState is PostAuthState.Ready &&
+                        hasUnlockMethod
 
             val authenticatedUid = (authState as? AuthState.Authenticated)?.uid
             LaunchedEffect(authenticatedUid) {
@@ -94,6 +95,7 @@ class MainActivity : FragmentActivity() {
                     "sid=${it.sid}, userId=${it.userId}, sv=${it.sessionVersion}, ts=${it.signInAtSeconds}, recordedAt=${it.recordedAt}"
                 } ?: "null"
                 Log.d("MainActivity", "roomSessionLog: $shape")
+
             }
 
             val navController = rememberNavController()

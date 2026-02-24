@@ -1,0 +1,26 @@
+import { Request, Response } from "express";
+import { initDeps } from "../dependencies.js";
+import { authContainer } from "../infrastructure/di/authContainer.js";
+import { SetHomeAddressVerified } from "../application/usecase/SetHomeAddressVerified.js";
+
+export async function setHomeAddressVerifiedHandler(req: Request, res: Response) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Missing token" });
+    }
+
+    const idToken = authHeader.split("Bearer ")[1];
+    const { auth } = initDeps();
+    const decoded = await auth.verifyIdToken(idToken);
+
+    const { securitySettings } = authContainer();
+    const useCase = new SetHomeAddressVerified(securitySettings);
+    await useCase.execute(decoded.uid);
+
+    return res.status(200).json({ ok: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal error" });
+  }
+}

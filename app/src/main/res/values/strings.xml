@@ -69,7 +69,7 @@
     <string name="enter_secure_password">Use 12+ characters with uppercase, lowercase, a number, and a symbol to keep your account protected.</string>
     <string name="confirm_password_label">Confirm password</string>
     <string name="create_password_cta">Create password</string>
-    <string name="create_password_loading">Creating secure password...</string>
+    <string name="create_password_loading">Creating secure password…</string>
     <string name="toggle_password_visibility">Toggle password visibility</string>
     <string name="enter_your_passcode">Enter your passcode</string>
     <string name="forgot_password_description">Change your password to recover your account.</string>
@@ -93,4 +93,168 @@
     <string name="add_passcode_advisory_text">Setting up a passcode is required to protect your PaySmart account and financial data. It helps ensure only you can access your funds, even if your device is lost or stolen.</string>
     <string name="set_up_passcode">Set up passcode</string>
     <string name="set_up_biometric">Set up biometric</string>
+
+    <string name="common_back">Back</string>
+    <string name="common_navigate">Open</string>
+    <string name="common_never">Never</string>
+    <string name="common_verified">Verified</string>
+    <string name="common_not_verified">Not verified</string>
+    <string name="common_completed">Completed</string>
+    <string name="common_required">Required</string>
+
+    <string name="profile_title">Profile</string>
+    <string name="profile_logout">Log out</string>
+    <string name="profile_version_format">Version: %1$s (%2$d)</string>
+    <string name="profile_default_name">PaySmart User</string>
+    <string name="profile_photo_content_description">Profile photo</string>
+    <string name="profile_verified_status_content_description">Verified status</string>
+    <string name="profile_pending_status_content_description">Verification pending status</string>
+    <string name="profile_verified_account_label">Verified account</string>
+    <string name="profile_pending_account_label">Verification pending</string>
+
+    <string name="profile_menu_account_information_title">Account information</string>
+    <string name="profile_menu_account_information_subtitle">Information about your account</string>
+    <string name="profile_menu_security_privacy_title">Security and privacy</string>
+    <string name="profile_menu_security_privacy_subtitle">Keep your account safe</string>
+    <string name="profile_menu_connected_accounts_title">Manage connected accounts</string>
+    <string name="profile_menu_connected_accounts_subtitle">External accounts connected</string>
+    <string name="profile_menu_help_support_title">Help and support</string>
+    <string name="profile_menu_help_support_subtitle">Need help? We have got you</string>
+    <string name="profile_menu_about_title">About</string>
+    <string name="profile_menu_about_subtitle">Information about this app</string>
+
+    <string name="profile_security_privacy_description">Manage account protection, sign-in options, and privacy controls.</string>
+    <string name="profile_connected_accounts_description">Review and manage linked providers such as Google, Facebook, and email.</string>
+    <string name="profile_about_description">App information, version details, and legal references.</string>
+
+    <string name="profile_account_information_title">Account information</string>
+    <string name="profile_account_info_profile_subtitle">Personal details and profile preferences</string>
+    <string name="profile_account_info_limits_subtitle">Verification-driven account limits</string>
+    <string name="profile_account_info_statement_subtitle">Transaction history and statement entries</string>
+    <string name="profile_language_title">Language</string>
+    <string name="profile_account_info_language_subtitle">Select your preferred language</string>
+
+    <string name="profile_details_title">Profile details</string>
+    <string name="profile_details_loading_message">Loading profile details from local cache.</string>
+    <string name="profile_locked_title">Profile locked</string>
+    <string name="profile_locked_message">You are unable to edit this profile because your account has already been verified. If you need to make changes, please contact customer support.</string>
+    <string name="profile_incomplete_title">Complete your profile setup</string>
+    <string name="profile_incomplete_description">Your account setup is incomplete. Finish the following steps to complete verification.</string>
+    <string name="profile_status_locked">Locked</string>
+    <string name="profile_status_incomplete">Incomplete</string>
+    <string name="profile_status_complete">Complete</string>
+    <string name="profile_field_full_name">Full name</string>
+    <string name="profile_field_date_of_birth">Date of birth</string>
+    <string name="profile_field_address_line_1">Address line 1</string>
+    <string name="profile_field_address_line_2">Address line 2</string>
+    <string name="profile_field_city">City</string>
+    <string name="profile_field_email">Email address</string>
+    <string name="profile_field_phone_number">Phone number</string>
+    <string name="profile_field_country">Country</string>
+    <string name="profile_field_postal_code">Postal code / ZIP code</string>
+    <string name="profile_field_not_provided">Not provided</string>
+    <string name="profile_missing_verified_email">Verify your email</string>
+    <string name="profile_missing_home_address">Add and verify your home address</string>
+    <string name="profile_missing_identity">Complete identity verification</string>
+    <string name="profile_action_verify_email">Verify email</string>
+    <string name="profile_action_complete_address">Complete address setup</string>
+    <string name="profile_action_verify_identity">Verify identity</string>
+    <string name="profile_action_review_profile">Review profile details</string>
+    <string name="profile_onboarding_ready_title">Profile setup complete</string>
+    <string name="profile_onboarding_ready_description">Your profile verification is complete. Continue to secure your account.</string>
+    <string name="profile_onboarding_continue_action">Continue to security setup</string>
+
+    <string name="account_limits_title">Account limits</string>
+    <string name="account_limits_current_tier">Current tier</string>
+    <string name="account_limits_tier_restricted">Restricted</string>
+    <string name="account_limits_tier_standard">Standard</string>
+    <string name="account_limits_tier_enhanced">Enhanced</string>
+    <string name="account_limits_identity_status">Identity verification</string>
+    <string name="account_limits_address_status">Address verification</string>
+    <string name="account_limits_email_status">Email verification</string>
+    <string name="account_limits_last_synced">Last synced: %1$s</string>
+    <string name="account_limits_info_note">Limits are derived from current verification status and update after successful sync.</string>
+
+    <string name="account_statement_title">Account statement</string>
+    <string name="account_statement_empty">No statement entries yet.</string>
+    <string name="account_statement_amount_format">%1$s %2$s %3$.2f</string>
+    <string name="account_statement_datetime_format">%1$s at %2$s</string>
+    <string name="account_statement_status_format">Status: %1$s</string>
+
+    <string name="address_resolver_title">Resolve home address</string>
+    <string name="address_resolver_map_title">Confirm address</string>
+    <string name="address_resolver_final_title">Final confirmation</string>
+    <string name="address_resolver_subtitle">Enter your house info and postcode. We will resolve a verified address from map providers.</string>
+    <string name="address_resolver_map_subtitle">Please confirm your resolved address on the map.</string>
+    <string name="address_resolver_final_subtitle">Review and edit your address details before saving.</string>
+    <string name="address_resolver_house_label">House / building</string>
+    <string name="address_resolver_postcode_label">Postcode</string>
+    <string name="address_resolver_country_label">Country code (ISO-2)</string>
+    <string name="address_resolver_lookup_action">Resolve address</string>
+    <string name="address_resolver_result_title">Resolved address</string>
+    <string name="address_resolver_line1_label">Address line 1</string>
+    <string name="address_resolver_city_label">City</string>
+    <string name="address_resolver_state_region_label">State / region</string>
+    <string name="address_resolver_country_code_label">Country</string>
+    <string name="address_resolver_postcode_short_label">Postcode</string>
+    <string name="address_resolver_coordinates_label">Coordinates</string>
+    <string name="address_resolver_source_label">Provider</string>
+    <string name="address_resolver_confirm_action">Use this address</string>
+    <string name="address_resolver_six_months_question">Have you lived at this address for more than 6 months?</string>
+    <string name="address_resolver_no_action">No</string>
+    <string name="address_resolver_yes_action">Yes</string>
+    <string name="address_resolver_edit_on_map_action">Back to map confirmation</string>
+
+    <string name="identity_resolver_title">Identity verification</string>
+    <string name="identity_resolver_subtitle">Identity verification is the final setup step for account limits and high-risk actions.</string>
+    <string name="identity_resolver_plan_title">Verification flow</string>
+    <string name="identity_resolver_plan_step_1">1. Capture government-issued identity document.</string>
+    <string name="identity_resolver_plan_step_2">2. Confirm name and date of birth match your profile.</string>
+    <string name="identity_resolver_plan_step_3">3. Run selfie/liveness verification and submit.</string>
+    <string name="identity_resolver_capture_step">Capture document</string>
+    <string name="identity_resolver_encrypt_step">Encrypt on device</string>
+    <string name="identity_resolver_upload_step">Upload encrypted payload</string>
+    <string name="identity_resolver_attest_step">Generate device attestation</string>
+    <string name="identity_resolver_commit_step">Commit verification request</string>
+    <string name="identity_resolver_document_type_title">Document type</string>
+    <string name="identity_resolver_document_type_passport">Passport</string>
+    <string name="identity_resolver_document_type_drivers_license">Driver license</string>
+    <string name="identity_resolver_document_type_national_id">National ID</string>
+    <string name="identity_resolver_selected_file">Selected: %1$s (%2$s)</string>
+    <string name="identity_resolver_capture_document_action">Capture/select document</string>
+    <string name="identity_resolver_replace_document_action">Replace document</string>
+    <string name="identity_resolver_submit_action">Submit encrypted verification</string>
+    <string name="identity_resolver_status_pending">Pending</string>
+    <string name="identity_resolver_status_in_progress">In progress</string>
+    <string name="identity_resolver_status_completed">Completed</string>
+    <string name="identity_resolver_status_failed">Failed</string>
+    <string name="identity_resolver_completed_message">Identity upload submitted. Verification is pending review.</string>
+    <string name="identity_resolver_done_action">Back to setup</string>
+    <string name="identity_resolver_country_title">Issuing country</string>
+    <string name="identity_resolver_country_selected">%1$s (%2$s)</string>
+    <string name="identity_resolver_document_unavailable_format">%1$s (Unavailable)</string>
+    <string name="identity_resolver_capture_hint">Capture guide: %1$s (%2$s frame)</string>
+    <string name="identity_resolver_frame_passport">Passport</string>
+    <string name="identity_resolver_frame_card">Card</string>
+    <string name="identity_resolver_frame_generic">Generic</string>
+    <string name="identity_resolver_document_not_accepted">This document type is currently not accepted.</string>
+    <string name="identity_resolver_document_not_supported">This document type is accepted but upload is not yet enabled in this build.</string>    <string name="identity_resolver_capture_validating">Validating capture...</string>
+    <string name="identity_resolver_capture_fallback_action">Use file instead</string>
+    <string name="identity_resolver_camera_permission_required">Camera permission is required to capture your document.</string>
+    <string name="identity_resolver_camera_permission_action">Allow camera</string>
+    <string name="identity_resolver_camera_capture_action">Capture document</string>
+    <string name="identity_resolver_camera_capturing">Capturing...</string>
+
+    <string name="add_money_title">Add money</string>
+    <string name="add_money_subtitle">Top up your wallet with Stripe PaymentSheet (sandbox).</string>
+    <string name="add_money_amount_label">Amount</string>
+    <string name="add_money_currency_label">Currency</string>
+    <string name="add_money_payment_sheet_action">Open Stripe PaymentSheet</string>
+    <string name="add_money_refresh_action">I completed payment, refresh status</string>
+    <string name="add_money_session_id">Session: %1$s</string>
+    <string name="add_money_status_value">Status: %1$s</string>
 </resources>
+
+
+
+

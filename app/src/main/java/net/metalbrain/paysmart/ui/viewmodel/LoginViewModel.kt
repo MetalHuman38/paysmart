@@ -168,11 +168,6 @@ class LoginViewModel @Inject constructor(
     }
 
 
-
-
-
-
-
     fun sendMagicLink(
         context: Context,
         email: String,

@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.ui.featuregate.FeatureKey
 import net.metalbrain.paysmart.ui.home.components.HomeContent
 import net.metalbrain.paysmart.ui.home.nav.HomeBottomNavigation
 import net.metalbrain.paysmart.ui.home.viewmodel.HomeViewModel
@@ -57,20 +58,25 @@ fun HomeScreen(
                         Screen.RewardDetails.routeWithPoints(uiState.rewardEarned.points)
                     )
                 },
-                onSecurityClick = {
-                    navController.navigate(Screen.Reauthenticate.baseRoute)
-                },
                 onLinkAccountClick = {
                     navController.navigate(Screen.LinkFederatedAccount.route)
+                },
+                onAddMoneyClick = {
+                    navController.navigate(
+                        Screen.FeatureGate.routeWithArgs(
+                            feature = FeatureKey.ADD_MONEY.id,
+                            resumeRoute = Screen.AddMoney.route
+                        )
+                    )
                 },
                 onVerifyEmailClick = {
                     navController.navigate(Screen.AddEmail.route)
                 },
                 onAddAddressClick = {
-                    navController.navigate(Screen.ProfileScreen.route)
+                    navController.navigate(Screen.ProfileAddressResolver.route)
                 },
                 onVerifyIdentityClick = {
-                    navController.navigate(Screen.ProfileScreen.route)
+                    navController.navigate(Screen.ProfileIdentityResolver.route)
                 },
                 localSettings = uiState.security,
                 transactions = uiState.recentTransactions,

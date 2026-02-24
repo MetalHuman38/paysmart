@@ -1,5 +1,7 @@
 
 
+-dontwarn kotlinx.parcelize.Parceler
+-dontwarn kotlinx.parcelize.Parcelize
 
 -dontwarn net.metalbrain.paysmart.Hilt_App
 -dontwarn net.metalbrain.paysmart.Hilt_MainActivity

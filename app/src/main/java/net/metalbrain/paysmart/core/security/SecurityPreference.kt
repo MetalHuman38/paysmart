@@ -37,6 +37,8 @@ class SecurityPreference @Inject constructor(
         private val PASSCODE_ENABLED = booleanPreferencesKey("passcode_enabled")
 
         private val HAS_VERIFIED_EMAIL = booleanPreferencesKey("has_verified_email")
+        private val HAS_ADDED_HOME_ADDRESS = booleanPreferencesKey("has_added_home_address")
+        private val HAS_VERIFIED_IDENTITY = booleanPreferencesKey("has_verified_identity")
 
         private val ALLOW_FEDERATED_LINKING = booleanPreferencesKey("allow_federated_linking")
 
@@ -57,6 +59,8 @@ class SecurityPreference @Inject constructor(
             passcodeEnabled = prefs[PASSCODE_ENABLED] ?: false,
             passwordEnabled = prefs[PASSWORD_ENABLED] ?: false,
             hasVerifiedEmail = prefs[HAS_VERIFIED_EMAIL] ?: false,
+            hasAddedHomeAddress = prefs[HAS_ADDED_HOME_ADDRESS],
+            hasVerifiedIdentity = prefs[HAS_VERIFIED_IDENTITY] ?: false,
             allowFederatedLinking = prefs[ALLOW_FEDERATED_LINKING] ?: false,
             sessionLocked = prefs[SESSION_LOCKED] ?: true,
             killSwitchActive = prefs[KILLSWITCH_ACTIVE] ?: false,
@@ -82,6 +86,8 @@ class SecurityPreference @Inject constructor(
             passcodeEnabled = prefs[PASSCODE_ENABLED] ?: fromJson.passcodeEnabled,
             passwordEnabled = prefs[PASSWORD_ENABLED] ?: fromJson.passwordEnabled,
             hasVerifiedEmail = prefs[HAS_VERIFIED_EMAIL] ?: fromJson.hasVerifiedEmail,
+            hasAddedHomeAddress = prefs[HAS_ADDED_HOME_ADDRESS] ?: fromJson.hasAddedHomeAddress,
+            hasVerifiedIdentity = prefs[HAS_VERIFIED_IDENTITY] ?: fromJson.hasVerifiedIdentity,
             allowFederatedLinking = prefs[ALLOW_FEDERATED_LINKING] ?: fromJson.allowFederatedLinking,
             sessionLocked = prefs[SESSION_LOCKED] ?: fromJson.sessionLocked,
             killSwitchActive = prefs[KILLSWITCH_ACTIVE] ?: fromJson.killSwitchActive,
@@ -100,6 +106,8 @@ class SecurityPreference @Inject constructor(
             prefs[PASSWORD_ENABLED] = state.passwordEnabled
             prefs[PASSCODE_ENABLED] = state.passcodeEnabled
             prefs[HAS_VERIFIED_EMAIL] = state.hasVerifiedEmail
+            prefs[HAS_ADDED_HOME_ADDRESS] = state.hasAddedHomeAddress == true
+            prefs[HAS_VERIFIED_IDENTITY] = state.hasVerifiedIdentity
             prefs[ALLOW_FEDERATED_LINKING] = state.allowFederatedLinking ?: false
             prefs[SESSION_LOCKED] = state.sessionLocked
             prefs[KILLSWITCH_ACTIVE] = state.killSwitchActive
@@ -176,6 +184,11 @@ class SecurityPreference @Inject constructor(
         server: SecuritySettingsModel?,
         local: LocalSecuritySettingsModel
     ): LocalSecuritySettingsModel {
+        val hasVerifiedEmailMerged = local.hasVerifiedEmail || (server?.hasVerifiedEmail == true)
+        val hasAddedHomeAddressMerged =
+            (local.hasAddedHomeAddress == true) || (server?.hasAddedHomeAddress == true)
+        val hasVerifiedIdentityMerged = local.hasVerifiedIdentity || (server?.hasVerifiedIdentity == true)
+
         return local.copy(
             // Server overrides requirements (e.g. what's required)
             biometricsRequired = server?.biometricsRequired ?: local.biometricsRequired,
@@ -194,11 +207,11 @@ class SecurityPreference @Inject constructor(
             onboardingRequired = server?.onboardingRequired ?: local.onboardingRequired,
             onboardingCompleted = server?.onboardingCompleted ?: local.onboardingCompleted,
 
-            hasVerifiedEmail = server?.hasVerifiedEmail ?: local.hasVerifiedEmail,
+            hasVerifiedEmail = hasVerifiedEmailMerged,
             emailVerificationSentAt = server?.emailVerificationSentAt ?: local.emailVerificationSentAt,
             emailToVerify = server?.emailToVerify ?: local.emailToVerify,
-            hasAddedHomeAddress = server?.hasAddedHomeAddress ?: local.hasAddedHomeAddress,
-            hasVerifiedIdentity = server?.hasVerifiedIdentity ?: local.hasVerifiedIdentity,
+            hasAddedHomeAddress = hasAddedHomeAddressMerged,
+            hasVerifiedIdentity = hasVerifiedIdentityMerged,
 
             tosAcceptedAt = server?.tosAcceptedAt ?: local.tosAcceptedAt,
             kycStatus = server?.kycStatus ?: local.kycStatus,

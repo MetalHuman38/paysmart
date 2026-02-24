@@ -1,13 +1,22 @@
 import { buildApp } from "./server.js";
 import { onRequest } from "firebase-functions/v2/https";
 import { APP } from "./config/globals.js";
+import { processIdentityUploadReview } from "./workers/processIdentityUploadReview.js";
 // Firebase HTTP function export
 export const api = onRequest({
     region: APP.region,
-    secrets: ["RESEND_API_KEY"],
+    secrets: [
+        "RESEND_API_KEY",
+        "ADDRESS_VALIDATION_API_KEY",
+        "EXCHANGE_RATE_API_KEY",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "STRIPE_API_KEY",
+    ],
     cors: false,
 }, (req, res) => {
     const app = buildApp();
     return app(req, res);
 });
+export { processIdentityUploadReview };
 //# sourceMappingURL=index.js.map

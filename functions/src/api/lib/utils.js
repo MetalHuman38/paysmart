@@ -1,7 +1,7 @@
 export function corsify(res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Firebase-AppCheck, X-API-KEY");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Idempotency-Key, Stripe-Signature, X-Firebase-AppCheck, X-API-KEY");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
 }
 export function detectProvider(eventType, data, user) {
     // Prefer eventType suffix: providers/firebase.auth/eventTypes/beforeSignIn:<suffix>

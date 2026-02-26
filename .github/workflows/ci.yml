@@ -39,7 +39,14 @@ jobs:
           echo "$GOOGLE_SERVICES_JSON_B64" | base64 --decode > app/google-services.json
 
       - name: 🔎 Android Lint
-        run: ./gradlew :app:lintDebug --no-daemon
+        run: >
+          ./gradlew :app:lintDebug
+          --no-daemon
+          --no-configuration-cache
+          --max-workers=2
+          -Dorg.gradle.vfs.watch=false
+          -Dorg.gradle.daemon.performance.disable-logging=true
+          "-Dorg.gradle.jvmargs=-Xmx6g -Xms2g -XX:MaxMetaspaceSize=2g -Dfile.encoding=UTF-8 -Dkotlin.daemon.jvm.options=-Xmx2g"
 
   build:
     name: Build & Test
@@ -72,10 +79,31 @@ jobs:
           echo "$GOOGLE_SERVICES_JSON_B64" | base64 --decode > app/google-services.json
 
       - name: 🤖 Build Project (Gradle)
-        run: ./gradlew clean :app:compileDebugKotlin --no-daemon
+        run: >
+          ./gradlew clean :app:compileDebugKotlin
+          --no-daemon
+          --no-configuration-cache
+          --max-workers=2
+          -Dorg.gradle.vfs.watch=false
+          -Dorg.gradle.daemon.performance.disable-logging=true
+          "-Dorg.gradle.jvmargs=-Xmx6g -Xms2g -XX:MaxMetaspaceSize=2g -Dfile.encoding=UTF-8 -Dkotlin.daemon.jvm.options=-Xmx2g"
 
       - name: ✅ Run Unit Tests
-        run: ./gradlew :app:testDebugUnitTest --no-daemon
+        run: >
+          ./gradlew :app:testDebugUnitTest
+          --no-daemon
+          --no-configuration-cache
+          --max-workers=2
+          -Dorg.gradle.vfs.watch=false
+          -Dorg.gradle.daemon.performance.disable-logging=true
+          "-Dorg.gradle.jvmargs=-Xmx6g -Xms2g -XX:MaxMetaspaceSize=2g -Dfile.encoding=UTF-8 -Dkotlin.daemon.jvm.options=-Xmx2g"
 
       - name: 🛡️ Verify Release R8 Shrinking
-        run: ./gradlew :app:minifyReleaseWithR8 --no-daemon
+        run: >
+          ./gradlew :app:minifyReleaseWithR8
+          --no-daemon
+          --no-configuration-cache
+          --max-workers=1
+          -Dorg.gradle.vfs.watch=false
+          -Dorg.gradle.daemon.performance.disable-logging=true
+          "-Dorg.gradle.jvmargs=-Xmx6g -Xms2g -XX:MaxMetaspaceSize=2g -Dfile.encoding=UTF-8 -Dkotlin.daemon.jvm.options=-Xmx2g"

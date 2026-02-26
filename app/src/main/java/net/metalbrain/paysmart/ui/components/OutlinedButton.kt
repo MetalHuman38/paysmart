@@ -37,7 +37,7 @@ fun OutlinedButton(
     height: Dp = ButtonTokens.height,
 
     ) {
-    androidx.compose.material3.OutlinedButton(
+    OutlinedButton(
         onClick = onClick,
         enabled = enabled && !isLoading,
         modifier = modifier

@@ -92,6 +92,10 @@
     public static <fields>;
 }
 
+# Suppress protobuf service-loader warning emitted from merged META-INF/services.
+-dontwarn com.google.protobuf.GeneratedExtensionRegistryLoader
+-dontwarn com.google.protobuf.**GeneratedExtensionRegistryLite$Loader
+
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.

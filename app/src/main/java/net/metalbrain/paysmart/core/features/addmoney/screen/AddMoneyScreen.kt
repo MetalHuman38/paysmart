@@ -46,7 +46,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
-import com.stripe.android.paymentsheet.rememberPaymentSheet
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.addmoney.viewmodel.AddMoneyViewModel
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountrySelectionCatalog
@@ -82,13 +81,17 @@ fun AddMoneyScreen(
         preferredCurrencyCode = uiState.countryCurrencyCode,
         preferredFlagEmoji = uiState.countryFlagEmoji
     )
-    val paymentSheet = rememberPaymentSheet { result ->
-        when (result) {
-            is PaymentSheetResult.Completed -> viewModel.onPaymentSheetCompleted()
-            is PaymentSheetResult.Canceled -> viewModel.onPaymentSheetCanceled()
-            is PaymentSheetResult.Failed -> viewModel.onPaymentSheetFailed(result.error.localizedMessage)
+    val paymentResultCallback: (PaymentSheetResult) -> Unit = remember {
+        { result ->
+            when (result) {
+                is PaymentSheetResult.Completed -> viewModel.onPaymentSheetCompleted()
+                is PaymentSheetResult.Canceled -> viewModel.onPaymentSheetCanceled()
+                is PaymentSheetResult.Failed ->
+                    viewModel.onPaymentSheetFailed(result.error.localizedMessage)
+            }
         }
     }
+    val paymentSheet = PaymentSheet.Builder(paymentResultCallback).build()
 
     LaunchedEffect(uiState.paymentSheetLaunch) {
         val launch = uiState.paymentSheetLaunch ?: return@LaunchedEffect
@@ -216,7 +219,7 @@ fun AddMoneyScreen(
                             )
                         },
                         label = "Paying in",
-                        value = "${currencyFlagEmoji} ${uiState.currency.uppercase(Locale.US)}"
+                        value = "$currencyFlagEmoji ${uiState.currency.uppercase(Locale.US)}"
                     )
 
                     SummaryLine(

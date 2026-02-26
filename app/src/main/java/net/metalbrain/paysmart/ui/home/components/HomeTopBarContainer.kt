@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import net.metalbrain.paysmart.ui.profile.components.UserIconButton
-import net.metalbrain.paysmart.ui.referral.components.ReferralBannerButton
+import net.metalbrain.paysmart.core.features.account.profile.components.UserIconButton
+import net.metalbrain.paysmart.core.features.referral.components.ReferralBannerButton
 
 @Composable
 fun HomeTopBarContainer(

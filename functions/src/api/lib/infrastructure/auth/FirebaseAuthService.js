@@ -15,6 +15,7 @@ export class FirebaseAuthService {
         return {
             uid: user.uid,
             email: user.email ?? undefined,
+            emailVerified: user.emailVerified,
         };
     }
     async updateUserEmail(uid, email) {

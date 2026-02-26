@@ -3,7 +3,7 @@ package net.metalbrain.paysmart.domain.usecase
 import android.content.Context
 import android.content.Intent
 import com.google.firebase.auth.FirebaseUser
-import net.metalbrain.paysmart.core.auth.providers.EmailLinkAuthProvider
+import net.metalbrain.paysmart.core.features.account.authentication.email.provider.EmailLinkAuthProvider
 import javax.inject.Inject
 
 class EmailLinkUseCase @Inject constructor() {

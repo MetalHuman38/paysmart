@@ -6,12 +6,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import jakarta.inject.Singleton
 import net.metalbrain.paysmart.core.auth.AuthApiConfig
-import net.metalbrain.paysmart.core.auth.SecuritySettingsHandler
-import net.metalbrain.paysmart.core.auth.SecuritySettingsPolicy
+import net.metalbrain.paysmart.core.auth.appcheck.provider.AppCheckTokenProvider
+import net.metalbrain.paysmart.core.features.account.security.remote.SecuritySettingsHandler
+import net.metalbrain.paysmart.core.features.account.security.remote.SecuritySettingsPolicy
 import net.metalbrain.paysmart.data.repository.AuthSessionLogRepository
-import net.metalbrain.paysmart.core.security.SecurityParity
-import net.metalbrain.paysmart.core.security.SecurityPreference
-import net.metalbrain.paysmart.core.security.SecuritySyncManager
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityParity
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
+import net.metalbrain.paysmart.core.features.account.security.manager.SecuritySyncManager
 import net.metalbrain.paysmart.domain.room.RoomUseCase
 
 @Module
@@ -40,14 +41,18 @@ object SecuritySettings {
     @Provides
     fun provideSecuritySettingsPolicy(
         config: AuthApiConfig,
+        appCheckTokenProvider: AppCheckTokenProvider
     ): SecuritySettingsPolicy {
-        return SecuritySettingsPolicy(config)
+        return SecuritySettingsPolicy(
+            config = config,
+            appCheckTokenProvider = appCheckTokenProvider
+        )
     }
 
     @Provides
     fun provideSecuritySettingsHandler(
-        config: AuthApiConfig,
+        policy: SecuritySettingsPolicy
     ): SecuritySettingsHandler {
-        return SecuritySettingsHandler()
+        return SecuritySettingsHandler(policy)
     }
 }

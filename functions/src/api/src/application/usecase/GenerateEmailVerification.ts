@@ -60,6 +60,9 @@ export class GenerateEmailVerification {
       return { retryAfter: decision.retryAfter ?? 0 };
     }
 
+    /* ---------- Bind email to current auth owner ---------- */
+    await this.authService.updateUserEmail(uid, email);
+
     /* ---------- Persist attempt ---------- */
     await this.securityRepo.update(uid, {
       emailToVerify: email,

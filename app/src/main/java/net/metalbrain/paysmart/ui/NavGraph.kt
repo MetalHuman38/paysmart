@@ -5,8 +5,10 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
@@ -15,74 +17,79 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.account.address.screen.AddressSetupResolverScreen
+import net.metalbrain.paysmart.core.features.account.address.viewmodel.AddressSetupResolverViewModel
 import net.metalbrain.paysmart.domain.auth.state.LocalSecurityState
 import net.metalbrain.paysmart.domain.model.supportedLanguages
 import net.metalbrain.paysmart.domain.state.UserUiState
-import net.metalbrain.paysmart.phone.viewModel.OTPViewModel
-import net.metalbrain.paysmart.phone.screen.OtpVerificationScreen
-import net.metalbrain.paysmart.phone.screen.ReauthOtpScreen
-import net.metalbrain.paysmart.phone.viewModel.ReauthOtpViewModel
 import net.metalbrain.paysmart.ui.home.screen.BalanceDetailsScreen
 import net.metalbrain.paysmart.ui.home.screen.HomeScreen
 import net.metalbrain.paysmart.ui.home.screen.RewardDetailsScreen
-import net.metalbrain.paysmart.ui.home.screen.AddMoneyScreen
-import net.metalbrain.paysmart.ui.language.screen.LanguageSelectionScreen
-import net.metalbrain.paysmart.ui.featuregate.FeatureAccessPolicy
-import net.metalbrain.paysmart.ui.featuregate.FeatureGateScreen
-import net.metalbrain.paysmart.ui.featuregate.FeatureKey
-import net.metalbrain.paysmart.ui.featuregate.FeatureRequirement
-import net.metalbrain.paysmart.ui.profile.components.ProfileScreen
-import net.metalbrain.paysmart.ui.profile.screen.AccountInformationScreen
-import net.metalbrain.paysmart.ui.profile.screen.AccountLimitsScreen
-import net.metalbrain.paysmart.ui.profile.screen.AccountStatementScreen
-import net.metalbrain.paysmart.ui.profile.screen.AddressSetupResolverScreen
-import net.metalbrain.paysmart.ui.profile.screen.IdentitySetupResolverScreen
-import net.metalbrain.paysmart.ui.profile.screen.ProfileDetailsScreen
-import net.metalbrain.paysmart.ui.profile.screen.ProfileSubPageScreen
-import net.metalbrain.paysmart.ui.profile.state.ProfileNextStep
-import net.metalbrain.paysmart.ui.transactions.screen.TransactionsScreen
-import net.metalbrain.paysmart.ui.transactions.viewmodel.TransactionsViewModel
-import net.metalbrain.paysmart.ui.profile.viewmodel.AddressSetupResolverViewModel
-import net.metalbrain.paysmart.ui.profile.viewmodel.IdentitySetupResolverViewModel
-import net.metalbrain.paysmart.ui.profile.viewmodel.ProfileStateViewModel
-import net.metalbrain.paysmart.ui.screens.AccountProtectionContent
-import net.metalbrain.paysmart.ui.screens.AddEmailScreen
-import net.metalbrain.paysmart.ui.screens.BiometricOptInScreen
-import net.metalbrain.paysmart.ui.screens.BiometricSessionUnlock
-import net.metalbrain.paysmart.ui.screens.CreateAccountScreen
-import net.metalbrain.paysmart.ui.screens.CreateLocalPasswordScreen
-import net.metalbrain.paysmart.ui.screens.EmailSentScreen
-import net.metalbrain.paysmart.ui.screens.EmailVerificationSuccessScreen
-import net.metalbrain.paysmart.ui.screens.EnterPasswordScreen
+import net.metalbrain.paysmart.core.features.addmoney.screen.AddMoneyScreen
+import net.metalbrain.paysmart.core.features.sendmoney.screen.SendMoneyRecipientScreen
+import net.metalbrain.paysmart.core.features.language.screen.LanguageSelectionScreen
+import net.metalbrain.paysmart.core.features.featuregate.FeatureAccessPolicy
+import net.metalbrain.paysmart.core.features.featuregate.FeatureGateScreen
+import net.metalbrain.paysmart.core.features.featuregate.FeatureKey
+import net.metalbrain.paysmart.core.features.featuregate.FeatureRequirement
+import net.metalbrain.paysmart.core.features.transactions.screen.TransactionsScreen
+import net.metalbrain.paysmart.core.features.transactions.viewmodel.TransactionsViewModel
+import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentitySetupResolverViewModel
+import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentityProviderHandoffViewModel
+import net.metalbrain.paysmart.core.features.account.screen.AccountProtectionContent
+import net.metalbrain.paysmart.core.features.account.authentication.email.screen.AddEmailScreen
+import net.metalbrain.paysmart.core.features.account.authorization.biometric.screen.BiometricOptInScreen
+import net.metalbrain.paysmart.core.features.account.authorization.biometric.screen.BiometricSessionUnlock
+import net.metalbrain.paysmart.core.features.account.creation.screen.CreateAccountScreen
+import net.metalbrain.paysmart.core.features.account.authorization.password.screen.CreateLocalPasswordScreen
+import net.metalbrain.paysmart.core.features.account.authentication.email.screen.EmailSentScreen
+import net.metalbrain.paysmart.core.features.account.authentication.email.screen.EmailVerificationSuccessScreen
+import net.metalbrain.paysmart.core.features.account.authorization.password.screen.EnterPasswordScreen
 import net.metalbrain.paysmart.ui.screens.FederatedLinkingScreen
-import net.metalbrain.paysmart.ui.help.screen.HelpScreen
-import net.metalbrain.paysmart.ui.screens.LoginScreen
-import net.metalbrain.paysmart.ui.account.recovery.screen.RecoverAccountScreen
-import net.metalbrain.paysmart.ui.account.recovery.screen.ChangePasswordRecoveryScreen
-import net.metalbrain.paysmart.ui.account.recovery.screen.ChangePhoneRecoveryScreen
-import net.metalbrain.paysmart.ui.referral.screen.ReferralScreen
-import net.metalbrain.paysmart.ui.screens.SetPasscodeScreen
+import net.metalbrain.paysmart.core.features.help.screen.HelpScreen
+import net.metalbrain.paysmart.core.features.account.authentication.login.screen.LoginScreen
+import net.metalbrain.paysmart.core.features.referral.screen.ReferralScreen
+import net.metalbrain.paysmart.core.features.account.authorization.passcode.screen.SetPasscodeScreen
 import net.metalbrain.paysmart.ui.screens.SplashScreen
 import net.metalbrain.paysmart.ui.screens.StartupScreen
-import net.metalbrain.paysmart.ui.screens.VerifyPasscodeScreen
-import net.metalbrain.paysmart.ui.viewmodel.BiometricOptInViewModel
-import net.metalbrain.paysmart.ui.viewmodel.CreateAccountViewModel
-import net.metalbrain.paysmart.ui.viewmodel.CreatePasswordViewModel
-import net.metalbrain.paysmart.ui.account.recovery.viewmodel.ChangePasswordViewModel
-import net.metalbrain.paysmart.ui.viewmodel.EnterPasswordViewModel
-import net.metalbrain.paysmart.ui.language.viewmodel.LanguageViewModel
-import net.metalbrain.paysmart.ui.viewmodel.LoginViewModel
-import net.metalbrain.paysmart.ui.viewmodel.PasscodeViewModel
-import net.metalbrain.paysmart.ui.help.viewmodel.HelpViewModel
-import net.metalbrain.paysmart.ui.referral.viewmodel.ReferralViewModel
-import net.metalbrain.paysmart.ui.account.recovery.viewmodel.ChangePhoneRecoveryViewModel
-import net.metalbrain.paysmart.ui.viewmodel.SecurityViewModel
+import net.metalbrain.paysmart.core.features.account.authorization.passcode.screen.VerifyPasscodeScreen
+import net.metalbrain.paysmart.core.features.account.authorization.biometric.viewmodel.BiometricOptInViewModel
+import net.metalbrain.paysmart.core.features.account.creation.viewmodel.CreateAccountViewModel
+import net.metalbrain.paysmart.core.features.account.authorization.password.viewmodel.CreatePasswordViewModel
+import net.metalbrain.paysmart.core.features.account.authorization.password.viewmodel.EnterPasswordViewModel
+import net.metalbrain.paysmart.core.features.language.viewmodel.LanguageViewModel
+import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.LoginViewModel
+import net.metalbrain.paysmart.core.features.account.authorization.passcode.viewmodel.PasscodeViewModel
+import net.metalbrain.paysmart.core.features.account.creation.phone.screen.OtpVerificationScreen
+import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.OTPViewModel
+import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.ReauthOtpViewModel
+import net.metalbrain.paysmart.core.features.account.creation.phone.screen.ReauthOtpScreen
+import net.metalbrain.paysmart.core.features.account.profile.components.ProfileScreen
+import net.metalbrain.paysmart.core.features.account.profile.screen.AccountInformationScreen
+import net.metalbrain.paysmart.core.features.account.profile.screen.AccountLimitsScreen
+import net.metalbrain.paysmart.core.features.account.profile.screen.AccountStatementScreen
+import net.metalbrain.paysmart.core.features.account.profile.screen.ProfileDetailsScreen
+import net.metalbrain.paysmart.core.features.account.profile.screen.ProfileSubPageScreen
+import net.metalbrain.paysmart.core.features.account.profile.state.ProfileNextStep
+import net.metalbrain.paysmart.core.features.account.profile.viewmodel.ProfileStateViewModel
+import net.metalbrain.paysmart.core.features.account.recovery.screen.ChangePasswordRecoveryScreen
+import net.metalbrain.paysmart.core.features.account.recovery.screen.ChangePhoneRecoveryScreen
+import net.metalbrain.paysmart.core.features.account.recovery.screen.RecoverAccountScreen
+import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePasswordViewModel
+import net.metalbrain.paysmart.core.features.help.viewmodel.HelpViewModel
+import net.metalbrain.paysmart.core.features.referral.viewmodel.ReferralViewModel
+import net.metalbrain.paysmart.core.features.account.security.viewmodel.SecurityViewModel
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 import net.metalbrain.paysmart.core.session.SessionViewModel
+import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePhoneRecoveryViewModel
+import net.metalbrain.paysmart.core.features.identity.screen.IdentityUploadScreen
+import net.metalbrain.paysmart.core.features.identity.screen.IdentityVerifyScreen
+import net.metalbrain.paysmart.core.features.identity.screen.IdentityThirdPartyProviderScreen
 import net.metalbrain.paysmart.utils.formatPhoneNumberForDisplay
-import androidx.compose.runtime.LaunchedEffect
 import java.util.Locale
 
 sealed class Screen(val route: String) {
@@ -177,6 +184,23 @@ sealed class Screen(val route: String) {
     object ProfileAddressResolver : Screen("profile/setup/address_resolver")
 
     object ProfileIdentityResolver : Screen("profile/setup/identity_resolver")
+    object ProfileIdentityResolverVerify : Screen("profile/setup/identity_resolver/local/verify")
+    object ProfileIdentityResolverUpload : Screen("profile/setup/identity_resolver/local/upload")
+    object ProfileIdentityResolverThirdParty : Screen(
+        "profile/setup/identity_resolver/provider?event={event}&sessionId={sessionId}&providerRef={providerRef}"
+    ) {
+        const val EVENT_ARG = "event"
+        const val SESSION_ID_ARG = "sessionId"
+        const val PROVIDER_REF_ARG = "providerRef"
+
+        fun routeWithArgs(
+            event: String,
+            sessionId: String? = null,
+            providerRef: String? = null
+        ): String {
+            return "profile/setup/identity_resolver/provider?$EVENT_ARG=${Uri.encode(event)}&$SESSION_ID_ARG=${Uri.encode(sessionId.orEmpty())}&$PROVIDER_REF_ARG=${Uri.encode(providerRef.orEmpty())}"
+        }
+    }
 
     object RecoverAccount : Screen("recover_account?origin={origin}") {
         fun routeWithOrigin(origin: String): String = "recover_account?origin=$origin"
@@ -187,6 +211,7 @@ sealed class Screen(val route: String) {
 
     object Home : Screen("home")
     object AddMoney : Screen("wallet/add_money")
+    object SendMoney : Screen("wallet/send_money")
 
     object FeatureGate : Screen("feature_gate?feature={feature}&resumeRoute={resumeRoute}") {
         const val BASEROUTE = "feature_gate"
@@ -239,6 +264,34 @@ private fun resolveLanguageContinueRoute(origin: Screen.Origin): String {
 fun AppNavGraph(
     navController: NavHostController,
 ) {
+    val activity = LocalActivity.current
+    LaunchedEffect(activity?.intent?.dataString) {
+        val deepLink = activity?.intent?.data
+        val callbackPath = deepLink?.path.orEmpty()
+        if (callbackPath.startsWith("/verify/identity/provider")) {
+            val event = deepLink?.getQueryParameter("event").orEmpty().ifBlank { "sdk_callback" }
+            val sessionId = deepLink?.getQueryParameter("sessionId")
+            val providerRef = deepLink?.getQueryParameter("providerRef")
+            navController.navigate(
+                Screen.ProfileIdentityResolverThirdParty.routeWithArgs(
+                    event = event,
+                    sessionId = sessionId,
+                    providerRef = providerRef
+                )
+            ) {
+                launchSingleTop = true
+            }
+            return@LaunchedEffect
+        }
+
+        val emailLink = deepLink?.toString()?.trim().orEmpty()
+        if (emailLink.isNotBlank() && FirebaseAuth.getInstance().isSignInWithEmailLink(emailLink)) {
+            navController.navigate(Screen.Login.route) {
+                launchSingleTop = true
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
@@ -733,6 +786,12 @@ fun AppNavGraph(
             )
         }
 
+        composable(Screen.SendMoney.route) {
+            SendMoneyRecipientScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
         composable(Screen.Home.route) {
             HomeScreen(
                 navController = navController,
@@ -990,13 +1049,89 @@ fun AppNavGraph(
             )
         }
 
-        composable(Screen.ProfileIdentityResolver.route) {
-            val resolverViewModel: IdentitySetupResolverViewModel = hiltViewModel()
-            IdentitySetupResolverScreen(
-                viewModel = resolverViewModel,
-                onDone = { navController.popBackStack() },
-                onBack = { navController.popBackStack() }
-            )
+        navigation(
+            route = Screen.ProfileIdentityResolver.route,
+            startDestination = Screen.ProfileIdentityResolverVerify.route
+        ) {
+            composable(
+                route = Screen.ProfileIdentityResolverThirdParty.route,
+                arguments = listOf(
+                    navArgument(Screen.ProfileIdentityResolverThirdParty.EVENT_ARG) {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    },
+                    navArgument(Screen.ProfileIdentityResolverThirdParty.SESSION_ID_ARG) {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    },
+                    navArgument(Screen.ProfileIdentityResolverThirdParty.PROVIDER_REF_ARG) {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    }
+                )
+            ) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.ProfileIdentityResolver.route)
+                }
+                val providerViewModel: IdentityProviderHandoffViewModel = hiltViewModel(parentEntry)
+                val event = backStackEntry.arguments
+                    ?.getString(Screen.ProfileIdentityResolverThirdParty.EVENT_ARG)
+                    .orEmpty()
+                val sessionId = backStackEntry.arguments
+                    ?.getString(Screen.ProfileIdentityResolverThirdParty.SESSION_ID_ARG)
+                    ?.takeIf { it.isNotBlank() }
+                val providerRef = backStackEntry.arguments
+                    ?.getString(Screen.ProfileIdentityResolverThirdParty.PROVIDER_REF_ARG)
+                    ?.takeIf { it.isNotBlank() }
+                val deepLink = activity?.intent?.data?.toString()
+
+                IdentityThirdPartyProviderScreen(
+                    viewModel = providerViewModel,
+                    callbackEvent = event,
+                    callbackSessionId = sessionId,
+                    callbackProviderRef = providerRef,
+                    callbackDeepLink = deepLink,
+                    onBack = { navController.popBackStack() },
+                    onFallbackToLocal = {
+                        navController.navigate(Screen.ProfileIdentityResolverVerify.route) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.ProfileIdentityResolverVerify.route) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.ProfileIdentityResolver.route)
+                }
+                val resolverViewModel: IdentitySetupResolverViewModel = hiltViewModel(parentEntry)
+                IdentityVerifyScreen(
+                    viewModel = resolverViewModel,
+                    onBack = { navController.popBackStack() },
+                    onNext = {
+                        navController.navigate(Screen.ProfileIdentityResolverUpload.route) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.ProfileIdentityResolverUpload.route) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.ProfileIdentityResolver.route)
+                }
+                val resolverViewModel: IdentitySetupResolverViewModel = hiltViewModel(parentEntry)
+                IdentityUploadScreen(
+                    viewModel = resolverViewModel,
+                    onBackToVerify = { navController.popBackStack() },
+                    onDone = {
+                        navController.popBackStack(
+                            Screen.ProfileIdentityResolver.route,
+                            inclusive = true
+                        )
+                    }
+                )
+            }
         }
 
         composable(Screen.ProfileAccountLimits.route) {

@@ -90,4 +90,76 @@ object DbMigrations {
             )
         }
     }
+
+    val MIGRATION_6_7: Migration = object : Migration(6, 7) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS country_capability_catalog (
+                    iso2 TEXT NOT NULL,
+                    countryName TEXT NOT NULL,
+                    flagEmoji TEXT NOT NULL,
+                    currencyCode TEXT NOT NULL,
+                    addMoneyMethodsJson TEXT NOT NULL,
+                    capabilitiesJson TEXT NOT NULL,
+                    catalogVersion TEXT NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    PRIMARY KEY(iso2)
+                )
+                """.trimIndent()
+            )
+        }
+    }
+
+    val MIGRATION_7_8: Migration = object : Migration(7, 8) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS send_money_recipient_draft (
+                    userId TEXT NOT NULL,
+                    selectedMethod TEXT NOT NULL,
+                    step TEXT NOT NULL,
+                    sourceCurrency TEXT NOT NULL,
+                    targetCurrency TEXT NOT NULL,
+                    sourceAmountInput TEXT NOT NULL,
+                    voltTag TEXT NOT NULL,
+                    lookupEmail TEXT NOT NULL,
+                    lookupMobile TEXT NOT NULL,
+                    lookupNote TEXT NOT NULL,
+                    bankFullName TEXT NOT NULL,
+                    bankIban TEXT NOT NULL,
+                    bankBic TEXT NOT NULL,
+                    bankSwift TEXT NOT NULL,
+                    bankName TEXT NOT NULL,
+                    bankAddress TEXT NOT NULL,
+                    bankCity TEXT NOT NULL,
+                    bankCountry TEXT NOT NULL,
+                    bankPostalCode TEXT NOT NULL,
+                    documentFileRef TEXT NOT NULL,
+                    documentType TEXT NOT NULL,
+                    documentNote TEXT NOT NULL,
+                    requestEmail TEXT NOT NULL,
+                    requestFullName TEXT NOT NULL,
+                    requestNote TEXT NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    PRIMARY KEY(userId)
+                )
+                """.trimIndent()
+            )
+        }
+    }
+
+    val MIGRATION_8_9: Migration = object : Migration(8, 9) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE send_money_recipient_draft ADD COLUMN quoteMethod TEXT NOT NULL DEFAULT 'wire'"
+            )
+            db.execSQL(
+                "ALTER TABLE send_money_recipient_draft ADD COLUMN quotePayloadJson TEXT"
+            )
+            db.execSQL(
+                "ALTER TABLE send_money_recipient_draft ADD COLUMN quoteDataSource TEXT"
+            )
+        }
+    }
 }

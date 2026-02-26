@@ -5,9 +5,9 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import jakarta.inject.Inject
+import net.metalbrain.paysmart.core.features.account.creation.phone.di.PhoneModule
 import net.metalbrain.paysmart.data.native.RoomNativeBridge
 import net.metalbrain.paysmart.di.AppModule
-import net.metalbrain.paysmart.phone.di.PhoneModule
 import net.metalbrain.paysmart.utils.RoomKeyProvider
 import org.junit.Assert.*
 import org.junit.Before

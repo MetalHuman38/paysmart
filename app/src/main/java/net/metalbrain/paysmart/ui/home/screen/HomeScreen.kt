@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import net.metalbrain.paysmart.ui.Screen
-import net.metalbrain.paysmart.ui.featuregate.FeatureKey
+import net.metalbrain.paysmart.core.features.featuregate.FeatureKey
 import net.metalbrain.paysmart.ui.home.components.HomeContent
 import net.metalbrain.paysmart.ui.home.nav.HomeBottomNavigation
 import net.metalbrain.paysmart.ui.home.viewmodel.HomeViewModel
@@ -48,6 +48,14 @@ fun HomeScreen(
                 onTransactionsClick = {
                     navController.navigate(Screen.Transactions.route)
                 },
+                onSendMoneyClick = {
+                    navController.navigate(
+                        Screen.FeatureGate.routeWithArgs(
+                            feature = FeatureKey.SEND_MONEY.id,
+                            resumeRoute = Screen.SendMoney.route
+                        )
+                    )
+                },
                 onBalanceCardClick = {
                     navController.navigate(
                         Screen.BalanceDetails.routeWithArgs(primaryCurrency, primaryAmount)
@@ -81,7 +89,9 @@ fun HomeScreen(
                 localSettings = uiState.security,
                 transactions = uiState.recentTransactions,
                 balanceSnapshot = uiState.balanceSnapshot,
-                rewardEarned = uiState.rewardEarned
+                rewardEarned = uiState.rewardEarned,
+                countryFlagEmoji = uiState.countryFlagEmoji,
+                topUpPolicyHint = uiState.topUpPolicyHint
             )
         }
     }

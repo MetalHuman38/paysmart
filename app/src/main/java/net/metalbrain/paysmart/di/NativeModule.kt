@@ -4,7 +4,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import net.metalbrain.paysmart.core.auth.BcryptPasswordHasher
+import net.metalbrain.paysmart.core.features.account.authorization.password.repository.BcryptPasswordHasher
 import net.metalbrain.paysmart.core.auth.NativePasswordHasher
 import net.metalbrain.paysmart.domain.crypto.CryptoUseCase
 import net.metalbrain.paysmart.domain.crypto.NativeCryptoUseCase

@@ -1,0 +1,86 @@
+package net.metalbrain.paysmart.core.features.account.authorization.password.repository
+
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import jakarta.inject.Inject
+import net.metalbrain.paysmart.core.features.account.authorization.password.repository.BcryptPasswordHasher
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
+
+class SecurePasswordRepository @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+    private val hasher: BcryptPasswordHasher,
+    private val securityPreference: SecurityPreference,
+    private val passwordPolicyHandler: PasswordPolicyHandler
+) : PasswordRepository {
+
+    private val file = PasswordCryptoFile(context)
+
+    override suspend fun setPassword(plain: String, idToken: String) {
+        if (file.exists()) {
+            val currentHash = file.read() ?: throw IllegalStateException("File exists but unreadable")
+            if (!hasher.verify(plain, currentHash)) {
+                throw IllegalStateException("Password mismatch")
+            }
+            if (hasher.needsRehash(currentHash)) {
+                val newHash = hasher.hash(plain)
+                file.write(newHash)
+            }
+        } else {
+            val newHash = hasher.hash(plain)
+            file.write(newHash)
+        }
+
+        val serverAccepted = passwordPolicyHandler.setPasswordEnabled(idToken)
+        val updated = securityPreference
+            .loadLocalSecurityState()
+            .copy(passwordEnabled = serverAccepted)
+        securityPreference.saveLocalSecurityState(updated)
+
+        if (!serverAccepted) {
+            throw IllegalStateException("Server failed to acknowledge password enablement")
+        }
+    }
+
+    override suspend fun verify(plain: String): Boolean {
+        val stored = file.read() ?: return false
+        val ok = hasher.verify(plain, stored)
+        if (ok && hasher.needsRehash(stored)) {
+            val newHash = hasher.hash(plain)
+            file.write(newHash)
+        }
+        return ok
+    }
+
+    override suspend fun hasPassword(): Boolean {
+        return file.exists()
+    }
+
+    override suspend fun changePassword(old: String, new: String, idToken: String): Boolean {
+        val stored = file.read() ?: return false
+        if (!hasher.verify(old, stored)) return false
+
+        val previousState = securityPreference.loadLocalSecurityState()
+        val nextHash = hasher.hash(new)
+        file.write(nextHash)
+
+        return try {
+            val serverAccepted = passwordPolicyHandler.setPasswordEnabled(idToken)
+            if (!serverAccepted) {
+                file.write(stored)
+                securityPreference.saveLocalSecurityState(previousState)
+                return false
+            }
+
+            securityPreference.saveLocalSecurityState(
+                previousState.copy(passwordEnabled = true)
+            )
+            true
+        } catch (e: Exception) {
+            file.write(stored)
+            securityPreference.saveLocalSecurityState(previousState)
+            throw e
+        }
+    }
+
+    override suspend fun clear() = file.clear()
+}

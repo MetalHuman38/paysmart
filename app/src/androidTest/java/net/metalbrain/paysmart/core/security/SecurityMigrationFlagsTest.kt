@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.core.security
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityMigrationFlags
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

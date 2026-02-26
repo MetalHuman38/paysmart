@@ -15,6 +15,9 @@ import { setHomeAddressVerifiedHandler } from "../handlers/setHomeAddressVerifie
 import { identityUploadSessionHandler } from "../handlers/identityUploadSession.js";
 import { identityUploadCommitHandler } from "../handlers/identityUploadCommit.js";
 import { identityUploadPayloadHandler } from "../handlers/identityUploadPayload.js";
+import { identityProviderStartSessionHandler } from "../handlers/identityProviderStartSession.js";
+import { identityProviderResumeHandler } from "../handlers/identityProviderResume.js";
+import { identityProviderCallbackHandler } from "../handlers/identityProviderCallback.js";
 export function mountAuthPolicyRoutes(app) {
     // Email Verification
     app.post("/auth/generate", requireActiveSession, generateEmailVerificationHandler);
@@ -67,6 +70,21 @@ export function mountAuthPolicyRoutes(app) {
     });
     app.post("/auth/identity/upload/payload", requireActiveSession, identityUploadPayloadHandler);
     app.options("/auth/identity/upload/payload", (_, res) => {
+        corsify(res);
+        res.status(204).end();
+    });
+    app.post("/auth/identity/provider/startSession", requireActiveSession, identityProviderStartSessionHandler);
+    app.options("/auth/identity/provider/startSession", (_, res) => {
+        corsify(res);
+        res.status(204).end();
+    });
+    app.post("/auth/identity/provider/resume", requireActiveSession, identityProviderResumeHandler);
+    app.options("/auth/identity/provider/resume", (_, res) => {
+        corsify(res);
+        res.status(204).end();
+    });
+    app.post("/auth/identity/provider/callback", requireActiveSession, identityProviderCallbackHandler);
+    app.options("/auth/identity/provider/callback", (_, res) => {
         corsify(res);
         res.status(204).end();
     });

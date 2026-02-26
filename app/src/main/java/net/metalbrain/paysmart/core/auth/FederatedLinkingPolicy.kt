@@ -8,10 +8,13 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
+import net.metalbrain.paysmart.core.auth.appcheck.provider.AppCheckTokenProvider
+import net.metalbrain.paysmart.core.auth.appcheck.provider.attachOptionalAppCheckToken
 
 
 class FederatedLinkingPolicy(
     private val config: AuthApiConfig,
+    private val appCheckTokenProvider: AppCheckTokenProvider? = null,
     private val httpClient: OkHttpClient = defaultClient
 ) {
     companion object {
@@ -31,6 +34,7 @@ class FederatedLinkingPolicy(
         val request = Request.Builder()
             .url(config.checkPhoneOrEmailUrl)
             .post(json.toString().toRequestBody("application/json".toMediaType()))
+            .attachOptionalAppCheckToken(appCheckTokenProvider)
             .build()
 
         return withContext(Dispatchers.IO) {

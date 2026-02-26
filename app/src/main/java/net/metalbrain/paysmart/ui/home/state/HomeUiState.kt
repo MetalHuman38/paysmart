@@ -15,5 +15,7 @@ data class HomeUiState(
     val security: LocalSecuritySettingsModel? = null,
     val recentTransactions: List<Transaction> = emptyList(),
     val balanceSnapshot: HomeBalanceSnapshot = HomeBalanceSnapshot(),
-    val rewardEarned: RewardEarnedSnapshot = RewardEarnedSnapshot()
+    val rewardEarned: RewardEarnedSnapshot = RewardEarnedSnapshot(),
+    val countryFlagEmoji: String = "🌍",
+    val topUpPolicyHint: String? = null
 )

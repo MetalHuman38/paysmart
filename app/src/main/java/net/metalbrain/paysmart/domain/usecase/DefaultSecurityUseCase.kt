@@ -4,9 +4,9 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
-import net.metalbrain.paysmart.core.auth.PassCodePolicyHandler
-import net.metalbrain.paysmart.core.security.SecurityPreference
-import net.metalbrain.paysmart.data.repository.SecurityRepositoryInterface
+import net.metalbrain.paysmart.core.features.account.authorization.passcode.remote.PassCodePolicyHandler
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
+import net.metalbrain.paysmart.core.features.account.security.repository.SecurityRepositoryInterface
 import net.metalbrain.paysmart.domain.security.SecuritySettingsManager
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.SecuritySettingsModel

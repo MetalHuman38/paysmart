@@ -27,7 +27,8 @@ export function emailContainer() {
   );
 
   const checkEmailVerificationStatus = new CheckEmailVerificationStatus(
-    securityRepo
+    securityRepo,
+    authService
   );
 
   return {

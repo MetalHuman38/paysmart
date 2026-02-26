@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.ui.animate.AnimatedLottieBackground
-import net.metalbrain.paysmart.ui.language.viewmodel.LanguageViewModel
+import net.metalbrain.paysmart.core.features.language.viewmodel.LanguageViewModel
 import net.metalbrain.paysmart.ui.Screen
 import net.metalbrain.paysmart.ui.components.LanguageSelector
 import net.metalbrain.paysmart.ui.theme.Dimens
@@ -136,4 +136,3 @@ fun getLanguageDisplay(code: String): String = when (code) {
     "ko" -> "Korean (한국인)"
     else -> "Language"
 }
-

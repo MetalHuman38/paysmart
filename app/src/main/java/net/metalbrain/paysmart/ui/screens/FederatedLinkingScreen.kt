@@ -47,7 +47,7 @@ import net.metalbrain.paysmart.ui.components.BackendErrorModal
 import net.metalbrain.paysmart.ui.components.EmailVerificationBtn
 import net.metalbrain.paysmart.ui.components.FacebookSignInButton
 import net.metalbrain.paysmart.ui.components.GoogleSignInBtn
-import net.metalbrain.paysmart.ui.viewmodel.LoginViewModel
+import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.LoginViewModel
 import net.metalbrain.paysmart.utils.extractSimpleBackendError
 
 

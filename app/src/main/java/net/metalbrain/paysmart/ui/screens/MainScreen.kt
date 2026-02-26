@@ -15,7 +15,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        Text(text = "👋 Welcome to Paysmart App!")
+        Text(text = "👋 Welcome to Paysmart App!!")
     }
 }
 

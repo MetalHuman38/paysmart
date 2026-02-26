@@ -16,6 +16,9 @@ data class AuthApiConfig (
     val identityUploadPayload: String = "/auth/identity/upload/payload",
     val identityUploadCommit: String = "/auth/identity/upload/commit",
     val identityImageAttestation: String = "/auth/identity/image/attestation",
+    val identityProviderStart: String = "/auth/identity/provider/startSession",
+    val identityProviderResume: String = "/auth/identity/provider/resume",
+    val identityProviderCallback: String = "/auth/identity/provider/callback",
     val addMoneySession: String = "/payments/add-money/session",
     val setPassCodeEnabled: String = "/auth/setPassCodeEnabled",
     val getPassCodeEnabled: String = "/auth/getPassCodeEnabled",
@@ -58,6 +61,12 @@ data class AuthApiConfig (
     val identityUploadPayloadUrl get() = "$apiBase$identityUploadPayload"
 
     val identityImageAttestationUrl get() = "$apiBase$identityImageAttestation"
+
+    val identityProviderStartUrl get() = "$apiBase$identityProviderStart"
+
+    val identityProviderResumeUrl get() = "$apiBase$identityProviderResume"
+
+    val identityProviderCallbackUrl get() = "$apiBase$identityProviderCallback"
 
     val addMoneySessionUrl get() = "$apiBase$addMoneySession"
 

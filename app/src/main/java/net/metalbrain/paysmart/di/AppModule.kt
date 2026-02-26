@@ -13,16 +13,16 @@ import net.metalbrain.paysmart.core.auth.AuthApiConfig
 import net.metalbrain.paysmart.core.auth.AuthHook
 import net.metalbrain.paysmart.core.auth.AuthPolicyHandler
 import net.metalbrain.paysmart.core.auth.AuthService
-import net.metalbrain.paysmart.core.auth.PasswordPolicyHandler
+import net.metalbrain.paysmart.core.features.account.authorization.password.repository.PasswordPolicyHandler
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.FirebaseAuthRepository
 import net.metalbrain.paysmart.data.repository.FirestoreUserProfileRepository
-import net.metalbrain.paysmart.data.repository.PasswordRepository
-import net.metalbrain.paysmart.data.repository.SecurePasswordRepository
-import net.metalbrain.paysmart.data.repository.SecurityRepository
-import net.metalbrain.paysmart.data.repository.SecurityRepositoryInterface
+import net.metalbrain.paysmart.core.features.account.authorization.password.repository.PasswordRepository
+import net.metalbrain.paysmart.core.features.account.authorization.password.repository.SecurePasswordRepository
+import net.metalbrain.paysmart.core.features.account.security.repository.SecurityRepository
+import net.metalbrain.paysmart.core.features.account.security.repository.SecurityRepositoryInterface
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
-import net.metalbrain.paysmart.data.security.DefaultSecurityManager
+import net.metalbrain.paysmart.core.features.account.security.manager.DefaultSecurityManager
 import net.metalbrain.paysmart.domain.security.SecuritySettingsManager
 import net.metalbrain.paysmart.domain.usecase.DefaultSecurityUseCase
 import net.metalbrain.paysmart.domain.usecase.SecurityUseCase
@@ -61,17 +61,6 @@ object AppModule {
         hooks: List<AuthHook>
     ): AuthService {
         return AuthService(authRepository, hooks)
-    }
-
-    @Module
-    @InstallIn(SingletonComponent::class)
-    object AuthPolicyModule {
-
-        @Provides
-        @Singleton
-        fun provideAuthPolicyHandler(): AuthPolicyHandler {
-            return AuthPolicyHandler()
-        }
     }
 
     @Module

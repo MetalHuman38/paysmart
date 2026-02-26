@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import net.metalbrain.paysmart.ui.transactions.components.TransactionFilter
+import net.metalbrain.paysmart.core.features.transactions.components.TransactionFilter
 
 @Composable
 fun FilterTabs(

@@ -6,6 +6,7 @@ import { CheckPhoneAvailability } from "../../application/usecase/CheckPhoneAvai
 import { FirestoreSecuritySettingsRepository } from "../firestore/FirestoreSecuritySettingsRepository.js";
 import { FirestoreUserRepository } from "../firestore/FirestoreUserRepository.js";
 import { FirestoreIdentityUploadRepository } from "../firestore/FirestoreIdentityUploadRepository.js";
+import { FirestoreIdentityProviderRepository } from "../firestore/FirestoreIdentityProviderRepository.js";
 import { FirestoreAddMoneyRepository } from "../firestore/FirestoreAddMoneyRepository.js";
 import { GoogleCloudAccessTokenProvider } from "../../services/googleCloudAccessTokenProvider.js";
 import { PlayIntegrityVerifier } from "../../services/playIntegrityVerifier.js";
@@ -34,6 +35,7 @@ export function authContainer() {
     const securityRepo = new FirestoreSecuritySettingsRepository(firestore);
     const userRepo = new FirestoreUserRepository(firestore);
     const identityUploadRepo = new FirestoreIdentityUploadRepository(firestore, storageBucket, attestationVerifier, kmsEnvelopeService, config.identityMaxPayloadBytes);
+    const identityProviderRepo = new FirestoreIdentityProviderRepository(firestore);
     const addMoneyRepo = new FirestoreAddMoneyRepository(firestore, stripePaymentsService, config.stripePublishableKey, config.stripeAllowedTopupCurrencies, config.stripeMinimumTopupAmountMinor);
     return {
         getUIDFromAuthHeader: new GetUIDFromAuthHeader(authService),
@@ -42,6 +44,7 @@ export function authContainer() {
         securitySettings: securityRepo,
         userRepo,
         identityUploads: identityUploadRepo,
+        identityProvider: identityProviderRepo,
         addMoney: addMoneyRepo,
     };
 }

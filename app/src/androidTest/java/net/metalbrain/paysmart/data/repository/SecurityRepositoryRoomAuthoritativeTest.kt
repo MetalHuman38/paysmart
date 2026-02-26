@@ -4,8 +4,9 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
-import net.metalbrain.paysmart.core.security.SecurityMigrationFlags
-import net.metalbrain.paysmart.core.security.SecurityPreference
+import net.metalbrain.paysmart.core.features.account.security.repository.SecurityRepository
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityMigrationFlags
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.SecuritySettingsModel
 import net.metalbrain.paysmart.domain.room.RoomUseCase

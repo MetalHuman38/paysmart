@@ -40,22 +40,10 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    fun clearSession() {
-        sessionState.value = null
-    }
-
-    fun isAuthenticated(): Boolean = sessionState.value != null
-
     fun unlockSession(onUnlocked: (() -> Unit)? = null) {
         viewModelScope.launch {
             sessionStateManager.unlockSession()
             onUnlocked?.invoke()
-        }
-    }
-
-    fun lockSession() {
-        viewModelScope.launch {
-            sessionStateManager.lockSession()
         }
     }
 }

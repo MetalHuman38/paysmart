@@ -10,8 +10,10 @@ import dagger.hilt.components.SingletonComponent
 import net.metalbrain.paysmart.room.DbMigrations
 import net.metalbrain.paysmart.room.EncryptedAppDatabase
 import net.metalbrain.paysmart.room.doa.AuthSessionLogDao
+import net.metalbrain.paysmart.room.doa.CountryCapabilityDao
 import net.metalbrain.paysmart.room.doa.FxQuoteCacheDao
 import net.metalbrain.paysmart.room.doa.SecureTokenDao
+import net.metalbrain.paysmart.room.doa.SendMoneyRecipientDraftDao
 import net.metalbrain.paysmart.room.doa.SecuritySettingsDao
 import net.metalbrain.paysmart.room.doa.UserProfileCacheDao
 import net.metalbrain.paysmart.room.doa.WalletBalanceDao
@@ -42,7 +44,10 @@ object RoomProvidesModule {
                 DbMigrations.MIGRATION_2_3,
                 DbMigrations.MIGRATION_3_4,
                 DbMigrations.MIGRATION_4_5,
-                DbMigrations.MIGRATION_5_6
+                DbMigrations.MIGRATION_5_6,
+                DbMigrations.MIGRATION_6_7,
+                DbMigrations.MIGRATION_7_8,
+                DbMigrations.MIGRATION_8_9
             )
             .fallbackToDestructiveMigration(false)
             .build()
@@ -70,4 +75,12 @@ object RoomProvidesModule {
     @Provides
     fun provideFxQuoteCacheDao(db: EncryptedAppDatabase): FxQuoteCacheDao =
         db.fxQuoteCacheDao()
+
+    @Provides
+    fun provideCountryCapabilityDao(db: EncryptedAppDatabase): CountryCapabilityDao =
+        db.countryCapabilityDao()
+
+    @Provides
+    fun provideSendMoneyRecipientDraftDao(db: EncryptedAppDatabase): SendMoneyRecipientDraftDao =
+        db.sendMoneyRecipientDraftDao()
 }

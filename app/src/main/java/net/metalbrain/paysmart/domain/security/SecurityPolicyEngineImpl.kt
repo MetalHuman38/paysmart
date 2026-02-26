@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.metalbrain.paysmart.core.security.SecurityPreference
-import net.metalbrain.paysmart.core.auth.BiometricHelper
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
+import net.metalbrain.paysmart.core.features.account.authorization.biometric.provider.BiometricHelper
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 import net.metalbrain.paysmart.utils.AppCoroutineScope
 import javax.inject.Inject

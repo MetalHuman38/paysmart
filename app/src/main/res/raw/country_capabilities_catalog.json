@@ -1,0 +1,350 @@
+{
+  "schemaVersion": "2026-02-24-v1",
+  "capabilitySets": {
+    "default": [
+      {
+        "key": "send_international",
+        "title": "Send money abroad",
+        "subtitle": "Low-cost international transfers."
+      },
+      {
+        "key": "card_spend_abroad",
+        "title": "Spend abroad with card",
+        "subtitle": "Spend and withdraw in local currency worldwide."
+      },
+      {
+        "key": "hold_and_convert",
+        "title": "Hold and convert money",
+        "subtitle": "Multi-currency balances, convert in seconds."
+      },
+      {
+        "key": "receive_money",
+        "title": "Receive money",
+        "subtitle": "Get account details and get paid from abroad."
+      }
+    ],
+    "gb_us": [
+      {
+        "key": "send_international",
+        "title": "Send money abroad",
+        "subtitle": "Make low-cost international transfers."
+      },
+      {
+        "key": "card_spend_abroad",
+        "title": "Spend abroad with card",
+        "subtitle": "Spend and withdraw in local currency with low fees."
+      },
+      {
+        "key": "hold_and_convert",
+        "title": "Hold and convert money",
+        "subtitle": "Keep and convert funds across multiple currencies."
+      },
+      {
+        "key": "receive_money",
+        "title": "Receive money",
+        "subtitle": "Get paid with local account details where supported."
+      },
+      {
+        "key": "earn_return",
+        "title": "Earn a return",
+        "subtitle": "Earn working-day returns on supported balances.",
+        "footnote": "Rates for selected currencies."
+      }
+    ],
+    "ng": [
+      {
+        "key": "send_international",
+        "title": "Send money abroad",
+        "subtitle": "Low-cost transfers for cross-border payments."
+      },
+      {
+        "key": "card_spend_abroad",
+        "title": "Spend abroad with card",
+        "subtitle": "Spend internationally with transparent card fees."
+      },
+      {
+        "key": "hold_and_convert",
+        "title": "Hold and convert money",
+        "subtitle": "Convert balances quickly between supported currencies."
+      },
+      {
+        "key": "earn_return",
+        "title": "Earn a return",
+        "subtitle": "Earn returns on selected balances.",
+        "footnote": "Availability depends on account status."
+      }
+    ]
+  },
+  "countries": [
+    {
+      "iso2": "GB",
+      "iso3": "GBR",
+      "name": "United Kingdom",
+      "flag": "🇬🇧",
+      "currencyCode": "GBP",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "gb_us"
+    },
+    {
+      "iso2": "US",
+      "iso3": "USA",
+      "name": "United States",
+      "flag": "🇺🇸",
+      "currencyCode": "USD",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "gb_us"
+    },
+    {
+      "iso2": "NG",
+      "iso3": "NGA",
+      "name": "Nigeria",
+      "flag": "🇳🇬",
+      "currencyCode": "NGN",
+      "addMoneyMethods": ["debitCard", "creditCard"],
+      "capabilitySet": "ng"
+    },
+    {
+      "iso2": "DE",
+      "iso3": "DEU",
+      "name": "Germany",
+      "flag": "🇩🇪",
+      "currencyCode": "EUR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "ES",
+      "iso3": "ESP",
+      "name": "Spain",
+      "flag": "🇪🇸",
+      "currencyCode": "EUR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "FR",
+      "iso3": "FRA",
+      "name": "France",
+      "flag": "🇫🇷",
+      "currencyCode": "EUR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "IT",
+      "iso3": "ITA",
+      "name": "Italy",
+      "flag": "🇮🇹",
+      "currencyCode": "EUR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "JP",
+      "iso3": "JPN",
+      "name": "Japan",
+      "flag": "🇯🇵",
+      "currencyCode": "JPY",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "IE",
+      "iso3": "IRL",
+      "name": "Ireland",
+      "flag": "🇮🇪",
+      "currencyCode": "EUR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "NL",
+      "iso3": "NLD",
+      "name": "Netherlands",
+      "flag": "🇳🇱",
+      "currencyCode": "EUR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "BE",
+      "iso3": "BEL",
+      "name": "Belgium",
+      "flag": "🇧🇪",
+      "currencyCode": "EUR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "PT",
+      "iso3": "PRT",
+      "name": "Portugal",
+      "flag": "🇵🇹",
+      "currencyCode": "EUR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "SE",
+      "iso3": "SWE",
+      "name": "Sweden",
+      "flag": "🇸🇪",
+      "currencyCode": "SEK",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "NO",
+      "iso3": "NOR",
+      "name": "Norway",
+      "flag": "🇳🇴",
+      "currencyCode": "NOK",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "DK",
+      "iso3": "DNK",
+      "name": "Denmark",
+      "flag": "🇩🇰",
+      "currencyCode": "DKK",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "FI",
+      "iso3": "FIN",
+      "name": "Finland",
+      "flag": "🇫🇮",
+      "currencyCode": "EUR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "AT",
+      "iso3": "AUT",
+      "name": "Austria",
+      "flag": "🇦🇹",
+      "currencyCode": "EUR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "CH",
+      "iso3": "CHE",
+      "name": "Switzerland",
+      "flag": "🇨🇭",
+      "currencyCode": "CHF",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "TR",
+      "iso3": "TUR",
+      "name": "Turkey",
+      "flag": "🇹🇷",
+      "currencyCode": "TRY",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "AE",
+      "iso3": "ARE",
+      "name": "United Arab Emirates",
+      "flag": "🇦🇪",
+      "currencyCode": "AED",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "SA",
+      "iso3": "SAU",
+      "name": "Saudi Arabia",
+      "flag": "🇸🇦",
+      "currencyCode": "SAR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "CA",
+      "iso3": "CAN",
+      "name": "Canada",
+      "flag": "🇨🇦",
+      "currencyCode": "CAD",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "AU",
+      "iso3": "AUS",
+      "name": "Australia",
+      "flag": "🇦🇺",
+      "currencyCode": "AUD",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "IN",
+      "iso3": "IND",
+      "name": "India",
+      "flag": "🇮🇳",
+      "currencyCode": "INR",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "KE",
+      "iso3": "KEN",
+      "name": "Kenya",
+      "flag": "🇰🇪",
+      "currencyCode": "KES",
+      "addMoneyMethods": ["debitCard", "creditCard"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "ZA",
+      "iso3": "ZAF",
+      "name": "South Africa",
+      "flag": "🇿🇦",
+      "currencyCode": "ZAR",
+      "addMoneyMethods": ["debitCard", "creditCard"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "GH",
+      "iso3": "GHA",
+      "name": "Ghana",
+      "flag": "🇬🇭",
+      "currencyCode": "GHS",
+      "addMoneyMethods": ["debitCard", "creditCard"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "PL",
+      "iso3": "POL",
+      "name": "Poland",
+      "flag": "🇵🇱",
+      "currencyCode": "PLN",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "BR",
+      "iso3": "BRA",
+      "name": "Brazil",
+      "flag": "🇧🇷",
+      "currencyCode": "BRL",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    },
+    {
+      "iso2": "MX",
+      "iso3": "MEX",
+      "name": "Mexico",
+      "flag": "🇲🇽",
+      "currencyCode": "MXN",
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
+      "capabilitySet": "default"
+    }
+  ]
+}

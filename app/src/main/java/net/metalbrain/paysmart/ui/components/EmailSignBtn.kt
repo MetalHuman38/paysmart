@@ -14,16 +14,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import net.metalbrain.paysmart.R
 import androidx.compose.ui.res.stringResource
-import net.metalbrain.paysmart.core.auth.providers.EmailLinkAuthProvider
+import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
 
 @Composable
 fun EmailSignInBtn(
@@ -35,23 +31,13 @@ fun EmailSignInBtn(
     isLoading: Boolean = false,
     loadingText: String = "Please wait..."
 ) {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
     OutlinedButton(
         onClick = {
             if (email.isBlank()) {
                 onError(IllegalArgumentException("Email cannot be empty"))
                 return@OutlinedButton
             }
-            coroutineScope.launch {
-                try {
-                    EmailLinkAuthProvider.sendEmailLink(context, email)
-                    onLinkSent()
-                } catch (e: Exception) {
-                    onError(e)
-                }
-            }
+            onLinkSent()
         },
         enabled = enabled && !isLoading,
         modifier = modifier

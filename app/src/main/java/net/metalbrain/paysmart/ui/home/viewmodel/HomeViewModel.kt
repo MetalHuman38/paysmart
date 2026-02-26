@@ -13,12 +13,15 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import net.metalbrain.paysmart.core.security.SecurityPreference
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
 import net.metalbrain.paysmart.data.repository.TransactionRepository
+import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
 import net.metalbrain.paysmart.data.repository.WalletBalanceRepository
 import net.metalbrain.paysmart.domain.auth.UserManager
 import net.metalbrain.paysmart.domain.auth.state.AuthState
 import net.metalbrain.paysmart.domain.model.Transaction
+import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
+import net.metalbrain.paysmart.core.features.capabilities.repository.CountryCapabilityRepository
 import net.metalbrain.paysmart.ui.home.state.HomeBalanceSnapshot
 import net.metalbrain.paysmart.ui.home.state.HomeUiState
 import net.metalbrain.paysmart.ui.home.state.RewardEarnedSnapshot
@@ -29,6 +32,8 @@ class HomeViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     securityPreference: SecurityPreference,
     private val walletBalanceRepository: WalletBalanceRepository,
+    private val profileCacheRepository: UserProfileCacheRepository,
+    private val countryCapabilityRepository: CountryCapabilityRepository,
     private val userManager: UserManager
 ) : ViewModel() {
 
@@ -47,11 +52,29 @@ class HomeViewModel @Inject constructor(
             initialValue = null
         )
 
+    private val countryCapabilities = userManager.authState
+        .flatMapLatest { auth ->
+            when (auth) {
+                is AuthState.Authenticated -> profileCacheRepository.observeByUid(auth.uid)
+                    .flatMapLatest { profile ->
+                        countryCapabilityRepository.observeProfile(profile?.country)
+                    }
+
+                else -> countryCapabilityRepository.observeProfile(null)
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = CountryCapabilityCatalog.defaultProfile()
+        )
+
     val uiState: StateFlow<HomeUiState> = combine(
         securityPreference.localSecurityStateFlow,
         _transactions,
-        walletBalances
-    ) { localSecurity, transactions, wallet ->
+        walletBalances,
+        countryCapabilities
+    ) { localSecurity, transactions, wallet, capabilityProfile ->
 
         HomeUiState(
             security = localSecurity,
@@ -61,7 +84,9 @@ class HomeViewModel @Inject constructor(
             ),
             rewardEarned = RewardEarnedSnapshot(
                 points = wallet?.rewardsPoints ?: 0.0
-            )
+            ),
+            countryFlagEmoji = capabilityProfile.flagEmoji,
+            topUpPolicyHint = CountryCapabilityCatalog.topUpPolicyHint(capabilityProfile)
         )
     }.stateIn(
         scope = viewModelScope,

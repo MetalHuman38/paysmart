@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.firebase.crashlytics)
     id("androidx.room")
     id("com.google.gms.google-services")
 }
@@ -70,10 +71,9 @@ android {
             val storePassword = project.findProperty("RELEASE_STORE_PASSWORD") as? String
             val keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as? String
             val keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as? String
-            val addressValidatonApiKey = project.findProperty("ADDRESS_VALIDATION_API_KEY") as? String
 
 
-            if (storeFilePath != null && storePassword != null && keyAlias != null && keyPassword != null && addressValidatonApiKey != null) {
+            if (storeFilePath != null && storePassword != null && keyAlias != null && keyPassword != null) {
                 storeFile = file(storeFilePath)
                 this.storePassword = storePassword
                 this.keyAlias = keyAlias
@@ -92,6 +92,7 @@ android {
             buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:5001/paysmart-7ee79/europe-west2/api\"")
             buildConfigField("String", "FUNCTION_API_URL", "\"http://10.0.2.2:8080\"")
             buildConfigField("Boolean", "IS_LOCAL", "true")
+            buildConfigField("Boolean", "APP_CHECK_ENFORCED", "false")
             buildConfigField("Boolean", "PHONE_PNV_PREVIEW_ENABLED", "true")
             buildConfigField("String", "IDENTITY_IMAGE_DETECTION_MODE", "\"on_device\"")
             buildConfigField("Boolean", "IDENTITY_IMAGE_DETECTION_FAIL_OPEN", "true")
@@ -105,9 +106,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "API_BASE_URL", "\"https.europe-west2-paysmart-7ee79.cloudfunctions.net/api\"")
-            buildConfigField("String", "FUNCTION_API_URL", "\"https.europe-west2-paysmart-7ee79.cloudfunctions.net\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://europe-west2-paysmart-7ee79.cloudfunctions.net/api\"")
+            buildConfigField("String", "FUNCTION_API_URL", "\"https://europe-west2-paysmart-7ee79.cloudfunctions.net\"")
             buildConfigField("Boolean", "IS_LOCAL", "false")
+            buildConfigField("Boolean", "APP_CHECK_ENFORCED", "true")
             buildConfigField("Boolean", "PHONE_PNV_PREVIEW_ENABLED", "false")
             buildConfigField("String", "IDENTITY_IMAGE_DETECTION_MODE", "\"on_device\"")
             buildConfigField("Boolean", "IDENTITY_IMAGE_DETECTION_FAIL_OPEN", "true")
@@ -154,6 +156,7 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.core)
+    implementation(libs.play.services.analytics)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.lifecycle.viewmodel.compose)
 
@@ -204,11 +207,8 @@ dependencies {
     androidTestImplementation(libs.mockk.android)
 
 
-    implementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.functions)
-    implementation(libs.kotlin.coroutines.play.services)
     implementation(libs.libphonenumber)
-    implementation(libs.firebase.analytics)
     implementation(libs.androidx.material3)
 
     // Room
@@ -243,4 +243,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 }

@@ -1,6 +1,8 @@
 package net.metalbrain.paysmart.core.security
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityParity
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityParityField
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.SecuritySettingsModel
 import org.junit.Assert.assertFalse

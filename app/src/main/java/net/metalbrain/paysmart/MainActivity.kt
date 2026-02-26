@@ -20,7 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.core.locale.LocaleManager
-import net.metalbrain.paysmart.core.security.RoomKeyManager
+import net.metalbrain.paysmart.room.manager.RoomKeyManager
 import net.metalbrain.paysmart.core.session.IdleSessionWatcher
 import net.metalbrain.paysmart.core.session.SessionStateManager
 import net.metalbrain.paysmart.data.repository.AuthSessionLogRepository
@@ -33,7 +33,7 @@ import net.metalbrain.paysmart.ui.AppNavGraph
 import net.metalbrain.paysmart.ui.LocalizedAppWrapper
 import net.metalbrain.paysmart.ui.Screen
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
-import net.metalbrain.paysmart.ui.viewmodel.SecurityViewModel
+import net.metalbrain.paysmart.core.features.account.security.viewmodel.SecurityViewModel
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {

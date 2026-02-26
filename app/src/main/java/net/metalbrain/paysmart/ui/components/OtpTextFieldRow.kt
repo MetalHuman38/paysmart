@@ -1,7 +1,9 @@
 package net.metalbrain.paysmart.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,29 +20,44 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun OtpTextFieldRow(
     otpDigits: List<String>,
+    modifier: Modifier = Modifier,
     onDigitChanged: (index: Int, value: String) -> Unit
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        otpDigits.forEachIndexed { index, digit ->
-            OutlinedTextField(
-                value = digit,
-                onValueChange = { value -> onDigitChanged(index, value) },
-                singleLine = true,
-                modifier = Modifier
-                    .width(50.dp)
-                    .height(64.dp),
-                textStyle = LocalTextStyle.current.copy(
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center
-                ),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number
-                ),
-                maxLines = 1
-            )
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val spacing = 8.dp
+        val fieldCount = otpDigits.size.coerceAtLeast(1)
+        val totalSpacing = spacing * (fieldCount - 1)
+        val maxFieldWidth = 52.dp
+        val minFieldWidth = 36.dp
+        val candidate = (maxWidth - totalSpacing) / fieldCount
+        val fieldWidth = when {
+            candidate < minFieldWidth -> minFieldWidth
+            candidate > maxFieldWidth -> maxFieldWidth
+            else -> candidate
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacing),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            otpDigits.forEachIndexed { index, digit ->
+                OutlinedTextField(
+                    value = digit,
+                    onValueChange = { value -> onDigitChanged(index, value) },
+                    singleLine = true,
+                    modifier = Modifier
+                        .width(fieldWidth)
+                        .height(64.dp),
+                    textStyle = LocalTextStyle.current.copy(
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center
+                    ),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.NumberPassword
+                    ),
+                    maxLines = 1
+                )
+            }
         }
     }
 }

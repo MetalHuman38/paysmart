@@ -2,6 +2,7 @@ package net.metalbrain.paysmart.core.auth
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
+import net.metalbrain.paysmart.core.features.account.security.remote.SecuritySettingsPolicy
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Protocol

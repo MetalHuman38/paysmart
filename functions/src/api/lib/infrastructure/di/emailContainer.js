@@ -16,7 +16,7 @@ export function emailContainer() {
         getVerifyUrl: () => cfg.getVerifyUrl(),
         shouldSendRealEmails: () => cfg.shouldSendRealEmails(),
     });
-    const checkEmailVerificationStatus = new CheckEmailVerificationStatus(securityRepo);
+    const checkEmailVerificationStatus = new CheckEmailVerificationStatus(securityRepo, authService);
     return {
         generateEmailVerification,
         checkEmailVerificationStatus,

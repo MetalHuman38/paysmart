@@ -2,6 +2,7 @@ package net.metalbrain.paysmart.core.security
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.SecuritySettingsModel
 import org.junit.Assert.assertEquals

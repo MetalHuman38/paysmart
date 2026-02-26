@@ -9,7 +9,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.metalbrain.paysmart.core.auth.AllowFederatedLinkingPolicy
 import net.metalbrain.paysmart.core.auth.AuthApiConfig
-import net.metalbrain.paysmart.core.auth.PassCodePolicyClient
+import net.metalbrain.paysmart.core.features.account.authorization.passcode.remote.PassCodePolicyClient
 import javax.inject.Singleton
 
 @Module

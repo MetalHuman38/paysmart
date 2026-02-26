@@ -8,11 +8,11 @@ import dagger.hilt.android.testing.UninstallModules
 import javax.inject.Inject
 import junit.framework.TestCase.assertEquals
 import net.metalbrain.paysmart.core.auth.AuthPolicyHandler
+import net.metalbrain.paysmart.core.features.account.creation.phone.data.PhoneVerifier
+import net.metalbrain.paysmart.core.features.account.creation.phone.di.PhoneModule
 import net.metalbrain.paysmart.di.AppModule
-import net.metalbrain.paysmart.phone.di.PhoneModule
 import net.metalbrain.paysmart.domain.model.Country
-import net.metalbrain.paysmart.phone.data.PhoneVerifier
-import net.metalbrain.paysmart.ui.viewmodel.CreateAccountViewModel
+import net.metalbrain.paysmart.core.features.account.creation.viewmodel.CreateAccountViewModel
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

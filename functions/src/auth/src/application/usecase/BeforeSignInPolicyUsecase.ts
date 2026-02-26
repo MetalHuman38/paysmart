@@ -74,7 +74,9 @@ export class BeforeSignInPolicyUsecase {
 
     const primaryProvider = this.resolvePrimaryProvider(effectiveProviderIds, ctx.hasPhone);
 
-    const emailWasVerifiedNow = Boolean(user.email && !security.hasVerifiedEmail);
+    const emailWasVerifiedNow = Boolean(
+      user.emailVerified && user.email && !security.hasVerifiedEmail
+    );
     if (emailWasVerifiedNow) {
 
       await Promise.all([

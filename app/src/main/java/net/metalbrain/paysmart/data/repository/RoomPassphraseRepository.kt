@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
-import net.metalbrain.paysmart.core.security.SecurityPreference
+import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
 import net.metalbrain.paysmart.domain.room.NativeRoomEncryptor
 import net.metalbrain.paysmart.utils.ThrottledLogger
 import java.security.SecureRandom

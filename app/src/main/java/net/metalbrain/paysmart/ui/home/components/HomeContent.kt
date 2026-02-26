@@ -17,6 +17,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import net.metalbrain.paysmart.ui.components.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -25,20 +26,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.core.features.account.components.AccountsHeader
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.Transaction
 import net.metalbrain.paysmart.domain.model.hasCompletedAddress
 import net.metalbrain.paysmart.domain.model.hasCompletedEmailVerification
 import net.metalbrain.paysmart.domain.model.hasCompletedIdentity
-import net.metalbrain.paysmart.ui.account.components.AccountsHeader
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.home.card.EmptyActivityCard
 import net.metalbrain.paysmart.ui.home.card.HomeBalanceSummaryCard
 import net.metalbrain.paysmart.ui.home.card.RewardEarnedSummaryCard
 import net.metalbrain.paysmart.ui.home.state.HomeBalanceSnapshot
 import net.metalbrain.paysmart.ui.home.state.RewardEarnedSnapshot
-import net.metalbrain.paysmart.ui.home.extensions.ProfileCompletionCard
-import net.metalbrain.paysmart.ui.transactions.components.TransactionItem
+import net.metalbrain.paysmart.core.features.account.profile.card.ProfileCompletionCard
+import net.metalbrain.paysmart.core.features.transactions.components.TransactionItem
 import net.metalbrain.paysmart.ui.theme.Dimens
 
 @Composable
@@ -46,6 +47,7 @@ fun HomeContent(
     onProfileClick: () -> Unit,
     onReferralClick: () -> Unit,
     onTransactionsClick: () -> Unit,
+    onSendMoneyClick: () -> Unit,
     onBalanceCardClick: () -> Unit,
     onRewardCardClick: () -> Unit,
     onLinkAccountClick: () -> Unit,
@@ -57,6 +59,8 @@ fun HomeContent(
     transactions: List<Transaction>,
     balanceSnapshot: HomeBalanceSnapshot,
     rewardEarned: RewardEarnedSnapshot,
+    countryFlagEmoji: String,
+    topUpPolicyHint: String?,
 ) {
     val showBalance = rememberSaveable { mutableStateOf(true) }
     val showCompletionCard = localSettings?.let { settings ->
@@ -113,7 +117,7 @@ fun HomeContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedButton(
-                    onClick = onTransactionsClick,
+                    onClick = onSendMoneyClick,
                     modifier = Modifier.weight(1f),
                     text = "Send Money",
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -149,6 +153,16 @@ fun HomeContent(
                         )
                     }
                 }
+            }
+        }
+
+        if (!topUpPolicyHint.isNullOrBlank()) {
+            item {
+                Text(
+                    text = "$countryFlagEmoji $topUpPolicyHint",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
 

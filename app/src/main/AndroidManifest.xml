@@ -59,7 +59,17 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
 
-            <!-- Deep link intent -->
+            <!-- Firebase email-link auth handoff -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="pay-smart.net"
+                    android:pathPrefix="/__/auth/links"/>
+            </intent-filter>
+
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -68,6 +78,16 @@
                     android:scheme="https"
                     android:host="pay-smart.net"
                     android:pathPrefix="/verify"/>
+            </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="paysmart-7ee79.firebaseapp.com"
+                    android:pathPrefix="/__/auth/links"/>
             </intent-filter>
         </activity>
     </application>

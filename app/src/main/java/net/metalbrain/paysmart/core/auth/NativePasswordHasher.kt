@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.core.auth
 
 import jakarta.inject.Inject
+import net.metalbrain.paysmart.core.features.account.authorization.password.repository.BcryptPasswordHasher
 import net.metalbrain.paysmart.data.native.NativePasswordBridge
 
 class NativePasswordHasher @Inject constructor() : BcryptPasswordHasher {

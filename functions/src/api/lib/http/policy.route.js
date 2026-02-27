@@ -15,9 +15,14 @@ import { setHomeAddressVerifiedHandler } from "../handlers/setHomeAddressVerifie
 import { identityUploadSessionHandler } from "../handlers/identityUploadSession.js";
 import { identityUploadCommitHandler } from "../handlers/identityUploadCommit.js";
 import { identityUploadPayloadHandler } from "../handlers/identityUploadPayload.js";
+import { identityExtractTextHandler } from "../handlers/identityExtractText.js";
 import { identityProviderStartSessionHandler } from "../handlers/identityProviderStartSession.js";
 import { identityProviderResumeHandler } from "../handlers/identityProviderResume.js";
 import { identityProviderCallbackHandler } from "../handlers/identityProviderCallback.js";
+import { passkeyRegisterOptionsHandler } from "../handlers/passkeyRegisterOptions.js";
+import { passkeyRegisterVerifyHandler } from "../handlers/passkeyRegisterVerify.js";
+import { passkeyAuthenticateOptionsHandler } from "../handlers/passkeyAuthenticateOptions.js";
+import { passkeyAuthenticateVerifyHandler } from "../handlers/passkeyAuthenticateVerify.js";
 export function mountAuthPolicyRoutes(app) {
     // Email Verification
     app.post("/auth/generate", requireActiveSession, generateEmailVerificationHandler);
@@ -73,6 +78,11 @@ export function mountAuthPolicyRoutes(app) {
         corsify(res);
         res.status(204).end();
     });
+    app.post("/auth/identity/extractText", requireActiveSession, identityExtractTextHandler);
+    app.options("/auth/identity/extractText", (_, res) => {
+        corsify(res);
+        res.status(204).end();
+    });
     app.post("/auth/identity/provider/startSession", requireActiveSession, identityProviderStartSessionHandler);
     app.options("/auth/identity/provider/startSession", (_, res) => {
         corsify(res);
@@ -85,6 +95,26 @@ export function mountAuthPolicyRoutes(app) {
     });
     app.post("/auth/identity/provider/callback", requireActiveSession, identityProviderCallbackHandler);
     app.options("/auth/identity/provider/callback", (_, res) => {
+        corsify(res);
+        res.status(204).end();
+    });
+    app.post("/auth/passkeys/register/options", requireActiveSession, passkeyRegisterOptionsHandler);
+    app.options("/auth/passkeys/register/options", (_, res) => {
+        corsify(res);
+        res.status(204).end();
+    });
+    app.post("/auth/passkeys/register/verify", requireActiveSession, passkeyRegisterVerifyHandler);
+    app.options("/auth/passkeys/register/verify", (_, res) => {
+        corsify(res);
+        res.status(204).end();
+    });
+    app.post("/auth/passkeys/authenticate/options", requireActiveSession, passkeyAuthenticateOptionsHandler);
+    app.options("/auth/passkeys/authenticate/options", (_, res) => {
+        corsify(res);
+        res.status(204).end();
+    });
+    app.post("/auth/passkeys/authenticate/verify", requireActiveSession, passkeyAuthenticateVerifyHandler);
+    app.options("/auth/passkeys/authenticate/verify", (_, res) => {
         corsify(res);
         res.status(204).end();
     });

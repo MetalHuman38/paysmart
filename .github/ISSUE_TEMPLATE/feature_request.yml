@@ -1,0 +1,73 @@
+name: Feature Request
+description: Propose a new feature or enhancement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Android app (Kotlin/Compose)
+        - Functions API (TypeScript)
+        - Public site/content
+        - Architecture/Platform
+        - Documentation
+    validations:
+      required: true
+
+  - type: input
+    id: ticket
+    attributes:
+      label: Related ticket ID (if any)
+      description: Example `SEND-004`, `APP-020`, `SEC-001`
+      placeholder: SEND-004
+    validations:
+      required: false
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What user/business problem does this solve?
+      placeholder: Describe the pain point clearly.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the design/flow/contract you want.
+      placeholder: Include impacted modules and API/UX expectations.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: List any alternatives and tradeoffs.
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] New behavior is implemented
+        - [ ] Tests added/updated
+        - [ ] Docs updated if contract changed
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies/constraints
+      description: Any external APIs, policy, legal, or infra dependencies.
+      placeholder: Stripe/Firebase/GCP constraints, timeline blockers, etc.
+    validations:
+      required: false

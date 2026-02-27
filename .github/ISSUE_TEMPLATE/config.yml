@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability report
+    url: https://github.com/MetalHuman38/paysmart/security/advisories/new
+    about: Use private disclosure for vulnerabilities. Do not file public issues.
+  - name: Contribution guidelines
+    url: https://github.com/MetalHuman38/paysmart/blob/main/CONTRIBUTING.md
+    about: Read contribution workflow and quality expectations.
+  - name: Architecture and backlog docs
+    url: https://github.com/MetalHuman38/paysmart/tree/main/app/docs
+    about: See current architecture, roadmap, and module-level plans.

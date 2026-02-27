@@ -6,6 +6,12 @@ import { APP } from "../config/globals.js";
 import { initDeps } from "../dependencies.js";
 import { authContainer } from "../infrastructure/di/authContainer.js";
 import { decryptIdentityPayload } from "../services/identityPayloadCrypto.js";
+import {
+  evaluateNameMatch,
+  type ParsedIdentityUploadPayload,
+  parseIdentityUploadPayload,
+} from "../services/identityUploadPayloadContract.js";
+import { GoogleVisionTextExtractionService } from "../services/googleVisionTextExtractionService.js";
 import { GoogleCloudAccessTokenProvider } from "../services/googleCloudAccessTokenProvider.js";
 import { KmsEnvelopeService } from "../services/kmsEnvelopeService.js";
 
@@ -71,7 +77,7 @@ export async function processIdentityUploadReviewJob(uid: string, sessionId: str
   }
 
   try {
-    const payload = await decryptUploadedPayload({
+    const decryptedPayload = await decryptUploadedPayload({
       bucketName,
       objectPath: uploadDoc.objectPath,
       associatedData: uploadDoc.associatedData,
@@ -81,11 +87,28 @@ export async function processIdentityUploadReviewJob(uid: string, sessionId: str
     });
 
     const payloadSha256 = createHash("sha256")
-      .update(payload)
+      .update(decryptedPayload)
       .digest("base64url");
     if (payloadSha256 !== uploadDoc.payloadSha256) {
       throw new Error("Payload sha256 does not match upload session");
     }
+
+    const parsedPayload = parseIdentityUploadPayload(decryptedPayload);
+    const expectedFullName = parsedPayload.clientInfo.fullName;
+    const nameExtraction = await resolveCandidateNameForReview(
+      parsedPayload,
+      config.identityOcrEnabled,
+      config.identityOcrAllowPayloadFallback
+    );
+    const candidateFullName = nameExtraction.candidateFullName;
+
+    const nameMatch = evaluateNameMatch(expectedFullName, candidateFullName);
+    if (!nameMatch.isMatch) {
+      throw new Error("Name mismatch between client profile and extracted document name");
+    }
+
+    const normalizedExpectedName = expectedFullName.trim().toLowerCase();
+    const normalizedCandidateName = candidateFullName.trim().toLowerCase();
 
     await uploadRef.set(
       {
@@ -93,7 +116,20 @@ export async function processIdentityUploadReviewJob(uid: string, sessionId: str
         reviewDecision: "verified",
         reviewDecisionReason: null,
         payloadSha256Verified: true,
-        decryptedPayloadBytes: payload.byteLength,
+        decryptedPayloadBytes: decryptedPayload.byteLength,
+        clientInfoContractVersion: parsedPayload.contractVersion,
+        clientInfoFullNameHash: createHash("sha256")
+          .update(normalizedExpectedName)
+          .digest("hex"),
+        extractedNameHash: createHash("sha256")
+          .update(normalizedCandidateName)
+          .digest("hex"),
+        extractedNameProvider: nameExtraction.provider,
+        extractedNameSource:
+          nameExtraction.source === "vision" ?
+            "google_vision_ocr" :
+            "payload_fallback",
+        nameMatchScore: nameMatch.score,
         reviewedAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       },
@@ -187,6 +223,14 @@ async function decryptUploadedPayload(input: DecryptJobInput): Promise<Buffer> {
 
 export function classifyIdentityReviewFailure(message: string): string {
   const value = message.toLowerCase();
+  if (value.includes("legacy identity payload")) return "legacy_payload_contract";
+  if (value.includes("client payload")) return "payload_contract_invalid";
+  if (value.includes("name extraction missing")) return "name_extraction_missing";
+  if (value.includes("identity ocr") || value.includes("vision ocr")) {
+    return "ocr_processing_failed";
+  }
+  if (value.includes("name mismatch")) return "name_mismatch";
+  if (value.includes("client info")) return "client_info_missing";
   if (value.includes("schema")) return "unsupported_encryption_schema";
   if (value.includes("sha256") || value.includes("hash")) return "payload_hash_mismatch";
   if (value.includes("auth") || value.includes("integrity")) return "payload_integrity_failed";
@@ -195,4 +239,57 @@ export function classifyIdentityReviewFailure(message: string): string {
   if (value.includes("empty")) return "payload_empty";
   if (value.includes("does not exist")) return "payload_missing";
   return "review_processing_failed";
+}
+
+type ReviewNameExtraction = {
+  candidateFullName: string;
+  provider: string;
+  source: "vision" | "payload";
+};
+
+async function resolveCandidateNameForReview(
+  parsedPayload: ParsedIdentityUploadPayload,
+  ocrEnabled: boolean,
+  allowPayloadFallback: boolean
+): Promise<ReviewNameExtraction> {
+  const payloadCandidate = parsedPayload.extraction.candidateFullName?.trim();
+  const payloadProvider = parsedPayload.extraction.provider?.trim();
+
+  let visionError: Error | undefined;
+  if (ocrEnabled) {
+    try {
+      const vision = new GoogleVisionTextExtractionService();
+      const extraction = await vision.extract(
+        parsedPayload.documentBytes,
+        parsedPayload.contentType
+      );
+      const visionCandidate = extraction.candidateFullName?.trim();
+      if (visionCandidate) {
+        return {
+          candidateFullName: visionCandidate,
+          provider: extraction.provider,
+          source: "vision",
+        };
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        visionError = error;
+      } else {
+        visionError = new Error("Unknown Vision OCR failure");
+      }
+    }
+  }
+
+  if (allowPayloadFallback && payloadCandidate) {
+    return {
+      candidateFullName: payloadCandidate,
+      provider: payloadProvider || "client_payload_extraction",
+      source: "payload",
+    };
+  }
+
+  if (visionError) {
+    throw new Error(`Identity OCR failed: ${visionError.message}`);
+  }
+  throw new Error("Name extraction missing for identity review");
 }

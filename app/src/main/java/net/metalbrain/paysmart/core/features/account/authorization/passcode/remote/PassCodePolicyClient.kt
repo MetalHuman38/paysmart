@@ -3,6 +3,7 @@ package net.metalbrain.paysmart.core.features.account.authorization.passcode.rem
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.metalbrain.paysmart.BuildConfig
 import net.metalbrain.paysmart.core.auth.AuthApiConfig
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -29,10 +30,14 @@ class PassCodePolicyClient(
             .header("Authorization", "Bearer $idToken")
             .post("{}".toRequestBody("application/json".toMediaTypeOrNull()))
             .build()
-        Log.d("PassCodePolicyClient", "Sending request: $request")
+        if (BuildConfig.DEBUG) {
+            Log.d("PassCodePolicyClient", "markPassCodeEnabled request dispatched")
+        }
 
         val response = httpClient.newCall(request).execute()
-        Log.d("PassCodePolicyClient", "Response: $response")
+        if (BuildConfig.DEBUG && !response.isSuccessful) {
+            Log.w("PassCodePolicyClient", "markPassCodeEnabled failed code=${response.code}")
+        }
 
         response.use {
             it.isSuccessful

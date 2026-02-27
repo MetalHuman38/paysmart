@@ -48,9 +48,19 @@ export class GenerateEmailVerification {
             await this.mailer.sendVerificationEmail({ to: email, link });
         }
         else {
-            console.log(`[DEV] Email verification link for ${email}: ${link}`);
+            const emailDomain = email.includes("@") ? email.split("@").pop() : "unknown";
+            const linkHost = safeHost(link);
+            console.log(`[DEV] Email verification link generated (domain=${emailDomain}, host=${linkHost})`);
         }
         return { sent: true };
+    }
+}
+function safeHost(url) {
+    try {
+        return new URL(url).host;
+    }
+    catch {
+        return "invalid-url";
     }
 }
 //# sourceMappingURL=GenerateEmailVerification.js.map

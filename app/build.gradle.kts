@@ -96,6 +96,8 @@ android {
             buildConfigField("Boolean", "PHONE_PNV_PREVIEW_ENABLED", "true")
             buildConfigField("String", "IDENTITY_IMAGE_DETECTION_MODE", "\"on_device\"")
             buildConfigField("Boolean", "IDENTITY_IMAGE_DETECTION_FAIL_OPEN", "true")
+            buildConfigField("String", "IDENTITY_DOCUMENT_OCR_MODE", "\"remote_api\"")
+            buildConfigField("Boolean", "IDENTITY_DOCUMENT_OCR_FAIL_OPEN", "true")
             manifestPlaceholders["networkSecurityConfig"] = "@xml/network_security_config_debug"
         }
         getByName("release") {
@@ -113,6 +115,8 @@ android {
             buildConfigField("Boolean", "PHONE_PNV_PREVIEW_ENABLED", "false")
             buildConfigField("String", "IDENTITY_IMAGE_DETECTION_MODE", "\"on_device\"")
             buildConfigField("Boolean", "IDENTITY_IMAGE_DETECTION_FAIL_OPEN", "true")
+            buildConfigField("String", "IDENTITY_DOCUMENT_OCR_MODE", "\"remote_api\"")
+            buildConfigField("Boolean", "IDENTITY_DOCUMENT_OCR_FAIL_OPEN", "false")
             manifestPlaceholders["networkSecurityConfig"] = "@xml/network_security_config_release"
 
         }
@@ -122,6 +126,22 @@ android {
         compose = true
     }
 }
+
+val crashlyticsMappingUploadEnabled: Boolean = providers
+    .gradleProperty("crashlyticsUploadEnabled")
+    .map { it.equals("true", ignoreCase = true) }
+    .orElse(
+        providers
+            .environmentVariable("CI")
+            .map { it.equals("true", ignoreCase = true) }
+    )
+    .orElse(false)
+    .get()
+
+tasks.matching { it.name == "uploadCrashlyticsMappingFileRelease" }.configureEach {
+    enabled = crashlyticsMappingUploadEnabled
+}
+
 
 room {
     schemaDirectory("$projectDir/schemas")

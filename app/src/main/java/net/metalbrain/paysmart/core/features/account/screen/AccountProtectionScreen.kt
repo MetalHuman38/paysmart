@@ -28,6 +28,7 @@ import net.metalbrain.paysmart.ui.components.PrimaryButton
 fun AccountProtectionContent(
     onSetPasscodeClick: () -> Unit,
     onSetBiometricClick: () -> Unit,
+    onSetPasskeyClick: () -> Unit = {},
 ) {
     Scaffold { innerPadding ->
         Column(
@@ -91,6 +92,10 @@ fun AccountProtectionContent(
 
             TextButton(onClick = onSetPasscodeClick) {
                 Text(text = stringResource(R.string.set_up_passcode))
+            }
+
+            TextButton(onClick = onSetPasskeyClick) {
+                Text(text = stringResource(R.string.continue_with_passkey))
             }
 
             Spacer(modifier = Modifier.height(16.dp))

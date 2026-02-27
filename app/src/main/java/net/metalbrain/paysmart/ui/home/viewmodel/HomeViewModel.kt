@@ -36,8 +36,12 @@ class HomeViewModel @Inject constructor(
     private val countryCapabilityRepository: CountryCapabilityRepository,
     private val userManager: UserManager
 ) : ViewModel() {
-
-    private val _transactions = MutableStateFlow(emptyList<Transaction>())
+    private val transactions = transactionRepository.observeTransactions()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
 
     private val walletBalances = userManager.authState
         .flatMapLatest { auth ->
@@ -71,7 +75,7 @@ class HomeViewModel @Inject constructor(
 
     val uiState: StateFlow<HomeUiState> = combine(
         securityPreference.localSecurityStateFlow,
-        _transactions,
+        transactions,
         walletBalances,
         countryCapabilities
     ) { localSecurity, transactions, wallet, capabilityProfile ->
@@ -95,14 +99,7 @@ class HomeViewModel @Inject constructor(
     )
 
     init {
-        refresh()
         syncWalletOnAuth()
-    }
-
-    fun refresh() {
-        viewModelScope.launch {
-            _transactions.value = transactionRepository.getTransactions()
-        }
     }
 
     private fun syncWalletOnAuth() {

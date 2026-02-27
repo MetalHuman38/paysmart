@@ -3,6 +3,7 @@ package net.metalbrain.paysmart.core.features.account.authorization.biometric.re
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.metalbrain.paysmart.BuildConfig
 import net.metalbrain.paysmart.core.auth.AuthApiConfig
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -29,10 +30,14 @@ class BiometricPolicyClient(
             .header("Authorization", "Bearer $idToken")
             .post("{}".toRequestBody("application/json".toMediaTypeOrNull()))
             .build()
-        Log.d("BiometricPolicyClient", "Sending request: $request")
+        if (BuildConfig.DEBUG) {
+            Log.d("BiometricPolicyClient", "markBiometricEnabled request dispatched")
+        }
 
         val response = httpClient.newCall(request).execute()
-        Log.d("BiometricPolicyClient", "Response: $response")
+        if (BuildConfig.DEBUG && !response.isSuccessful) {
+            Log.w("BiometricPolicyClient", "markBiometricEnabled failed code=${response.code}")
+        }
 
         response.use {
             it.isSuccessful

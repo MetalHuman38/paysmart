@@ -19,6 +19,7 @@ import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionStatus
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyUiState
 import net.metalbrain.paysmart.core.features.addmoney.repository.AddMoneyRepository
 import net.metalbrain.paysmart.data.repository.AuthRepository
+import net.metalbrain.paysmart.data.repository.TransactionRepository
 import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
 import net.metalbrain.paysmart.data.repository.WalletBalanceRepository
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
@@ -35,6 +36,7 @@ import java.math.RoundingMode
 class AddMoneyViewModel @Inject constructor(
     private val addMoneyRepository: AddMoneyRepository,
     private val authRepository: AuthRepository,
+    private val transactionRepository: TransactionRepository,
     private val userProfileCacheRepository: UserProfileCacheRepository,
     private val countryCapabilityRepository: CountryCapabilityRepository,
     private val walletBalanceRepository: WalletBalanceRepository,
@@ -44,6 +46,7 @@ class AddMoneyViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AddMoneyUiState())
     val uiState: StateFlow<AddMoneyUiState> = _uiState.asStateFlow()
     private var quoteRefreshJob: Job? = null
+    private var statusPollingJob: Job? = null
 
     init {
         observeCountryCapabilities()
@@ -231,6 +234,7 @@ class AddMoneyViewModel @Inject constructor(
                             }
                         )
                     }
+                    mirrorSessionStatusToTransactions(session)
                 }
                 .onFailure { error ->
                     _uiState.update {
@@ -255,9 +259,11 @@ class AddMoneyViewModel @Inject constructor(
             )
         }
         refreshSessionStatus()
+        startSessionStatusPolling()
     }
 
     fun onPaymentSheetCanceled() {
+        stopSessionStatusPolling()
         _uiState.update {
             it.copy(
                 infoMessage = "Payment canceled.",
@@ -267,6 +273,7 @@ class AddMoneyViewModel @Inject constructor(
     }
 
     fun onPaymentSheetFailed(message: String?) {
+        stopSessionStatusPolling()
         _uiState.update {
             it.copy(
                 error = message?.takeIf { value -> value.isNotBlank() }
@@ -304,9 +311,15 @@ class AddMoneyViewModel @Inject constructor(
                             }
                         )
                     }
+                    mirrorSessionStatusToTransactions(session)
 
                     if (session.status == AddMoneySessionStatus.SUCCEEDED) {
+                        stopSessionStatusPolling()
                         syncWalletSnapshot()
+                    } else if (session.status == AddMoneySessionStatus.FAILED ||
+                        session.status == AddMoneySessionStatus.EXPIRED
+                    ) {
+                        stopSessionStatusPolling()
                     }
                 }
                 .onFailure { error ->
@@ -422,5 +435,50 @@ class AddMoneyViewModel @Inject constructor(
             sourceAmount = sourceAmount,
             method = method
         )
+    }
+
+    private fun mirrorSessionStatusToTransactions(
+        session: net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData
+    ) {
+        viewModelScope.launch {
+            transactionRepository.upsertAddMoneySimulation(
+                sessionId = session.sessionId,
+                amountMinor = session.amountMinor,
+                currency = session.currency,
+                status = session.status.name
+            )
+        }
+    }
+
+    private fun startSessionStatusPolling() {
+        val sessionId = _uiState.value.sessionId ?: return
+        statusPollingJob?.cancel()
+        statusPollingJob = viewModelScope.launch {
+            repeat(8) { index ->
+                if (index > 0) {
+                    delay(1_500)
+                }
+                refreshSessionStatus()
+                val status = _uiState.value.sessionStatus
+                if (status == AddMoneySessionStatus.SUCCEEDED ||
+                    status == AddMoneySessionStatus.FAILED ||
+                    status == AddMoneySessionStatus.EXPIRED ||
+                    _uiState.value.sessionId != sessionId
+                ) {
+                    stopSessionStatusPolling()
+                    return@launch
+                }
+            }
+        }
+    }
+
+    private fun stopSessionStatusPolling() {
+        statusPollingJob?.cancel()
+        statusPollingJob = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        stopSessionStatusPolling()
     }
 }

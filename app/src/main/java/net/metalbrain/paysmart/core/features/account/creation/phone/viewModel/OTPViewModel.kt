@@ -89,7 +89,6 @@ class OTPViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(loading = true)
             try {
                 val result = phoneVerifier.submitOtp(code)
-                Log.d("OTP", "OTP verification result: $result")
                 result.fold(
                     onSuccess = {
                         val phoneNumber = auth.currentUser?.phoneNumber
@@ -114,7 +113,7 @@ class OTPViewModel @Inject constructor(
                 phoneVerifier.cancel()
                 _formattedPhoneNumber.value = ""
                 _state.value = OTPState()
-                Log.d("OTP", "OTP verification successful")
+                Log.d("OTP", "OTP verification flow completed")
             } catch (e: Exception) {
                 Log.e("OTP", "OTP verification failed", e)
                 onError(e)

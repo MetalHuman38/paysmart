@@ -13,3 +13,20 @@ suspend fun Request.Builder.attachOptionalAppCheckToken(
     }
     return this
 }
+
+suspend fun Request.Builder.attachRequiredAppCheckToken(
+    appCheckTokenProvider: AppCheckTokenProvider?,
+    endpointName: String
+): Request.Builder {
+    requireNotNull(appCheckTokenProvider) {
+        "App Check token provider is required for $endpointName"
+    }
+
+    val token = appCheckTokenProvider.getTokenOrNull()
+    if (token.isNullOrBlank()) {
+        throw IllegalStateException("App Check token missing for $endpointName")
+    }
+
+    header("X-Firebase-AppCheck", token)
+    return this
+}

@@ -51,6 +51,14 @@ export function loadConfig() {
     const stripeAllowedTopupCurrencies = new Set((configuredTopupCurrencies.size > 0 ?
         Array.from(configuredTopupCurrencies) :
         ["GBP", "EUR", "USD"]).map((currency) => currency.toUpperCase()));
+    const passkeyRpId = (process.env.PASSKEY_RP_ID || "").trim();
+    const configuredPasskeyOrigins = csvSet("PASSKEY_EXPECTED_ORIGINS");
+    const passkeyExpectedOrigins = configuredPasskeyOrigins.size > 0 ?
+        configuredPasskeyOrigins :
+        passkeyRpId ?
+            new Set([`https://${passkeyRpId}`]) :
+            new Set();
+    const passkeyEnabled = passkeyRpId.length > 0 && passkeyExpectedOrigins.size > 0;
     let cachedMailer = null;
     return {
         projectId,
@@ -67,6 +75,13 @@ export function loadConfig() {
         playIntegrityRequireLicensed: readBoolean("PLAY_INTEGRITY_REQUIRE_LICENSED", isProduction),
         identityKmsKeyName: (process.env.IDENTITY_UPLOAD_KMS_KEY_NAME || "").trim(),
         identityMaxPayloadBytes: readNumber("IDENTITY_UPLOAD_MAX_PAYLOAD_BYTES", 15 * 1024 * 1024),
+        identityOcrEnabled: readBoolean("IDENTITY_OCR_ENABLED", true),
+        identityOcrAllowPayloadFallback: readBoolean("IDENTITY_OCR_ALLOW_PAYLOAD_FALLBACK", !isProduction),
+        passkeyEnabled,
+        passkeyRpId,
+        passkeyRpName: (process.env.PASSKEY_RP_NAME || "PaySmart").trim(),
+        passkeyExpectedOrigins,
+        passkeyChallengeTtlMs: readNumber("PASSKEY_CHALLENGE_TTL_MS", 5 * 60 * 1000),
         exchangeRateApiKey: (process.env.EXCHANGE_RATE_API_KEY || "").trim(),
         exchangeRateCacheTtlMs: readNumber("FX_RATE_CACHE_TTL_MS", 60 * 1000),
         exchangeRateTimeoutMs: readNumber("FX_RATE_TIMEOUT_MS", 4 * 1000),

@@ -10,6 +10,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import net.metalbrain.paysmart.BuildConfig
 import net.metalbrain.paysmart.domain.model.AuthUserModel
 import net.metalbrain.paysmart.utils.normalizeProvider
 
@@ -62,7 +63,9 @@ class FirestoreUserProfileRepository @Inject constructor(
             put("tenantId", user.tenantId ?: FieldValue.delete())
         }
 
-        Log.d("UserRepo", "Creating user record: $data")
+        if (BuildConfig.DEBUG) {
+            Log.d("UserRepo", "Creating user record for provider=$normalizedProvider")
+        }
 
         docRef.set(data, SetOptions.merge()).await()
     }

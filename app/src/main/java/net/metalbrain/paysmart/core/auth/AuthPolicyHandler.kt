@@ -17,6 +17,10 @@ class AuthPolicyHandler @Inject constructor(
 
     private val client = AuthPolicyClient(
         config = config,
+        requireAppCheckToken = config.checkIfPhoneAlreadyExistUrl.startsWith(
+            prefix = "https://",
+            ignoreCase = true
+        ),
         appCheckTokenProvider = appCheckTokenProvider
     )
 
@@ -25,7 +29,10 @@ class AuthPolicyHandler @Inject constructor(
             client.checkIfPhoneNumberAlreadyExist(e164)
         } catch (e: Exception) {
             Log.e("AuthPolicyHandler", "Phone check failed", e)
-            false // fail open
+            throw IllegalStateException(
+                "Unable to verify phone availability. Please retry.",
+                e
+            )
         }
     }
 }

@@ -45,13 +45,14 @@ import net.metalbrain.paysmart.ui.components.SmallTextButton
 import net.metalbrain.paysmart.ui.components.TermsAndPrivacyText
 import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.CreateAccountViewModel
+import net.metalbrain.paysmart.domain.model.normalizeCountryIso2
 import net.metalbrain.paysmart.ui.screens.CountryPickerBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateAccountScreen(
     viewModel: CreateAccountViewModel,
-    onVerificationContinue: () -> Unit,
+    onVerificationContinue: (String) -> Unit,
     onGetHelpClicked: () -> Unit,
     onSignInClicked: () -> Unit,
     onBackClicked: () -> Unit
@@ -184,7 +185,7 @@ fun CreateAccountScreen(
                         activity = activity,
                         onSuccess = {
                             isSubmitting = false
-                            onVerificationContinue()
+                            onVerificationContinue(normalizeCountryIso2(selectedCountry.isoCode))
                         },
                         onPhoneAlreadyRegistered = {
                             // 👇 This is the lambda we pass to show the bottom sheet

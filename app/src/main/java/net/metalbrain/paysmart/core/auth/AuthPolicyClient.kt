@@ -8,10 +8,12 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import net.metalbrain.paysmart.core.auth.appcheck.provider.AppCheckTokenProvider
+import net.metalbrain.paysmart.core.auth.appcheck.provider.attachRequiredAppCheckToken
 import net.metalbrain.paysmart.core.auth.appcheck.provider.attachOptionalAppCheckToken
 
 class AuthPolicyClient(
     private val config: AuthApiConfig,
+    private val requireAppCheckToken: Boolean = false,
     private val appCheckTokenProvider: AppCheckTokenProvider? = null,
     private val httpClient: OkHttpClient = defaultClient
 ) {
@@ -27,11 +29,20 @@ class AuthPolicyClient(
         val json = JSONObject().put("phoneNumber", phoneNumber).toString()
         val body = json.toRequestBody(mediaType)
 
-        val request = Request.Builder()
+        val requestBuilder = Request.Builder()
             .url(config.checkIfPhoneAlreadyExistUrl)
             .post(body)
-            .attachOptionalAppCheckToken(appCheckTokenProvider)
-            .build()
+
+        if (requireAppCheckToken) {
+            requestBuilder.attachRequiredAppCheckToken(
+                appCheckTokenProvider = appCheckTokenProvider,
+                endpointName = "/auth/check-phone"
+            )
+        } else {
+            requestBuilder.attachOptionalAppCheckToken(appCheckTokenProvider)
+        }
+
+        val request = requestBuilder.build()
 
         val response = httpClient.newCall(request).execute()
         response.use {

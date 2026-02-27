@@ -11,12 +11,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.core.features.account.profile.data.type.KycDocumentType
+import net.metalbrain.paysmart.core.features.identity.data.ClientInformation
+import net.metalbrain.paysmart.core.features.identity.provider.IdentityDocumentTextExtraction
 import net.metalbrain.paysmart.core.features.identity.provider.IdentityDocumentTextExtractor
 import net.metalbrain.paysmart.core.features.identity.provider.IdentityImageAuthenticityDetector
 import net.metalbrain.paysmart.core.features.identity.provider.IdentityImageDecision
 import net.metalbrain.paysmart.core.features.identity.provider.KycDocumentCatalog
 import net.metalbrain.paysmart.core.features.identity.state.IdentitySetupResolverUiState
 import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityDocumentType
+import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityUploadExtractionSnapshot
 import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityUploadOrchestrator
 import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityUploadPipelineStage
 import net.metalbrain.paysmart.data.repository.AuthRepository
@@ -44,6 +47,7 @@ class IdentitySetupResolverViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var capturedBytes: ByteArray? = null
+    private var capturedExtraction: IdentityDocumentTextExtraction? = null
 
     private val _uiState = MutableStateFlow(createInitialState())
     val uiState: StateFlow<IdentitySetupResolverUiState> = _uiState.asStateFlow()
@@ -58,6 +62,7 @@ class IdentitySetupResolverViewModel @Inject constructor(
         val selectedId = defaultDocumentId(documents)
 
         capturedBytes = null
+        capturedExtraction = null
         _uiState.update {
             it.copy(
                 selectedCountryIso2 = country,
@@ -81,6 +86,7 @@ class IdentitySetupResolverViewModel @Inject constructor(
         val shouldResetCapture = _uiState.value.selectedDocumentId != documentId
         if (shouldResetCapture) {
             capturedBytes = null
+            capturedExtraction = null
         }
         _uiState.update { current ->
             if (current.availableDocuments.none { it.id == documentId }) {
@@ -116,6 +122,7 @@ class IdentitySetupResolverViewModel @Inject constructor(
 
             val detectionResult = imageAuthenticityDetector.detect(bytes, mimeType).getOrElse { error ->
                 capturedBytes = null
+                capturedExtraction = null
                 _uiState.update {
                     it.copy(
                         isValidatingCapture = false,
@@ -134,6 +141,7 @@ class IdentitySetupResolverViewModel @Inject constructor(
 
             if (detectionResult.decision == IdentityImageDecision.SUSPECTED_SYNTHETIC) {
                 capturedBytes = null
+                capturedExtraction = null
                 _uiState.update {
                     it.copy(
                         isValidatingCapture = false,
@@ -150,12 +158,11 @@ class IdentitySetupResolverViewModel @Inject constructor(
                 return@launch
             }
 
-            val nameMatchWarning = resolveNameMatchWarning(
-                documentBytes = bytes,
-                mimeType = mimeType
-            )
+            val extraction = textExtractor.extract(bytes, mimeType).getOrNull()
+            val nameMatchWarning = resolveNameMatchWarning(extraction?.candidateFullName)
 
             capturedBytes = bytes
+            capturedExtraction = extraction
             _uiState.update {
                 it.copy(
                     selectedDocumentName = fileName,
@@ -237,6 +244,18 @@ class IdentitySetupResolverViewModel @Inject constructor(
                 }
                 return@launch
             }
+            val clientInformation = resolveClientInformation(state.selectedCountryIso2)
+            if (clientInformation == null) {
+                _uiState.update {
+                    it.copy(
+                        isProcessing = false,
+                        isValidatingCapture = false,
+                        error = "Complete legal name, email, and date of birth before identity upload",
+                        failedStep = IdentityResolverStep.CAPTURE
+                    )
+                }
+                return@launch
+            }
 
             _uiState.update {
                     it.copy(
@@ -253,6 +272,8 @@ class IdentitySetupResolverViewModel @Inject constructor(
                 documentType = uploadDocumentType,
                 documentBytes = bytes,
                 contentType = state.selectedMimeType ?: "image/jpeg",
+                clientInformation = clientInformation,
+                extraction = capturedExtraction.toUploadExtractionSnapshot(),
                 onStageChanged = { stage ->
                     _uiState.update { current ->
                         current.copy(
@@ -305,13 +326,9 @@ class IdentitySetupResolverViewModel @Inject constructor(
         }
     }
 
-    private suspend fun resolveNameMatchWarning(
-        documentBytes: ByteArray,
-        mimeType: String
-    ): String? {
+    private suspend fun resolveNameMatchWarning(extractedCandidate: String?): String? {
         val expectedName = resolveExpectedProfileName() ?: return null
-        val extraction = textExtractor.extract(documentBytes, mimeType).getOrNull() ?: return null
-        val extractedName = extraction.candidateFullName
+        val extractedName = extractedCandidate
             ?.trim()
             ?.takeIf { it.isNotEmpty() }
             ?: return null
@@ -331,6 +348,34 @@ class IdentitySetupResolverViewModel @Inject constructor(
 
         val fromAuth = authRepository.currentUser?.displayName?.trim().orEmpty()
         return fromAuth.ifEmpty { null }
+    }
+
+    private suspend fun resolveClientInformation(selectedCountryIso2: String): ClientInformation? {
+        val uid = authRepository.currentUser?.uid ?: return null
+        val cached = userProfileCacheRepository.observeByUid(uid).firstOrNull()
+        val legalName = cached?.displayName?.trim().orEmpty()
+            .ifBlank { authRepository.currentUser?.displayName?.trim().orEmpty() }
+        val email = cached?.email?.trim().orEmpty()
+            .ifBlank { authRepository.currentUser?.email?.trim().orEmpty() }
+        val dateOfBirth = cached?.dateOfBirth?.trim().orEmpty()
+        if (legalName.isBlank() || email.isBlank() || dateOfBirth.isBlank()) {
+            return null
+        }
+
+        val nameParts = splitLegalName(legalName)
+        if (nameParts.firstName.isBlank() || nameParts.lastName.isBlank()) {
+            return null
+        }
+
+        val countryIso2 = resolveCountryIso2FromCachedValue(cached?.country) ?: selectedCountryIso2
+        return ClientInformation(
+            firstName = nameParts.firstName,
+            middleName = nameParts.middleName,
+            lastName = nameParts.lastName,
+            email = email,
+            dateOfBirth = dateOfBirth,
+            countryIso2 = countryIso2
+        )
     }
 }
 
@@ -402,6 +447,35 @@ private fun tokenizeName(value: String): Set<String> {
         .split(Regex("\\s+"))
         .filter { token -> token.length >= 2 }
         .toSet()
+}
+
+private data class LegalNameParts(
+    val firstName: String,
+    val middleName: String?,
+    val lastName: String
+)
+
+private fun splitLegalName(fullName: String): LegalNameParts {
+    val parts = fullName.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
+    return when {
+        parts.isEmpty() -> LegalNameParts("", null, "")
+        parts.size == 1 -> LegalNameParts(parts.first(), null, "")
+        parts.size == 2 -> LegalNameParts(parts.first(), null, parts.last())
+        else -> LegalNameParts(
+            firstName = parts.first(),
+            middleName = parts.subList(1, parts.lastIndex).joinToString(" ").ifBlank { null },
+            lastName = parts.last()
+        )
+    }
+}
+
+private fun IdentityDocumentTextExtraction?.toUploadExtractionSnapshot():
+    IdentityUploadExtractionSnapshot? {
+    this ?: return null
+    return IdentityUploadExtractionSnapshot(
+        candidateFullName = candidateFullName?.trim()?.ifBlank { null },
+        provider = provider
+    )
 }
 
 private fun IdentityUploadPipelineStage.toResolverStep(): IdentityResolverStep {

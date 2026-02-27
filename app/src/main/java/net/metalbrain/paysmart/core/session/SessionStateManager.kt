@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.core.session
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -18,6 +19,10 @@ class SessionStateManager @Inject constructor(
     private val policy: SecurityPolicyEngine,
     private val roomUseCase: RoomUseCase,
 ) {
+    private companion object {
+        const val TAG = "LockStateTrace"
+    }
+
     private val _sessionState = MutableStateFlow<SessionState>(SessionState.Loading)
     val sessionState: StateFlow<SessionState> = _sessionState.asStateFlow()
 
@@ -30,11 +35,19 @@ class SessionStateManager @Inject constructor(
     suspend fun unlockSession() {
         securityUseCase.unlockSession()
         _sessionState.value = SessionState.Unlocked
+        Log.d(
+            TAG,
+            "unlock_requested policySessionLocked=${policy.currentState.value.sessionLocked} sessionState=${_sessionState.value}"
+        )
     }
 
     suspend fun lockSession() {
         policy.lockSession()
         _sessionState.value = SessionState.Locked
+        Log.d(
+            TAG,
+            "lock_requested policySessionLocked=${policy.currentState.value.sessionLocked} sessionState=${_sessionState.value}"
+        )
     }
 
     private suspend fun observeAndSyncSession() {

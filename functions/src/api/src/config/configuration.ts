@@ -20,6 +20,13 @@ export type Config = {
   playIntegrityRequireLicensed: boolean;
   identityKmsKeyName: string;
   identityMaxPayloadBytes: number;
+  identityOcrEnabled: boolean;
+  identityOcrAllowPayloadFallback: boolean;
+  passkeyEnabled: boolean;
+  passkeyRpId: string;
+  passkeyRpName: string;
+  passkeyExpectedOrigins: Set<string>;
+  passkeyChallengeTtlMs: number;
   exchangeRateApiKey: string;
   exchangeRateCacheTtlMs: number;
   exchangeRateTimeoutMs: number;
@@ -113,6 +120,15 @@ export function loadConfig(): Config {
       ["GBP", "EUR", "USD"]
     ).map((currency) => currency.toUpperCase())
   );
+  const passkeyRpId = (process.env.PASSKEY_RP_ID || "").trim();
+  const configuredPasskeyOrigins = csvSet("PASSKEY_EXPECTED_ORIGINS");
+  const passkeyExpectedOrigins =
+    configuredPasskeyOrigins.size > 0 ?
+      configuredPasskeyOrigins :
+      passkeyRpId ?
+        new Set([`https://${passkeyRpId}`]) :
+        new Set<string>();
+  const passkeyEnabled = passkeyRpId.length > 0 && passkeyExpectedOrigins.size > 0;
 
   let cachedMailer: Mailer | null = null;
 
@@ -142,6 +158,16 @@ export function loadConfig(): Config {
       "IDENTITY_UPLOAD_MAX_PAYLOAD_BYTES",
       15 * 1024 * 1024
     ),
+    identityOcrEnabled: readBoolean("IDENTITY_OCR_ENABLED", true),
+    identityOcrAllowPayloadFallback: readBoolean(
+      "IDENTITY_OCR_ALLOW_PAYLOAD_FALLBACK",
+      !isProduction
+    ),
+    passkeyEnabled,
+    passkeyRpId,
+    passkeyRpName: (process.env.PASSKEY_RP_NAME || "PaySmart").trim(),
+    passkeyExpectedOrigins,
+    passkeyChallengeTtlMs: readNumber("PASSKEY_CHALLENGE_TTL_MS", 5 * 60 * 1000),
     exchangeRateApiKey: (process.env.EXCHANGE_RATE_API_KEY || "").trim(),
     exchangeRateCacheTtlMs: readNumber("FX_RATE_CACHE_TTL_MS", 60 * 1000),
     exchangeRateTimeoutMs: readNumber("FX_RATE_TIMEOUT_MS", 4 * 1000),

@@ -69,10 +69,7 @@ class LoginViewModel @Inject constructor(
 
             try {
                 socialAuth.signInWithGoogle(credential).getOrThrow()
-                Log.d(
-                    "LoginViewModel",
-                    "Google auth successful (intent=$intent, uid=${authRepository.currentUser?.uid})"
-                )
+                Log.d("LoginViewModel", "Google auth successful (intent=$intent)")
                 onSuccess()
             } catch (e: Exception) {
                 Log.e("LoginViewModel", "Google auth failed (intent=$intent)", e)
@@ -156,7 +153,7 @@ class LoginViewModel @Inject constructor(
 
                     Log.d(
                         "LoginViewModel",
-                        "Facebook sign-in successful for uid=${session.user.uid}"
+                        "Facebook sign-in successful"
                     )
                 } catch (e: Exception) {
                     Log.w("LoginViewModel", "Session retrieval after FaceBook sign-in failed", e)
@@ -221,7 +218,7 @@ class LoginViewModel @Inject constructor(
                 emailDraftStore.saveDraft(
                     EmailDraft(email = user.email ?: resolvedEmail, verified = true)
                 )
-                Log.d("LoginViewModel", "Magic link sign-in success. UID: ${user.uid}")
+                Log.d("LoginViewModel", "Magic link sign-in success")
                 onSuccess()
             } catch (e: Exception) {
                 handledEmailLink = null

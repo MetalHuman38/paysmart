@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.core.features.identity.uploadhelpers
 
+import net.metalbrain.paysmart.core.features.identity.data.ClientInformation
 import javax.inject.Inject
 
 class IdentityUploadOrchestrator @Inject constructor(
@@ -11,13 +12,24 @@ class IdentityUploadOrchestrator @Inject constructor(
         documentType: IdentityDocumentType,
         documentBytes: ByteArray,
         contentType: String,
+        clientInformation: ClientInformation,
+        extraction: IdentityUploadExtractionSnapshot? = null,
         onStageChanged: (IdentityUploadPipelineStage) -> Unit = {}
     ): Result<IdentityUploadReceipt> {
         return runCatching {
             require(documentBytes.isNotEmpty()) { "Document payload is empty" }
 
             onStageChanged(IdentityUploadPipelineStage.ENCRYPT)
-            val payloadSha256 = cipher.sha256Base64Url(documentBytes)
+            val plainPayload = IdentityUploadPayloadContract.encode(
+                IdentityUploadPayloadInput(
+                    documentType = documentType,
+                    contentType = contentType,
+                    documentBytes = documentBytes,
+                    clientInformation = clientInformation,
+                    extraction = extraction
+                )
+            )
+            val payloadSha256 = cipher.sha256Base64Url(plainPayload)
             val session = uploadRepository.createUploadSession(
                 documentType = documentType,
                 payloadSha256 = payloadSha256,
@@ -25,7 +37,7 @@ class IdentityUploadOrchestrator @Inject constructor(
             ).getOrThrow()
 
             val encrypted = cipher.encrypt(
-                plainBytes = documentBytes,
+                plainBytes = plainPayload,
                 associatedData = session.associatedData.toByteArray(Charsets.UTF_8),
                 contentType = contentType,
                 encryptionKeyBase64 = session.encryptionKeyBase64,

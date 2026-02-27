@@ -38,9 +38,17 @@ export function buildApp() {
 
     // Routes
     app.post("/facebook/data-deletion", facebookDataDeletionHandler);
+    app.get("/", (_, res) => {
+      res.status(200).json({ ok: true, service: "api" });
+    });
+    app.get("/favicon.ico", (_, res) => {
+      res.status(204).end();
+    });
 
     app.use((req, res) => {
-    console.error(`404 Not Found: ${req.method} ${req.path}`);
+    if (process.env.LOG_404 === "true") {
+      console.warn(`404 Not Found: ${req.method} ${req.path}`);
+    }
     res.status(404).json({ error: "Not Found" });
 });
     return app;

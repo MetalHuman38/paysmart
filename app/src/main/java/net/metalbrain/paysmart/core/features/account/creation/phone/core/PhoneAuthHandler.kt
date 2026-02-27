@@ -47,7 +47,7 @@ class PhoneAuthHandler(
         val verificationId = phoneDraftState.value.verificationId
             ?: return Result.failure(IllegalStateException("No verification ID in state"))
 
-        Log.d("PhoneAuth", "Using verification ID: $verificationId")
+        Log.d("PhoneAuth", "Submitting OTP with cached verification handle")
 
         val credential = PhoneAuthProvider.getCredential(verificationId, code)
         return suspendCancellableCoroutine { cont ->

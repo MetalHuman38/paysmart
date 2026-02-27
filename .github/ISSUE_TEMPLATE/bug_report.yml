@@ -1,0 +1,108 @@
+name: Bug Report
+description: Report a reproducible bug in app, backend, or web/public surfaces.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the codebase is affected?
+      options:
+        - Android app (Kotlin/Compose)
+        - Functions API (TypeScript)
+        - Public site/content
+        - CI/CD
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Affected path/module
+      description: Example `app/src/main/...` or `functions/src/api/...`
+      placeholder: app/src/main/java/net/metalbrain/paysmart/...
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is wrong and why it matters?
+      placeholder: Briefly describe the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: What should happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: What actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Use numbered deterministic steps.
+      placeholder: |
+        1. Go to ...
+        2. Tap ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Device/OS/build/backend mode details.
+      placeholder: |
+        - OS:
+        - Device/Emulator:
+        - Build type: debug/release
+        - Backend: local emulator / cloud
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs, screenshots, traces
+      description: Paste relevant errors/logs. Redact secrets.
+      placeholder: Stack traces, logcat snippets, screenshots, command output.
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Suggested acceptance criteria
+      placeholder: |
+        - [ ] Repro no longer fails
+        - [ ] Tests added/updated
+        - [ ] No regression in related flow
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submit checks
+      options:
+        - label: I confirmed this is not a security vulnerability requiring private disclosure.
+          required: true
+        - label: I searched existing issues to avoid duplicates.
+          required: true

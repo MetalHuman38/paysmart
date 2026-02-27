@@ -24,6 +24,8 @@ import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.address.screen.AddressSetupResolverScreen
 import net.metalbrain.paysmart.core.features.account.address.viewmodel.AddressSetupResolverViewModel
 import net.metalbrain.paysmart.domain.auth.state.LocalSecurityState
+import net.metalbrain.paysmart.domain.model.DEFAULT_COUNTRY_ISO2
+import net.metalbrain.paysmart.domain.model.normalizeCountryIso2
 import net.metalbrain.paysmart.domain.model.supportedLanguages
 import net.metalbrain.paysmart.domain.state.UserUiState
 import net.metalbrain.paysmart.ui.home.screen.BalanceDetailsScreen
@@ -41,10 +43,12 @@ import net.metalbrain.paysmart.core.features.transactions.viewmodel.Transactions
 import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentitySetupResolverViewModel
 import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentityProviderHandoffViewModel
 import net.metalbrain.paysmart.core.features.account.screen.AccountProtectionContent
+import net.metalbrain.paysmart.core.features.account.passkey.screen.PasskeySetupScreen
 import net.metalbrain.paysmart.core.features.account.authentication.email.screen.AddEmailScreen
 import net.metalbrain.paysmart.core.features.account.authorization.biometric.screen.BiometricOptInScreen
 import net.metalbrain.paysmart.core.features.account.authorization.biometric.screen.BiometricSessionUnlock
 import net.metalbrain.paysmart.core.features.account.creation.screen.CreateAccountScreen
+import net.metalbrain.paysmart.core.features.account.creation.screen.ClientInformationScreen
 import net.metalbrain.paysmart.core.features.account.authorization.password.screen.CreateLocalPasswordScreen
 import net.metalbrain.paysmart.core.features.account.authentication.email.screen.EmailSentScreen
 import net.metalbrain.paysmart.core.features.account.authentication.email.screen.EmailVerificationSuccessScreen
@@ -61,6 +65,7 @@ import net.metalbrain.paysmart.core.features.account.authorization.biometric.vie
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.CreateAccountViewModel
 import net.metalbrain.paysmart.core.features.account.authorization.password.viewmodel.CreatePasswordViewModel
 import net.metalbrain.paysmart.core.features.account.authorization.password.viewmodel.EnterPasswordViewModel
+import net.metalbrain.paysmart.core.features.account.passkey.viewmodel.PasskeySetupViewModel
 import net.metalbrain.paysmart.core.features.language.viewmodel.LanguageViewModel
 import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.LoginViewModel
 import net.metalbrain.paysmart.core.features.account.authorization.passcode.viewmodel.PasscodeViewModel
@@ -69,6 +74,7 @@ import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.OT
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.ReauthOtpViewModel
 import net.metalbrain.paysmart.core.features.account.creation.phone.screen.ReauthOtpScreen
 import net.metalbrain.paysmart.core.features.account.profile.components.ProfileScreen
+import net.metalbrain.paysmart.core.features.account.creation.screen.PostOtpCapabilitiesScreen
 import net.metalbrain.paysmart.core.features.account.profile.screen.AccountInformationScreen
 import net.metalbrain.paysmart.core.features.account.profile.screen.AccountLimitsScreen
 import net.metalbrain.paysmart.core.features.account.profile.screen.AccountStatementScreen
@@ -83,6 +89,8 @@ import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePa
 import net.metalbrain.paysmart.core.features.help.viewmodel.HelpViewModel
 import net.metalbrain.paysmart.core.features.referral.viewmodel.ReferralViewModel
 import net.metalbrain.paysmart.core.features.account.security.viewmodel.SecurityViewModel
+import net.metalbrain.paysmart.core.features.account.creation.viewmodel.PostOtpCapabilitiesViewModel
+import net.metalbrain.paysmart.core.features.account.creation.viewmodel.ClientInformationViewModel
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 import net.metalbrain.paysmart.core.session.SessionViewModel
 import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePhoneRecoveryViewModel
@@ -134,6 +142,8 @@ sealed class Screen(val route: String) {
     object CreateAccount : Screen("create_account")
 
     object ProtectAccount: Screen("protect_account")
+
+    object PasskeySetup : Screen("passkey_setup")
 
 
     object LinkFederatedAccount : Screen("link_federated_account")
@@ -244,9 +254,29 @@ sealed class Screen(val route: String) {
     object Help: Screen("help")
 
 
-    object OtpVerification : Screen("otp_verification/{dialCode}/{phoneNumber}") {
-        fun routeWithArgs(dialCode: String, phoneNumber: String): String {
-            return "otp_verification/${dialCode.trimStart('+')}/${phoneNumber}"
+    object OtpVerification :
+        Screen("otp_verification/{dialCode}/{phoneNumber}?countryIso2={countryIso2}") {
+        const val COUNTRY_ISO2_ARG = "countryIso2"
+
+        fun routeWithArgs(
+            dialCode: String,
+            phoneNumber: String,
+            countryIso2: String = DEFAULT_COUNTRY_ISO2
+        ): String {
+            val normalizedIso2 = normalizeCountryIso2(countryIso2)
+            return "otp_verification/${dialCode.trimStart('+')}/${phoneNumber}?$COUNTRY_ISO2_ARG=${Uri.encode(normalizedIso2)}"
+        }
+    }
+
+    object PostOtpCapabilities : Screen("onboarding/capabilities/{countryIso2}") {
+        fun routeWithCountry(countryIso2: String): String {
+            return "onboarding/capabilities/${Uri.encode(normalizeCountryIso2(countryIso2))}"
+        }
+    }
+
+    object PostOtpClientInformation : Screen("onboarding/client_information/{countryIso2}") {
+        fun routeWithCountry(countryIso2: String): String {
+            return "onboarding/client_information/${Uri.encode(normalizeCountryIso2(countryIso2))}"
         }
     }
 }
@@ -322,7 +352,20 @@ fun AppNavGraph(
                 },
                 onSetBiometricClick = {
                     navController.navigate(Screen.BiometricOptIn.route)
+                },
+                onSetPasskeyClick = {
+                    navController.navigate(Screen.PasskeySetup.route)
                 }
+            )
+        }
+
+        composable(Screen.PasskeySetup.route) {
+            val viewModel: PasskeySetupViewModel = hiltViewModel()
+            val activity = LocalActivity.current as FragmentActivity
+            PasskeySetupScreen(
+                activity = activity,
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -343,7 +386,8 @@ fun AppNavGraph(
         composable(Screen.RequireSessionUnlock.route) {
             val securityViewModel: SecurityViewModel = hiltViewModel()
             val sessionViewModel: SessionViewModel = hiltViewModel()
-            val localSettings by securityViewModel.localSecuritySettings.collectAsState()
+            val localSecurityState by securityViewModel.localSecurityState.collectAsState()
+            val localSettings = (localSecurityState as? LocalSecurityState.Ready)?.settings
 
             val onUnlocked = {
                 sessionViewModel.unlockSession {
@@ -354,6 +398,10 @@ fun AppNavGraph(
             }
 
             when {
+                localSecurityState is LocalSecurityState.Loading -> {
+                    SplashScreen()
+                }
+
                 localSettings?.biometricsEnabled == true -> {
                     BiometricSessionUnlock(onUnlock = onUnlocked)
                 }
@@ -371,9 +419,23 @@ fun AppNavGraph(
                 }
 
                 else -> {
-                    LaunchedEffect(Unit) {
-                        onUnlocked()
-                    }
+                    AccountProtectionContent(
+                        onSetPasscodeClick = {
+                            navController.navigate(Screen.SetUpPassCode.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onSetBiometricClick = {
+                            navController.navigate(Screen.BiometricOptIn.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onSetPasskeyClick = {
+                            navController.navigate(Screen.PasskeySetup.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -420,12 +482,19 @@ fun AppNavGraph(
             route = Screen.OtpVerification.route,
             arguments = listOf(
                 navArgument("dialCode") { type = NavType.StringType },
-                navArgument("phoneNumber") { type = NavType.StringType }
+                navArgument("phoneNumber") { type = NavType.StringType },
+                navArgument(Screen.OtpVerification.COUNTRY_ISO2_ARG) {
+                    type = NavType.StringType
+                    defaultValue = DEFAULT_COUNTRY_ISO2
+                }
             )
         ) {
             val otpViewModel: OTPViewModel = hiltViewModel()
             val dialCode = it.arguments?.getString("dialCode") ?: ""
             val rawPhone = it.arguments?.getString("phoneNumber") ?: ""
+            val countryIso2 = normalizeCountryIso2(
+                it.arguments?.getString(Screen.OtpVerification.COUNTRY_ISO2_ARG)
+            )
             val formattedNumber = formatPhoneNumberForDisplay(
                 rawNumber = rawPhone,
                 dialCode = dialCode
@@ -434,7 +503,7 @@ fun AppNavGraph(
             OtpVerificationScreen(
                 phoneNumber = formattedNumber,
                 onContinue = {
-                    navController.navigate(Screen.ProtectAccount.route) {
+                    navController.navigate(Screen.PostOtpCapabilities.routeWithCountry(countryIso2)) {
                         popUpTo(Screen.OtpVerification.route) { inclusive = true }
                     }
                 },
@@ -445,14 +514,74 @@ fun AppNavGraph(
             otpViewModel.startTimer()
         }
 
+        composable(
+            route = Screen.PostOtpCapabilities.route,
+            arguments = listOf(
+                navArgument("countryIso2") {
+                    type = NavType.StringType
+                    defaultValue = DEFAULT_COUNTRY_ISO2
+                }
+            )
+        ) { backStackEntry ->
+            val capabilitiesViewModel: PostOtpCapabilitiesViewModel = hiltViewModel()
+            val countryIso2 = normalizeCountryIso2(
+                backStackEntry.arguments?.getString("countryIso2")
+            )
+            val currentDestinationId = backStackEntry.destination.id
+
+            PostOtpCapabilitiesScreen(
+                countryIso2 = countryIso2,
+                viewModel = capabilitiesViewModel,
+                onBack = { navController.popBackStack() },
+                onNext = {
+                    navController.navigate(Screen.PostOtpClientInformation.routeWithCountry(countryIso2)) {
+                        popUpTo(currentDestinationId) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Screen.PostOtpClientInformation.route,
+            arguments = listOf(
+                navArgument("countryIso2") {
+                    type = NavType.StringType
+                    defaultValue = DEFAULT_COUNTRY_ISO2
+                }
+            )
+        ) { backStackEntry ->
+            val countryIso2 = normalizeCountryIso2(
+                backStackEntry.arguments?.getString("countryIso2")
+            )
+            val clientInfoViewModel: ClientInformationViewModel = hiltViewModel()
+            val currentDestinationId = backStackEntry.destination.id
+
+            ClientInformationScreen(
+                countryIso2 = countryIso2,
+                viewModel = clientInfoViewModel,
+                onBack = { navController.popBackStack() },
+                onContinue = {
+                    navController.navigate(Screen.ProtectAccount.route) {
+                        popUpTo(currentDestinationId) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Screen.CreateAccount.route) {
             val createAccount: CreateAccountViewModel = hiltViewModel()
             val dialCode = createAccount.selectedCountry.value.dialCode
             val rawPhone = createAccount.phoneNumber
             CreateAccountScreen(
                 viewModel = createAccount,
-                onVerificationContinue = {
-                    navController.navigate(Screen.OtpVerification.routeWithArgs(dialCode, rawPhone))
+                onVerificationContinue = { countryIso2 ->
+                    navController.navigate(
+                        Screen.OtpVerification.routeWithArgs(
+                            dialCode = dialCode,
+                            phoneNumber = rawPhone,
+                            countryIso2 = countryIso2
+                        )
+                    )
                 },
                 onGetHelpClicked = {
                     navController.navigate(Screen.Help.route) {

@@ -56,7 +56,7 @@ class ReauthOtpViewModel @Inject constructor(
                 // ✅ Get cached phone number
                 val phoneDraft = phoneDraftStore.draft.first()
                 val phone = phoneDraft.e164
-                Log.d("ReauthOtpViewModel", "📞 Phone: $phone")
+                Log.d("ReauthOtpViewModel", "Loaded cached phone for OTP reauth")
 
                 if (phone.isNullOrBlank()) {
                     _uiState.update { it.copy(error = "Phone number not available") }

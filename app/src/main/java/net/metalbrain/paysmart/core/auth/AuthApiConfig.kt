@@ -15,10 +15,15 @@ data class AuthApiConfig (
     val identityUploadSession: String = "/auth/identity/upload/session",
     val identityUploadPayload: String = "/auth/identity/upload/payload",
     val identityUploadCommit: String = "/auth/identity/upload/commit",
+    val identityExtractText: String = "/auth/identity/extractText",
     val identityImageAttestation: String = "/auth/identity/image/attestation",
     val identityProviderStart: String = "/auth/identity/provider/startSession",
     val identityProviderResume: String = "/auth/identity/provider/resume",
     val identityProviderCallback: String = "/auth/identity/provider/callback",
+    val passkeyRegisterOptions: String = "/auth/passkeys/register/options",
+    val passkeyRegisterVerify: String = "/auth/passkeys/register/verify",
+    val passkeyAuthenticateOptions: String = "/auth/passkeys/authenticate/options",
+    val passkeyAuthenticateVerify: String = "/auth/passkeys/authenticate/verify",
     val addMoneySession: String = "/payments/add-money/session",
     val setPassCodeEnabled: String = "/auth/setPassCodeEnabled",
     val getPassCodeEnabled: String = "/auth/getPassCodeEnabled",
@@ -60,6 +65,8 @@ data class AuthApiConfig (
 
     val identityUploadPayloadUrl get() = "$apiBase$identityUploadPayload"
 
+    val identityExtractTextUrl get() = "$apiBase$identityExtractText"
+
     val identityImageAttestationUrl get() = "$apiBase$identityImageAttestation"
 
     val identityProviderStartUrl get() = "$apiBase$identityProviderStart"
@@ -67,6 +74,14 @@ data class AuthApiConfig (
     val identityProviderResumeUrl get() = "$apiBase$identityProviderResume"
 
     val identityProviderCallbackUrl get() = "$apiBase$identityProviderCallback"
+
+    val passkeyRegisterOptionsUrl get() = "$apiBase$passkeyRegisterOptions"
+
+    val passkeyRegisterVerifyUrl get() = "$apiBase$passkeyRegisterVerify"
+
+    val passkeyAuthenticateOptionsUrl get() = "$apiBase$passkeyAuthenticateOptions"
+
+    val passkeyAuthenticateVerifyUrl get() = "$apiBase$passkeyAuthenticateVerify"
 
     val addMoneySessionUrl get() = "$apiBase$addMoneySession"
 

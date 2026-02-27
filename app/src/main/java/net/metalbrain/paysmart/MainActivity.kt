@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
@@ -67,14 +68,11 @@ class MainActivity : FragmentActivity() {
             val securityViewModel = hiltViewModel<SecurityViewModel>()
 
             val authState by userManager.authState.collectAsState(AuthState.Loading)
-            Log.d("MainActivity", "authState: $authState")
             val postAuthState by securityViewModel.postAuthState.collectAsState()
-            Log.d("MainActivity", "postAuthState: $postAuthState")
             val sessionState by sessionStateManager.sessionState.collectAsState()
-            Log.d("MainActivity", "sessionState: $sessionState")
             val localSecurityState by securityViewModel.localSecurityState.collectAsState()
-            Log.d("MainActivity", "localSecurityState Data: $localSecurityState")
             val localSettings = (localSecurityState as? LocalSecurityState.Ready)?.settings
+            val sessionLocked = localSettings?.sessionLocked
             val hasUnlockMethod = localSettings?.let {
                 it.biometricsEnabled || it.passcodeEnabled || it.passwordEnabled
             } ?: false
@@ -83,6 +81,36 @@ class MainActivity : FragmentActivity() {
                 authState is AuthState.Authenticated &&
                         postAuthState is PostAuthState.Ready &&
                         hasUnlockMethod
+
+            val navController = rememberNavController()
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route ?: "unknown"
+            val deferSecurityIntentForOnboarding =
+                currentRoute == Screen.CreateAccount.route ||
+                    currentRoute.startsWith("otp_verification/") ||
+                    currentRoute.startsWith("onboarding/capabilities/") ||
+                    currentRoute.startsWith("onboarding/client_information/")
+
+            LaunchedEffect(sessionLocked, postAuthState, sessionState, currentRoute) {
+                Log.d(
+                    "LockStateTrace",
+                    "sessionLocked=$sessionLocked postAuthState=$postAuthState sessionState=$sessionState route=$currentRoute"
+                )
+            }
+
+            LaunchedEffect(postAuthState, currentRoute) {
+                if (postAuthState is PostAuthState.Locked &&
+                    currentRoute != Screen.RequireSessionUnlock.route
+                ) {
+                    Log.d(
+                        "LockStateTrace",
+                        "force_lock_route from=$currentRoute to=${Screen.RequireSessionUnlock.route}"
+                    )
+                    navController.navigate(Screen.RequireSessionUnlock.route) {
+                        launchSingleTop = true
+                    }
+                }
+            }
 
             val authenticatedUid = (authState as? AuthState.Authenticated)?.uid
             LaunchedEffect(authenticatedUid) {
@@ -98,14 +126,16 @@ class MainActivity : FragmentActivity() {
 
             }
 
-            val navController = rememberNavController()
-
             PaysmartTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     IdleSessionWatcher(
                         enabled = idleLockEnabled,
                         lockAfterMinutes = lockAfterMinutes,
                         onTimeout = {
+                            Log.d(
+                                "LockStateTrace",
+                                "idle_timeout sessionLockedBefore=$sessionLocked postAuthState=$postAuthState route=$currentRoute"
+                            )
                             lifecycleScope.launch {
                                 sessionStateManager.lockSession()
                             }
@@ -127,18 +157,36 @@ class MainActivity : FragmentActivity() {
                                         }
 
                                         SecureNavIntent.ToAccountProtection -> {
-                                            navController.navigate(Screen.ProtectAccount.route) {
-                                                launchSingleTop = true
+                                            if (deferSecurityIntentForOnboarding) {
+                                                Log.d(
+                                                    "LockStateTrace",
+                                                    "defer_account_protection_intent route=$currentRoute"
+                                                )
+                                            } else {
+                                                navController.navigate(Screen.ProtectAccount.route) {
+                                                    launchSingleTop = true
+                                                }
                                             }
                                         }
 
                                         SecureNavIntent.ToEmailVerification -> {
-                                            navController.navigate(Screen.LinkFederatedAccount.route) {
-                                                launchSingleTop = true
+                                            if (deferSecurityIntentForOnboarding) {
+                                                Log.d(
+                                                    "LockStateTrace",
+                                                    "defer_email_verification_intent route=$currentRoute"
+                                                )
+                                            } else {
+                                                navController.navigate(Screen.LinkFederatedAccount.route) {
+                                                    launchSingleTop = true
+                                                }
                                             }
                                         }
 
                                         SecureNavIntent.RequireSessionUnlock -> {
+                                            Log.d(
+                                                "LockStateTrace",
+                                                "lock_intent route=$currentRoute to=${Screen.RequireSessionUnlock.route}"
+                                            )
                                             navController.navigate(Screen.RequireSessionUnlock.route) {
                                                 launchSingleTop = true
                                             }

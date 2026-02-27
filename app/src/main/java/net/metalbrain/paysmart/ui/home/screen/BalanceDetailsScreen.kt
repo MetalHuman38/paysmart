@@ -2,25 +2,36 @@ package net.metalbrain.paysmart.ui.home.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.NorthEast
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CurrencyFlagResolver
@@ -35,27 +46,24 @@ fun BalanceDetailsScreen(
 ) {
     val context = LocalContext.current
     val normalizedCurrency = currencyCode.trim().uppercase(Locale.US).ifBlank { "GBP" }
-    val flag = CurrencyFlagResolver.resolve(
-        context = context,
-        currencyCode = normalizedCurrency
-    )
+    val flag = CurrencyFlagResolver.resolve(context, normalizedCurrency)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Balance details") },
+                title = {},
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+                actions = {
+                    IconButton(onClick = {}) {
+                        Icon(imageVector = Icons.Filled.MoreHoriz, contentDescription = "More")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         }
     ) { innerPadding ->
@@ -63,38 +71,53 @@ fun BalanceDetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.Top
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
+            Text(text = flag, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.align(Alignment.CenterHorizontally))
+            Text(text = "$normalizedCurrency balance", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.CenterHorizontally))
+            Text(
+                text = "$amountLabel $normalizedCurrency",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+
+            Surface(
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Wallet balance",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                    )
-                    Text(
-                        text = "$flag $normalizedCurrency",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Text(
-                        text = "$normalizedCurrency $amountLabel",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                    Icon(imageVector = Icons.Filled.AccountBalance, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(text = "View account limits", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 8.dp))
                 }
             }
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+                BalanceQuickAction(icon = Icons.Filled.NorthEast, label = "Send")
+                BalanceQuickAction(icon = Icons.Filled.Add, label = "Add")
+                BalanceQuickAction(icon = Icons.Filled.Remove, label = "Withdraw")
+                BalanceQuickAction(icon = Icons.Filled.Autorenew, label = "Convert")
+            }
+
+            Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+                Row(modifier = Modifier.fillMaxWidth().padding(4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    SegmentChip(label = "Transactions", selected = true, modifier = Modifier.weight(1f))
+                    SegmentChip(label = "Account details", selected = false, modifier = Modifier.weight(1f))
+                }
+            }
+
+            Text("Recent activity", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            BalanceActivityRow("To Kalejaiye Aderonke Ade...", "15:51", "-10.00 $normalizedCurrency", "Successful")
+            HorizontalDivider()
+            BalanceActivityRow("Topup via MONZO BANK LIMI...", "15:50", "+10.00 $normalizedCurrency", "Successful")
+            HorizontalDivider()
+            BalanceActivityRow("Topup via MONZO BANK LIMI...", "15:49", "+10.00 $normalizedCurrency", "Failed")
         }
     }
 }

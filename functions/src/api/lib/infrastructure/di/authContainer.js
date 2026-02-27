@@ -8,9 +8,12 @@ import { FirestoreUserRepository } from "../firestore/FirestoreUserRepository.js
 import { FirestoreIdentityUploadRepository } from "../firestore/FirestoreIdentityUploadRepository.js";
 import { FirestoreIdentityProviderRepository } from "../firestore/FirestoreIdentityProviderRepository.js";
 import { FirestoreAddMoneyRepository } from "../firestore/FirestoreAddMoneyRepository.js";
+import { FirestorePasskeyRepository } from "../firestore/FirestorePasskeyRepository.js";
 import { GoogleCloudAccessTokenProvider } from "../../services/googleCloudAccessTokenProvider.js";
 import { PlayIntegrityVerifier } from "../../services/playIntegrityVerifier.js";
 import { KmsEnvelopeService } from "../../services/kmsEnvelopeService.js";
+import { GoogleVisionTextExtractionService } from "../../services/googleVisionTextExtractionService.js";
+import { PasskeyService } from "../../services/passkeyService.js";
 import { StripePaymentsService } from "../../services/stripePaymentsService.js";
 export function authContainer() {
     const { auth, firestore, getConfig } = initDeps();
@@ -36,7 +39,16 @@ export function authContainer() {
     const userRepo = new FirestoreUserRepository(firestore);
     const identityUploadRepo = new FirestoreIdentityUploadRepository(firestore, storageBucket, attestationVerifier, kmsEnvelopeService, config.identityMaxPayloadBytes);
     const identityProviderRepo = new FirestoreIdentityProviderRepository(firestore);
+    const passkeyRepo = new FirestorePasskeyRepository(firestore);
     const addMoneyRepo = new FirestoreAddMoneyRepository(firestore, stripePaymentsService, config.stripePublishableKey, config.stripeAllowedTopupCurrencies, config.stripeMinimumTopupAmountMinor);
+    const identityTextExtractionService = new GoogleVisionTextExtractionService(undefined, config.identityOcrEnabled);
+    const passkeyService = new PasskeyService(passkeyRepo, {
+        enabled: config.passkeyEnabled,
+        rpId: config.passkeyRpId,
+        rpName: config.passkeyRpName,
+        expectedOrigins: config.passkeyExpectedOrigins,
+        challengeTtlMs: config.passkeyChallengeTtlMs,
+    });
     return {
         getUIDFromAuthHeader: new GetUIDFromAuthHeader(authService),
         checkPhoneAvailability: new CheckPhoneAvailability(authService),
@@ -45,6 +57,8 @@ export function authContainer() {
         userRepo,
         identityUploads: identityUploadRepo,
         identityProvider: identityProviderRepo,
+        identityTextExtraction: identityTextExtractionService,
+        passkeys: passkeyService,
         addMoney: addMoneyRepo,
     };
 }

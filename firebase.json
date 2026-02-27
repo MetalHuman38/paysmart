@@ -20,11 +20,6 @@
       "source": "functions/src/security",
       "codebase": "security",
       "disallowLegacyRuntimeConfig": true
-    },
-    {
-      "source": "functions/src/echo",
-      "codebase": "echo",
-      "disallowLegacyRuntimeConfig": true
     }
   ],
   "hosting": {

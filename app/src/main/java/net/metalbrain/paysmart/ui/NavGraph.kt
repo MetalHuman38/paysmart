@@ -2,8 +2,14 @@ package net.metalbrain.paysmart.ui
 
 
 import android.net.Uri
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
 import android.util.Log
+import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.activity.compose.LocalActivity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,17 +44,20 @@ import net.metalbrain.paysmart.core.features.featuregate.FeatureAccessPolicy
 import net.metalbrain.paysmart.core.features.featuregate.FeatureGateScreen
 import net.metalbrain.paysmart.core.features.featuregate.FeatureKey
 import net.metalbrain.paysmart.core.features.featuregate.FeatureRequirement
+import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.transactions.screen.TransactionsScreen
 import net.metalbrain.paysmart.core.features.transactions.viewmodel.TransactionsViewModel
 import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentitySetupResolverViewModel
 import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentityProviderHandoffViewModel
 import net.metalbrain.paysmart.core.features.account.screen.AccountProtectionContent
 import net.metalbrain.paysmart.core.features.account.passkey.screen.PasskeySetupScreen
+import net.metalbrain.paysmart.core.features.account.passkey.screen.ProfilePasskeySettingsScreen
 import net.metalbrain.paysmart.core.features.account.authentication.email.screen.AddEmailScreen
 import net.metalbrain.paysmart.core.features.account.authorization.biometric.screen.BiometricOptInScreen
 import net.metalbrain.paysmart.core.features.account.authorization.biometric.screen.BiometricSessionUnlock
 import net.metalbrain.paysmart.core.features.account.creation.screen.CreateAccountScreen
 import net.metalbrain.paysmart.core.features.account.creation.screen.ClientInformationScreen
+import net.metalbrain.paysmart.core.features.account.creation.screen.PostOtpSecurityStepsScreen
 import net.metalbrain.paysmart.core.features.account.authorization.password.screen.CreateLocalPasswordScreen
 import net.metalbrain.paysmart.core.features.account.authentication.email.screen.EmailSentScreen
 import net.metalbrain.paysmart.core.features.account.authentication.email.screen.EmailVerificationSuccessScreen
@@ -79,6 +88,7 @@ import net.metalbrain.paysmart.core.features.account.profile.screen.AccountInfor
 import net.metalbrain.paysmart.core.features.account.profile.screen.AccountLimitsScreen
 import net.metalbrain.paysmart.core.features.account.profile.screen.AccountStatementScreen
 import net.metalbrain.paysmart.core.features.account.profile.screen.ProfileDetailsScreen
+import net.metalbrain.paysmart.core.features.account.profile.screen.ProfileSecurityPrivacyScreen
 import net.metalbrain.paysmart.core.features.account.profile.screen.ProfileSubPageScreen
 import net.metalbrain.paysmart.core.features.account.profile.state.ProfileNextStep
 import net.metalbrain.paysmart.core.features.account.profile.viewmodel.ProfileStateViewModel
@@ -89,8 +99,12 @@ import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePa
 import net.metalbrain.paysmart.core.features.help.viewmodel.HelpViewModel
 import net.metalbrain.paysmart.core.features.referral.viewmodel.ReferralViewModel
 import net.metalbrain.paysmart.core.features.account.security.viewmodel.SecurityViewModel
+import net.metalbrain.paysmart.core.features.account.security.mfa.screen.MfaNudgeScreen
+import net.metalbrain.paysmart.core.features.account.security.mfa.viewmodel.MfaNudgeViewModel
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.PostOtpCapabilitiesViewModel
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.ClientInformationViewModel
+import net.metalbrain.paysmart.core.features.account.authentication.email.viewmodel.EmailSentViewModel
+import net.metalbrain.paysmart.core.features.theme.viewmodel.AppThemeViewModel
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 import net.metalbrain.paysmart.core.session.SessionViewModel
 import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePhoneRecoveryViewModel
@@ -105,9 +119,6 @@ sealed class Screen(val route: String) {
     object Splash : Screen("splash")
 
     object Startup : Screen("startup")
-
-    object SecurityGate: Screen("security_gate")
-
 
     object BiometricOptIn: Screen("biometric_opt_in")
 
@@ -133,10 +144,6 @@ sealed class Screen(val route: String) {
         fun routeWithOrigin(origin: Origin): String {
             return "$BASEROUTE?$ORIGINARG=${Uri.encode(origin.routeValue)}"
         }
-
-        fun routeWithOrigin(origin: String): String {
-            return routeWithOrigin(Origin.fromRouteValue(origin))
-        }
     }
     
     object CreateAccount : Screen("create_account")
@@ -146,7 +153,12 @@ sealed class Screen(val route: String) {
     object PasskeySetup : Screen("passkey_setup")
 
 
-    object LinkFederatedAccount : Screen("link_federated_account")
+    object LinkFederatedAccount : Screen("link_federated_account") {
+        const val RETURN_ROUTE_ARG = "returnRoute"
+        fun routeWithReturn(returnRoute: String): String {
+            return "${route}?$RETURN_ROUTE_ARG=${Uri.encode(returnRoute)}"
+        }
+    }
 
     object CreatePassword : Screen("create_password")
 
@@ -179,6 +191,7 @@ sealed class Screen(val route: String) {
     object ProfileAccountInformation : Screen("profile/account_information")
 
     object ProfileSecurityPrivacy : Screen("profile/security_privacy")
+    object ProfilePasskeySettings : Screen("profile/security_privacy/passkey")
 
     object ProfileConnectedAccounts : Screen("profile/connected_accounts")
 
@@ -279,6 +292,20 @@ sealed class Screen(val route: String) {
             return "onboarding/client_information/${Uri.encode(normalizeCountryIso2(countryIso2))}"
         }
     }
+
+    object PostOtpSecuritySteps : Screen("onboarding/security_steps/{countryIso2}") {
+        fun routeWithCountry(countryIso2: String): String {
+            return "onboarding/security_steps/${Uri.encode(normalizeCountryIso2(countryIso2))}"
+        }
+    }
+
+    object PostOtpMfaNudge : Screen("onboarding/mfa_nudge/{countryIso2}") {
+        fun routeWithCountry(countryIso2: String): String {
+            return "onboarding/mfa_nudge/${Uri.encode(normalizeCountryIso2(countryIso2))}"
+        }
+    }
+
+    object ProfileMfaNudge : Screen("profile/security/mfa_nudge")
 }
 
 private fun resolveLanguageContinueRoute(origin: Screen.Origin): String {
@@ -287,6 +314,28 @@ private fun resolveLanguageContinueRoute(origin: Screen.Origin): String {
         Screen.Origin.CREATE_ACCOUNT -> Screen.CreateAccount.route
         Screen.Origin.PROFILE_ACCOUNT_INFORMATION -> Screen.ProfileAccountInformation.route
         Screen.Origin.STARTUP -> Screen.Startup.route
+    }
+}
+
+private fun openEmailApp(context: Context): Boolean {
+    val emailAppIntent = Intent(Intent.ACTION_MAIN).apply {
+        addCategory(Intent.CATEGORY_APP_EMAIL)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    try {
+        context.startActivity(emailAppIntent)
+        return true
+    } catch (_: ActivityNotFoundException) {
+        val fallback = Intent(Intent.ACTION_SENDTO).apply {
+            data = "mailto:".toUri()
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        return try {
+            context.startActivity(fallback)
+            true
+        } catch (_: ActivityNotFoundException) {
+            false
+        }
     }
 }
 
@@ -371,13 +420,24 @@ fun AppNavGraph(
 
         composable(Screen.BiometricOptIn.route) {
             val viewModel: BiometricOptInViewModel = hiltViewModel()
+            val securityViewModel: SecurityViewModel = hiltViewModel()
+            val localSecurityState by securityViewModel.localSecurityState.collectAsState()
+            val localSettings = (localSecurityState as? LocalSecurityState.Ready)?.settings
+            val hasReadyPassword = localSettings?.passwordEnabled == true &&
+                localSettings.localPasswordSetAt != null
             val activity = LocalActivity.current as FragmentActivity
             BiometricOptInScreen(
                 activity = activity,
                 viewModel = viewModel,
                 onSuccess = {
-                    navController.navigate(Screen.LinkFederatedAccount.route) {
+                    val targetRoute = if (hasReadyPassword) {
+                        Screen.Home.route
+                    } else {
+                        Screen.CreatePassword.route
+                    }
+                    navController.navigate(targetRoute) {
                         popUpTo(Screen.ProtectAccount.route) { inclusive = true }
+                        launchSingleTop = true
                     }
                 },
             )
@@ -386,6 +446,7 @@ fun AppNavGraph(
         composable(Screen.RequireSessionUnlock.route) {
             val securityViewModel: SecurityViewModel = hiltViewModel()
             val sessionViewModel: SessionViewModel = hiltViewModel()
+            val userViewModel: UserViewModel = hiltViewModel()
             val localSecurityState by securityViewModel.localSecurityState.collectAsState()
             val localSettings = (localSecurityState as? LocalSecurityState.Ready)?.settings
 
@@ -396,6 +457,13 @@ fun AppNavGraph(
                     }
                 }
             }
+            val onLogout = {
+                userViewModel.signOut()
+                navController.navigate(Screen.Startup.route) {
+                    popUpTo(0)
+                    launchSingleTop = true
+                }
+            }
 
             when {
                 localSecurityState is LocalSecurityState.Loading -> {
@@ -403,7 +471,10 @@ fun AppNavGraph(
                 }
 
                 localSettings?.biometricsEnabled == true -> {
-                    BiometricSessionUnlock(onUnlock = onUnlocked)
+                    BiometricSessionUnlock(
+                        onUnlock = onUnlocked,
+                        onLogout = onLogout
+                    )
                 }
 
                 localSettings?.passcodeEnabled == true -> {
@@ -534,6 +605,31 @@ fun AppNavGraph(
                 viewModel = capabilitiesViewModel,
                 onBack = { navController.popBackStack() },
                 onNext = {
+                    navController.navigate(Screen.PostOtpSecuritySteps.routeWithCountry(countryIso2)) {
+                        popUpTo(currentDestinationId) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Screen.PostOtpSecuritySteps.route,
+            arguments = listOf(
+                navArgument("countryIso2") {
+                    type = NavType.StringType
+                    defaultValue = DEFAULT_COUNTRY_ISO2
+                }
+            )
+        ) { backStackEntry ->
+            val countryIso2 = normalizeCountryIso2(
+                backStackEntry.arguments?.getString("countryIso2")
+            )
+            val currentDestinationId = backStackEntry.destination.id
+
+            PostOtpSecurityStepsScreen(
+                countryIso2 = countryIso2,
+                onBack = { navController.popBackStack() },
+                onContinue = {
                     navController.navigate(Screen.PostOtpClientInformation.routeWithCountry(countryIso2)) {
                         popUpTo(currentDestinationId) { inclusive = true }
                     }
@@ -561,6 +657,43 @@ fun AppNavGraph(
                 viewModel = clientInfoViewModel,
                 onBack = { navController.popBackStack() },
                 onContinue = {
+                    navController.navigate(Screen.PostOtpMfaNudge.routeWithCountry(countryIso2)) {
+                        popUpTo(currentDestinationId) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Screen.PostOtpMfaNudge.route,
+            arguments = listOf(
+                navArgument("countryIso2") {
+                    type = NavType.StringType
+                    defaultValue = DEFAULT_COUNTRY_ISO2
+                }
+            )
+        ) { backStackEntry ->
+            val countryIso2 = normalizeCountryIso2(
+                backStackEntry.arguments?.getString("countryIso2")
+            )
+            val mfaViewModel: MfaNudgeViewModel = hiltViewModel()
+            val currentDestinationId = backStackEntry.destination.id
+
+            MfaNudgeScreen(
+                viewModel = mfaViewModel,
+                onBack = { navController.popBackStack() },
+                onPrimaryAction = { hasVerifiedEmail ->
+                    if (hasVerifiedEmail) {
+                        navController.navigate(Screen.ProtectAccount.route) {
+                            popUpTo(currentDestinationId) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(
+                            Screen.LinkFederatedAccount.routeWithReturn(Screen.ProtectAccount.route)
+                        )
+                    }
+                },
+                onSkip = {
                     navController.navigate(Screen.ProtectAccount.route) {
                         popUpTo(currentDestinationId) { inclusive = true }
                     }
@@ -599,21 +732,50 @@ fun AppNavGraph(
             )
         }
 
-        composable(Screen.LinkFederatedAccount.route) {
+        composable(
+            route = "${Screen.LinkFederatedAccount.route}?${Screen.LinkFederatedAccount.RETURN_ROUTE_ARG}={${Screen.LinkFederatedAccount.RETURN_ROUTE_ARG}}",
+            arguments = listOf(
+                navArgument(Screen.LinkFederatedAccount.RETURN_ROUTE_ARG) {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
+        ) { backStackEntry ->
+            val returnRoute = Uri.decode(
+                backStackEntry.arguments
+                    ?.getString(Screen.LinkFederatedAccount.RETURN_ROUTE_ARG)
+                    .orEmpty()
+            )
+            val securityViewModel: SecurityViewModel = hiltViewModel()
+            val localSecurityState by securityViewModel.localSecurityState.collectAsState()
+            val localSettings = (localSecurityState as? LocalSecurityState.Ready)?.settings
+            val hasReadyPassword = localSettings?.passwordEnabled == true &&
+                localSettings.localPasswordSetAt != null
+            val nextRouteAfterLinkNudge = if (hasReadyPassword) {
+                Screen.Home.route
+            } else {
+                Screen.CreatePassword.route
+            }
+            val destination = returnRoute.ifBlank { nextRouteAfterLinkNudge }
+
             FederatedLinkingScreen(
                 viewModel = hiltViewModel(),
+                emailReturnRoute = destination,
                 onSkip = {
-                    navController.navigate(Screen.CreatePassword.route) {
-                        popUpTo(Screen.SecurityGate.route) { inclusive = true }
+                    navController.navigate(destination) {
+                        popUpTo(backStackEntry.destination.id) { inclusive = true }
+                        launchSingleTop = true
                     }
                 },
-                onGoogleLinkSuccess = { navController.navigate(Screen.CreatePassword.route) {
-                        popUpTo(Screen.LinkFederatedAccount.route) { inclusive = true }
+                onGoogleLinkSuccess = { navController.navigate(destination) {
+                        popUpTo(backStackEntry.destination.id) { inclusive = true }
+                        launchSingleTop = true
                     }
                 },
                 onFacebookLinkSuccess = {
-                    navController.navigate(Screen.CreatePassword.route) {
-                        popUpTo(Screen.LinkFederatedAccount.route) { inclusive = true }
+                    navController.navigate(destination) {
+                        popUpTo(backStackEntry.destination.id) { inclusive = true }
+                        launchSingleTop = true
                     }
                 },
                 navController = navController,
@@ -759,7 +921,10 @@ fun AppNavGraph(
             CreateLocalPasswordScreen(
                 viewModel = viewModel,
                 onDone = {
-                    navController.navigate(Screen.Home.route)
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
                 }
             )
         }
@@ -770,7 +935,7 @@ fun AppNavGraph(
                 viewModel = passCodeviewModel,
                 onPasscodeSet = {
                     Log.d("SetPasscodeScreen", "onPasscodeSet invoked")
-                    navController.navigate(Screen.CreatePassword.route) {
+                    navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.SetUpPassCode.route) { inclusive = true }
                     }
                 }
@@ -814,12 +979,34 @@ fun AppNavGraph(
             )
         ) {
             val email = Uri.decode(it.arguments?.getString("email") ?: "")
+            val returnRoute = Uri.decode(it.arguments?.getString("returnRoute") ?: Screen.Home.route)
+            val context = LocalContext.current
+            val emailSentViewModel: EmailSentViewModel = hiltViewModel()
+            val emailSentState by emailSentViewModel.uiState.collectAsState()
+
+            LaunchedEffect(emailSentState.infoMessage, emailSentState.errorMessage) {
+                val message = emailSentState.infoMessage ?: emailSentState.errorMessage
+                if (!message.isNullOrBlank()) {
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    emailSentViewModel.consumeTransientMessage()
+                }
+            }
+
             EmailSentScreen(
                 email = email,
-                onResend = { /* Handle resend email */ },
-                onOpenEmailApp = { /* Handle opening email app */ },
+                onResend = {
+                    emailSentViewModel.resendVerificationEmail(email)
+                },
+                onOpenEmailApp = {
+                    if (!openEmailApp(context)) {
+                        Toast.makeText(context, "No email app found.", Toast.LENGTH_SHORT).show()
+                    }
+                },
                 onChangeEmail = { navController.popBackStack() },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                isResending = emailSentState.isResending,
+                infoMessage = emailSentState.infoMessage,
+                errorMessage = emailSentState.errorMessage
             )
         }
 
@@ -934,12 +1121,41 @@ fun AppNavGraph(
                 navArgument("amount") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val currency = Uri.decode(backStackEntry.arguments?.getString("currency") ?: "GBP")
+            val currency = Uri.decode(
+                backStackEntry.arguments?.getString("currency")
+                    ?: CountryCapabilityCatalog.defaultProfile().currencyCode
+            )
             val amount = Uri.decode(backStackEntry.arguments?.getString("amount") ?: "0.00")
             BalanceDetailsScreen(
                 currencyCode = currency,
                 amountLabel = amount,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onSendClick = {
+                    navController.navigate(
+                        Screen.FeatureGate.routeWithArgs(
+                            feature = FeatureKey.SEND_MONEY.id,
+                            resumeRoute = Screen.SendMoney.route
+                        )
+                    )
+                },
+                onAddClick = {
+                    navController.navigate(
+                        Screen.FeatureGate.routeWithArgs(
+                            feature = FeatureKey.ADD_MONEY.id,
+                            resumeRoute = Screen.AddMoney.route
+                        )
+                    )
+                },
+                onWithdrawClick = {
+                    navController.navigate(Screen.Help.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onConvertClick = {
+                    navController.navigate(Screen.SendMoney.route) {
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 
@@ -1019,11 +1235,14 @@ fun AppNavGraph(
         composable(Screen.ProfileAccountInformation.route) {
             val languageViewModel: LanguageViewModel = hiltViewModel()
             val profileViewModel: ProfileStateViewModel = hiltViewModel()
+            val appThemeViewModel: AppThemeViewModel = hiltViewModel()
             val profileState by profileViewModel.uiState.collectAsState()
             val languageCode by languageViewModel.currentLanguage.collectAsState()
+            val themeMode by appThemeViewModel.themeMode.collectAsState()
 
             AccountInformationScreen(
                 currentLanguage = languageCode,
+                currentThemeMode = themeMode,
                 profileStatusLabel = when {
                     profileState.isLocked -> stringResource(R.string.profile_status_locked)
                     profileState.isIncomplete -> stringResource(R.string.profile_status_incomplete)
@@ -1045,15 +1264,85 @@ fun AppNavGraph(
                             Screen.Origin.PROFILE_ACCOUNT_INFORMATION
                         )
                     )
+                },
+                onThemeModeClick = {
+                    appThemeViewModel.cycleThemeMode()
                 }
             )
         }
 
         composable(Screen.ProfileSecurityPrivacy.route) {
-            ProfileSubPageScreen(
-                title = stringResource(R.string.profile_menu_security_privacy_title),
-                description = stringResource(R.string.profile_security_privacy_description),
+            val securityViewModel: SecurityViewModel = hiltViewModel()
+            val localSecurityState by securityViewModel.localSecurityState.collectAsState()
+            val hideBalanceEnabled by securityViewModel.hideBalanceEnabled.collectAsState()
+            val settings = (localSecurityState as? LocalSecurityState.Ready)?.settings
+
+            ProfileSecurityPrivacyScreen(
+                settings = settings,
+                hideBalanceEnabled = hideBalanceEnabled,
+                onBack = { navController.popBackStack() },
+                onResetPassword = {
+                    navController.navigate(Screen.ChangePasswordRecovery.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onTransactionPin = {
+                    navController.navigate(Screen.SetUpPassCode.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onPasskeySettings = {
+                    navController.navigate(Screen.ProfilePasskeySettings.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onBiometricToggle = { enabled ->
+                    if (enabled) {
+                        navController.navigate(Screen.BiometricOptIn.route) {
+                            launchSingleTop = true
+                        }
+                    } else {
+                        securityViewModel.clearBiometricOptIn()
+                    }
+                },
+                onViewPrivacySettings = {
+                    navController.navigate(Screen.ProfileAbout.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onHideBalanceToggle = securityViewModel::setHideBalance
+            )
+        }
+
+        composable(Screen.ProfilePasskeySettings.route) {
+            val viewModel: PasskeySetupViewModel = hiltViewModel()
+            val activity = LocalActivity.current as FragmentActivity
+            ProfilePasskeySettingsScreen(
+                activity = activity,
+                viewModel = viewModel,
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.ProfileMfaNudge.route) { backStackEntry ->
+            val mfaViewModel: MfaNudgeViewModel = hiltViewModel()
+            val currentDestinationId = backStackEntry.destination.id
+
+            MfaNudgeScreen(
+                viewModel = mfaViewModel,
+                onBack = { navController.popBackStack() },
+                onPrimaryAction = { hasVerifiedEmail ->
+                    if (hasVerifiedEmail) {
+                        navController.navigate(Screen.ProfileSecurityPrivacy.route) {
+                            popUpTo(currentDestinationId) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(
+                            "${Screen.AddEmail.route}?returnRoute=${Uri.encode(Screen.ProfileMfaNudge.route)}"
+                        )
+                    }
+                },
+                onSkip = { navController.popBackStack() }
             )
         }
 
@@ -1107,6 +1396,18 @@ fun AppNavGraph(
                             null -> Unit
                         }
                     },
+                    showMfaNudgeCta = profileState.security?.hasSkippedMfaEnrollmentPrompt == true,
+                    onOpenMfaNudge = {
+                        navController.navigate(Screen.ProfileMfaNudge.route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    showPasskeyNudgeCta = profileState.security?.hasSkippedPasskeyEnrollmentPrompt == true,
+                    onOpenPasskeyNudge = {
+                        navController.navigate(Screen.ProfilePasskeySettings.route) {
+                            launchSingleTop = true
+                        }
+                    },
                     onBack = { navController.popBackStack() }
                 )
             } else {
@@ -1133,7 +1434,7 @@ fun AppNavGraph(
                         when (profileState.nextStep) {
                             ProfileNextStep.VERIFY_EMAIL -> {
                                 navController.navigate(
-                                    "${Screen.AddEmail.route}?returnRoute=${Uri.encode(Screen.OnboardingProfile.route)}"
+                                    Screen.LinkFederatedAccount.routeWithReturn(Screen.OnboardingProfile.route)
                                 )
                             }
 
@@ -1156,6 +1457,18 @@ fun AppNavGraph(
                     onContinueToSecuritySetup = {
                         navController.navigate(Screen.ProtectAccount.route) {
                             popUpTo(Screen.OnboardingProfile.route) { inclusive = true }
+                        }
+                    },
+                    showMfaNudgeCta = profileState.security?.hasSkippedMfaEnrollmentPrompt == true,
+                    onOpenMfaNudge = {
+                        navController.navigate(Screen.ProfileMfaNudge.route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    showPasskeyNudgeCta = profileState.security?.hasSkippedPasskeyEnrollmentPrompt == true,
+                    onOpenPasskeyNudge = {
+                        navController.navigate(Screen.ProfilePasskeySettings.route) {
+                            launchSingleTop = true
                         }
                     },
                     onBack = { navController.popBackStack() }

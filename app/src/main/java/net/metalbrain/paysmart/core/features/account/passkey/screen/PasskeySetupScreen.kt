@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.passkey.viewmodel.PasskeySetupViewModel
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 
@@ -33,29 +35,33 @@ fun PasskeySetupScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Passkey setup",
+            text = stringResource(R.string.passkey_setup_title),
             style = MaterialTheme.typography.headlineSmall
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Register a device passkey and verify it against your PaySmart backend profile.",
+            text = stringResource(R.string.passkey_setup_description),
             style = MaterialTheme.typography.bodyMedium
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         PrimaryButton(
-            text = if (state.isRegistered) "Passkey registered" else "Create passkey",
+            text = if (state.isRegistered) {
+                stringResource(R.string.passkey_registered)
+            } else {
+                stringResource(R.string.passkey_create_action)
+            },
             onClick = { viewModel.registerPasskey(activity) },
             enabled = !state.isLoading && !state.isRegistered,
             isLoading = state.isLoading,
-            loadingText = "Processing..."
+            loadingText = stringResource(R.string.common_processing)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         PrimaryButton(
-            text = "Verify passkey",
+            text = stringResource(R.string.passkey_verify_action),
             onClick = { viewModel.verifyPasskey(activity) },
             enabled = !state.isLoading
         )
@@ -79,7 +85,7 @@ fun PasskeySetupScreen(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Back")
+            Text(stringResource(R.string.common_back))
         }
     }
 }

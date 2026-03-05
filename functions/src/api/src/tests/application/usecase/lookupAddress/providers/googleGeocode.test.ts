@@ -78,7 +78,7 @@ describe.sequential("googleGeocode", () => {
 
     const result = await googleGeocode("1600 Amphitheatre Pkwy 94043", "us");
 
-    expect(result).toHaveLength(1);
+    expect(result).toHaveLength(2);
     expect(result[0]).toEqual({
       displayName: "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA",
       lat: 37.4224764,
@@ -91,6 +91,20 @@ describe.sequential("googleGeocode", () => {
         line2: undefined,
         city: "Mountain View",
         stateOrRegion: "California",
+      },
+    });
+    expect(result[1]).toEqual({
+      displayName: "missing postcode candidate",
+      lat: 1,
+      lon: 2,
+      placeId: undefined,
+      address: {
+        postcode: undefined,
+        countryCode: "us",
+        line1: undefined,
+        line2: undefined,
+        city: undefined,
+        stateOrRegion: undefined,
       },
     });
 

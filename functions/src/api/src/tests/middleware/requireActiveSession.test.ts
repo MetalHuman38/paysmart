@@ -102,4 +102,32 @@ describe("requireActiveSession middleware", () => {
     expect(res.statusCode).toBe(401);
     expect(res.payload).toEqual({ error: "Session claims missing. Please sign in again." });
   });
+
+  it("returns 503 with code when session state lookup fails", async () => {
+    const middleware = createRequireActiveSession({
+      verifyIdToken: vi.fn().mockResolvedValue({
+        uid: "uid-4",
+        sid: "sid-1",
+        sv: 1,
+      }),
+      getSessionState: vi.fn().mockRejectedValue(new Error("firestore unavailable")),
+    });
+
+    const req = {
+      headers: {
+        authorization: "Bearer token",
+      },
+    } as TestReq;
+    const res = createResponseRecorder();
+    const next = vi.fn();
+
+    await middleware(req as any, res as any, next as any);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(503);
+    expect(res.payload).toEqual({
+      error: "Session validation unavailable",
+      code: "SESSION_VALIDATION_UNAVAILABLE",
+    });
+  });
 });

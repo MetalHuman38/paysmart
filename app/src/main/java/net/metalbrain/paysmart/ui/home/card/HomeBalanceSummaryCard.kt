@@ -14,9 +14,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.ui.home.state.HomeBalanceSnapshot
 import java.util.Locale
 
@@ -29,7 +32,10 @@ fun HomeBalanceSummaryCard(
 ) {
     val primaryCurrency = snapshot.primaryCurrencyCode()
     val primaryAmount = snapshot.balancesByCurrency[primaryCurrency] ?: 0.0
-    val walletBreakdown = snapshot.walletBreakdownLabel()
+    val walletBreakdown = snapshot.walletBreakdownLabel(
+        noDataLabel = stringResource(id = R.string.home_wallet_no_data),
+        walletLabel = stringResource(id = R.string.home_wallet_label)
+    )
 
     Card(
         onClick = onClick,
@@ -54,14 +60,18 @@ fun HomeBalanceSummaryCard(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "Total balance",
+                    text = stringResource(id = R.string.home_total_balance_label),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
                 )
                 Text(
                     text = maskedValue(
                         isBalanceVisible,
-                        formatCurrencyAmount(primaryCurrency, primaryAmount)
+                        stringResource(
+                            id = R.string.home_currency_amount,
+                            primaryCurrency,
+                            formatAmount(primaryAmount)
+                        )
                     ),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
@@ -84,20 +94,26 @@ fun HomeBalanceSummaryCard(
 }
 
 private fun HomeBalanceSnapshot.primaryCurrencyCode(): String {
-    if (balancesByCurrency.isEmpty()) {
-        return "GBP"
+    val preferred = preferredCurrencyCode.trim().uppercase(Locale.US)
+    if (preferred.isNotBlank() && balancesByCurrency.containsKey(preferred)) {
+        return preferred
     }
 
-    if (balancesByCurrency.containsKey("GBP")) {
-        return "GBP"
+    if (balancesByCurrency.isEmpty()) {
+        return preferred.ifBlank {
+            CountryCapabilityCatalog.defaultProfile().currencyCode
+        }
     }
 
     return balancesByCurrency.keys.minOf { it }
 }
 
-private fun HomeBalanceSnapshot.walletBreakdownLabel(): String {
+private fun HomeBalanceSnapshot.walletBreakdownLabel(
+    noDataLabel: String,
+    walletLabel: String
+): String {
     if (balancesByCurrency.isEmpty()) {
-        return "No wallet data yet"
+        return noDataLabel
     }
 
     return balancesByCurrency
@@ -105,12 +121,8 @@ private fun HomeBalanceSnapshot.walletBreakdownLabel(): String {
         .sortedBy { it.first }
         .take(2)
         .joinToString(" | ") { (currency, amount) ->
-            "$currency wallet ${formatAmount(amount)}"
+            "$currency $walletLabel ${formatAmount(amount)}"
         }
-}
-
-private fun formatCurrencyAmount(currencyCode: String, amount: Double): String {
-    return "$currencyCode ${formatAmount(amount)}"
 }
 
 private fun formatAmount(amount: Double): String {

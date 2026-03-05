@@ -18,7 +18,9 @@ export async function nominatimSearch(
   params.set("q", query);
   params.set("format", "json");
   params.set("addressdetails", "1");
-  params.set("countrycodes", country);
+  if (country.trim().length > 0) {
+    params.set("countrycodes", country);
+  }
   params.set("limit", "5");
 
   if (typeof lat === "number" && typeof lng === "number") {
@@ -49,7 +51,6 @@ export async function nominatimSearch(
       !row.display_name ||
       !Number.isFinite(latValue) ||
       !Number.isFinite(lonValue) ||
-      !postcode ||
       !countryCode
     ) {
       continue;

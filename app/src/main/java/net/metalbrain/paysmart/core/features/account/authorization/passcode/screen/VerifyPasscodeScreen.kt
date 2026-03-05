@@ -30,6 +30,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.ui.components.NumberPad
 import net.metalbrain.paysmart.core.features.account.authorization.passcode.viewmodel.VerifyPasscodeViewModel
 import net.metalbrain.paysmart.utils.launchBiometricPrompt
@@ -50,11 +52,12 @@ fun VerifyPasscodeScreen(
     val haptic = LocalHapticFeedback.current
     val isLockedOut by viewModel.isLockedOut.collectAsState()
     val shakeTrigger by viewModel.shakeTrigger
+    val biometricFailedMessage = stringResource(R.string.verify_passcode_biometric_failed)
 
 
     if (isLockedOut) {
         Text(
-            text = "Too many attempts. Please wait...",
+            text = stringResource(R.string.verify_passcode_lockout_message),
             color = MaterialTheme.colorScheme.error
         )
         Spacer(Modifier.height(8.dp))
@@ -71,7 +74,7 @@ fun VerifyPasscodeScreen(
                 onFail = {
                     viewModel.onBiometricDismissed()
                     scope.launch {
-                        snackbarHostState.showSnackbar("Biometric authentication failed")
+                        snackbarHostState.showSnackbar(biometricFailedMessage)
                     }
                 }
             )
@@ -96,7 +99,10 @@ fun VerifyPasscodeScreen(
 
         SnackbarHost(hostState = snackbarHostState)
 
-        Text("Enter your passcode", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = stringResource(R.string.enter_your_passcode),
+            style = MaterialTheme.typography.headlineSmall
+        )
 
         Spacer(Modifier.height(16.dp))
 

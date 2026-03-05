@@ -45,7 +45,7 @@ fun PasscodePrompt(
 
         // 🔐 Subtitle
         Text(
-            text = "Enter your 4-digit passcode to log in",
+            text = stringResource(R.string.passcode_prompt_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -58,13 +58,20 @@ fun PasscodePrompt(
             onValueChange = {
                 if (it.length <= 6) code = it.filter { char -> char.isDigit() }
             },
-            label = { Text("Passcode") },
+            label = { Text(stringResource(R.string.passcode_label)) },
             singleLine = true,
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                 IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                    Icon(imageVector = image, contentDescription = if (isPasswordVisible) "Hide passcode" else "Show passcode")
+                    Icon(
+                        imageVector = image,
+                        contentDescription = if (isPasswordVisible) {
+                            stringResource(R.string.passcode_hide)
+                        } else {
+                            stringResource(R.string.passcode_show)
+                        }
+                    )
                 }
             },
             keyboardOptions = KeyboardOptions(

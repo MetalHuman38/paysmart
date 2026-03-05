@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.ui.components
 
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,12 +26,15 @@ import net.metalbrain.paysmart.ui.Screen
 @Composable
 fun EmailVerificationBtn(
     navController: NavController,
+    returnRoute: String = Screen.Home.route,
     modifier: Modifier = Modifier,
 ) {
 
     OutlinedButton(
         onClick = {
-            navController.navigate(Screen.AddEmail.route)
+            navController.navigate(
+                "${Screen.AddEmail.route}?returnRoute=${Uri.encode(returnRoute)}"
+            )
         },
         modifier = modifier
             .fillMaxWidth()
@@ -46,7 +50,7 @@ fun EmailVerificationBtn(
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_email_logo),
-            contentDescription = "Verify an Email",
+            contentDescription = stringResource(R.string.content_desc_verify_email_button),
             tint = Color.Unspecified,
             modifier = Modifier.size(24.dp)
         )

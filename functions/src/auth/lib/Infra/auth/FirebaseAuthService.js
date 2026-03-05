@@ -38,6 +38,7 @@ export class FirebaseAuthService {
                 providerIds: (userRecord.providerData ?? [])
                     .map((provider) => provider.providerId)
                     .filter((providerId) => Boolean(providerId)),
+                hasEnrolledMfaFactor: (userRecord.multiFactor?.enrolledFactors?.length ?? 0) > 0,
             };
         }
         catch (error) {

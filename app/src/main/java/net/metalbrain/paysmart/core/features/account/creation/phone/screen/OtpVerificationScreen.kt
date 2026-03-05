@@ -1,25 +1,52 @@
 package net.metalbrain.paysmart.core.features.account.creation.phone.screen
 
-import net.metalbrain.paysmart.ui.components.OtpTextFieldRow
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.OTPViewModel
 import net.metalbrain.paysmart.ui.components.PrimaryButton
+import net.metalbrain.paysmart.ui.components.OtpTextFieldRow
 import net.metalbrain.paysmart.ui.screens.LoadingState
 import net.metalbrain.paysmart.ui.screens.rememberStabilizedLoading
+import net.metalbrain.paysmart.ui.theme.Dimens
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -36,20 +63,22 @@ fun OtpVerificationScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val activity = LocalActivity.current
     var submitting by remember { mutableStateOf(false) }
+    var resending by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val scrollState = rememberScrollState()
 
     val uiState by viewModel.uiState.collectAsState()
     val showLoading = rememberStabilizedLoading(uiState.loading)
+    val otpFinishSetupErrorText = stringResource(R.string.otp_finish_setup_error)
+    val otpInvalidCodeText = stringResource(R.string.otp_invalid_code_error)
 
-    // 🌀 Show animated spinner while loading
     if (showLoading) {
-        LoadingState(message = "Creating your account....")
+        LoadingState(message = stringResource(R.string.otp_loading_message))
         return
     }
 
     var timeLeft by remember { mutableIntStateOf(60) }
 
-    // ⏱ Countdown timer
     LaunchedEffect(Unit) {
         while (timeLeft > 0) {
             delay(1000)
@@ -60,32 +89,38 @@ fun OtpVerificationScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(WindowInsets.systemBars.asPaddingValues())
+            .navigationBarsPadding()
+            .imePadding()
+            .padding(horizontal = Dimens.screenPadding)
+            .padding(top = Dimens.mediumSpacing, bottom = Dimens.mediumSpacing)
+            .verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 🔙 Back
         IconButton(onClick = onBack) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.common_back)
+            )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
 
         Text(
-            text = "Verify phone number",
+            text = stringResource(R.string.otp_verify_phone_title),
             style = MaterialTheme.typography.headlineSmall
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Dimens.smallSpacing))
 
         Text(
-            text = "Enter the 6 digit code sent to $phoneNumber",
-            style = MaterialTheme.typography.bodyMedium
+            text = stringResource(R.string.otp_verify_phone_subtitle, phoneNumber),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimens.largeSpacing))
 
         OtpTextFieldRow(
             otpDigits = otpDigits,
@@ -123,20 +158,18 @@ fun OtpVerificationScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
 
         if (timeLeft > 0) {
             Text(
-                text = "Didn't receive it? Retry in $timeLeft seconds",
+                text = stringResource(R.string.otp_resend_in_seconds, timeLeft),
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp)
             )
         } else {
-            var resending by remember { mutableStateOf(false) }
-
             TextButton(
                 onClick = {
                     resending = true
-                    if(activity != null) {
+                    if (activity != null) {
                         viewModel.startTimer(backoff = false)
                         focusManager.clearFocus()
                         keyboardController?.hide()
@@ -155,11 +188,17 @@ fun OtpVerificationScreen(
                 },
                 enabled = !resending
             ) {
-                Text(if (resending) "Resending..." else "Resend OTP")
+                Text(
+                    if (resending) {
+                        stringResource(R.string.otp_resending_action)
+                    } else {
+                        stringResource(R.string.otp_resend_action)
+                    }
+                )
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(Dimens.largeSpacing))
 
         PrimaryButton(
             onClick = {
@@ -170,26 +209,35 @@ fun OtpVerificationScreen(
                 viewModel.verifyOtp(
                     code = code,
                     onSuccess = {
-                        submitting = false
-                        viewModel.upsertUserAfterOtp()
-                        onContinue()
+                        viewModel.upsertUserAfterOtp(
+                            onDone = {
+                                submitting = false
+                                onContinue()
+                            },
+                            onError = { error ->
+                                submitting = false
+                                errorMessage = error.message
+                                    ?: otpFinishSetupErrorText
+                            }
+                        )
                     },
                     onError = { e ->
                         submitting = false
-                        errorMessage = e.message ?: "Invalid verification code"
+                        errorMessage = e.message ?: otpInvalidCodeText
                     }
                 )
             },
             enabled = isOtpComplete,
             isLoading = submitting,
-            loadingText = "Verifying...",
-            text = "Continue",
-                    modifier = Modifier
-                         .fillMaxWidth()
-                         .height(52.dp)
+            loadingText = stringResource(R.string.otp_verifying_action),
+            text = stringResource(R.string.otp_continue_action),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(Dimens.buttonHeight)
         )
 
         if (errorMessage != null) {
+            Spacer(modifier = Modifier.height(Dimens.smallSpacing))
             Text(
                 text = errorMessage!!,
                 color = MaterialTheme.colorScheme.error,

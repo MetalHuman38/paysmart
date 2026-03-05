@@ -97,9 +97,9 @@ fun EnterPasswordScreen(
                                 Icons.Default.Visibility
                             }
                             val description = if (showPassword) {
-                                "Hide password"
+                                stringResource(R.string.enter_password_hide)
                             } else {
-                                "Show password"
+                                stringResource(R.string.enter_password_show)
                             }
                             IconButton(onClick = { showPassword = !showPassword }) {
                                 Icon(imageVector = icon, contentDescription = description)
@@ -121,8 +121,8 @@ fun EnterPasswordScreen(
                         },
                         enabled = uiState.password.isNotBlank(),
                         isLoading = uiState.loading,
-                        loadingText = "Checking...",
-                        text = "Continue",
+                        loadingText = stringResource(R.string.enter_password_checking),
+                        text = stringResource(R.string.continue_text),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -161,12 +161,12 @@ fun EnterPasswordScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_paysmart_logo),
-                contentDescription = "PaySmart Logo",
+                contentDescription = stringResource(R.string.content_desc_logo),
                 modifier = Modifier.height(34.dp)
             )
             Spacer(modifier = Modifier.width(2.dp))
             Text(
-                text = "PaySmart",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp,

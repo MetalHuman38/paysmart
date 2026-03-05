@@ -78,7 +78,7 @@ fun AddressMapConfirmStep(
                 value = countryDisplay
             )
             AddressResultLine(
-                label = stringResource(R.string.address_resolver_postcode_short_label),
+                label = stringResource(R.string.profile_field_postal_code),
                 value = postCode
             )
             source?.let {

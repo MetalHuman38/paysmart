@@ -2,6 +2,7 @@ export interface SecuritySettingsModel {
   allowFederatedLinking: boolean;
   passcodeEnabled: boolean;
   passwordEnabled: boolean;
+  passkeyEnabled: boolean;
   biometricsRequired: boolean;
   biometricsEnabled: boolean;
   biometricsEnabledAt: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue | null;
@@ -14,6 +15,10 @@ export interface SecuritySettingsModel {
   hasVerifiedEmail: boolean;
   hasAddedHomeAddress: boolean;
   hasVerifiedIdentity: boolean;
+  hasSkippedMfaEnrollmentPrompt: boolean;
+  hasSkippedPasskeyEnrollmentPrompt: boolean;
+  hasEnrolledMfaFactor: boolean;
+  mfaEnrolledAt: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue | null;
   kycStatus?: string | null;
   localPassCodeSetAt: FirebaseFirestore.Timestamp | null;
   localPasswordSetAt: FirebaseFirestore.Timestamp | null;

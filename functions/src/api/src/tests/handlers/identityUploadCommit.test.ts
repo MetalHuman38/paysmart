@@ -110,4 +110,54 @@ describe("identityUploadCommitHandler", () => {
       status: "pending_review",
     });
   });
+
+  it("returns 400 code when fallback attestation is disabled", async () => {
+    verifyIdToken.mockResolvedValue({ uid: "uid-1" });
+    commitSession.mockRejectedValue(new Error("Fallback attestation token is disabled"));
+
+    const req = {
+      headers: {
+        authorization: "Bearer token-1",
+      },
+      body: {
+        sessionId: "sess-1",
+        payloadSha256: "abc123",
+        attestationJwt: "fallback.token.sig",
+      },
+    } as TestReq;
+    const res = createResponseRecorder();
+
+    await identityUploadCommitHandler(req as any, res as any);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.payload).toEqual({
+      error: "Fallback attestation token is disabled",
+      code: "ATTESTATION_FALLBACK_DISABLED",
+    });
+  });
+
+  it("returns 503 code when Play Integrity is not configured", async () => {
+    verifyIdToken.mockResolvedValue({ uid: "uid-1" });
+    commitSession.mockRejectedValue(new Error("PLAY_INTEGRITY_PACKAGE_NAME is not configured"));
+
+    const req = {
+      headers: {
+        authorization: "Bearer token-1",
+      },
+      body: {
+        sessionId: "sess-1",
+        payloadSha256: "abc123",
+        attestationJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+      },
+    } as TestReq;
+    const res = createResponseRecorder();
+
+    await identityUploadCommitHandler(req as any, res as any);
+
+    expect(res.statusCode).toBe(503);
+    expect(res.payload).toEqual({
+      error: "PLAY_INTEGRITY_PACKAGE_NAME is not configured",
+      code: "PLAY_INTEGRITY_NOT_CONFIGURED",
+    });
+  });
 });

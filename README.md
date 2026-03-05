@@ -1,6 +1,6 @@
 # PaySmart
 
-Last updated: February 27, 2026
+Last updated: March 2, 2026
 
 PaySmart is a security-first mobile payments product built by **VoltService Ltd**.  
 The platform is focused on trusted onboarding, policy-driven feature access, secure identity verification, add-money rails, and FX-ready transfer flows.
@@ -80,6 +80,28 @@ npm run serve
 - Do not commit secrets, API keys, service account JSON, or signing assets.
 - Use environment variables/secrets for Stripe, KMS, attestation, and provider credentials.
 - Identity documents are expected to follow encrypted upload and attested commit paths.
+
+## Performance and Reliability Baseline
+
+- Firebase Performance Monitoring is wired through a centralized monitor service (`core/service/performance`).
+- Collection is cost-controlled:
+  - debug/local (`BuildConfig.IS_LOCAL`): disabled
+  - release (Play/internal testing): enabled
+- Release traces are attached to the highest-risk network paths:
+  - `add_money_create_session`
+  - `add_money_get_session_status`
+  - `identity_create_upload_session`
+  - `identity_upload_encrypted_payload`
+  - `identity_commit_upload`
+- Runtime reliability guardrails now include:
+  - hard offline gate screen before app navigation resumes
+  - biometric setup routing that resolves to `CreatePassword` or `Home` based on local password readiness
+  - idle session watcher reset on unlock to prevent immediate re-lock loops
+
+## Admin Panel Roadmap
+
+- Minimal admin panel scope and hardening model are tracked in:
+  - `app/docs/admin_panel_roadmap.md`
 
 ## Contributors Needed
 

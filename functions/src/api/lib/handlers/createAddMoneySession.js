@@ -24,12 +24,11 @@ export async function createAddMoneySessionHandler(req, res) {
     }
     catch (error) {
         const message = error instanceof Error ? error.message : "Internal error";
-        if (message.includes("STRIPE_SECRET_KEY is not configured") ||
-            message.includes("must be a secret key") ||
-            message.includes("STRIPE_PUBLISHABLE_KEY is not configured")) {
+        const paymentsConfigErrorCode = resolvePaymentsConfigErrorCode(message);
+        if (paymentsConfigErrorCode) {
             return res.status(503).json({
                 error: "Payments service is not configured",
-                code: "PAYMENTS_SERVICE_MISCONFIGURED",
+                code: paymentsConfigErrorCode,
             });
         }
         if (message.includes("Invalid") ||
@@ -76,6 +75,18 @@ function parseNumber(raw) {
         if (Number.isFinite(parsed)) {
             return parsed;
         }
+    }
+    return null;
+}
+function resolvePaymentsConfigErrorCode(message) {
+    if (message.includes("STRIPE_SECRET_KEY is not configured")) {
+        return "MISSING_STRIPE_SECRET_KEY";
+    }
+    if (message.includes("must be a secret key")) {
+        return "INVALID_STRIPE_SECRET_KEY";
+    }
+    if (message.includes("STRIPE_PUBLISHABLE_KEY is not configured")) {
+        return "MISSING_STRIPE_PUBLISHABLE_KEY";
     }
     return null;
 }

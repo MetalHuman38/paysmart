@@ -111,14 +111,14 @@ fun AddEmailScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_paysmart_logo),
-                contentDescription = "PaySmart Logo",
+                contentDescription = stringResource(R.string.app_name),
                 modifier = Modifier.height(34.dp)
             )
 
             Spacer(modifier = Modifier.width(2.dp))
 
             Text(
-                text = "PaySmart",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp,

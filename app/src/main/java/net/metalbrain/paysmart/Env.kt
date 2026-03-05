@@ -8,6 +8,9 @@ object Env {
     val pvn: Boolean
         get() = BuildConfig.PHONE_PNV_PREVIEW_ENABLED
 
+    val fallbackPublishableKey: String
+        get() = BuildConfig.STRIPE_PUBLISHABLE_KEY.trim()
+
     val identityImageDetectionMode: String
         get() = BuildConfig.IDENTITY_IMAGE_DETECTION_MODE
 

@@ -7,7 +7,9 @@ export async function googleGeocode(query, country) {
     }
     const params = new URLSearchParams();
     params.set("address", query);
-    params.set("components", `country:${country}`);
+    if (country.trim().length > 0) {
+        params.set("components", `country:${country}`);
+    }
     params.set("key", apiKey);
     const url = `https://maps.googleapis.com/maps/api/geocode/json?${params.toString()}`;
     const payload = await fetchJson(url, {}, 8_000).catch(() => null);
@@ -38,7 +40,7 @@ export async function googleGeocode(query, country) {
         const countryCode = normalizeOptionalText((result.address_components ?? [])
             .find((component) => component.types?.includes("country"))
             ?.short_name)?.toLowerCase() ?? normalizeOptionalText(components.get("country"))?.toLowerCase();
-        if (!postcode || !countryCode) {
+        if (!countryCode) {
             continue;
         }
         const line1 = [

@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
@@ -19,6 +20,8 @@ import net.metalbrain.paysmart.domain.model.hasCompletedIdentity
 import net.metalbrain.paysmart.ui.components.CircularProgressWithText
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.components.SetupStep
+import net.metalbrain.paysmart.R
+
 
 
 
@@ -56,32 +59,33 @@ fun AccountSetupSheetContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Complete your account setup",
+            text = stringResource(id = R.string.complete_your_account_setup),
+            modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.titleLarge,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         Text(
-            text = "Secure your account and do even more.",
+            text = stringResource(id = R.string.secure_your_account_and_do_even_more),
+            modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 4.dp)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Steps list
-        SetupStep(label = "Open a PaySmart account", done = true)
-        SetupStep(label = "Verify your email", done = security.hasCompletedEmailVerification)
-        SetupStep(label = "Add your home address", done = security.hasCompletedAddress, onClick = onAddAddressClick)
-        SetupStep(label = "Verify your identity", done = security.hasCompletedIdentity, onClick = onVerifyIdentityClick)
+        SetupStep(label = stringResource(id = R.string.open_a_paySmart_account), done = true)
+        SetupStep(label = stringResource(id = R.string.verify_email), done = security.hasCompletedEmailVerification)
+        SetupStep(label = stringResource(id = R.string.add_address), done = security.hasCompletedAddress, onClick = onAddAddressClick)
+        SetupStep(label = stringResource(id = R.string.verify_identity), done = security.hasCompletedIdentity, onClick = onVerifyIdentityClick)
 
         Spacer(modifier = Modifier.height(32.dp))
 
         // CTA — change based on status
         val buttonLabel = when {
-            !security.hasCompletedAddress -> "Add address"
-            !security.hasCompletedIdentity -> "Verify identity"
+            !security.hasCompletedAddress -> stringResource(id = R.string.add_address)
+            !security.hasCompletedIdentity -> stringResource(id = R.string.verify_identity)
             else -> "Continue"
         }
 
@@ -91,6 +95,7 @@ fun AccountSetupSheetContent(
                 if (!security.hasCompletedAddress) onAddAddressClick()
                 else if (!security.hasCompletedIdentity) onVerifyIdentityClick()
             },
+            contentColor = MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier.fillMaxWidth()
         )
     }

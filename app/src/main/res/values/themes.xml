@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.Paysmart" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="SpinnerDatePickerDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:datePickerStyle">@style/SpinnerDatePicker</item>
+        <item name="android:windowBackground">@drawable/bg_date_picker_dialog</item>
+        <item name="android:windowAnimationStyle">@style/DatePickerDialogAnimation</item>
+    </style>
+
+    <style name="SpinnerDatePicker" parent="android:Widget.Material.Light.DatePicker">
+        <item name="android:datePickerMode">spinner</item>
+    </style>
+
+    <style name="DatePickerDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/date_picker_dialog_enter</item>
+        <item name="android:windowExitAnimation">@anim/date_picker_dialog_exit</item>
+    </style>
 </resources>

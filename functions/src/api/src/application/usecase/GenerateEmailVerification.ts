@@ -12,7 +12,9 @@ export class GenerateEmailVerification {
     private readonly securityRepo: SecuritySettingsRepository,
     private readonly userRepo: UserRepository,
     private readonly authService: {
-      getUser(uid: string): Promise<{ email?: string }>;
+      getUser(
+        uid: string
+      ): Promise<{ email?: string; tenantId?: string | null }>;
       updateUserEmail(uid: string, email: string): Promise<void>;
       generateEmailVerificationLink(
         email: string,
@@ -37,11 +39,11 @@ export class GenerateEmailVerification {
   }): Promise<GenerateEmailVerificationResult> {
     const { uid, email } = input;
 
+    const authUser = await this.authService.getUser(uid);
+
     /* ---------- User ---------- */
     const user = await this.userRepo.getById(uid);
-    if (!user) throw new Error("User profile missing");
-
-    const tenantId = String(user.tenantId || "").toLowerCase();
+    const tenantId = String(user?.tenantId || authUser.tenantId || "").toLowerCase();
     if (
       this.config.allowedTenants.size &&
       !this.config.allowedTenants.has(tenantId)
@@ -50,8 +52,9 @@ export class GenerateEmailVerification {
     }
 
     /* ---------- Security ---------- */
+    await this.securityRepo.createIfMissing(uid);
     const sec = await this.securityRepo.get(uid);
-    if (!sec) throw new Error("security/settings missing");
+    if (!sec) throw new Error("security/settings missing after ensure");
 
     const now = Timestamp.now();
     const decision = evaluateEmailVerificationPolicy(sec, now);

@@ -75,10 +75,14 @@ fun AddressSetupResolverScreen(
                 AddressSetupResolverStep.INPUT -> {
                     AddressLookupStep(
                         house = state.house,
+                        city = state.city,
+                        stateOrRegion = state.stateOrRegion,
                         postcode = state.postcode,
                         country = state.country,
                         isLoading = state.isLoading,
                         onHouseChanged = viewModel::onHouseChanged,
+                        onCityChanged = viewModel::onCityChanged,
+                        onStateOrRegionChanged = viewModel::onStateOrRegionChanged,
                         onPostcodeChanged = viewModel::onPostcodeChanged,
                         onCountryChanged = viewModel::onCountryChanged,
                         onResolve = viewModel::resolveAddress

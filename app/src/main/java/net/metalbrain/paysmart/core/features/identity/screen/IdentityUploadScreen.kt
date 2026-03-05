@@ -92,6 +92,7 @@ fun IdentityUploadScreen(
                     viewModel.clearError()
                     showCameraOverlay = true
                 },
+                contentColor = MaterialTheme.colorScheme.surfaceVariant,
                 enabled = !state.isProcessing && !state.isValidatingCapture && selectedDocument != null,
                 isLoading = state.isValidatingCapture,
                 loadingText = stringResource(R.string.identity_resolver_capture_validating)

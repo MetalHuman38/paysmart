@@ -36,7 +36,7 @@ fun PhoneAlreadyRegisteredSheet(
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Close"
+                    contentDescription = stringResource(R.string.content_desc_close)
                 )
             }
         }
@@ -46,7 +46,7 @@ fun PhoneAlreadyRegisteredSheet(
         // ⚠️ Warning icon (use custom drawable if you have one)
         Image(
             painter = painterResource(id = R.drawable.ic_warning),
-            contentDescription = "Warning",
+            contentDescription = stringResource(R.string.content_desc_warning),
             modifier = Modifier
                 .size(64.dp)
         )

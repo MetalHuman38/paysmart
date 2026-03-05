@@ -36,16 +36,16 @@ describe("lookupAddressHandler", () => {
     vi.clearAllMocks();
   });
 
-  it("returns 400 when postcode is missing", async () => {
+  it("returns 400 when all address fields are missing", async () => {
     const req = {
-      body: { house: "10 Downing Street" },
+      body: { country: "gb" },
     } as TestReq;
     const res = createResponseRecorder();
 
     await lookupAddressHandler(req as any, res as any);
 
     expect(res.statusCode).toBe(400);
-    expect(res.payload).toEqual({ error: "postcode is required" });
+    expect(res.payload).toEqual({ error: "at least one address field is required" });
   });
 
   it("returns resolved payload when address is found", async () => {
@@ -72,8 +72,9 @@ describe("lookupAddressHandler", () => {
 
     const req = {
       body: {
-        house: "10 Downing Street",
-        postcode: "SW1A 2AA",
+        line1: "10 Downing Street",
+        city: "London",
+        postalCode: "SW1A 2AA",
         country: "gb",
       },
     } as TestReq;
@@ -83,7 +84,9 @@ describe("lookupAddressHandler", () => {
 
     expect(res.statusCode).toBe(200);
     expect(execute).toHaveBeenCalledWith({
-      house: "10 Downing Street",
+      line1: "10 Downing Street",
+      city: "London",
+      stateOrRegion: "",
       postcode: "SW1A 2AA",
       country: "gb",
       lat: undefined,

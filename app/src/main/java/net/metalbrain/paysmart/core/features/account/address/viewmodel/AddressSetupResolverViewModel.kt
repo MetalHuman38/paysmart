@@ -7,6 +7,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.core.auth.AddressLookupPayload
@@ -14,6 +15,7 @@ import net.metalbrain.paysmart.core.auth.AddressLookupResult
 import net.metalbrain.paysmart.core.auth.AddressResolverPolicyHandler
 import net.metalbrain.paysmart.core.features.account.profile.data.repository.ProfileRepository
 import net.metalbrain.paysmart.data.repository.AuthRepository
+import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
 import net.metalbrain.paysmart.domain.model.ProfileDetailsDraft
 
 enum class AddressSetupResolverStep {
@@ -24,6 +26,8 @@ enum class AddressSetupResolverStep {
 
 data class AddressSetupResolverUiState(
     val house: String = "",
+    val city: String = "",
+    val stateOrRegion: String = "",
     val postcode: String = "",
     val country: String = "GB",
     val step: AddressSetupResolverStep = AddressSetupResolverStep.INPUT,
@@ -43,11 +47,16 @@ data class AddressSetupResolverUiState(
 class AddressSetupResolverViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val profileRepository: ProfileRepository,
+    private val userProfileCacheRepository: UserProfileCacheRepository,
     private val resolverPolicyHandler: AddressResolverPolicyHandler
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddressSetupResolverUiState())
     val uiState: StateFlow<AddressSetupResolverUiState> = _uiState.asStateFlow()
+
+    init {
+        hydrateCountryFromProfile()
+    }
 
     fun onHouseChanged(value: String) {
         _uiState.update { it.copy(house = value, error = null) }
@@ -55,6 +64,14 @@ class AddressSetupResolverViewModel @Inject constructor(
 
     fun onPostcodeChanged(value: String) {
         _uiState.update { it.copy(postcode = value, error = null) }
+    }
+
+    fun onCityChanged(value: String) {
+        _uiState.update { it.copy(city = value, error = null) }
+    }
+
+    fun onStateOrRegionChanged(value: String) {
+        _uiState.update { it.copy(stateOrRegion = value, error = null) }
     }
 
     fun onCountryChanged(value: String) {
@@ -83,6 +100,25 @@ class AddressSetupResolverViewModel @Inject constructor(
 
     fun onCountryCodeDraftChanged(value: String) {
         _uiState.update { it.copy(countryCodeDraft = value, error = null) }
+    }
+
+    private fun hydrateCountryFromProfile() {
+        viewModelScope.launch {
+            val uid = authRepository.currentUser?.uid ?: return@launch
+            val cachedProfile = userProfileCacheRepository.observeByUid(uid).firstOrNull() ?: return@launch
+            val normalizedCountry = cachedProfile.country.orEmpty().trim().uppercase()
+            if (normalizedCountry.length != 2) {
+                return@launch
+            }
+            _uiState.update { state ->
+                val isDefaultCountry = state.country.equals("GB", ignoreCase = true)
+                if (state.country.isNotBlank() && !isDefaultCountry) {
+                    state
+                } else {
+                    state.copy(country = normalizedCountry)
+                }
+            }
+        }
     }
 
     fun goToFinalConfirmation() {
@@ -123,8 +159,13 @@ class AddressSetupResolverViewModel @Inject constructor(
 
     fun resolveAddress() {
         val currentState = _uiState.value
-        if (currentState.postcode.isBlank()) {
-            _uiState.update { it.copy(error = "Postcode is required") }
+        if (
+            currentState.house.isBlank() &&
+            currentState.city.isBlank() &&
+            currentState.stateOrRegion.isBlank() &&
+            currentState.postcode.isBlank()
+        ) {
+            _uiState.update { it.copy(error = "Enter at least one address detail to continue") }
             return
         }
 
@@ -143,8 +184,10 @@ class AddressSetupResolverViewModel @Inject constructor(
                 }
 
             val payload = AddressLookupPayload(
-                house = currentState.house,
-                postcode = currentState.postcode,
+                line1 = currentState.house,
+                city = currentState.city,
+                stateOrRegion = currentState.stateOrRegion,
+                postalCode = currentState.postcode,
                 country = currentState.country
             )
 
@@ -181,12 +224,12 @@ class AddressSetupResolverViewModel @Inject constructor(
         val currentState = _uiState.value
         val resolved = currentState.resolvedAddress ?: return
         val line1 = currentState.line1Draft.trim().ifBlank { resolved.line1.ifBlank { resolved.fullAddressWithHouse } }
-        val postCode = currentState.postCodeDraft.trim().ifBlank { resolved.postCode }
+        val postCode = currentState.postCodeDraft.trim().ifBlank { resolved.postCode }.uppercase()
         val countryCode = currentState.countryCodeDraft.trim().ifBlank { resolved.countryCode }
 
-        if (line1.isBlank() || postCode.isBlank() || countryCode.isBlank()) {
+        if (line1.isBlank() || countryCode.isBlank()) {
             _uiState.update {
-                it.copy(error = "Address line 1, postcode, and country code are required")
+                it.copy(error = "Address line 1 and country are required")
             }
             return
         }
@@ -200,7 +243,7 @@ class AddressSetupResolverViewModel @Inject constructor(
                     addressLine2 = currentState.line2Draft.trim().ifBlank { null },
                     city = currentState.cityDraft.trim().ifBlank { null },
                     country = countryCode.uppercase(),
-                    postalCode = postCode.uppercase()
+                    postalCode = postCode.ifBlank { null }
                 )
             )
 

@@ -98,8 +98,15 @@ export function createRequireActiveSession(deps?: Partial<SessionDeps>) {
     let currentState: SessionState;
     try {
       currentState = await resolvedDeps.getSessionState(uid);
-    } catch {
-      return res.status(503).json({ error: "Session validation unavailable" });
+    } catch (error) {
+      console.error("requireActiveSession state fetch failed", {
+        uid,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return res.status(503).json({
+        error: "Session validation unavailable",
+        code: "SESSION_VALIDATION_UNAVAILABLE",
+      });
     }
 
     if (!currentState.activeSid || !currentState.sessionVersion) {

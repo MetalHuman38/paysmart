@@ -21,7 +21,8 @@ export async function passkeyAuthenticateOptionsHandler(req: Request, res: Respo
     const message = error instanceof Error ? error.message : "Internal error";
     if (message.includes("PASSKEY_NOT_CONFIGURED")) {
       return res.status(503).json({
-        error: "Passkey service is not configured",
+        error:
+          "Passkey service is not configured. Set PASSKEY_RP_ID and PASSKEY_EXPECTED_ORIGINS (or PASSKEY_ANDROID_APK_KEY_HASHES).",
         code: "PASSKEY_NOT_CONFIGURED",
       });
     }

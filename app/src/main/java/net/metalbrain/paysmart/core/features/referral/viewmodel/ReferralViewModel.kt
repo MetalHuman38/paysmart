@@ -5,15 +5,33 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import net.metalbrain.paysmart.core.features.referral.model.ReferralUiState
 
 @HiltViewModel
 class ReferralViewModel @Inject constructor() : ViewModel() {
-    data class UiState(
-        val referralCode: String = "PAYSMART10",
-        val rewardLabel: String = "10.00 GBP",
-        val summary: String = "Invite a friend and both of you earn rewards."
-    )
+    private val _uiState = MutableStateFlow(ReferralUiState())
+    val uiState: StateFlow<ReferralUiState> = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(UiState())
-    val uiState: StateFlow<UiState> = _uiState
+    fun onReferralCodeChanged(value: String) {
+        val normalized = value
+            .uppercase()
+            .filter { it.isLetterOrDigit() || it == '-' }
+            .take(32)
+        _uiState.update { current ->
+            current.copy(enteredCode = normalized)
+        }
+    }
+
+    fun submitReferralCode() {
+        if (!_uiState.value.canSubmit) return
+        _uiState.update { current ->
+            current.copy(isSubmitting = true)
+        }
+        // Placeholder for backend submission.
+        _uiState.update { current ->
+            current.copy(isSubmitting = false)
+        }
+    }
 }

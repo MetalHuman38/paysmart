@@ -14,7 +14,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import net.metalbrain.paysmart.Env
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyPaymentSheetLaunch
+import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionStatus
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyUiState
 import net.metalbrain.paysmart.core.features.addmoney.repository.AddMoneyRepository
@@ -42,6 +44,10 @@ class AddMoneyViewModel @Inject constructor(
     private val walletBalanceRepository: WalletBalanceRepository,
     private val fxQuoteRepository: FxQuoteRepository
 ) : ViewModel() {
+
+    
+    private val fallbackPublishableKey = Env.fallbackPublishableKey
+        .takeIf { it.isNotEmpty() }
 
     private val _uiState = MutableStateFlow(AddMoneyUiState())
     val uiState: StateFlow<AddMoneyUiState> = _uiState.asStateFlow()
@@ -187,32 +193,42 @@ class AddMoneyViewModel @Inject constructor(
         }
 
         val currency = _uiState.value.currency.ifBlank { "GBP" }.uppercase()
+        val requestedProvider = resolveProviderForRequest(
+            currency = currency,
+            countryIso2 = _uiState.value.countryIso2
+        )
 
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
                     isSubmitting = true,
                     error = null,
-                    infoMessage = null
+                    infoMessage = null,
+                    providerActionUrl = null
                 )
             }
 
-            addMoneyRepository.createSession(amountMinor, currency)
+            addMoneyRepository.createSession(amountMinor, currency, requestedProvider)
                 .onSuccess { session ->
+                    val resolvedProvider = session.provider
                     val paymentIntentClientSecret = session.paymentIntentClientSecret
                         ?.trim()
                         ?.takeIf { it.isNotEmpty() }
                     val publishableKey = session.publishableKey
                         ?.trim()
                         ?.takeIf { it.isNotEmpty() }
+                        ?: fallbackPublishableKey
 
-                    if (paymentIntentClientSecret == null || publishableKey == null) {
+                    if (resolvedProvider == AddMoneyProvider.STRIPE &&
+                        (paymentIntentClientSecret == null || publishableKey == null)
+                    ) {
                         _uiState.update {
                             it.copy(
                                 isSubmitting = false,
                                 sessionId = session.sessionId,
+                                activeSessionProvider = resolvedProvider,
                                 sessionStatus = session.status,
-                                error = "Payment session is missing PaymentSheet configuration"
+                                error = "Payment session is missing PaymentSheet configuration (publishable key)"
                             )
                         }
                         return@onSuccess
@@ -222,25 +238,57 @@ class AddMoneyViewModel @Inject constructor(
                         it.copy(
                             isSubmitting = false,
                             sessionId = session.sessionId,
+                            activeSessionProvider = resolvedProvider,
                             sessionStatus = session.status,
-                            paymentSheetLaunch = AddMoneyPaymentSheetLaunch(
-                                publishableKey = publishableKey,
-                                paymentIntentClientSecret = paymentIntentClientSecret
-                            ),
+                            paymentSheetLaunch = if (resolvedProvider == AddMoneyProvider.STRIPE) {
+                                AddMoneyPaymentSheetLaunch(
+                                    publishableKey = publishableKey!!,
+                                    paymentIntentClientSecret = paymentIntentClientSecret!!
+                                )
+                            } else {
+                                null
+                            },
+                            providerActionUrl = session.checkoutUrl,
                             infoMessage = when (session.status) {
                                 AddMoneySessionStatus.SUCCEEDED -> "Payment completed. Refresh to sync wallet."
                                 AddMoneySessionStatus.EXPIRED -> "Session expired. Create a new top up session."
-                                else -> "Payment sheet ready."
+                                else -> when (resolvedProvider) {
+                                    AddMoneyProvider.STRIPE -> "Payment sheet ready."
+                                    AddMoneyProvider.FLUTTERWAVE ->
+                                        if (!session.checkoutUrl.isNullOrBlank()) {
+                                            "Flutterwave session ready. Continue to secure checkout."
+                                        } else {
+                                            "Flutterwave session created. Make transfer and refresh status."
+                                        }
+                                }
                             }
                         )
                     }
                     mirrorSessionStatusToTransactions(session)
                 }
                 .onFailure { error ->
+                    val message = error.localizedMessage.orEmpty()
+                    val resolvedMessage = when {
+                        message.contains("MISSING_STRIPE_PUBLISHABLE_KEY") ->
+                            "Payments backend missing publishable key configuration"
+                        message.contains("MISSING_STRIPE_SECRET_KEY") ->
+                            "Payments backend missing secret key configuration"
+                        message.contains("INVALID_STRIPE_SECRET_KEY") ->
+                            "Payments backend has invalid Stripe secret key"
+                        message.contains("MISSING_FLUTTERWAVE_SECRET_KEY") ->
+                            "Flutterwave backend missing secret key configuration"
+                        message.contains("MISSING_FLUTTERWAVE_PUBLIC_KEY") ->
+                            "Flutterwave backend missing public key configuration"
+                        message.contains("FLUTTERWAVE_NOT_IMPLEMENTED") ->
+                            "Flutterwave flow is not fully enabled on backend"
+                        message.contains("SESSION_VALIDATION_UNAVAILABLE") ->
+                            "Session validation is temporarily unavailable. Try again."
+                        else -> message.ifBlank { "Unable to start add money flow" }
+                    }
                     _uiState.update {
                         it.copy(
                             isSubmitting = false,
-                            error = error.localizedMessage ?: "Unable to start add money flow"
+                            error = resolvedMessage
                         )
                     }
                 }
@@ -286,6 +334,10 @@ class AddMoneyViewModel @Inject constructor(
     fun refreshSessionStatus() {
         val sessionId = _uiState.value.sessionId
         if (sessionId.isNullOrBlank() || _uiState.value.isCheckingStatus) return
+        val provider = _uiState.value.activeSessionProvider ?: resolveProviderForRequest(
+            currency = _uiState.value.currency,
+            countryIso2 = _uiState.value.countryIso2
+        )
 
         viewModelScope.launch {
             _uiState.update {
@@ -296,12 +348,14 @@ class AddMoneyViewModel @Inject constructor(
                 )
             }
 
-            addMoneyRepository.getSessionStatus(sessionId)
+            addMoneyRepository.getSessionStatus(sessionId, provider)
                 .onSuccess { session ->
                     _uiState.update {
                         it.copy(
                             isCheckingStatus = false,
+                            activeSessionProvider = session.provider,
                             sessionStatus = session.status,
+                            providerActionUrl = session.checkoutUrl ?: it.providerActionUrl,
                             infoMessage = when (session.status) {
                                 AddMoneySessionStatus.SUCCEEDED -> "Top up completed. Wallet is syncing."
                                 AddMoneySessionStatus.PENDING,
@@ -480,5 +534,18 @@ class AddMoneyViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         stopSessionStatusPolling()
+    }
+
+    private fun resolveProviderForRequest(
+        currency: String,
+        countryIso2: String
+    ): AddMoneyProvider {
+        val normalizedCurrency = currency.trim().uppercase()
+        val normalizedCountry = countryIso2.trim().uppercase()
+        return if (normalizedCurrency == "NGN" || normalizedCountry == "NG") {
+            AddMoneyProvider.FLUTTERWAVE
+        } else {
+            AddMoneyProvider.STRIPE
+        }
     }
 }

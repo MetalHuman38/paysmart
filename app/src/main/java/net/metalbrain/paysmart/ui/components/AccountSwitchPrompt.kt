@@ -51,7 +51,7 @@ fun AccountSwitchPrompt(
         Text(
             text = stringResource(actionRes),
             style = MaterialTheme.typography.bodyMedium.copy(
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold,
                 textDecoration = TextDecoration.Underline,
             ),

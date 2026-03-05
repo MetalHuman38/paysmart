@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { HttpsError } from "firebase-functions/v2/https";
+import { FieldValue } from "firebase-admin/firestore";
 const FEDERATED_PROVIDERS = new Set(["google.com", "facebook.com", "apple.com"]);
 const PASSWORD_PROVIDER = "password";
 export class BeforeSignInPolicyUsecase {
@@ -24,6 +25,7 @@ export class BeforeSignInPolicyUsecase {
         const incomingProviderIds = this.normalizeProviderIds((user.providerData ?? []).map((p) => p.providerId));
         const security = await this.securityRepo.createIfMissing(uid);
         const authoritativeUser = await this.resolveAuthUser(uid);
+        const hasEnrolledMfaFactor = authoritativeUser?.hasEnrolledMfaFactor === true;
         const authoritativePhone = user.phoneNumber ?? authoritativeUser?.phoneNumber ?? null;
         const effectiveProviderIds = this.mergeProviderIds(incomingProviderIds, authoritativeUser?.providerIds ?? []);
         const existingProviderIds = security.providerIds ?? [];
@@ -34,6 +36,16 @@ export class BeforeSignInPolicyUsecase {
                 consumeLinkingGrant: ctx.isNewFederatedProvider,
             };
             await this.securityRepo.persistProviders(uid, effectiveProviderIds, persistOptions);
+        }
+        if (security.hasEnrolledMfaFactor !== hasEnrolledMfaFactor) {
+            await this.securityRepo.update(uid, {
+                hasEnrolledMfaFactor,
+                mfaEnrolledAt: hasEnrolledMfaFactor
+                    ? FieldValue.serverTimestamp()
+                    : null,
+                updatedAt: FieldValue.serverTimestamp(),
+            });
+            security.hasEnrolledMfaFactor = hasEnrolledMfaFactor;
         }
         if (ctx.isNewFederatedProvider) {
             await this.auditLogRepo.log(uid, "federated_link_confirmed", {
@@ -71,6 +83,7 @@ export class BeforeSignInPolicyUsecase {
                 sid: session.sid,
                 sv: session.sv,
                 emailVerified: Boolean(security.hasVerifiedEmail || emailWasVerifiedNow),
+                mfaEnrolled: Boolean(security.hasEnrolledMfaFactor || hasEnrolledMfaFactor),
             },
         };
     }

@@ -64,6 +64,7 @@ class SendMoneyViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SendMoneyRecipientUiState())
     val uiState: StateFlow<SendMoneyRecipientUiState> = _uiState.asStateFlow()
     private var quoteRefreshJob: Job? = null
+    private var latestQuoteRequestId: Long = 0L
 
     init {
         observeRecipientDraft()
@@ -83,7 +84,15 @@ class SendMoneyViewModel @Inject constructor(
     }
 
     fun updateSourceAmountInput(input: String) {
-        val sanitized = input.filter { it.isDigit() || it == '.' }.take(12)
+        val filtered = input.filter { it.isDigit() || it == '.' }.take(12)
+        val firstDotIndex = filtered.indexOf('.')
+        val sanitized = if (firstDotIndex >= 0) {
+            val beforeDot = filtered.substring(0, firstDotIndex + 1)
+            val afterDot = filtered.substring(firstDotIndex + 1).replace(".", "")
+            beforeDot + afterDot
+        } else {
+            filtered
+        }
         mutateDraft { draft ->
             draft.copy(
                 sourceAmountInput = sanitized,
@@ -136,6 +145,7 @@ class SendMoneyViewModel @Inject constructor(
     fun refreshQuote() {
         val query = buildQuoteQueryOrNull()
         if (query == null) {
+            latestQuoteRequestId++
             _uiState.update {
                 it.copy(
                     quoteError = "Enter a valid amount and currencies to fetch live quote",
@@ -145,9 +155,7 @@ class SendMoneyViewModel @Inject constructor(
             return
         }
 
-        if (_uiState.value.isQuoteLoading) {
-            return
-        }
+        val requestId = ++latestQuoteRequestId
 
         viewModelScope.launch {
             _uiState.update {
@@ -160,6 +168,9 @@ class SendMoneyViewModel @Inject constructor(
 
             fxQuoteRepository.getQuote(query)
                 .onSuccess { result ->
+                    if (requestId != latestQuoteRequestId) {
+                        return@onSuccess
+                    }
                     mutateDraft { draft ->
                         draft.copy(
                             quoteMethod = query.method,
@@ -175,6 +186,9 @@ class SendMoneyViewModel @Inject constructor(
                     }
                 }
                 .onFailure { error ->
+                    if (requestId != latestQuoteRequestId) {
+                        return@onFailure
+                    }
                     _uiState.update {
                         it.copy(
                             isQuoteLoading = false,

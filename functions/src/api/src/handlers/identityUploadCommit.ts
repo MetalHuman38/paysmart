@@ -41,6 +41,14 @@ export async function identityUploadCommitHandler(req: Request, res: Response) {
     return res.status(200).json(receipt);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal error";
+    const classified = classifyIdentityCommitError(message);
+    if (classified) {
+      return res.status(classified.status).json({
+        error: message,
+        code: classified.code,
+      });
+    }
+
     if (
       message.includes("expired") ||
       message.includes("mismatch") ||
@@ -61,4 +69,34 @@ export async function identityUploadCommitHandler(req: Request, res: Response) {
     console.error("identityUploadCommitHandler failed", error);
     return res.status(500).json({ error: "Internal error" });
   }
+}
+
+function classifyIdentityCommitError(
+  message: string
+): { status: number; code: string } | null {
+  if (message.includes("Fallback attestation token is disabled")) {
+    return { status: 400, code: "ATTESTATION_FALLBACK_DISABLED" };
+  }
+  if (message.includes("PLAY_INTEGRITY_PACKAGE_NAME is not configured")) {
+    return { status: 503, code: "PLAY_INTEGRITY_NOT_CONFIGURED" };
+  }
+  if (message.includes("Play Integrity decode failed")) {
+    return { status: 502, code: "PLAY_INTEGRITY_DECODE_FAILED" };
+  }
+  if (message.includes("Play Integrity nonce mismatch")) {
+    return { status: 400, code: "PLAY_INTEGRITY_NONCE_MISMATCH" };
+  }
+  if (message.includes("Play Integrity package mismatch")) {
+    return { status: 400, code: "PLAY_INTEGRITY_PACKAGE_MISMATCH" };
+  }
+  if (message.includes("Play Integrity app verdict is not allowed")) {
+    return { status: 400, code: "PLAY_INTEGRITY_APP_VERDICT_REJECTED" };
+  }
+  if (message.includes("Play Integrity device verdict is not allowed")) {
+    return { status: 400, code: "PLAY_INTEGRITY_DEVICE_VERDICT_REJECTED" };
+  }
+  if (message.includes("Play Integrity app licensing verdict is not licensed")) {
+    return { status: 400, code: "PLAY_INTEGRITY_NOT_LICENSED" };
+  }
+  return null;
 }

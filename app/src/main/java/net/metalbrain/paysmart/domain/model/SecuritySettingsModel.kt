@@ -17,6 +17,7 @@ data class SecuritySettingsModel(
     // Core auth
     var passcodeEnabled: Boolean? = false,
     var passwordEnabled: Boolean? = false,
+    var passkeyEnabled: Boolean? = false,
     var biometricsRequired: Boolean? = true,
     var biometricsEnabled: Boolean? = false,
     var biometricsEnabledAt: Timestamp? = null,
@@ -32,6 +33,8 @@ data class SecuritySettingsModel(
 
     // Identity verification
     var hasVerifiedIdentity: Boolean? = null,
+    var hasSkippedMfaEnrollmentPrompt: Boolean? = null,
+    var hasSkippedPasskeyEnrollmentPrompt: Boolean? = null,
 
     // Local security
     var localPassCodeSetAt: Timestamp? = null,

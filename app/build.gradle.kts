@@ -13,6 +13,9 @@ android {
     namespace = "net.metalbrain.paysmart"
     compileSdk = 36
     ndkVersion = "29.0.14206865"
+    val stripePublishableFromGradle =
+        (project.findProperty("STRIPE_PUBLISHABLE_KEY") as? String).orEmpty()
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
@@ -34,8 +37,8 @@ android {
         applicationId = "net.metalbrain.paysmart"
         minSdk = 33
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.0.0"
+        versionCode = 13
+        versionName = "1.13.0"
         testInstrumentationRunner = "net.metalbrain.paysmart.HiltTestRunner"
 
         ndk {
@@ -98,7 +101,9 @@ android {
             buildConfigField("Boolean", "IDENTITY_IMAGE_DETECTION_FAIL_OPEN", "true")
             buildConfigField("String", "IDENTITY_DOCUMENT_OCR_MODE", "\"remote_api\"")
             buildConfigField("Boolean", "IDENTITY_DOCUMENT_OCR_FAIL_OPEN", "true")
+            buildConfigField("String", "STRIPE_PUBLISHABLE_KEY", "\"$stripePublishableFromGradle\"")
             manifestPlaceholders["networkSecurityConfig"] = "@xml/network_security_config_debug"
+            manifestPlaceholders["firebasePerformanceCollectionEnabled"] = "false"
         }
         getByName("release") {
             isMinifyEnabled = true
@@ -117,7 +122,9 @@ android {
             buildConfigField("Boolean", "IDENTITY_IMAGE_DETECTION_FAIL_OPEN", "true")
             buildConfigField("String", "IDENTITY_DOCUMENT_OCR_MODE", "\"remote_api\"")
             buildConfigField("Boolean", "IDENTITY_DOCUMENT_OCR_FAIL_OPEN", "false")
+            buildConfigField("String", "STRIPE_PUBLISHABLE_KEY", "\"$stripePublishableFromGradle\"")
             manifestPlaceholders["networkSecurityConfig"] = "@xml/network_security_config_release"
+            manifestPlaceholders["firebasePerformanceCollectionEnabled"] = "true"
 
         }
     }
@@ -177,6 +184,7 @@ dependencies {
     // Hilt
     implementation(libs.hilt.core)
     implementation(libs.play.services.analytics)
+    implementation(libs.google.play.integrity)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.lifecycle.viewmodel.compose)
 
@@ -195,6 +203,7 @@ dependencies {
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.store)
+    implementation(libs.firebase.performance)
 
     // Facebook
     implementation(libs.facebook.login)

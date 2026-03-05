@@ -7,6 +7,7 @@ This folder contains provider-specific integrations used by `LookupAddress`.
 - `googleAddressValidationLookup(input): Promise<AddressLookupResult | null>`
   - Returns a fully classified lookup result (`VERIFIED`, `REVIEW`, or `REJECT`) when Google Address Validation is available and returns usable geocode data.
   - Returns `null` when the API key is missing, payload is unusable, or the request fails.
+  - Input includes `line1`, `city`, `stateOrRegion`, `postcode`, and `country`.
   - Reads `GOOGLE_ADDRESS_VALIDATION_KEY`.
 
 - `postcodesIoLookup(postcode, house): Promise<AddressCandidate | null>`
@@ -14,7 +15,7 @@ This folder contains provider-specific integrations used by `LookupAddress`.
   - Returns `null` when payload is invalid or request fails.
 
 - `nominatimSearch(query, country, lat?, lng?): Promise<AddressCandidate[]>`
-  - Returns a list of mapped candidates that include display name, coordinates, postcode, and country code.
+  - Returns a list of mapped candidates that include display name, coordinates, and country code (postcode is optional).
   - Returns `[]` for blank query or request failure.
   - Uses bounded search when `lat/lng` are provided.
 
@@ -36,9 +37,10 @@ This folder contains provider-specific integrations used by `LookupAddress`.
 ### Selection rules for candidate providers
 
 - Candidate lists from Nominatim/Google Geocode are filtered via `pickCandidate(...)`.
-- `pickCandidate(...)` requires:
-  - normalized postcode equality (`normalizePostCode`)
-  - case-insensitive country code equality
+- `pickCandidate(...)` applies country-first scoring and then boosts matches on:
+  - normalized postcode similarity (when provided)
+  - city and state/region equality
+  - line1 token overlap
 
 ### Result shaping for fallback candidates
 
@@ -52,7 +54,7 @@ This folder contains provider-specific integrations used by `LookupAddress`.
 
 - Provider network/parsing failures are absorbed inside provider modules and converted to `null`/`[]`.
 - Provider errors do not bubble from `LookupAddress.execute(...)`.
-- The only expected validation throw in the use case is missing postcode input.
+- The only expected validation throw in the use case is when all address inputs are blank.
 
 ## Timeout expectations
 

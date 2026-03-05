@@ -50,6 +50,7 @@ import net.metalbrain.paysmart.ui.components.EmailSignInBtn
 import net.metalbrain.paysmart.ui.components.FacebookSignInButton
 import net.metalbrain.paysmart.ui.components.GoogleSignInBtn
 import net.metalbrain.paysmart.ui.components.LanguageSelector
+import net.metalbrain.paysmart.ui.components.PasskeySignBtn
 import net.metalbrain.paysmart.ui.components.PhoneNumberInput
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
@@ -58,6 +59,7 @@ import net.metalbrain.paysmart.core.features.language.viewmodel.LanguageViewMode
 import net.metalbrain.paysmart.ui.screens.CountryPickerBottomSheet
 import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.LoginViewModel
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.ReauthOtpViewModel
+import net.metalbrain.paysmart.utils.detectDeviceCountryIso2
 import net.metalbrain.paysmart.utils.extractSimpleBackendError
 
 
@@ -93,6 +95,10 @@ fun LoginScreen(
         )
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.autoSelectCountry(detectDeviceCountryIso2(context))
+    }
+
 
     val googleLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -119,7 +125,8 @@ fun LoginScreen(
             // 🔙 Back arrow (left-aligned)
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.common_back),
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .clickable { onBackClicked() }
                     .padding(start = 8.dp)
@@ -142,7 +149,8 @@ fun LoginScreen(
         Text(
             text = stringResource(R.string.welcome_back),
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         Spacer(Modifier.height(8.dp))
@@ -150,7 +158,8 @@ fun LoginScreen(
         Text(
             text = stringResource(R.string.enter_phone_to_associated_to_account),
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 16.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.95f)
         )
 
         // 🔹 Phone Field
@@ -189,7 +198,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             enabled = phoneNumber.isNotBlank(),
             isLoading = isAuthLoading,
-            loadingText = "Please wait..."
+            loadingText = stringResource(R.string.common_processing)
         )
 
         Spacer(Modifier.height(12.dp))
@@ -203,7 +212,8 @@ fun LoginScreen(
         ) {
             Text(
                 text = stringResource(R.string.trouble_loggin_in),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
@@ -228,7 +238,7 @@ fun LoginScreen(
             HorizontalDivider(
                 modifier = Modifier.weight(1f),
                 thickness = 2.dp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
             )
 
             Spacer(modifier =  Modifier.width(8.dp))
@@ -243,7 +253,7 @@ fun LoginScreen(
             HorizontalDivider(
                 modifier = Modifier.weight(1f),
                 thickness = 2.dp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
             )
         }
 
@@ -306,6 +316,21 @@ fun LoginScreen(
                 )
             }
         )
+
+        Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
+
+        PasskeySignBtn(
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isAuthLoading,
+            isLoading = isAuthLoading,
+            loadingText = stringResource(R.string.common_processing),
+            onClick = {
+                navController.navigate(Screen.PasskeySetup.route) {
+                    launchSingleTop = true
+                }
+            }
+        )
+
         Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
 
         // Dont have an account?

@@ -1,6 +1,7 @@
 import { AuthBlockingEvent } from "firebase-functions/v2/identity";
 import { randomUUID } from "node:crypto";
 import { HttpsError } from "firebase-functions/v2/https";
+import { FieldValue } from "firebase-admin/firestore";
 import {
   SecuritySettingsRepository,
   PersistProvidersOptions,
@@ -45,6 +46,7 @@ export class BeforeSignInPolicyUsecase {
     );
     const security = await this.securityRepo.createIfMissing(uid);
     const authoritativeUser = await this.resolveAuthUser(uid);
+    const hasEnrolledMfaFactor = authoritativeUser?.hasEnrolledMfaFactor === true;
     const authoritativePhone = user.phoneNumber ?? authoritativeUser?.phoneNumber ?? null;
     const effectiveProviderIds = this.mergeProviderIds(
       incomingProviderIds,
@@ -64,6 +66,17 @@ export class BeforeSignInPolicyUsecase {
         consumeLinkingGrant: ctx.isNewFederatedProvider,
       };
       await this.securityRepo.persistProviders(uid, effectiveProviderIds, persistOptions);
+    }
+
+    if (security.hasEnrolledMfaFactor !== hasEnrolledMfaFactor) {
+      await this.securityRepo.update(uid, {
+        hasEnrolledMfaFactor,
+        mfaEnrolledAt: hasEnrolledMfaFactor
+          ? FieldValue.serverTimestamp()
+          : null,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      security.hasEnrolledMfaFactor = hasEnrolledMfaFactor;
     }
 
     if (ctx.isNewFederatedProvider) {
@@ -109,6 +122,7 @@ export class BeforeSignInPolicyUsecase {
         sid: session.sid,
         sv: session.sv,
         emailVerified: Boolean(security.hasVerifiedEmail || emailWasVerifiedNow),
+        mfaEnrolled: Boolean(security.hasEnrolledMfaFactor || hasEnrolledMfaFactor),
       },
     };
   }

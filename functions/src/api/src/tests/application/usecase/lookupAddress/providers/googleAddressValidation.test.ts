@@ -29,7 +29,9 @@ describe.sequential("googleAddressValidationLookup", () => {
     delete process.env.GOOGLE_ADDRESS_VALIDATION_KEY;
 
     const result = await googleAddressValidationLookup({
-      house: "1600 Amphitheatre Pkwy",
+      line1: "1600 Amphitheatre Pkwy",
+      city: "Mountain View",
+      stateOrRegion: "CA",
       postcode: "94043",
       country: "us",
     });
@@ -72,7 +74,9 @@ describe.sequential("googleAddressValidationLookup", () => {
     );
 
     const result = await googleAddressValidationLookup({
-      house: "1600 Amphitheatre Pkwy",
+      line1: "1600 Amphitheatre Pkwy",
+      city: "Mountain View",
+      stateOrRegion: "CA",
       postcode: "94043",
       country: "us",
     });
@@ -111,7 +115,7 @@ describe.sequential("googleAddressValidationLookup", () => {
         address: expect.objectContaining({
           regionCode: "US",
           postalCode: "94043",
-          addressLines: ["1600 Amphitheatre Pkwy 94043"],
+          addressLines: ["1600 Amphitheatre Pkwy, Mountain View, CA, 94043"],
         }),
         enableUspsCass: true,
       })
@@ -147,7 +151,9 @@ describe.sequential("googleAddressValidationLookup", () => {
     );
 
     const result = await googleAddressValidationLookup({
-      house: "1600 Amphitheatre Pkwy",
+      line1: "1600 Amphitheatre Pkwy",
+      city: "Mountain View",
+      stateOrRegion: "CA",
       postcode: "94043",
       country: "us",
     });

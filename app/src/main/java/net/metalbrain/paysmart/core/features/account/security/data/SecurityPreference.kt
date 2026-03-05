@@ -35,10 +35,16 @@ class SecurityPreference @Inject constructor(
         private val PASSWORD_ENABLED = booleanPreferencesKey("password_enabled")
 
         private val PASSCODE_ENABLED = booleanPreferencesKey("passcode_enabled")
+        private val PASSKEY_ENABLED = booleanPreferencesKey("passkey_enabled")
 
         private val HAS_VERIFIED_EMAIL = booleanPreferencesKey("has_verified_email")
         private val HAS_ADDED_HOME_ADDRESS = booleanPreferencesKey("has_added_home_address")
         private val HAS_VERIFIED_IDENTITY = booleanPreferencesKey("has_verified_identity")
+        private val HAS_SKIPPED_MFA_ENROLLMENT_PROMPT =
+            booleanPreferencesKey("has_skipped_mfa_enrollment_prompt")
+        private val HAS_SKIPPED_PASSKEY_ENROLLMENT_PROMPT =
+            booleanPreferencesKey("has_skipped_passkey_enrollment_prompt")
+        private val HIDE_BALANCE = booleanPreferencesKey("hide_balance")
 
         private val ALLOW_FEDERATED_LINKING = booleanPreferencesKey("allow_federated_linking")
 
@@ -58,9 +64,12 @@ class SecurityPreference @Inject constructor(
             biometricsEnabled = prefs[BIOMETRIC_ENABLED] ?: false,
             passcodeEnabled = prefs[PASSCODE_ENABLED] ?: false,
             passwordEnabled = prefs[PASSWORD_ENABLED] ?: false,
+            passkeyEnabled = prefs[PASSKEY_ENABLED] ?: false,
             hasVerifiedEmail = prefs[HAS_VERIFIED_EMAIL] ?: false,
             hasAddedHomeAddress = prefs[HAS_ADDED_HOME_ADDRESS],
             hasVerifiedIdentity = prefs[HAS_VERIFIED_IDENTITY] ?: false,
+            hasSkippedMfaEnrollmentPrompt = prefs[HAS_SKIPPED_MFA_ENROLLMENT_PROMPT] ?: false,
+            hasSkippedPasskeyEnrollmentPrompt = prefs[HAS_SKIPPED_PASSKEY_ENROLLMENT_PROMPT] ?: true,
             allowFederatedLinking = prefs[ALLOW_FEDERATED_LINKING] ?: false,
             sessionLocked = prefs[SESSION_LOCKED] ?: true,
             killSwitchActive = prefs[KILLSWITCH_ACTIVE] ?: false,
@@ -85,9 +94,14 @@ class SecurityPreference @Inject constructor(
             biometricsEnabled = prefs[BIOMETRIC_ENABLED] ?: fromJson.biometricsEnabled,
             passcodeEnabled = prefs[PASSCODE_ENABLED] ?: fromJson.passcodeEnabled,
             passwordEnabled = prefs[PASSWORD_ENABLED] ?: fromJson.passwordEnabled,
+            passkeyEnabled = prefs[PASSKEY_ENABLED] ?: fromJson.passkeyEnabled,
             hasVerifiedEmail = prefs[HAS_VERIFIED_EMAIL] ?: fromJson.hasVerifiedEmail,
             hasAddedHomeAddress = prefs[HAS_ADDED_HOME_ADDRESS] ?: fromJson.hasAddedHomeAddress,
             hasVerifiedIdentity = prefs[HAS_VERIFIED_IDENTITY] ?: fromJson.hasVerifiedIdentity,
+            hasSkippedMfaEnrollmentPrompt = prefs[HAS_SKIPPED_MFA_ENROLLMENT_PROMPT]
+                ?: fromJson.hasSkippedMfaEnrollmentPrompt,
+            hasSkippedPasskeyEnrollmentPrompt = prefs[HAS_SKIPPED_PASSKEY_ENROLLMENT_PROMPT]
+                ?: fromJson.hasSkippedPasskeyEnrollmentPrompt,
             allowFederatedLinking = prefs[ALLOW_FEDERATED_LINKING] ?: fromJson.allowFederatedLinking,
             sessionLocked = prefs[SESSION_LOCKED] ?: fromJson.sessionLocked,
             killSwitchActive = prefs[KILLSWITCH_ACTIVE] ?: fromJson.killSwitchActive,
@@ -105,9 +119,12 @@ class SecurityPreference @Inject constructor(
             prefs[BIOMETRIC_ENABLED] = state.biometricsEnabled
             prefs[PASSWORD_ENABLED] = state.passwordEnabled
             prefs[PASSCODE_ENABLED] = state.passcodeEnabled
+            prefs[PASSKEY_ENABLED] = state.passkeyEnabled
             prefs[HAS_VERIFIED_EMAIL] = state.hasVerifiedEmail
             prefs[HAS_ADDED_HOME_ADDRESS] = state.hasAddedHomeAddress == true
             prefs[HAS_VERIFIED_IDENTITY] = state.hasVerifiedIdentity
+            prefs[HAS_SKIPPED_MFA_ENROLLMENT_PROMPT] = state.hasSkippedMfaEnrollmentPrompt
+            prefs[HAS_SKIPPED_PASSKEY_ENROLLMENT_PROMPT] = state.hasSkippedPasskeyEnrollmentPrompt
             prefs[ALLOW_FEDERATED_LINKING] = state.allowFederatedLinking ?: false
             prefs[SESSION_LOCKED] = state.sessionLocked
             prefs[KILLSWITCH_ACTIVE] = state.killSwitchActive
@@ -133,6 +150,17 @@ class SecurityPreference @Inject constructor(
         store.data.map { prefs ->
             resolveLocalState(prefs)
         }
+
+    val hideBalanceFlow: Flow<Boolean> =
+        store.data.map { prefs ->
+            prefs[HIDE_BALANCE] ?: false
+        }
+
+    suspend fun setHideBalance(hidden: Boolean) {
+        store.edit { prefs ->
+            prefs[HIDE_BALANCE] = hidden
+        }
+    }
 
     /* ---------------- Cloud Security Cache ---------------- */
     suspend fun saveCloudSecuritySettings(settings: SecuritySettingsModel?) {
@@ -184,6 +212,7 @@ class SecurityPreference @Inject constructor(
             // Mirror account-level enablement from server/Room to avoid stale local truth.
             passcodeEnabled = server?.passcodeEnabled ?: local.passcodeEnabled,
             passwordEnabled = server?.passwordEnabled ?: local.passwordEnabled,
+            passkeyEnabled = server?.passkeyEnabled ?: local.passkeyEnabled,
             biometricsEnabled = server?.biometricsEnabled ?: local.biometricsEnabled,
             biometricsEnabledAt = server?.biometricsEnabledAt ?: local.biometricsEnabledAt,
             localPassCodeSetAt = server?.localPassCodeSetAt ?: local.localPassCodeSetAt,
@@ -201,6 +230,10 @@ class SecurityPreference @Inject constructor(
             emailToVerify = server?.emailToVerify ?: local.emailToVerify,
             hasAddedHomeAddress = hasAddedHomeAddressMerged,
             hasVerifiedIdentity = hasVerifiedIdentityMerged,
+            hasSkippedMfaEnrollmentPrompt = server?.hasSkippedMfaEnrollmentPrompt
+                ?: local.hasSkippedMfaEnrollmentPrompt,
+            hasSkippedPasskeyEnrollmentPrompt = server?.hasSkippedPasskeyEnrollmentPrompt
+                ?: local.hasSkippedPasskeyEnrollmentPrompt,
 
             tosAcceptedAt = server?.tosAcceptedAt ?: local.tosAcceptedAt,
             kycStatus = server?.kycStatus ?: local.kycStatus,

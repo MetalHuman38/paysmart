@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -117,14 +118,14 @@ fun BiometricOptInScreen(
         Spacer(modifier = Modifier.height(22.dp))
 
         Text(
-            text = "Protect your account",
+            text = stringResource(R.string.Secure_your_account),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
 
 
         Text(
-            text = "Adding biometric security will ensure you are the only one that can access your PaySmart account.\nIt also protects your secure activities.",
+            text = stringResource(R.string.add_passcode_title),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center
         )
@@ -152,7 +153,7 @@ fun BiometricOptInScreen(
 
         TextButton(onClick = onSuccess) {
             Text(
-                text = "Skip for now",
+                text = stringResource(R.string.mfa_prompt_skip_action),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -180,14 +181,14 @@ fun BiometricOptInScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_paysmart_logo),
-                contentDescription = "PaySmart Logo",
+                contentDescription = stringResource(R.string.content_desc_logo),
                 modifier = Modifier.height(34.dp)
             )
 
             Spacer(modifier = Modifier.width(2.dp))
 
             Text(
-                text = "PaySmart",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp,

@@ -18,7 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePasswordViewModel
 import net.metalbrain.paysmart.ui.components.PasswordInputField
 import net.metalbrain.paysmart.ui.components.PrimaryButton
@@ -39,10 +41,13 @@ fun ChangePasswordRecoveryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Change password") },
+                title = { Text(stringResource(R.string.change_password_recovery_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_back)
+                        )
                     }
                 }
             )
@@ -56,28 +61,28 @@ fun ChangePasswordRecoveryScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Use your current local password to set a new one.",
+                text = stringResource(R.string.change_password_recovery_description),
                 style = MaterialTheme.typography.bodyMedium
             )
 
             PasswordInputField(
                 value = state.oldPassword,
                 onValueChange = viewModel::onOldPasswordChanged,
-                placeholder = "Current password",
+                placeholder = stringResource(R.string.change_password_current_label),
                 isPassword = true
             )
 
             PasswordInputField(
                 value = state.newPassword,
                 onValueChange = viewModel::onNewPasswordChanged,
-                placeholder = "New password",
+                placeholder = stringResource(R.string.change_password_new_label),
                 isPassword = true
             )
 
             PasswordInputField(
                 value = state.confirmNewPassword,
                 onValueChange = viewModel::onConfirmNewPasswordChanged,
-                placeholder = "Confirm new password",
+                placeholder = stringResource(R.string.change_password_confirm_label),
                 isPassword = true
             )
 
@@ -90,13 +95,13 @@ fun ChangePasswordRecoveryScreen(
             }
 
             PrimaryButton(
-                text = "Update password",
+                text = stringResource(R.string.change_password_update_action),
                 onClick = { viewModel.submitPasswordChange() },
                 enabled = state.oldPassword.isNotBlank() &&
                     state.newPassword.length >= 6 &&
                     state.confirmNewPassword.isNotBlank(),
                 isLoading = state.loading,
-                loadingText = "Updating...",
+                loadingText = stringResource(R.string.change_password_updating),
                 modifier = Modifier.fillMaxWidth()
             )
         }

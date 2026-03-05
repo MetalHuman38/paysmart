@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.core.features.transactions.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,11 +16,24 @@ import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.domain.model.Transaction
 
 @Composable
-fun TransactionItem(transaction: Transaction) {
-    Row(
-        modifier = Modifier
+fun TransactionItem(
+    transaction: Transaction,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
+) {
+    val rowModifier = if (onClick != null) {
+        modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp)
+    } else {
+        modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    }
+
+    Row(
+        modifier = rowModifier,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column {

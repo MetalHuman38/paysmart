@@ -8,9 +8,13 @@ export async function googleAddressValidationLookup(input) {
         return null;
     }
     const countryCode = normalizeCountryCode(input.country).toUpperCase();
+    const inputLine1 = input.line1.trim();
+    const inputCity = input.city.trim();
+    const inputStateOrRegion = input.stateOrRegion.trim();
     const postcode = input.postcode.trim();
-    const house = input.house.trim();
-    const addressLine = [house, postcode].filter((value) => value.length > 0).join(" ");
+    const addressLine = [inputLine1, inputCity, inputStateOrRegion, postcode]
+        .filter((value) => value.length > 0)
+        .join(", ");
     if (!addressLine) {
         return null;
     }
@@ -39,12 +43,12 @@ export async function googleAddressValidationLookup(input) {
     const resolvedCountryCode = normalizeOptionalText(postalAddress?.regionCode)?.toUpperCase() ?? countryCode;
     const resolvedPostCode = normalizeOptionalText(postalAddress?.postalCode) ?? postcode;
     const line1 = normalizeOptionalText(postalAddress?.addressLines?.[0]) ??
-        normalizeOptionalText(house) ??
+        normalizeOptionalText(input.line1) ??
         fullAddress;
     const line2 = normalizeOptionalText(postalAddress?.addressLines?.[1]);
     const city = normalizeOptionalText(postalAddress?.locality);
     const stateOrRegion = normalizeOptionalText(postalAddress?.administrativeArea);
-    const fullAddressWithHouse = buildFullAddressWithHouse(fullAddress, house);
+    const fullAddressWithHouse = buildFullAddressWithHouse(fullAddress, inputLine1);
     const classification = classifyAddressValidationVerdict({
         verdict: result.verdict,
         requestedCountryCode: countryCode,
@@ -60,7 +64,7 @@ export async function googleAddressValidationLookup(input) {
         lat: geocode.latitude,
         lng: geocode.longitude,
         postCode: resolvedPostCode.toUpperCase(),
-        houseInfo: house,
+        houseInfo: normalizeOptionalText(input.line1) ?? "",
         countryCode: resolvedCountryCode,
         fullAddressWithHouse,
         line1,

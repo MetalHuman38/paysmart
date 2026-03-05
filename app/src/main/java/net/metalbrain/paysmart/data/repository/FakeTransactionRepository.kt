@@ -3,9 +3,11 @@ package net.metalbrain.paysmart.data.repository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.domain.model.Transaction
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.LinkedHashMap
@@ -13,67 +15,17 @@ import java.util.Locale
 import javax.inject.Inject
 
 class FakeTransactionRepository @Inject constructor() : TransactionRepository {
-    private val staticTransactions = listOf(
-        Transaction(
-            id = "seed_1",
-            title = "To Kalejaiye Aderonke Ade...",
-            time = "18:58",
-            amount = -20.0,
-            currency = "GBP",
-            status = "Successful",
-            date = "9 Jan 2026",
-            iconRes = R.drawable.ic_send
-        ),
-        Transaction(
-            id = "seed_2",
-            title = "Topup via MONZO BANK LIMI...",
-            time = "18:56",
-            amount = 20.0,
-            currency = "GBP",
-            status = "Successful",
-            date = "9 Jan 2026",
-            iconRes = R.drawable.ic_topup_mastercard
-        ),
-        Transaction(
-            id = "seed_3",
-            title = "Topup via MONZO BANK LIMI...",
-            time = "17:47",
-            amount = 20.0,
-            currency = "GBP",
-            status = "Successful",
-            date = "14 Nov 2025",
-            iconRes = R.drawable.ic_topup_bank
-        ),
-        Transaction(
-            id = "seed_4",
-            title = "To Kalejaiye Aderonke Ade...",
-            time = "17:49",
-            amount = -20.0,
-            currency = "GBP",
-            status = "Cancelled",
-            date = "14 Nov 2025",
-            iconRes = R.drawable.ic_send
-        ),
-        Transaction(
-            id = "seed_5",
-            title = "To Wale Kalejaiye",
-            time = "13:55",
-            amount = -10.0,
-            currency = "GBP",
-            status = "Failed",
-            date = "24 Oct 2025",
-            iconRes = R.drawable.ic_send
-        )
-    )
+    private val staticTransactions: List<Transaction> = emptyList()
 
     private val simulatedTopUps = LinkedHashMap<String, SimulatedTopUp>()
-    private val transactions = MutableStateFlow(staticTransactions)
+    private val transactions = MutableStateFlow(sortNewestFirst(staticTransactions))
 
-    override fun observeTransactions(): Flow<List<Transaction>> = transactions
+    override fun observeTransactions(): Flow<List<Transaction>> =
+        transactions.map { rows -> sortNewestFirst(rows) }
 
     override suspend fun getTransactions(): List<Transaction> {
         delay(120)
-        return transactions.value
+        return sortNewestFirst(transactions.value)
     }
 
     override suspend fun upsertAddMoneySimulation(
@@ -102,7 +54,7 @@ class FakeTransactionRepository @Inject constructor() : TransactionRepository {
         val dynamicRows = simulatedTopUps.values
             .sortedByDescending { it.createdAtMs }
             .map { it.toTransaction() }
-        transactions.value = dynamicRows + staticTransactions
+        transactions.value = sortNewestFirst(dynamicRows)
     }
 }
 
@@ -147,3 +99,22 @@ private val DATE_FORMAT: DateTimeFormatter =
 
 private val TIME_FORMAT: DateTimeFormatter =
     DateTimeFormatter.ofPattern("HH:mm", Locale.US)
+
+private val SORT_DATE_TIME_FORMAT: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("d MMM yyyy HH:mm", Locale.US)
+
+private fun sortNewestFirst(items: List<Transaction>): List<Transaction> {
+    return items.sortedByDescending { transaction ->
+        parseSortEpochMillis(transaction)
+    }
+}
+
+private fun parseSortEpochMillis(transaction: Transaction): Long {
+    val rawDateTime = "${transaction.date.trim()} ${transaction.time.trim()}"
+    return runCatching {
+        LocalDateTime.parse(rawDateTime, SORT_DATE_TIME_FORMAT)
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+    }.getOrDefault(0L)
+}

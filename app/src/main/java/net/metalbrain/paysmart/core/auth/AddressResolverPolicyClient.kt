@@ -9,8 +9,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 
 data class AddressLookupPayload(
-    val house: String,
-    val postcode: String,
+    val line1: String,
+    val city: String,
+    val stateOrRegion: String,
+    val postalCode: String,
     val country: String,
     val lat: Double? = null,
     val lng: Double? = null
@@ -46,9 +48,18 @@ class AddressResolverPolicyClient(
         payload: AddressLookupPayload
     ): Result<AddressLookupResult> = withContext(Dispatchers.IO) {
         runCatching {
+            val normalizedLine1 = payload.line1.trim()
+            val normalizedCity = payload.city.trim()
+            val normalizedStateOrRegion = payload.stateOrRegion.trim()
+            val normalizedPostalCode = payload.postalCode.trim()
+
             val requestBody = JSONObject()
-                .put("house", payload.house.trim())
-                .put("postcode", payload.postcode.trim())
+                .put("line1", normalizedLine1)
+                .put("city", normalizedCity)
+                .put("stateOrRegion", normalizedStateOrRegion)
+                .put("postalCode", normalizedPostalCode)
+                .put("house", normalizedLine1)
+                .put("postcode", normalizedPostalCode)
                 .put("country", payload.country.trim().lowercase())
                 .apply {
                     payload.lat?.let { put("lat", it) }

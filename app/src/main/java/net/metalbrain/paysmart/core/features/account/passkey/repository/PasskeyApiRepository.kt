@@ -82,6 +82,19 @@ class PasskeyApiRepository @Inject constructor(
         }
     }
 
+    suspend fun setPasskeyEnabled(passkeyEnabled: Boolean): Result<Boolean> = runCatching {
+        val body = JSONObject()
+            .put("passkeyEnabled", passkeyEnabled)
+            .toString()
+
+        post(
+            url = config.setPasskeyEnabledUrl,
+            body = body
+        ) { payload ->
+            JSONObject(payload).optBoolean("ok", false)
+        }
+    }
+
     private suspend fun <T> post(
         url: String,
         body: String,
@@ -109,7 +122,15 @@ class PasskeyApiRepository @Inject constructor(
     private fun parseErrorMessage(body: String, fallback: String): String {
         if (body.isBlank()) return fallback
         return runCatching {
-            JSONObject(body).optString("error", fallback).ifBlank { fallback }
+            val json = JSONObject(body)
+            val code = json.optString("code").trim()
+            when (code) {
+                "PASSKEY_NOT_CONFIGURED" -> {
+                    "Passkey is not configured on server. Set PASSKEY_RP_ID and PASSKEY_EXPECTED_ORIGINS (or PASSKEY_ANDROID_APK_KEY_HASHES)."
+                }
+
+                else -> json.optString("error", fallback).ifBlank { fallback }
+            }
         }.getOrDefault(fallback)
     }
 }

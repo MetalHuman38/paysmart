@@ -11,6 +11,7 @@ data class LocalSecuritySettingsModel(
 
     var passcodeEnabled: Boolean = false,
     var passwordEnabled: Boolean = false,
+    var passkeyEnabled: Boolean = false,
 
     var localPassCodeSetAt: Timestamp? = null,
     var localPasswordSetAt: Timestamp? = null,
@@ -33,6 +34,8 @@ data class LocalSecuritySettingsModel(
     var hasVerifiedIdentity: Boolean = false,
     var identityVerificationSentAt: Timestamp? = null,
     var identityToVerify: String? = null,
+    var hasSkippedMfaEnrollmentPrompt: Boolean = false,
+    var hasSkippedPasskeyEnrollmentPrompt: Boolean = true,
 
     var sessionLocked: Boolean = false,
     var killSwitchActive: Boolean = false,

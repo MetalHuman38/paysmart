@@ -108,6 +108,7 @@ fun IdentityVerifyScreen(
 
             PrimaryButton(
                 text = stringResource(R.string.continue_text),
+                contentColor = MaterialTheme.colorScheme.surfaceVariant,
                 onClick = onNext,
                 enabled = canContinue && !state.isProcessing && !state.isValidatingCapture
             )

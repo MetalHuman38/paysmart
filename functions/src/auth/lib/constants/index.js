@@ -2,6 +2,7 @@ export const SECURITY_SETTINGS_COLLECTION = {
     allowFederatedLinking: false,
     passcodeEnabled: false,
     passwordEnabled: false,
+    passkeyEnabled: false,
     biometricsRequired: false,
     biometricsEnabled: false,
     biometricsEnabledAt: null,
@@ -14,6 +15,10 @@ export const SECURITY_SETTINGS_COLLECTION = {
     hasVerifiedEmail: false,
     hasAddedHomeAddress: false,
     hasVerifiedIdentity: false,
+    hasSkippedMfaEnrollmentPrompt: false,
+    hasSkippedPasskeyEnrollmentPrompt: true,
+    hasEnrolledMfaFactor: false,
+    mfaEnrolledAt: null,
     localPassCodeSetAt: null,
     localPasswordSetAt: null,
 };

@@ -60,7 +60,7 @@ fun SetPasscodeScreen(
         PasscodeField(
             value = passcode,
             onValueChange = viewModel::onPasscodeChanged,
-            label = "Enter passcode",
+            label = stringResource(R.string.set_passcode_enter_label),
             showText = showPasscode,
             onToggleVisibility = { showPasscode = !showPasscode }
         )
@@ -70,7 +70,7 @@ fun SetPasscodeScreen(
         PasscodeField(
             value = confirm,
             onValueChange = viewModel::onConfirmPasscodeChanged,
-            label = "Confirm passcode",
+            label = stringResource(R.string.set_passcode_confirm_label),
             showText = showConfirmPasscode,
             onToggleVisibility = { showConfirmPasscode = !showConfirmPasscode },
             isError = confirm.isNotBlank() && passcode != confirm
@@ -84,14 +84,14 @@ fun SetPasscodeScreen(
         Spacer(Modifier.height(24.dp))
 
         PrimaryButton(
-            text = "Save passcode",
+            text = stringResource(R.string.set_passcode_save_action),
             onClick = {
                 Log.d("SetPasscodeScreen", "Save button clicked")
                 viewModel.submitPasscode(onSuccess = onPasscodeSet)
                       },
             enabled = passcode.length >= 4 && passcode == confirm,
             isLoading = uiState.loading,
-            loadingText = "Saving...",
+            loadingText = stringResource(R.string.set_passcode_saving),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -106,14 +106,14 @@ fun SetPasscodeScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_paysmart_logo),
-                contentDescription = "PaySmart Logo",
+                contentDescription = stringResource(R.string.content_desc_logo),
                 modifier = Modifier.height(34.dp)
             )
 
             Spacer(modifier = Modifier.width(2.dp))
 
             Text(
-                text = "PaySmart",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp,

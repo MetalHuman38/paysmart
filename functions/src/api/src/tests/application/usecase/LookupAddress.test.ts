@@ -66,7 +66,9 @@ describe.sequential("LookupAddress", () => {
 
     const useCase = new LookupAddress();
     const result = await useCase.execute({
-      house: "1600 Amphitheatre Pkwy",
+      line1: "1600 Amphitheatre Pkwy",
+      city: "Mountain View",
+      stateOrRegion: "CA",
       postcode: "94043",
       country: "us",
     });
@@ -125,7 +127,9 @@ describe.sequential("LookupAddress", () => {
 
     const useCase = new LookupAddress();
     const result = await useCase.execute({
-      house: "1600 Amphitheatre Pkwy",
+      line1: "1600 Amphitheatre Pkwy",
+      city: "Mountain View",
+      stateOrRegion: "CA",
       postcode: "94043",
       country: "us",
     });
@@ -165,7 +169,9 @@ describe.sequential("LookupAddress", () => {
 
     const useCase = new LookupAddress();
     const result = await useCase.execute({
-      house: "1600 Amphitheatre Pkwy",
+      line1: "1600 Amphitheatre Pkwy",
+      city: "Mountain View",
+      stateOrRegion: "CA",
       postcode: "94043",
       country: "us",
     });
@@ -196,7 +202,9 @@ describe.sequential("LookupAddress", () => {
 
     const useCase = new LookupAddress();
     const result = await useCase.execute({
-      house: "1600 Amphitheatre Pkwy",
+      line1: "1600 Amphitheatre Pkwy",
+      city: "Mountain View",
+      stateOrRegion: "California",
       postcode: "94043",
       country: "us",
     });
@@ -205,5 +213,37 @@ describe.sequential("LookupAddress", () => {
     expect(result?.source).toBe("nominatim");
     expect(result?.decision).toBe("REVIEW");
     expect(result?.decisionReasons).toContain("fallback_geocode_only");
+  });
+
+  it("returns a fallback result even when postcode is blank", async () => {
+    fetchMock.mockRejectedValueOnce(new Error("Address validation timeout"));
+    fetchMock.mockResolvedValueOnce(
+      okJson([
+        {
+          display_name: "Alausa, Ikeja, Lagos, Nigeria",
+          lat: "6.6018",
+          lon: "3.3515",
+          address: {
+            country_code: "ng",
+            road: "Alausa",
+            city: "Ikeja",
+            state: "Lagos",
+          },
+        },
+      ])
+    );
+
+    const useCase = new LookupAddress();
+    const result = await useCase.execute({
+      line1: "Alausa",
+      city: "Ikeja",
+      stateOrRegion: "Lagos",
+      postcode: "",
+      country: "ng",
+    });
+
+    expect(result?.source).toBe("nominatim");
+    expect(result?.countryCode).toBe("NG");
+    expect(result?.decision).toBe("REVIEW");
   });
 });

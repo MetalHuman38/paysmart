@@ -1,18 +1,57 @@
-import { RecaptchaEnterpriseServiceClient } from
-  "@google-cloud/recaptcha-enterprise";
+import { RecaptchaEnterpriseServiceClient } from "@google-cloud/recaptcha-enterprise";
 
-const client = new RecaptchaEnterpriseServiceClient();
+let client: RecaptchaEnterpriseServiceClient | null = null;
+
+function getClient(): RecaptchaEnterpriseServiceClient {
+  if (!client) {
+    // Lazy init avoids deployment-time import stalls during function discovery.
+    client = new RecaptchaEnterpriseServiceClient();
+  }
+  return client;
+}
+
+function getProjectId(): string {
+  return (
+    process.env.GOOGLE_CLOUD_PROJECT ||
+    process.env.GCLOUD_PROJECT ||
+    process.env.GCP_PROJECT ||
+    ""
+  ).trim();
+}
+
+function getSiteKey(): string {
+  return (process.env.RECAPTCHA_SITE_KEY || process.env.API_KEY || "").trim();
+}
 
 export async function verifyRecaptcha(token: string, action: string) {
-  const projectPath = client.projectPath("paysmart-7ee79");
+  const normalizedToken = token?.trim();
+  const normalizedAction = action?.trim();
+  if (!normalizedToken) {
+    throw new Error("Missing reCAPTCHA token");
+  }
+  if (!normalizedAction) {
+    throw new Error("Missing reCAPTCHA action");
+  }
 
-  const [assessment] = await client.createAssessment({
+  const projectId = getProjectId();
+  const siteKey = getSiteKey();
+  if (!projectId) {
+    throw new Error("Missing GOOGLE_CLOUD_PROJECT for reCAPTCHA");
+  }
+  if (!siteKey) {
+    throw new Error("Missing RECAPTCHA_SITE_KEY");
+  }
+
+  const recaptcha = getClient();
+  const projectPath = recaptcha.projectPath(projectId);
+
+  const [assessment] = await recaptcha.createAssessment({
     parent: projectPath,
     assessment: {
       event: {
-        token,
-        siteKey: process.env.API_KEY || "API_KEY",
-        expectedAction: action,
+        token: normalizedToken,
+        siteKey,
+        expectedAction: normalizedAction,
       },
     },
   });
@@ -21,13 +60,15 @@ export async function verifyRecaptcha(token: string, action: string) {
     throw new Error("Invalid reCAPTCHA token");
   }
 
-  if (assessment.tokenProperties.action !== action) {
+  if (assessment.tokenProperties.action !== normalizedAction) {
     throw new Error("Action mismatch");
   }
 
   const score = assessment.riskAnalysis?.score ?? 0;
+  const minScoreRaw = Number(process.env.RECAPTCHA_MIN_SCORE ?? "0.5");
+  const minScore = Number.isFinite(minScoreRaw) ? minScoreRaw : 0.5;
 
-  if (score < 0.5) {
+  if (score < minScore) {
     throw new Error("Low confidence request");
   }
 

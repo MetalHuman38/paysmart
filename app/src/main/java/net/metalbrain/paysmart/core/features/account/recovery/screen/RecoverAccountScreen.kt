@@ -43,12 +43,18 @@ fun RecoverAccountScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_back)
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = onHelpClick) {
-                        Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = "Help")
+                        Icon(
+                            Icons.AutoMirrored.Filled.HelpOutline,
+                            contentDescription = stringResource(R.string.content_desc_help)
+                        )
                     }
                 }
             )

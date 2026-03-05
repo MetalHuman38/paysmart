@@ -1,5 +1,7 @@
 # Send Money Port Trace (VoltPay -> PaySmart)
 
+_Last updated: 2026-03-02_
+
 ## Goal
 - Port VoltPay recipient-first transfer flow into PaySmart Kotlin without touching Stripe add-money settlement flow.
 - Keep architecture aligned with `server -> Room -> local state`.

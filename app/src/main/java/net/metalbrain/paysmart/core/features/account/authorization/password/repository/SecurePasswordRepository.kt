@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.core.features.account.authorization.password.repository
 
 import android.content.Context
+import com.google.firebase.Timestamp
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import net.metalbrain.paysmart.core.features.account.authorization.password.repository.BcryptPasswordHasher
@@ -33,7 +34,10 @@ class SecurePasswordRepository @Inject constructor(
         val serverAccepted = passwordPolicyHandler.setPasswordEnabled(idToken)
         val updated = securityPreference
             .loadLocalSecurityState()
-            .copy(passwordEnabled = serverAccepted)
+            .copy(
+                passwordEnabled = serverAccepted,
+                localPasswordSetAt = if (serverAccepted) Timestamp.now() else null
+            )
         securityPreference.saveLocalSecurityState(updated)
 
         if (!serverAccepted) {
@@ -72,7 +76,10 @@ class SecurePasswordRepository @Inject constructor(
             }
 
             securityPreference.saveLocalSecurityState(
-                previousState.copy(passwordEnabled = true)
+                previousState.copy(
+                    passwordEnabled = true,
+                    localPasswordSetAt = Timestamp.now()
+                )
             )
             true
         } catch (e: Exception) {

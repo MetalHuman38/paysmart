@@ -15,9 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.identity.provider.CameraFrameShape
 
 
@@ -27,6 +29,11 @@ fun DocumentFrameOverlay(
     captureLabel: String,
     modifier: Modifier = Modifier
 ) {
+    val frameContentDescription = stringResource(
+        R.string.document_frame_content_description,
+        captureLabel
+    )
+
     Box(modifier = modifier) {
         Box(
             modifier = Modifier
@@ -40,7 +47,7 @@ fun DocumentFrameOverlay(
                 .fillMaxWidth(0.84f)
                 .aspectRatio(frameAspectRatio(frameShape))
                 .semantics {
-                    contentDescription = "Document capture frame for $captureLabel"
+                    contentDescription = frameContentDescription
                 }
                 .border(
                     width = 3.dp,

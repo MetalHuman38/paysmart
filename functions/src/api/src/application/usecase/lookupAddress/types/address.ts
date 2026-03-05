@@ -1,5 +1,7 @@
 export type AddressLookupInput = {
-  house: string;
+  line1: string;
+  city: string;
+  stateOrRegion: string;
   postcode: string;
   country: string;
   lat?: number;
@@ -31,7 +33,7 @@ export type AddressCandidate = {
   lon: number;
   placeId?: string;
   address: {
-    postcode: string;
+    postcode?: string;
     countryCode: string;
     line1?: string;
     line2?: string;

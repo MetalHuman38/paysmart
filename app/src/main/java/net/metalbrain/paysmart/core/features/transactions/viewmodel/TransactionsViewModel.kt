@@ -9,6 +9,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import net.metalbrain.paysmart.data.repository.TransactionRepository
+import net.metalbrain.paysmart.domain.model.Transaction
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @HiltViewModel
 class TransactionsViewModel @Inject constructor(
@@ -29,7 +34,7 @@ class TransactionsViewModel @Inject constructor(
         transactions.filter {
             (status.isEmpty() || it.status in status) &&
                     (currency.isEmpty() || it.currency in currency)
-        }
+        }.sortedByDescending { transaction -> transaction.toSortEpochMillis() }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun setStatusFilter(newStatus: Set<String>) {
@@ -44,4 +49,17 @@ class TransactionsViewModel @Inject constructor(
         _statusFilter.value = emptySet()
         _currencyFilter.value = emptySet()
     }
+}
+
+private val TRANSACTION_SORT_FORMAT: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("d MMM yyyy HH:mm", Locale.US)
+
+private fun Transaction.toSortEpochMillis(): Long {
+    val rawDateTime = "${date.trim()} ${time.trim()}"
+    return runCatching {
+        LocalDateTime.parse(rawDateTime, TRANSACTION_SORT_FORMAT)
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+    }.getOrDefault(0L)
 }

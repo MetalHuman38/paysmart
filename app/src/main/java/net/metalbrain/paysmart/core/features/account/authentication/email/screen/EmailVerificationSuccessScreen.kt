@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,7 +59,7 @@ fun EmailVerificationSuccessScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Email verification successful",
+            text = stringResource(R.string.email_verification_success_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
@@ -67,7 +68,7 @@ fun EmailVerificationSuccessScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Your email has been successfully verified.",
+            text = stringResource(R.string.email_verification_success_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -76,7 +77,7 @@ fun EmailVerificationSuccessScreen(
         Spacer(modifier = Modifier.height(40.dp))
 
         PrimaryButton(
-            text = "Back to the app",
+            text = stringResource(R.string.email_verification_success_action),
             onClick = onBackToApp,
             modifier = Modifier.fillMaxWidth()
         )

@@ -22,6 +22,9 @@ import net.metalbrain.paysmart.domain.auth.SocialAuthUseCase
 import net.metalbrain.paysmart.core.features.account.authentication.email.data.EmailDraft
 import net.metalbrain.paysmart.core.features.account.authentication.email.data.EmailDraftStore
 import net.metalbrain.paysmart.domain.model.Country
+import net.metalbrain.paysmart.domain.model.DEFAULT_COUNTRY_ISO2
+import net.metalbrain.paysmart.domain.model.matchCountryByInternationalPrefix
+import net.metalbrain.paysmart.domain.model.normalizeCountryIso2
 import net.metalbrain.paysmart.domain.model.supportedCountries
 import net.metalbrain.paysmart.domain.usecase.EmailLinkUseCase
 import javax.inject.Inject
@@ -41,7 +44,10 @@ class LoginViewModel @Inject constructor(
     private val emailDraftStore: EmailDraftStore,
 ) : ViewModel() {
 
-    private val _selectedCountry = mutableStateOf(supportedCountries.first())
+    private val _selectedCountry = mutableStateOf(
+        supportedCountries.firstOrNull { it.isoCode == DEFAULT_COUNTRY_ISO2 }
+            ?: supportedCountries.first()
+    )
 
     val selectedCountry: State<Country> = _selectedCountry
 
@@ -235,10 +241,30 @@ class LoginViewModel @Inject constructor(
     val password: State<String> = _password
 
     fun onPhoneNumberChanged(value: String) {
-        phoneNumber = value
+        val matched = matchCountryByInternationalPrefix(value)
+        if (matched != null) {
+            _selectedCountry.value = matched.first
+            phoneNumber = matched.second
+            return
+        }
+        phoneNumber = value.trim().filter { it.isDigit() }.take(15)
     }
 
     fun onCountrySelected(country: Country) {
         _selectedCountry.value = country
+    }
+
+    fun autoSelectCountry(rawIso2: String?) {
+        val normalizedIso2 = normalizeCountryIso2(rawIso2, DEFAULT_COUNTRY_ISO2)
+        val match = supportedCountries.firstOrNull {
+            it.isoCode.equals(normalizedIso2, ignoreCase = true)
+        } ?: return
+
+        val shouldReplaceSelection =
+            phoneNumber.isBlank() ||
+                selectedCountry.value.isoCode == DEFAULT_COUNTRY_ISO2
+        if (shouldReplaceSelection) {
+            _selectedCountry.value = match
+        }
     }
 }

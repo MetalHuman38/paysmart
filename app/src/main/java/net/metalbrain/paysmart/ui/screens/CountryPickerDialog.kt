@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -18,7 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.capabilities.catalog.CountrySelectionCatalog
 import net.metalbrain.paysmart.domain.model.Country
+import net.metalbrain.paysmart.domain.model.countryDisplayName
 import net.metalbrain.paysmart.domain.model.supportedCountries
 import net.metalbrain.paysmart.utils.rememberDebouncedState
 
@@ -29,17 +32,28 @@ fun CountryPickerBottomSheet(
     onCountrySelected: (Country) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false
     )
 
     var rawSearch by remember { mutableStateOf("") }
     val debouncedSearch by rememberDebouncedState(rawSearch, 300L)
+    val catalogPriorityIso2 = remember(context) {
+        CountrySelectionCatalog.countries(context)
+            .map { it.iso2 }
+            .toSet()
+    }
 
     // Sort and filter countries — done during composition for recomposition on locale change
     val countriesGrouped = supportedCountries
-        .map { country -> country to stringResource(country.nameRes) }
-        .sortedBy { it.second }
+        .map { country -> country to countryDisplayName(country) }
+        .sortedWith(
+            compareBy(
+                { if (it.first.isoCode in catalogPriorityIso2) 0 else 1 },
+                { it.second.lowercase() }
+            )
+        )
         .filter { (_, name) ->
             name.contains(debouncedSearch, ignoreCase = true)
         }

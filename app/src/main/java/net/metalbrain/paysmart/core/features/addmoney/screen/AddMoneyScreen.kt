@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.core.features.addmoney.screen
 
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,10 +44,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.core.net.toUri
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
 import net.metalbrain.paysmart.core.features.addmoney.viewmodel.AddMoneyViewModel
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountrySelectionCatalog
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CurrencyFlagResolver
@@ -80,6 +83,10 @@ fun AddMoneyScreen(
         currencyCode = uiState.currency,
         preferredCurrencyCode = uiState.countryCurrencyCode,
         preferredFlagEmoji = uiState.countryFlagEmoji
+    )
+    val activeProvider = uiState.activeSessionProvider ?: inferProvider(
+        currency = uiState.currency,
+        countryIso2 = uiState.countryIso2
     )
     val paymentResultCallback: (PaymentSheetResult) -> Unit = remember {
         { result ->
@@ -133,7 +140,7 @@ fun AddMoneyScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Text(
-                text = "You add",
+                text = stringResource(R.string.add_money_you_add),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
@@ -170,9 +177,9 @@ fun AddMoneyScreen(
                                 )
                             }
                         },
-                        label = { Text("Currency") },
+                        label = { Text(stringResource(R.string.add_money_currency_label)) },
                         enabled = !uiState.isSubmitting && !uiState.isCheckingStatus,
-                        supportingText = { Text("Tap to select") }
+                        supportingText = { Text(stringResource(R.string.add_money_currency_supporting)) }
                     )
                     OutlinedTextField(
                         value = uiState.amountInput,
@@ -204,7 +211,12 @@ fun AddMoneyScreen(
                 ) {
                     uiState.quote?.let { quote ->
                         Text(
-                            text = "1 ${quote.sourceCurrency} = ${quote.rate} ${quote.targetCurrency}",
+                            text = stringResource(
+                                R.string.add_money_quote_rate_format,
+                                quote.sourceCurrency,
+                                quote.rate.toString(),
+                                quote.targetCurrency
+                            ),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -218,7 +230,7 @@ fun AddMoneyScreen(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
-                        label = "Paying in",
+                        label = stringResource(R.string.add_money_summary_paying_in),
                         value = "$currencyFlagEmoji ${uiState.currency.uppercase(Locale.US)}"
                     )
 
@@ -230,7 +242,7 @@ fun AddMoneyScreen(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
-                        label = "Paying with",
+                        label = stringResource(R.string.add_money_summary_paying_with),
                         value = uiState.quoteMethod.label
                     )
 
@@ -242,14 +254,14 @@ fun AddMoneyScreen(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
-                        label = "Arrives",
+                        label = stringResource(R.string.add_money_summary_arrives),
                         value = uiState.quote?.let {
                             if (it.arrivalSeconds <= 120) {
-                                "Today - in seconds"
+                                stringResource(R.string.add_money_summary_arrives_today_seconds)
                             } else {
-                                "Today"
+                                stringResource(R.string.add_money_summary_arrives_today)
                             }
-                        } ?: "Estimate after quote"
+                        } ?: stringResource(R.string.add_money_summary_arrives_estimate)
                     )
 
                     uiState.quote?.let { quote ->
@@ -260,7 +272,7 @@ fun AddMoneyScreen(
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             },
-                            label = "You pay",
+                            label = stringResource(R.string.add_money_summary_you_pay),
                             value = "${quote.sourceAmount} ${quote.sourceCurrency}"
                         )
 
@@ -281,7 +293,7 @@ fun AddMoneyScreen(
             }
 
             Text(
-                text = "Payment method",
+                text = stringResource(R.string.add_money_payment_method_title),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
@@ -301,7 +313,7 @@ fun AddMoneyScreen(
             }
 
             AppOutlinedButton(
-                text = "Refresh live FX quote",
+                text = stringResource(R.string.add_money_refresh_quote_action),
                 onClick = viewModel::refreshQuote,
                 enabled = uiState.canRefreshQuote && !uiState.isSubmitting && !uiState.isCheckingStatus,
                 isLoading = uiState.isQuoteLoading,
@@ -321,8 +333,32 @@ fun AddMoneyScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = uiState.canSubmit && !uiState.isCheckingStatus,
                 isLoading = uiState.isSubmitting,
-                text = stringResource(R.string.add_money_payment_sheet_action)
+                text = if (activeProvider == AddMoneyProvider.FLUTTERWAVE) {
+                    stringResource(R.string.add_money_create_flutterwave_action)
+                } else {
+                    stringResource(R.string.add_money_payment_sheet_action)
+                }
             )
+
+            val providerActionUrl = uiState.providerActionUrl
+            if (!providerActionUrl.isNullOrBlank()) {
+                PrimaryButton(
+                    text = stringResource(R.string.add_money_open_provider_checkout_action),
+                    onClick = {
+                        runCatching {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                providerActionUrl.toUri()
+                            )
+                            context.startActivity(intent)
+                        }.onFailure { error ->
+                            viewModel.onPaymentSheetFailed(error.localizedMessage)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !uiState.isSubmitting && !uiState.isCheckingStatus
+                )
+            }
 
             AppOutlinedButton(
                 text = stringResource(R.string.add_money_refresh_action),
@@ -354,6 +390,23 @@ fun AddMoneyScreen(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
+                        uiState.activeSessionProvider?.let { provider ->
+                            Text(
+                                text = stringResource(
+                                    R.string.add_money_provider_value,
+                                    when (provider) {
+                                        AddMoneyProvider.STRIPE -> stringResource(
+                                            R.string.add_money_provider_stripe
+                                        )
+                                        AddMoneyProvider.FLUTTERWAVE -> stringResource(
+                                            R.string.add_money_provider_flutterwave
+                                        )
+                                    }
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -378,7 +431,7 @@ fun AddMoneyScreen(
 
     if (showCurrencySheet) {
         CatalogSelectionBottomSheet(
-            title = "Select currency",
+            title = stringResource(R.string.add_money_select_currency_title),
             options = currencyOptions,
             selectedKey = uiState.currency.uppercase(Locale.US),
             onDismiss = { showCurrencySheet = false },
@@ -386,6 +439,19 @@ fun AddMoneyScreen(
                 viewModel.onCurrencyChanged(selected.key)
             }
         )
+    }
+}
+
+private fun inferProvider(
+    currency: String,
+    countryIso2: String
+): AddMoneyProvider {
+    val normalizedCurrency = currency.trim().uppercase(Locale.US)
+    val normalizedCountry = countryIso2.trim().uppercase(Locale.US)
+    return if (normalizedCurrency == "NGN" || normalizedCountry == "NG") {
+        AddMoneyProvider.FLUTTERWAVE
+    } else {
+        AddMoneyProvider.STRIPE
     }
 }
 

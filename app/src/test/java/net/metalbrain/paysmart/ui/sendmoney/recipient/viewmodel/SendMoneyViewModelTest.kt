@@ -5,10 +5,13 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.room.doa.SendMoneyRecipientDraftDao
@@ -148,6 +151,100 @@ class SendMoneyViewModelTest {
         assertEquals(FxQuoteDataSource.SERVER, persisted?.quoteDataSource)
     }
 
+    @Test
+    fun `refreshQuote keeps latest result when earlier request finishes later`() = runTest {
+        val userId = "user_fx_race"
+        val dao = FakeSendMoneyRecipientDraftDao()
+        val repository = SendMoneyRecipientDraftRepository(dao)
+        val quoteRepository = mockk<FxQuoteRepository>()
+
+        coEvery {
+            quoteRepository.getQuote(match { it.sourceAmount == 10.0 })
+        } coAnswers {
+            delay(300)
+            Result.success(
+                FxQuoteResult(
+                    quote = FxQuote(
+                        sourceCurrency = "GBP",
+                        targetCurrency = "EUR",
+                        sourceAmount = 10.0,
+                        rate = 1.10,
+                        recipientAmount = 11.0,
+                        fees = emptyList(),
+                        guaranteeSeconds = 30,
+                        arrivalSeconds = 120,
+                        rateSource = "test",
+                        updatedAtMs = 1_700_000_001L
+                    ),
+                    dataSource = FxQuoteDataSource.SERVER
+                )
+            )
+        }
+        coEvery {
+            quoteRepository.getQuote(match { it.sourceAmount == 20.0 })
+        } coAnswers {
+            delay(50)
+            Result.success(
+                FxQuoteResult(
+                    quote = FxQuote(
+                        sourceCurrency = "GBP",
+                        targetCurrency = "EUR",
+                        sourceAmount = 20.0,
+                        rate = 1.15,
+                        recipientAmount = 23.0,
+                        fees = emptyList(),
+                        guaranteeSeconds = 30,
+                        arrivalSeconds = 120,
+                        rateSource = "test",
+                        updatedAtMs = 1_700_000_002L
+                    ),
+                    dataSource = FxQuoteDataSource.SERVER
+                )
+            )
+        }
+
+        val viewModel = SendMoneyViewModel(
+            authRepository = createAuthRepository(userId),
+            draftRepository = repository,
+            fxQuoteRepository = quoteRepository
+        )
+
+        repository.upsert(
+            userId = userId,
+            draft = SendMoneyRecipientDraft(
+                sourceAmountInput = "10",
+                sourceCurrency = "GBP",
+                targetCurrency = "EUR"
+            )
+        )
+        advanceUntilIdle()
+
+        viewModel.refreshQuote() // slow request for amount=10
+
+        repository.upsert(
+            userId = userId,
+            draft = SendMoneyRecipientDraft(
+                sourceAmountInput = "20",
+                sourceCurrency = "GBP",
+                targetCurrency = "EUR"
+            )
+        )
+        runCurrent()
+        viewModel.refreshQuote() // fast request for amount=20
+
+        advanceTimeBy(60)
+        runCurrent()
+
+        assertEquals(20.0, viewModel.uiState.value.draft.quoteSnapshot?.sourceAmount)
+        assertEquals(23.0, viewModel.uiState.value.draft.quoteSnapshot?.recipientAmount)
+
+        advanceTimeBy(300)
+        runCurrent()
+
+        assertEquals(20.0, viewModel.uiState.value.draft.quoteSnapshot?.sourceAmount)
+        assertEquals(23.0, viewModel.uiState.value.draft.quoteSnapshot?.recipientAmount)
+    }
+
     private fun createViewModel(userId: String): SendMoneyViewModel {
         val dao = FakeSendMoneyRecipientDraftDao()
         return SendMoneyViewModel(
@@ -183,7 +280,7 @@ private class FakeSendMoneyRecipientDraftDao : SendMoneyRecipientDraftDao {
     }
 
     override suspend fun deleteByUserId(userId: String) {
-        rows.value = rows.value - userId
+        rows.value -= userId
     }
 
     fun rawByUserId(userId: String): SendMoneyRecipientDraftEntity? {

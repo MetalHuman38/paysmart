@@ -46,6 +46,9 @@ function makeSecurity(overrides: Record<string, unknown> = {}) {
     hasVerifiedEmail: false,
     hasAddedHomeAddress: false,
     hasVerifiedIdentity: false,
+    hasSkippedMfaEnrollmentPrompt: false,
+    hasEnrolledMfaFactor: false,
+    mfaEnrolledAt: null,
     localPassCodeSetAt: null,
     localPasswordSetAt: null,
     updatedAt: {} as any,
@@ -97,6 +100,7 @@ describe("BeforeSignInPolicyUsecase", () => {
         sid: expect.any(String),
         sv: 1,
         emailVerified: false,
+        mfaEnrolled: false,
       },
     });
     expect(authService.getUserByUid).toHaveBeenCalledWith("uid-1");
@@ -207,6 +211,7 @@ describe("BeforeSignInPolicyUsecase", () => {
         sid: expect.any(String),
         sv: 1,
         emailVerified: false,
+        mfaEnrolled: false,
       },
     });
     expect(securityRepo.persistProviders).toHaveBeenCalledWith(
@@ -257,6 +262,7 @@ describe("BeforeSignInPolicyUsecase", () => {
         sid: expect.any(String),
         sv: 1,
         emailVerified: false,
+        mfaEnrolled: false,
       },
     });
     expect(auditLogRepo.log).toHaveBeenCalledWith(

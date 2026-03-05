@@ -92,10 +92,10 @@ fun LanguageSelectionScreen(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.common_back),
                     modifier = Modifier
                         .padding(end = 16.dp)
-                        .clickable { onBack() }
+                        .clickable { onBack() },
                 )
             }
 
@@ -110,7 +110,7 @@ fun LanguageSelectionScreen(
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                     ),
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
@@ -118,7 +118,7 @@ fun LanguageSelectionScreen(
             Text(
                 text = stringResource(R.string.language_description),
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             // Search
@@ -156,6 +156,9 @@ fun LanguageSelectionScreen(
                             text = flagEmoji,
                             fontSize = 24.sp,
                             modifier = Modifier.size(28.dp)
+                            .padding(end = 12.dp)
+                            .align(Alignment.CenterVertically),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                         Spacer(Modifier.width(12.dp))
@@ -176,7 +179,7 @@ fun LanguageSelectionScreen(
                             if (isSelected) {
                                 Icon(
                                     Icons.Default.CheckCircle,
-                                    contentDescription = "Selected",
+                                    contentDescription = stringResource(R.string.content_desc_selected),
                                     tint = Color(0xFF009E5D)
                                 )
                             } else {

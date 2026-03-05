@@ -12,7 +12,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun AnimatedLottieBackground(modifier: Modifier = Modifier) {
     val animations = listOf(
-        R.raw.bg_1,
+        R.raw.card,
         R.raw.grow,
         R.raw.wallet
     )

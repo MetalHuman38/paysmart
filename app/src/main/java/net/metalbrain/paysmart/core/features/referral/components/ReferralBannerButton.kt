@@ -15,8 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
 
 @Composable
 fun ReferralBannerButton(onClick: () -> Unit) {
@@ -29,13 +31,13 @@ fun ReferralBannerButton(onClick: () -> Unit) {
     ) {
         Icon(
             imageVector = Icons.Default.CardGiftcard,
-            contentDescription = "Gift",
+            contentDescription = stringResource(R.string.content_desc_gift),
             tint = Color(0xFF1B9C85),
             modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "Get 10 GBP",
+            text = stringResource(R.string.referral_banner_reward_text),
             color = Color(0xFF1B9C85),
             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
         )

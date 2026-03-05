@@ -14,7 +14,9 @@ export async function googleGeocode(
 
   const params = new URLSearchParams();
   params.set("address", query);
-  params.set("components", `country:${country}`);
+  if (country.trim().length > 0) {
+    params.set("components", `country:${country}`);
+  }
   params.set("key", apiKey);
 
   const url = `https://maps.googleapis.com/maps/api/geocode/json?${params.toString()}`;
@@ -54,7 +56,7 @@ export async function googleGeocode(
           ?.short_name
       )?.toLowerCase() ?? normalizeOptionalText(components.get("country"))?.toLowerCase();
 
-    if (!postcode || !countryCode) {
+    if (!countryCode) {
       continue;
     }
 

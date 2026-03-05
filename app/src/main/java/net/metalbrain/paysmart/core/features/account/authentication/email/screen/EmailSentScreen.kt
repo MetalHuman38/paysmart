@@ -23,6 +23,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import net.metalbrain.paysmart.ui.components.PrimaryButton
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,6 +40,9 @@ fun EmailSentScreen(
     onResend: () -> Unit,
     onOpenEmailApp: () -> Unit,
     onChangeEmail: () -> Unit,
+    isResending: Boolean = false,
+    infoMessage: String? = null,
+    errorMessage: String? = null,
     onBack: () -> Unit = {}
 ) {
 
@@ -65,12 +70,12 @@ fun EmailSentScreen(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = stringResource(R.string.common_back)
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
             TextButton(onClick = { /* Show help */ }) {
-                Text("Get help")
+                Text(stringResource(R.string.get_help))
             }
         }
 
@@ -93,7 +98,7 @@ fun EmailSentScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Check your email",
+            text = stringResource(R.string.email_sent_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
@@ -101,7 +106,7 @@ fun EmailSentScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "We sent a verification email to",
+            text = stringResource(R.string.email_sent_subtitle),
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -113,14 +118,16 @@ fun EmailSentScreen(
         )
 
         TextButton(onClick = onChangeEmail) {
-            Text("Not you? Change email", color = MaterialTheme.colorScheme.primary)
+            Text(
+                text = stringResource(R.string.email_sent_change_email),
+                color = MaterialTheme.colorScheme.primary
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Click on the link inside the email to verify your email address. " +
-                    "Check your spam folder if you don’t see it in your inbox.",
+            text = stringResource(R.string.email_sent_instruction),
             style = MaterialTheme.typography.bodySmall,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 16.dp)
@@ -129,7 +136,7 @@ fun EmailSentScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         PrimaryButton(
-            text = "Open email app",
+            text = stringResource(R.string.email_sent_open_app),
             onClick = onOpenEmailApp,
             modifier = Modifier.fillMaxWidth()
         )
@@ -138,9 +145,35 @@ fun EmailSentScreen(
 
         OutlinedButton(
             onClick = onResend,
+            enabled = !isResending,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Resend email")
+            Text(
+                if (isResending) {
+                    stringResource(R.string.email_sent_resending)
+                } else {
+                    stringResource(R.string.email_sent_resend)
+                }
+            )
+        }
+
+        if (!infoMessage.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = infoMessage,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        if (!errorMessage.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Red,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

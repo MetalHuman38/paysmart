@@ -1,6 +1,6 @@
 # PaySmart Architecture (Pitch View)
 
-_Last updated: 2026-02-23_
+_Last updated: 2026-03-02_
 
 ## 1) One-page Summary
 PaySmart is a mobile-first payments platform with a security-first core:
@@ -173,6 +173,7 @@ sequenceDiagram
 - Client boundary:
   - App Check/Auth token required for sensitive API surfaces.
   - Identity payload encrypted before transport.
+  - Offline hard-gate screen prevents partial/undefined client state when network is unavailable.
 - API boundary:
   - Route-level validation and explicit status/error contracts.
   - Stripe webhook signature verification (or controlled unsigned mode in non-prod).
@@ -187,7 +188,15 @@ Use this architecture to tell a clear story:
 3. **Cross-border readiness**: live FX quote layer and method-based fee model.
 4. **Scale-ready product spine**: modular Kotlin + Functions architecture, offline-first UX, auditable backend transitions.
 
-## 10) Suggested Slide Mapping
+## 10) Observability and Cost Controls
+- Firebase Analytics + Crashlytics for product/exception telemetry.
+- Firebase Performance Monitoring integrated behind app-level wrapper:
+  - release-only collection by default
+  - local/debug collection disabled for noise/cost control
+  - focused traces on critical network journeys (identity + add-money)
+- Session lock diagnostics and route traces retained to verify lock lifecycle behavior.
+
+## 11) Suggested Slide Mapping
 - Slide 1: System context diagram + value proposition.
 - Slide 2: Identity + compliance flow (why safer than naive upload).
 - Slide 3: Add-money + FX monetization engine (unit economics + growth path).

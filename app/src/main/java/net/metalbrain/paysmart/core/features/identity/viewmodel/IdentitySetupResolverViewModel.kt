@@ -22,6 +22,7 @@ import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityDocu
 import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityUploadExtractionSnapshot
 import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityUploadOrchestrator
 import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityUploadPipelineStage
+import net.metalbrain.paysmart.core.service.repositiry.FirebaseAnalyticalServiceInterface
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
 import java.util.Locale
@@ -43,7 +44,8 @@ class IdentitySetupResolverViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val userProfileCacheRepository: UserProfileCacheRepository,
     private val imageAuthenticityDetector: IdentityImageAuthenticityDetector,
-    private val textExtractor: IdentityDocumentTextExtractor
+    private val textExtractor: IdentityDocumentTextExtractor,
+    private val analyticsService: FirebaseAnalyticalServiceInterface
 ) : ViewModel() {
 
     private var capturedBytes: ByteArray? = null
@@ -268,6 +270,14 @@ class IdentitySetupResolverViewModel @Inject constructor(
                 )
             }
 
+            analyticsService.logEvent(
+                event = "identity_upload_started",
+                params = mapOf(
+                    "country_iso2" to state.selectedCountryIso2,
+                    "document_type" to selectedDocument.id
+                )
+            )
+
             val result = uploadOrchestrator.uploadDocument(
                 documentType = uploadDocumentType,
                 documentBytes = bytes,
@@ -286,6 +296,12 @@ class IdentitySetupResolverViewModel @Inject constructor(
 
             result
                 .onSuccess { receipt ->
+                    analyticsService.logEvent(
+                        event = "identity_upload_commit_success",
+                        params = mapOf(
+                            "verification_status" to receipt.status
+                        )
+                    )
                     _uiState.update {
                         it.copy(
                             isProcessing = false,
@@ -299,6 +315,15 @@ class IdentitySetupResolverViewModel @Inject constructor(
                 }
                 .onFailure { error ->
                     val failed = _uiState.value.currentStep
+                    analyticsService.logNonFatal(
+                        tag = "identity_upload_commit_failed",
+                        throwable = error,
+                        extras = mapOf(
+                            "step" to failed.name,
+                            "countryIso2" to state.selectedCountryIso2,
+                            "documentType" to selectedDocument.id
+                        )
+                    )
                     _uiState.update {
                         it.copy(
                             isProcessing = false,

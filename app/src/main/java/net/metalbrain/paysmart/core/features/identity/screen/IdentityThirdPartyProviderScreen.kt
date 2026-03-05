@@ -2,6 +2,7 @@ package net.metalbrain.paysmart.core.features.identity.screen
 
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,20 +57,33 @@ fun IdentityThirdPartyProviderScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Third-party identity verification",
+                text = stringResource(R.string.identity_provider_title),
                 style = MaterialTheme.typography.titleLarge
             )
             Text(
-                text = "Use provider handoff for start, callback and resume while local flow stays isolated.",
+                text = stringResource(R.string.identity_provider_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Text("Provider: ${state.provider}")
-            Text("Session: ${state.sessionId ?: "Not started"}")
-            Text("Status: ${state.status}")
-            state.lastEvent?.let { Text("Callback event: $it") }
-            state.reason?.let { Text("Reason: $it") }
+            Text(
+                stringResource(R.string.identity_provider_value, state.provider)
+            )
+            Text(
+                stringResource(
+                    R.string.identity_provider_session_value,
+                    state.sessionId ?: stringResource(R.string.identity_provider_not_started)
+                )
+            )
+            Text(
+                stringResource(R.string.identity_provider_status_value, state.status)
+            )
+            state.lastEvent?.let {
+                Text(stringResource(R.string.identity_provider_callback_event_value, it))
+            }
+            state.reason?.let {
+                Text(stringResource(R.string.identity_provider_reason_value, it))
+            }
 
             state.error?.let {
                 Text(text = it, color = MaterialTheme.colorScheme.error)
@@ -79,24 +93,24 @@ fun IdentityThirdPartyProviderScreen(
             }
 
             PrimaryButton(
-                text = "Start provider session",
+                text = stringResource(R.string.identity_provider_start_action),
                 onClick = { viewModel.startSession(countryIso2 = null, documentType = null) },
                 enabled = !state.isBusy,
                 isLoading = state.isStartingSession
             )
 
             PrimaryButton(
-                text = "Resume provider status",
+                text = stringResource(R.string.identity_provider_resume_action),
                 onClick = viewModel::resumeSession,
                 enabled = state.hasSession && !state.isBusy,
                 isLoading = state.isResuming
             )
 
             PrimaryButton(
-                text = "Open provider SDK/Web",
+                text = stringResource(R.string.identity_provider_open_action),
                 onClick = {
                     state.launchUrl?.let { url ->
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
                     }
                 },
                 enabled = !state.launchUrl.isNullOrBlank() && !state.isBusy

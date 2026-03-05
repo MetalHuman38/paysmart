@@ -29,11 +29,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CurrencyFlagResolver
 import java.util.Locale
 
@@ -42,11 +49,18 @@ import java.util.Locale
 fun BalanceDetailsScreen(
     currencyCode: String,
     amountLabel: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSendClick: () -> Unit = {},
+    onAddClick: () -> Unit = {},
+    onWithdrawClick: () -> Unit = {},
+    onConvertClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val normalizedCurrency = currencyCode.trim().uppercase(Locale.US).ifBlank { "GBP" }
+    val normalizedCurrency = currencyCode.trim().uppercase(Locale.US).ifBlank {
+        CountryCapabilityCatalog.defaultProfile().currencyCode
+    }
     val flag = CurrencyFlagResolver.resolve(context, normalizedCurrency)
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -55,12 +69,18 @@ fun BalanceDetailsScreen(
                 title = {},
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.common_back)
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = {}) {
-                        Icon(imageVector = Icons.Filled.MoreHoriz, contentDescription = "More")
+                        Icon(
+                            imageVector = Icons.Filled.MoreHoriz,
+                            contentDescription = stringResource(id = R.string.home_more_actions_content_description)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -76,9 +96,17 @@ fun BalanceDetailsScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Text(text = flag, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.align(Alignment.CenterHorizontally))
-            Text(text = "$normalizedCurrency balance", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.CenterHorizontally))
             Text(
-                text = "$amountLabel $normalizedCurrency",
+                text = stringResource(id = R.string.home_balance_currency_title, normalizedCurrency),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Text(
+                text = stringResource(
+                    id = R.string.home_balance_amount_value,
+                    amountLabel,
+                    normalizedCurrency
+                ),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -94,30 +122,79 @@ fun BalanceDetailsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(imageVector = Icons.Filled.AccountBalance, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Text(text = "View account limits", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 8.dp))
+                    Text(
+                        text = stringResource(id = R.string.home_view_account_limits),
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 }
             }
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                BalanceQuickAction(icon = Icons.Filled.NorthEast, label = "Send")
-                BalanceQuickAction(icon = Icons.Filled.Add, label = "Add")
-                BalanceQuickAction(icon = Icons.Filled.Remove, label = "Withdraw")
-                BalanceQuickAction(icon = Icons.Filled.Autorenew, label = "Convert")
+                BalanceQuickAction(
+                    icon = Icons.Filled.NorthEast,
+                    label = stringResource(id = R.string.home_quick_action_send),
+                    onClick = onSendClick
+                )
+                BalanceQuickAction(
+                    icon = Icons.Filled.Add,
+                    label = stringResource(id = R.string.home_quick_action_add),
+                    onClick = onAddClick
+                )
+                BalanceQuickAction(
+                    icon = Icons.Filled.Remove,
+                    label = stringResource(id = R.string.home_quick_action_withdraw),
+                    onClick = onWithdrawClick
+                )
+                BalanceQuickAction(
+                    icon = Icons.Filled.Autorenew,
+                    label = stringResource(id = R.string.home_quick_action_convert),
+                    onClick = onConvertClick
+                )
             }
 
             Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
                 Row(modifier = Modifier.fillMaxWidth().padding(4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    SegmentChip(label = "Transactions", selected = true, modifier = Modifier.weight(1f))
-                    SegmentChip(label = "Account details", selected = false, modifier = Modifier.weight(1f))
+                    SegmentChip(
+                        label = stringResource(id = R.string.home_segment_transactions),
+                        selected = selectedTabIndex == 0,
+                        modifier = Modifier.weight(1f),
+                        onClick = { selectedTabIndex = 0 }
+                    )
+                    SegmentChip(
+                        label = stringResource(id = R.string.home_segment_account_details),
+                        selected = selectedTabIndex == 1,
+                        modifier = Modifier.weight(1f),
+                        onClick = { selectedTabIndex = 1 }
+                    )
                 }
             }
 
-            Text("Recent activity", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            BalanceActivityRow("To Kalejaiye Aderonke Ade...", "15:51", "-10.00 $normalizedCurrency", "Successful")
+            Text(
+                text = stringResource(id = R.string.home_recent_activity_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            BalanceActivityRow(
+                title = stringResource(id = R.string.home_balance_activity_transfer_out),
+                time = "15:51",
+                amount = stringResource(id = R.string.home_balance_amount_negative, "10.00", normalizedCurrency),
+                status = stringResource(id = R.string.home_status_successful)
+            )
             HorizontalDivider()
-            BalanceActivityRow("Topup via MONZO BANK LIMI...", "15:50", "+10.00 $normalizedCurrency", "Successful")
+            BalanceActivityRow(
+                title = stringResource(id = R.string.home_balance_activity_topup),
+                time = "15:50",
+                amount = stringResource(id = R.string.home_balance_amount_positive, "10.00", normalizedCurrency),
+                status = stringResource(id = R.string.home_status_successful)
+            )
             HorizontalDivider()
-            BalanceActivityRow("Topup via MONZO BANK LIMI...", "15:49", "+10.00 $normalizedCurrency", "Failed")
+            BalanceActivityRow(
+                title = stringResource(id = R.string.home_balance_activity_topup),
+                time = "15:49",
+                amount = stringResource(id = R.string.home_balance_amount_positive, "10.00", normalizedCurrency),
+                status = stringResource(id = R.string.home_status_failed)
+            )
         }
     }
 }

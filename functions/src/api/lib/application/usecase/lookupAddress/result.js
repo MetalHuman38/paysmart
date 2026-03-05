@@ -1,12 +1,14 @@
 import { buildFullAddressWithHouse, normalizeOptionalText, normalizePostCode, } from "./normalization.js";
-export function toResolvedResult(candidate, house, source) {
-    const houseInfo = house.trim();
-    const postCode = candidate.address.postcode.toUpperCase();
+export function toResolvedResult(candidate, line1Hint, source) {
+    const houseInfo = normalizeOptionalText(line1Hint)?.trim() ??
+        normalizeOptionalText(candidate.address.line1) ??
+        "";
+    const postCode = normalizeOptionalText(candidate.address.postcode)?.toUpperCase() ?? "";
     const countryCode = candidate.address.countryCode.toUpperCase();
     const line1 = normalizeOptionalText(candidate.address.line1) ??
         normalizeOptionalText(houseInfo) ??
         candidate.displayName;
-    const fullAddressWithHouse = buildFullAddressWithHouse(candidate.displayName, houseInfo);
+    const fullAddressWithHouse = buildFullAddressWithHouse(candidate.displayName, line1);
     return {
         status: "OK",
         decision: "REVIEW",

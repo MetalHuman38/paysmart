@@ -1,9 +1,11 @@
 package net.metalbrain.paysmart.core.features.transactions.screen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -19,41 +21,56 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import net.metalbrain.paysmart.ui.components.FilterTabs
-import net.metalbrain.paysmart.core.features.transactions.components.TransactionFilter
-import net.metalbrain.paysmart.core.features.transactions.components.TransactionList
-import net.metalbrain.paysmart.ui.home.nav.HomeBottomNavigation
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.sheets.CurrencyFilterSheet
 import net.metalbrain.paysmart.core.features.account.sheets.StatusFilterSheet
+import net.metalbrain.paysmart.core.features.transactions.components.TransactionFilter
+import net.metalbrain.paysmart.core.features.transactions.components.TransactionList
 import net.metalbrain.paysmart.core.features.transactions.viewmodel.TransactionsViewModel
-
+import net.metalbrain.paysmart.domain.model.Transaction
+import net.metalbrain.paysmart.ui.components.FilterTabs
+import net.metalbrain.paysmart.ui.home.nav.HomeBottomNavigation
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsScreen(
     viewModel: TransactionsViewModel = hiltViewModel(),
-    navController: NavHostController,
+    navController: NavHostController
 ) {
     val transactions by viewModel.filteredTransactions.collectAsState()
-    val sheetState = rememberModalBottomSheetState()
+    val filterSheetState = rememberModalBottomSheetState()
+    val detailSheetState = rememberModalBottomSheetState()
     var activeFilter by remember { mutableStateOf<TransactionFilter>(TransactionFilter.All) }
-    var showSheet by remember { mutableStateOf(false) }
+    var showFilterSheet by remember { mutableStateOf(false) }
+    var selectedTransaction by remember { mutableStateOf<Transaction?>(null) }
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.transactions))
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = LottieConstants.IterateForever
+    )
 
-    // Bottom Sheet Launcher
-    if (showSheet) {
+    if (showFilterSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showSheet = false },
-            sheetState = sheetState
+            onDismissRequest = { showFilterSheet = false },
+            sheetState = filterSheetState
         ) {
             when (activeFilter) {
                 is TransactionFilter.Status -> StatusFilterSheet(
                     selected = viewModel.selectedStatus,
                     onSelect = {
                         viewModel.setStatusFilter(it)
-                        showSheet = false
+                        showFilterSheet = false
                     }
                 )
 
@@ -61,12 +78,21 @@ fun TransactionsScreen(
                     selected = viewModel.selectedCurrencies,
                     onSelect = {
                         viewModel.setCurrencyFilter(it)
-                        showSheet = false
+                        showFilterSheet = false
                     }
                 )
 
-                else -> {}
+                else -> Unit
             }
+        }
+    }
+
+    selectedTransaction?.let { transaction ->
+        ModalBottomSheet(
+            onDismissRequest = { selectedTransaction = null },
+            sheetState = detailSheetState
+        ) {
+            TransactionDetailsSheet(transaction = transaction)
         }
     }
 
@@ -79,10 +105,8 @@ fun TransactionsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding) // ✅ Handles top + bottom insets
+                .padding(innerPadding)
         ) {
-
-            // Transaction Header
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -90,7 +114,7 @@ fun TransactionsScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Transactions",
+                    text = stringResource(R.string.transactions_title),
                     style = MaterialTheme.typography.headlineMedium
                 )
             }
@@ -100,14 +124,106 @@ fun TransactionsScreen(
                 onTabClick = {
                     if (it == TransactionFilter.All) {
                         viewModel.clearFilters()
+                        activeFilter = TransactionFilter.All
+                        showFilterSheet = false
                     } else {
                         activeFilter = it
-                        showSheet = true
+                        showFilterSheet = true
                     }
                 }
             )
 
-            TransactionList(transactions = transactions)
+            if (transactions.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(220.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.transactions_empty_subtitle),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                TransactionList(
+                    transactions = transactions,
+                    onTransactionClick = {
+                        showFilterSheet = false
+                        selectedTransaction = it
+                    }
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun TransactionDetailsSheet(transaction: Transaction) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.transaction_details_title),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold
+        )
+        TransactionDetailRow(
+            label = stringResource(R.string.transaction_details_reference),
+            value = transaction.id
+        )
+        TransactionDetailRow(
+            label = stringResource(R.string.transaction_details_status),
+            value = transaction.status
+        )
+        TransactionDetailRow(
+            label = stringResource(R.string.transaction_details_amount),
+            value = stringResource(
+                R.string.transaction_amount_format,
+                String.format(Locale.US, "%.2f", transaction.amount),
+                transaction.currency
+            )
+        )
+        TransactionDetailRow(
+            label = stringResource(R.string.transaction_details_date),
+            value = transaction.date
+        )
+        TransactionDetailRow(
+            label = stringResource(R.string.transaction_details_time),
+            value = transaction.time
+        )
+    }
+}
+
+@Composable
+private fun TransactionDetailRow(
+    label: String,
+    value: String
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }

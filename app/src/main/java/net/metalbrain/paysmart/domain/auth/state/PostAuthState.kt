@@ -7,6 +7,7 @@ sealed interface PostAuthState {
     data object Unauthenticated : PostAuthState
 
     data object RequireAccountProtection : PostAuthState
+    data object RequirePasswordSetup : PostAuthState
 
     data object RequireEmailVerification : PostAuthState
 

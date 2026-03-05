@@ -49,6 +49,7 @@ class SecurityRepository @Inject constructor(
             biometricsEnabledAt = roomModel.biometricsEnabledAt ?: currentLocal.biometricsEnabledAt,
             passcodeEnabled = roomModel.passcodeEnabled ?: currentLocal.passcodeEnabled,
             passwordEnabled = roomModel.passwordEnabled ?: currentLocal.passwordEnabled,
+            passkeyEnabled = roomModel.passkeyEnabled ?: currentLocal.passkeyEnabled,
             localPassCodeSetAt = roomModel.localPassCodeSetAt ?: currentLocal.localPassCodeSetAt,
             localPasswordSetAt = roomModel.localPasswordSetAt ?: currentLocal.localPasswordSetAt,
             lockAfterMinutes = roomModel.lockAfterMinutes ?: currentLocal.lockAfterMinutes,
@@ -62,6 +63,10 @@ class SecurityRepository @Inject constructor(
             emailVerificationSentAt = roomModel.emailVerificationSentAt ?: currentLocal.emailVerificationSentAt,
             emailToVerify = roomModel.emailToVerify ?: currentLocal.emailToVerify,
             hasVerifiedIdentity = roomModel.hasVerifiedIdentity ?: currentLocal.hasVerifiedIdentity,
+            hasSkippedMfaEnrollmentPrompt = roomModel.hasSkippedMfaEnrollmentPrompt
+                ?: currentLocal.hasSkippedMfaEnrollmentPrompt,
+            hasSkippedPasskeyEnrollmentPrompt = roomModel.hasSkippedPasskeyEnrollmentPrompt
+                ?: currentLocal.hasSkippedPasskeyEnrollmentPrompt,
             // Session lock is ephemeral-local and should not be replaced by durable store snapshots.
             sessionLocked = currentLocal.sessionLocked,
             killSwitchActive = roomModel.killswitch || currentLocal.killSwitchActive,

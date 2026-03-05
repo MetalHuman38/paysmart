@@ -15,7 +15,8 @@ import net.metalbrain.paysmart.R
 @Composable
 fun TermsAndPrivacyText(
     onTermsClicked: () -> Unit,
-    onPrivacyClicked: () -> Unit
+    onPrivacyClicked: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val annotatedText = buildAnnotatedString {
         append(stringResource(R.string.terms_prefix).trim())
@@ -30,10 +31,10 @@ fun TermsAndPrivacyText(
             )
 
             append(stringResource(R.string.terms_and_conditions).trim())
-            append(" ")
+            pop()
         }
 
-        append(stringResource(R.string.terms_separator).trim()) // e.g. " and "
+        append(stringResource(R.string.terms_separator).trim())
         append(" ")
 
 
@@ -49,14 +50,15 @@ fun TermsAndPrivacyText(
             pop()
         }
         append(" ")
-
         append(stringResource(R.string.verification_policy).trim())
     }
 
     Text(
         text = annotatedText,
-        style = MaterialTheme.typography.bodyLarge,
-        modifier = Modifier
+        style = MaterialTheme.typography.bodyMedium.copy(
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        modifier = modifier
 
     )
 }

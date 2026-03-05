@@ -14,7 +14,10 @@ import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.domain.model.Transaction
 
 @Composable
-fun TransactionList(transactions: List<Transaction>) {
+fun TransactionList(
+    transactions: List<Transaction>,
+    onTransactionClick: (Transaction) -> Unit = {}
+) {
     // Group by date
     val grouped = transactions.groupBy { it.date }
 
@@ -32,7 +35,10 @@ fun TransactionList(transactions: List<Transaction>) {
             }
 
             items(itemsForDate) { transaction ->
-                TransactionItem(transaction)
+                TransactionItem(
+                    transaction = transaction,
+                    onClick = { onTransactionClick(transaction) }
+                )
             }
         }
     }

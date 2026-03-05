@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.ui.home.screen
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import net.metalbrain.paysmart.ui.Screen
 import net.metalbrain.paysmart.core.features.featuregate.FeatureKey
+import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
+import net.metalbrain.paysmart.core.features.account.security.viewmodel.SecurityViewModel
 import net.metalbrain.paysmart.ui.home.components.HomeContent
 import net.metalbrain.paysmart.ui.home.nav.HomeBottomNavigation
 import net.metalbrain.paysmart.ui.home.viewmodel.HomeViewModel
@@ -31,9 +34,14 @@ fun HomeScreen(
         }
     ) { innerPadding ->
         val homeViewModel = hiltViewModel<HomeViewModel>()
+        val securityViewModel = hiltViewModel<SecurityViewModel>()
         val uiState by homeViewModel.uiState.collectAsState()
+        val isBalanceHidden by securityViewModel.hideBalanceEnabled.collectAsState()
         val balances = uiState.balanceSnapshot.balancesByCurrency
-        val primaryCurrency = resolvePrimaryCurrency(balances)
+        val primaryCurrency = resolvePrimaryCurrency(
+            balancesByCurrency = balances,
+            preferredCurrency = uiState.balanceSnapshot.preferredCurrencyCode
+        )
         val primaryAmount = balances[primaryCurrency] ?: 0.0
 
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -66,9 +74,6 @@ fun HomeScreen(
                         Screen.RewardDetails.routeWithPoints(uiState.rewardEarned.points)
                     )
                 },
-                onLinkAccountClick = {
-                    navController.navigate(Screen.LinkFederatedAccount.route)
-                },
                 onAddMoneyClick = {
                     navController.navigate(
                         Screen.FeatureGate.routeWithArgs(
@@ -78,7 +83,9 @@ fun HomeScreen(
                     )
                 },
                 onVerifyEmailClick = {
-                    navController.navigate(Screen.AddEmail.route)
+                    navController.navigate(
+                        "${Screen.AddEmail.route}?returnRoute=${Uri.encode(Screen.Home.route)}"
+                    )
                 },
                 onAddAddressClick = {
                     navController.navigate(Screen.ProfileAddressResolver.route)
@@ -86,23 +93,47 @@ fun HomeScreen(
                 onVerifyIdentityClick = {
                     navController.navigate(Screen.ProfileIdentityResolver.route)
                 },
+                onViewRatesClick = {
+                    navController.navigate(
+                        Screen.FeatureGate.routeWithArgs(
+                            feature = FeatureKey.SEND_MONEY.id,
+                            resumeRoute = Screen.SendMoney.route
+                        )
+                    )
+                },
+                onViewAllLimitsClick = {
+                    navController.navigate(Screen.ProfileAccountLimits.route)
+                },
                 localSettings = uiState.security,
                 transactions = uiState.recentTransactions,
                 balanceSnapshot = uiState.balanceSnapshot,
                 rewardEarned = uiState.rewardEarned,
                 countryFlagEmoji = uiState.countryFlagEmoji,
-                topUpPolicyHint = uiState.topUpPolicyHint
+                countryCurrencyCode = uiState.countryCurrencyCode,
+                capabilities = uiState.capabilities,
+                exchangeRateSnapshot = uiState.exchangeRateSnapshot,
+                isBalanceVisible = !isBalanceHidden,
+                onToggleBalanceVisibility = {
+                    securityViewModel.setHideBalance(!isBalanceHidden)
+                }
             )
         }
     }
 }
 
-private fun resolvePrimaryCurrency(balancesByCurrency: Map<String, Double>): String {
-    if (balancesByCurrency.isEmpty()) {
-        return "GBP"
+private fun resolvePrimaryCurrency(
+    balancesByCurrency: Map<String, Double>,
+    preferredCurrency: String
+): String {
+    val normalizedPreferred = preferredCurrency.trim().uppercase(Locale.US)
+    if (normalizedPreferred.isNotBlank() && balancesByCurrency.containsKey(normalizedPreferred)) {
+        return normalizedPreferred
     }
-    if (balancesByCurrency.containsKey("GBP")) {
-        return "GBP"
+
+    if (balancesByCurrency.isEmpty()) {
+        return normalizedPreferred.ifBlank {
+            CountryCapabilityCatalog.defaultProfile().currencyCode
+        }
     }
     return balancesByCurrency.keys.minOf { it.uppercase(Locale.US) }
 }

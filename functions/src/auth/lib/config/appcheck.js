@@ -1,4 +1,5 @@
-import * as admin from "firebase-admin";
+import { getApp, getApps, initializeApp } from "firebase-admin/app";
+import { getAppCheck } from "firebase-admin/app-check";
 import { APP, SECURITY } from "./globals.js";
 // Middleware to require and verify Firebase App Check token
 export async function requireAppCheck(req, res, next) {
@@ -18,8 +19,8 @@ export async function requireAppCheck(req, res, next) {
             });
             return res.status(401).json({ error: "Missing App Check token" });
         }
-        const { appCheck } = admin;
-        const result = await appCheck().verifyToken(token);
+        const app = getApps().length === 0 ? initializeApp() : getApp();
+        const result = await getAppCheck(app).verifyToken(token);
         // attach claims for downstream handlers (optional)
         req.appCheck = result.token;
         return next();

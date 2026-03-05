@@ -7,36 +7,54 @@ import { postcodesIoLookup } from "./lookupAddress/providers/postcodesIo.js";
 import { toResolvedResult } from "./lookupAddress/result.js";
 export class LookupAddress {
     async execute(input) {
-        const house = input.house.trim();
+        const line1 = input.line1.trim();
+        const city = input.city.trim();
+        const stateOrRegion = input.stateOrRegion.trim();
         const postcode = input.postcode.trim();
         const country = normalizeCountryCode(input.country);
-        if (!postcode) {
-            throw new Error("postcode is required");
+        if (![line1, city, stateOrRegion, postcode].some((value) => value.length > 0)) {
+            throw new Error("at least one address field is required");
         }
         const addressValidationResult = await googleAddressValidationLookup({
-            house,
+            line1,
+            city,
+            stateOrRegion,
             postcode,
             country,
         });
         if (addressValidationResult) {
             return addressValidationResult;
         }
-        if (country === "gb") {
-            const ukCandidate = await postcodesIoLookup(postcode, house);
+        if (country === "gb" && postcode) {
+            const ukCandidate = await postcodesIoLookup(postcode, line1);
             if (ukCandidate) {
-                return toResolvedResult(ukCandidate, house, "postcodes_io");
+                return toResolvedResult(ukCandidate, line1, "postcodes_io");
             }
         }
-        const query = [house, postcode].filter((value) => value.length > 0).join(" ");
+        const query = [line1, city, stateOrRegion, postcode]
+            .filter((value) => value.length > 0)
+            .join(", ");
         const nominatim = await nominatimSearch(query, country, input.lat, input.lng);
-        const nominatimBest = pickCandidate(nominatim, postcode, country);
+        const nominatimBest = pickCandidate(nominatim, {
+            line1,
+            city,
+            stateOrRegion,
+            postcode,
+            country,
+        });
         if (nominatimBest) {
-            return toResolvedResult(nominatimBest, house, "nominatim");
+            return toResolvedResult(nominatimBest, line1, "nominatim");
         }
         const google = await googleGeocode(query, country);
-        const googleBest = pickCandidate(google, postcode, country);
+        const googleBest = pickCandidate(google, {
+            line1,
+            city,
+            stateOrRegion,
+            postcode,
+            country,
+        });
         if (googleBest) {
-            return toResolvedResult(googleBest, house, "google");
+            return toResolvedResult(googleBest, line1, "google");
         }
         return null;
     }

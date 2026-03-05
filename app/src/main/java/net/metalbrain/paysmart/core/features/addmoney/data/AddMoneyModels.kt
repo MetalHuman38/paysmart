@@ -5,6 +5,20 @@ import net.metalbrain.paysmart.core.features.fx.data.FxPaymentMethod
 import net.metalbrain.paysmart.core.features.fx.data.FxQuote
 import net.metalbrain.paysmart.core.features.fx.data.FxQuoteDataSource
 
+enum class AddMoneyProvider {
+    STRIPE,
+    FLUTTERWAVE;
+
+    companion object {
+        fun fromRaw(raw: String?): AddMoneyProvider {
+            return when (raw?.trim()?.lowercase()) {
+                "flutterwave" -> FLUTTERWAVE
+                else -> STRIPE
+            }
+        }
+    }
+}
+
 enum class AddMoneySessionStatus {
     CREATED,
     PENDING,
@@ -32,6 +46,9 @@ data class AddMoneySessionData(
     val currency: String,
     val status: AddMoneySessionStatus,
     val expiresAtMs: Long,
+    val provider: AddMoneyProvider = AddMoneyProvider.STRIPE,
+    val checkoutUrl: String? = null,
+    val flutterwaveTransactionId: String? = null,
     val paymentIntentId: String? = null,
     val paymentIntentClientSecret: String? = null,
     val publishableKey: String? = null
@@ -60,7 +77,9 @@ data class AddMoneyUiState(
     val isSubmitting: Boolean = false,
     val isCheckingStatus: Boolean = false,
     val sessionId: String? = null,
+    val activeSessionProvider: AddMoneyProvider? = null,
     val sessionStatus: AddMoneySessionStatus? = null,
+    val providerActionUrl: String? = null,
     val paymentSheetLaunch: AddMoneyPaymentSheetLaunch? = null,
     val error: String? = null,
     val infoMessage: String? = null

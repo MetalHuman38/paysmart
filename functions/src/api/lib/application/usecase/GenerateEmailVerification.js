@@ -15,19 +15,19 @@ export class GenerateEmailVerification {
     }
     async execute(input) {
         const { uid, email } = input;
+        const authUser = await this.authService.getUser(uid);
         /* ---------- User ---------- */
         const user = await this.userRepo.getById(uid);
-        if (!user)
-            throw new Error("User profile missing");
-        const tenantId = String(user.tenantId || "").toLowerCase();
+        const tenantId = String(user?.tenantId || authUser.tenantId || "").toLowerCase();
         if (this.config.allowedTenants.size &&
             !this.config.allowedTenants.has(tenantId)) {
             throw new Error("Tenant not allowed");
         }
         /* ---------- Security ---------- */
+        await this.securityRepo.createIfMissing(uid);
         const sec = await this.securityRepo.get(uid);
         if (!sec)
-            throw new Error("security/settings missing");
+            throw new Error("security/settings missing after ensure");
         const now = Timestamp.now();
         const decision = evaluateEmailVerificationPolicy(sec, now);
         if (!decision.allowed) {

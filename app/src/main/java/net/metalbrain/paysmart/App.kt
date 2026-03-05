@@ -10,6 +10,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.PersistentCacheSettings
 import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.perf.FirebasePerformance
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -19,7 +20,17 @@ class App : BaseApp() {
 
         FirebaseApp.initializeApp(this)
         val firebaseAppCheck = FirebaseAppCheck.getInstance()
-        FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = !BuildConfig.IS_LOCAL
+        val crashlytics = FirebaseCrashlytics.getInstance()
+        val firebasePerformance = FirebasePerformance.getInstance()
+        val crashlyticsEnabled = !BuildConfig.IS_LOCAL
+        val performanceEnabled = !BuildConfig.IS_LOCAL && !BuildConfig.DEBUG
+        crashlytics.isCrashlyticsCollectionEnabled = crashlyticsEnabled
+        firebasePerformance.isPerformanceCollectionEnabled = performanceEnabled
+        crashlytics.setCustomKey("build_type", BuildConfig.BUILD_TYPE)
+        crashlytics.setCustomKey("is_local", BuildConfig.IS_LOCAL)
+        if (crashlyticsEnabled) {
+            crashlytics.sendUnsentReports()
+        }
 
         if (BuildConfig.DEBUG) {
             firebaseAppCheck.installAppCheckProviderFactory(

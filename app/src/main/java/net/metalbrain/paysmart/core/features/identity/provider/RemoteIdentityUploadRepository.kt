@@ -11,6 +11,7 @@ import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityDocu
 import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityUploadReceipt
 import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityUploadRepository
 import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityUploadSession
+import net.metalbrain.paysmart.core.service.performance.AppPerformanceMonitor
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -19,6 +20,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONObject
 import java.util.Base64
+import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,7 +28,8 @@ import javax.inject.Singleton
 @Singleton
 class RemoteIdentityUploadRepository @Inject constructor(
     private val authRepository: AuthRepository,
-    private val appCheckTokenProvider: AppCheckTokenProvider
+    private val appCheckTokenProvider: AppCheckTokenProvider,
+    private val performanceMonitor: AppPerformanceMonitor
 ) : IdentityUploadRepository {
 
     private val config = AuthApiConfig(
@@ -35,7 +38,10 @@ class RemoteIdentityUploadRepository @Inject constructor(
     )
 
     private val httpClient = OkHttpClient.Builder()
-        .callTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(20, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
+        .callTimeout(75, TimeUnit.SECONDS)
         .build()
 
     override suspend fun createUploadSession(
@@ -43,39 +49,51 @@ class RemoteIdentityUploadRepository @Inject constructor(
         payloadSha256: String,
         contentType: String
     ): Result<IdentityUploadSession> = runCatching {
-        val session = authRepository.getCurrentSessionOrThrow()
-        val requestJson = JSONObject()
-            .put("documentType", documentType.toApiValue())
-            .put("payloadSha256", payloadSha256)
-            .put("contentType", contentType)
-            .toString()
+        performanceMonitor.trace(
+            name = "identity_create_upload_session",
+            attributes = mapOf(
+                "document_type" to documentType.toApiValue(),
+                "content_type" to contentType.take(40)
+            )
+        ) {
+            val session = authRepository.getCurrentSessionOrThrow()
+            val requestJson = JSONObject()
+                .put("documentType", documentType.toApiValue())
+                .put("payloadSha256", payloadSha256)
+                .put("contentType", contentType)
+                .toString()
 
-        withContext(Dispatchers.IO) {
-            val request = Request.Builder()
-                .url(config.identityUploadSessionUrl)
-                .header("Authorization", "Bearer ${session.idToken}")
-                .attachOptionalAppCheckToken(appCheckTokenProvider)
-                .post(requestJson.toRequestBody("application/json".toMediaTypeOrNull()))
-                .build()
+            withContext(Dispatchers.IO) {
+                val request = Request.Builder()
+                    .url(config.identityUploadSessionUrl)
+                    .header("Authorization", "Bearer ${session.idToken}")
+                    .attachOptionalAppCheckToken(appCheckTokenProvider)
+                    .post(requestJson.toRequestBody("application/json".toMediaTypeOrNull()))
+                    .build()
 
-            httpClient.newCall(request).execute().use { response ->
-                val body = response.body?.string().orEmpty()
-                if (!response.isSuccessful) {
-                    throw IllegalStateException(parseErrorMessage(body, "Unable to create upload session"))
+                try {
+                    httpClient.newCall(request).execute().use { response ->
+                        val body = response.body?.string().orEmpty()
+                        if (!response.isSuccessful) {
+                            throw IllegalStateException(parseErrorMessage(body, "Unable to create upload session"))
+                        }
+
+                        val json = JSONObject(body)
+                        val uploadUrl = normalizeUploadUrlForLocal(json.getString("uploadUrl"))
+                        IdentityUploadSession(
+                            sessionId = json.getString("sessionId"),
+                            uploadUrl = uploadUrl,
+                            objectPath = json.getString("objectPath"),
+                            associatedData = json.getString("associatedData"),
+                            attestationNonce = json.getString("attestationNonce"),
+                            encryptionKeyBase64 = json.optString("encryptionKeyBase64"),
+                            encryptionSchema = json.optString("encryptionSchema", "aes-256-gcm-v1"),
+                            cryptoContractVersion = json.optString("cryptoContractVersion", "unknown")
+                        )
+                    }
+                } catch (error: SocketTimeoutException) {
+                    throw IllegalStateException("Timeout while creating identity upload session", error)
                 }
-
-                val json = JSONObject(body)
-                val uploadUrl = normalizeUploadUrlForLocal(json.getString("uploadUrl"))
-                IdentityUploadSession(
-                    sessionId = json.getString("sessionId"),
-                    uploadUrl = uploadUrl,
-                    objectPath = json.getString("objectPath"),
-                    associatedData = json.getString("associatedData"),
-                    attestationNonce = json.getString("attestationNonce"),
-                    encryptionKeyBase64 = json.optString("encryptionKeyBase64"),
-                    encryptionSchema = json.optString("encryptionSchema", "aes-256-gcm-v1"),
-                    cryptoContractVersion = json.optString("cryptoContractVersion", "unknown")
-                )
             }
         }
     }
@@ -84,25 +102,37 @@ class RemoteIdentityUploadRepository @Inject constructor(
         session: IdentityUploadSession,
         payload: EncryptedIdentityPayload
     ): Result<Unit> = runCatching {
-        if (shouldUseLocalPayloadFallback(session.uploadUrl)) {
-            uploadEncryptedPayloadViaFallback(session, payload)
-            return@runCatching
-        }
+        performanceMonitor.trace(
+            name = "identity_upload_encrypted_payload",
+            attributes = mapOf(
+                "document_size_bytes" to payload.cipherText.size.toString(),
+                "local_fallback" to shouldUseLocalPayloadFallback(session.uploadUrl).toString()
+            )
+        ) {
+            if (shouldUseLocalPayloadFallback(session.uploadUrl)) {
+                uploadEncryptedPayloadViaFallback(session, payload)
+                return@trace
+            }
 
-        withContext(Dispatchers.IO) {
-            val uploadMediaType = "application/octet-stream".toMediaTypeOrNull()
-            val request = Request.Builder()
-                .url(session.uploadUrl)
-                .put(payload.cipherText.toRequestBody(uploadMediaType))
-                .build()
+            withContext(Dispatchers.IO) {
+                val uploadMediaType = "application/octet-stream".toMediaTypeOrNull()
+                val request = Request.Builder()
+                    .url(session.uploadUrl)
+                    .put(payload.cipherText.toRequestBody(uploadMediaType))
+                    .build()
 
-            httpClient.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    val body = response.body?.string().orEmpty()
-                    val detail = parseErrorMessage(body, "Upload failed")
-                    throw IllegalStateException(
-                        "Unable to upload encrypted payload (http=${response.code}, detail=$detail, host=${request.url.host})"
-                    )
+                try {
+                    httpClient.newCall(request).execute().use { response ->
+                        if (!response.isSuccessful) {
+                            val body = response.body?.string().orEmpty()
+                            val detail = parseErrorMessage(body, "Upload failed")
+                            throw IllegalStateException(
+                                "Unable to upload encrypted payload (http=${response.code}, detail=$detail, host=${request.url.host})"
+                            )
+                        }
+                    }
+                } catch (error: SocketTimeoutException) {
+                    throw IllegalStateException("Timeout while uploading encrypted payload", error)
                 }
             }
         }
@@ -113,32 +143,41 @@ class RemoteIdentityUploadRepository @Inject constructor(
         payloadSha256: String,
         attestationJwt: String
     ): Result<IdentityUploadReceipt> = runCatching {
-        val session = authRepository.getCurrentSessionOrThrow()
-        val requestJson = JSONObject()
-            .put("sessionId", sessionId)
-            .put("payloadSha256", payloadSha256)
-            .put("attestationJwt", attestationJwt)
-            .toString()
+        performanceMonitor.trace(
+            name = "identity_commit_upload",
+            attributes = mapOf("session_id" to sessionId.take(40))
+        ) {
+            val session = authRepository.getCurrentSessionOrThrow()
+            val requestJson = JSONObject()
+                .put("sessionId", sessionId)
+                .put("payloadSha256", payloadSha256)
+                .put("attestationJwt", attestationJwt)
+                .toString()
 
-        withContext(Dispatchers.IO) {
-            val request = Request.Builder()
-                .url(config.identityUploadCommitUrl)
-                .header("Authorization", "Bearer ${session.idToken}")
-                .attachOptionalAppCheckToken(appCheckTokenProvider)
-                .post(requestJson.toRequestBody("application/json".toMediaTypeOrNull()))
-                .build()
+            withContext(Dispatchers.IO) {
+                val request = Request.Builder()
+                    .url(config.identityUploadCommitUrl)
+                    .header("Authorization", "Bearer ${session.idToken}")
+                    .attachOptionalAppCheckToken(appCheckTokenProvider)
+                    .post(requestJson.toRequestBody("application/json".toMediaTypeOrNull()))
+                    .build()
 
-            httpClient.newCall(request).execute().use { response ->
-                val body = response.body?.string().orEmpty()
-                if (!response.isSuccessful) {
-                    throw IllegalStateException(parseErrorMessage(body, "Unable to commit upload"))
+                try {
+                    httpClient.newCall(request).execute().use { response ->
+                        val body = response.body?.string().orEmpty()
+                        if (!response.isSuccessful) {
+                            throw IllegalStateException(parseErrorMessage(body, "Unable to commit upload"))
+                        }
+
+                        val json = JSONObject(body)
+                        IdentityUploadReceipt(
+                            verificationId = json.getString("verificationId"),
+                            status = json.getString("status")
+                        )
+                    }
+                } catch (error: SocketTimeoutException) {
+                    throw IllegalStateException("Timeout while committing verification request", error)
                 }
-
-                val json = JSONObject(body)
-                IdentityUploadReceipt(
-                    verificationId = json.getString("verificationId"),
-                    status = json.getString("status")
-                )
             }
         }
     }
@@ -154,9 +193,12 @@ class RemoteIdentityUploadRepository @Inject constructor(
     private fun parseErrorMessage(body: String, fallback: String): String {
         if (body.isBlank()) return fallback
         return runCatching {
-            JSONObject(body).optString("error", fallback).ifBlank {
+            val json = JSONObject(body)
+            val error = json.optString("error", fallback).ifBlank {
                 body.trim().take(220).ifBlank { fallback }
             }
+            val code = json.optString("code").trim()
+            if (code.isBlank()) error else "$error (code=$code)"
         }.getOrElse {
             body.trim().take(220).ifBlank { fallback }
         }
@@ -181,13 +223,17 @@ class RemoteIdentityUploadRepository @Inject constructor(
                 .post(requestJson.toRequestBody("application/json".toMediaTypeOrNull()))
                 .build()
 
-            httpClient.newCall(request).execute().use { response ->
-                val body = response.body?.string().orEmpty()
-                if (!response.isSuccessful) {
-                    throw IllegalStateException(
-                        parseErrorMessage(body, "Unable to upload encrypted payload via local fallback")
-                    )
+            try {
+                httpClient.newCall(request).execute().use { response ->
+                    val body = response.body?.string().orEmpty()
+                    if (!response.isSuccessful) {
+                        throw IllegalStateException(
+                            parseErrorMessage(body, "Unable to upload encrypted payload via local fallback")
+                        )
+                    }
                 }
+            } catch (error: SocketTimeoutException) {
+                throw IllegalStateException("Timeout while uploading encrypted payload via fallback", error)
             }
         }
     }

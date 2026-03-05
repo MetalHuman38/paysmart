@@ -117,12 +117,22 @@ class OTPViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("OTP", "OTP verification failed", e)
                 onError(e)
+            } finally {
+                _uiState.value = _uiState.value.copy(loading = false)
             }
         }
     }
 
-    fun upsertUserAfterOtp(onDone: () -> Unit = {}) {
-        val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
+    fun upsertUserAfterOtp(
+        onDone: () -> Unit = {},
+        onError: (Throwable) -> Unit = {}
+    ) {
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+        if (firebaseUser == null) {
+            onError(IllegalStateException("Authenticated user is unavailable"))
+            return
+        }
+
         val authUser = AuthUserModel(
             uid = firebaseUser.uid,
             phoneNumber = firebaseUser.phoneNumber,
@@ -135,8 +145,14 @@ class OTPViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            userRepo.upsertNewUser(authUser, providerId = "phone")
-            onDone()
+            runCatching {
+                userRepo.upsertNewUser(authUser, providerId = "phone")
+            }.onSuccess {
+                onDone()
+            }.onFailure { error ->
+                Log.e("OTP", "Failed to upsert user profile after OTP", error)
+                onError(error)
+            }
         }
     }
 

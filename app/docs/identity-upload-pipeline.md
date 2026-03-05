@@ -1,5 +1,7 @@
 # Identity Upload Pipeline (Client Encrypt -> Upload -> Attested Decrypt)
 
+_Last updated: 2026-03-02_
+
 ## Goal
 Upload identity documents without exposing plaintext to transport/storage layers, while ensuring the server only decrypts payloads tied to a valid device attestation.
 
@@ -44,3 +46,10 @@ Current behavior:
 - `ui/profile/identity/IdentityUploadOrchestrator.kt`
 - `ui/profile/identity/RemoteIdentityUploadRepository.kt`
 - `ui/profile/viewmodel/IdentitySetupResolverViewModel.kt`
+
+## Observability
+- Firebase Performance traces are attached to identity upload critical calls:
+  - `identity_create_upload_session`
+  - `identity_upload_encrypted_payload`
+  - `identity_commit_upload`
+- Collection is disabled in local/debug and enabled in release builds for controlled cost.

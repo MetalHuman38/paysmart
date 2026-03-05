@@ -41,6 +41,10 @@ fun ProfileDetailsScreen(
     onResolveSetup: () -> Unit,
     showSecuritySetupCta: Boolean = false,
     onContinueToSecuritySetup: (() -> Unit)? = null,
+    showMfaNudgeCta: Boolean = false,
+    onOpenMfaNudge: (() -> Unit)? = null,
+    showPasskeyNudgeCta: Boolean = false,
+    onOpenPasskeyNudge: (() -> Unit)? = null,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -138,6 +142,58 @@ fun ProfileDetailsScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(stringResource(R.string.profile_onboarding_continue_action))
+                        }
+                    }
+                }
+            }
+
+            if (showMfaNudgeCta && onOpenMfaNudge != null) {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.profile_mfa_nudge_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = stringResource(R.string.profile_mfa_nudge_description),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Button(
+                            onClick = onOpenMfaNudge,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.profile_mfa_nudge_action))
+                        }
+                    }
+                }
+            }
+
+            if (showPasskeyNudgeCta && onOpenPasskeyNudge != null) {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.profile_passkey_nudge_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = stringResource(R.string.profile_passkey_nudge_description),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Button(
+                            onClick = onOpenPasskeyNudge,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.profile_passkey_nudge_action))
                         }
                     }
                 }

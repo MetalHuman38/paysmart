@@ -39,6 +39,17 @@ export type Config = {
   stripeCancelUrl: string;
   stripeAllowedTopupCurrencies: Set<string>;
   stripeMinimumTopupAmountMinor: number;
+  flutterwaveSecretKey: string;
+  flutterwavePublicKey: string;
+  flutterwaveWebhookSecretHash: string;
+  flutterwaveAllowUnsignedWebhooks: boolean;
+  flutterwaveBaseUrl: string;
+  flutterwaveIdpBaseUrl: string;
+  flutterwaveClientId: string;
+  flutterwaveClientSecret: string;
+  flutterwaveVirtualAccountExpirySeconds: number;
+  flutterwaveAllowedTopupCurrencies: Set<string>;
+  flutterwaveMinimumTopupAmountMinor: number;
 
   getMailer(): Mailer;
   getVerifyUrl(): string;
@@ -55,6 +66,24 @@ export type Config = {
   disposablePatterns: RegExp[];
   port: number;
 };
+
+function parseFirebaseConfig(): Record<string, unknown> {
+  const raw = (process.env.FIREBASE_CONFIG || "").trim();
+  if (!raw || !raw.startsWith("{")) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return typeof parsed === "object" && parsed !== null ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function stringValue(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
 
 function csvSet(name: string, lower = false): Set<string> {
   const value = process.env[name];
@@ -92,12 +121,32 @@ function readNumber(name: string, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function normalizeAndroidPasskeyOrigin(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith("android:apk-key-hash:")) {
+    return trimmed;
+  }
+  return `android:apk-key-hash:${trimmed}`;
+}
+
 export function loadConfig(): Config {
+  const firebaseConfig = parseFirebaseConfig();
+  const firebaseProjectId = stringValue(firebaseConfig.projectId);
+  const firebaseStorageBucket = stringValue(firebaseConfig.storageBucket);
   const projectId =
     process.env.GOOGLE_CLOUD_PROJECT ||
+    process.env.GCLOUD_PROJECT ||
     process.env.GCP_PROJECT ||
     process.env.FIREBASE_PROJECT ||
+    firebaseProjectId ||
     "";
+  const configuredStorageBucket = stringValue(process.env.STORAGE_BUCKET);
+  const storageBucket =
+    configuredStorageBucket ||
+    stringValue(process.env.FIREBASE_STORAGE_BUCKET) ||
+    firebaseStorageBucket ||
+    (projectId ? `${projectId}.appspot.com` : "");
   const isProduction =
     (process.env.NODE_ENV || "").toLowerCase() === "production";
   const configuredAppVerdicts = csvSet(
@@ -120,11 +169,39 @@ export function loadConfig(): Config {
       ["GBP", "EUR", "USD"]
     ).map((currency) => currency.toUpperCase())
   );
+  const configuredFlutterwaveTopupCurrencies = csvSet(
+    "FLUTTERWAVE_ALLOWED_TOPUP_CURRENCIES"
+  );
+  const flutterwaveAllowedTopupCurrencies = new Set(
+    (configuredFlutterwaveTopupCurrencies.size > 0 ?
+      Array.from(configuredFlutterwaveTopupCurrencies) :
+      ["NGN"]
+    ).map((currency) => currency.toUpperCase())
+  );
   const passkeyRpId = (process.env.PASSKEY_RP_ID || "").trim();
   const configuredPasskeyOrigins = csvSet("PASSKEY_EXPECTED_ORIGINS");
+  const configuredAndroidPasskeyOrigins = csvSet(
+    "PASSKEY_ANDROID_EXPECTED_ORIGINS"
+  );
+  const configuredAndroidApkKeyHashes = csvSet(
+    "PASSKEY_ANDROID_APK_KEY_HASHES"
+  );
+  const androidPasskeyOrigins = new Set(
+    [
+      ...Array.from(configuredAndroidPasskeyOrigins).map(
+        normalizeAndroidPasskeyOrigin
+      ),
+      ...Array.from(configuredAndroidApkKeyHashes).map(
+        normalizeAndroidPasskeyOrigin
+      ),
+    ].filter(Boolean)
+  );
   const passkeyExpectedOrigins =
-    configuredPasskeyOrigins.size > 0 ?
-      configuredPasskeyOrigins :
+    configuredPasskeyOrigins.size > 0 || androidPasskeyOrigins.size > 0 ?
+      new Set([
+        ...Array.from(configuredPasskeyOrigins),
+        ...Array.from(androidPasskeyOrigins),
+      ]) :
       passkeyRpId ?
         new Set([`https://${passkeyRpId}`]) :
         new Set<string>();
@@ -134,7 +211,7 @@ export function loadConfig(): Config {
 
   return {
     projectId,
-    storageBucket: process.env.STORAGE_BUCKET,
+    storageBucket,
     playIntegrityPackageName: (process.env.PLAY_INTEGRITY_PACKAGE_NAME || "").trim(),
     playIntegrityAllowFallback: readBoolean(
       "PLAY_INTEGRITY_ALLOW_FALLBACK",
@@ -197,6 +274,46 @@ export function loadConfig(): Config {
     stripeAllowedTopupCurrencies,
     stripeMinimumTopupAmountMinor: readNumber(
       "STRIPE_MINIMUM_TOPUP_AMOUNT_MINOR",
+      100
+    ),
+    flutterwaveSecretKey: (
+      process.env.FLUTTERWAVE_SECRET_KEY ||
+      process.env.FLW_SECRET_KEY ||
+      ""
+    ).trim(),
+    flutterwavePublicKey: (
+      process.env.FLUTTERWAVE_PUBLIC_KEY ||
+      process.env.FLW_PUBLIC_KEY ||
+      ""
+    ).trim(),
+    flutterwaveWebhookSecretHash: (
+      process.env.FLUTTERWAVE_WEBHOOK_SECRET_HASH ||
+      process.env.FLW_WEBHOOK_SECRET_HASH ||
+      ""
+    ).trim(),
+    flutterwaveAllowUnsignedWebhooks: readBoolean(
+      "FLUTTERWAVE_ALLOW_UNSIGNED_WEBHOOKS",
+      !isProduction
+    ),
+    flutterwaveBaseUrl: (
+      process.env.FLUTTERWAVE_BASE_URL || "https://api.flutterwave.cloud"
+    ).trim(),
+    flutterwaveIdpBaseUrl: (
+      process.env.FLUTTERWAVE_IDP_BASE_URL || "https://idp.flutterwave.com"
+    ).trim(),
+    flutterwaveClientId: (
+      process.env.FLUTTERWAVE_CLIENT_ID || process.env.FLW_CLIENT_ID || ""
+    ).trim(),
+    flutterwaveClientSecret: (
+      process.env.FLUTTERWAVE_CLIENT_SECRET || process.env.FLW_CLIENT_SECRET || ""
+    ).trim(),
+    flutterwaveVirtualAccountExpirySeconds: readNumber(
+      "FLUTTERWAVE_VIRTUAL_ACCOUNT_EXPIRY_SECONDS",
+      3600
+    ),
+    flutterwaveAllowedTopupCurrencies,
+    flutterwaveMinimumTopupAmountMinor: readNumber(
+      "FLUTTERWAVE_MINIMUM_TOPUP_AMOUNT_MINOR",
       100
     ),
 

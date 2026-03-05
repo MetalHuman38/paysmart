@@ -5,7 +5,11 @@ const lookupAddressUseCase = new LookupAddress();
 
 type LookupAddressPayload = {
   house?: unknown;
+  line1?: unknown;
+  city?: unknown;
+  stateOrRegion?: unknown;
   postcode?: unknown;
+  postalCode?: unknown;
   country?: unknown;
   lat?: unknown;
   lng?: unknown;
@@ -34,18 +38,22 @@ function readOptionalNumber(value: unknown): number | undefined {
 export async function lookupAddressHandler(req: Request, res: Response) {
   try {
     const body = (req.body ?? {}) as LookupAddressPayload;
-    const house = readString(body.house);
-    const postcode = readString(body.postcode);
+    const line1 = readString(body.line1 || body.house);
+    const city = readString(body.city);
+    const stateOrRegion = readString(body.stateOrRegion);
+    const postcode = readString(body.postalCode || body.postcode);
     const country = readString(body.country, "gb").toLowerCase();
     const lat = readOptionalNumber(body.lat);
     const lng = readOptionalNumber(body.lng);
 
-    if (!postcode) {
-      return res.status(400).json({ error: "postcode is required" });
+    if (![line1, city, stateOrRegion, postcode].some((value) => value.length > 0)) {
+      return res.status(400).json({ error: "at least one address field is required" });
     }
 
     const resolved = await lookupAddressUseCase.execute({
-      house,
+      line1,
+      city,
+      stateOrRegion,
       postcode,
       country,
       lat,

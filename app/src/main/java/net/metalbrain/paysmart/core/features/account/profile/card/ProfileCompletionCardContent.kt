@@ -25,9 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.hasCompletedAddress
 import net.metalbrain.paysmart.domain.model.hasCompletedEmailVerification
@@ -69,8 +71,14 @@ fun ProfileCompletionCardContent(
         ) {
             AccountSetupSheetContent(
                 security = security,
-                onAddAddressClick = { /* TODO: navigate to address */ },
-                onVerifyIdentityClick = { /* TODO: navigate to identity */ }
+                onAddAddressClick = {
+                    showSheet.value = false
+                    onAddAddressClick()
+                },
+                onVerifyIdentityClick = {
+                    showSheet.value = false
+                    onVerifyIdentityClick()
+                }
             )
         }
     }
@@ -84,13 +92,14 @@ fun ProfileCompletionCardContent(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Get started",
+            text = stringResource(R.string.get_started),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
 
         TextButton(onClick = { showSheet.value = true }) {
-            Text("See all")
+            Text(stringResource(id = R.string.see_all),)
+
         }
     }
 
@@ -126,7 +135,7 @@ fun ProfileCompletionCardContent(
             }
 
             Text(
-                text = "Finish setting up your account",
+                text = stringResource(R.string.finish_setting_up_account),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center
@@ -139,25 +148,27 @@ fun ProfileCompletionCardContent(
                 ProfileStepItem("Verify your identity", security.hasCompletedIdentity)
             }
 
+
             // CTA
             when {
                 !security.hasCompletedEmailVerification -> {
                     PrimaryButton(
-                        text = "Verify email",
+                        text = stringResource(R.string.verify_email),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = onVerifyEmailClick
                     )
                 }
                 !security.hasCompletedAddress -> {
                     PrimaryButton(
-                        text = "Add address",
+                        text = stringResource(R.string.add_address),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = onAddAddressClick
                     )
                 }
                 !security.hasCompletedIdentity -> {
                     PrimaryButton(
-                        text = "Verify identity",
+                        text = stringResource(R.string.verify_identity),
+                        contentColor = MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier.fillMaxWidth(),
                         onClick = onVerifyIdentityClick
                     )

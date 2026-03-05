@@ -37,6 +37,13 @@ fun IdleSessionWatcher(
         Modifier
     }
 
+    LaunchedEffect(enabled) {
+        if (enabled) {
+            // Reset baseline whenever watcher re-enables (e.g., immediately after unlock)
+            lastInteraction = System.currentTimeMillis()
+        }
+    }
+
     LaunchedEffect(enabled, lockAfterMinutes) {
         if (!enabled) {
             return@LaunchedEffect

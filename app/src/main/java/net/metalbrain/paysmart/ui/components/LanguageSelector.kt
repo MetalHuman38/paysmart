@@ -12,8 +12,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.ui.screens.getLanguageDisplay
 
 @Composable
@@ -30,7 +32,7 @@ fun LanguageSelector(
     ) {
         Icon(
             imageVector = Icons.Default.Language,
-            contentDescription = "Select Language",
+            contentDescription = stringResource(R.string.content_desc_select_language),
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))

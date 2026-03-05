@@ -34,7 +34,12 @@ export class FirebaseAuthService implements FirebaseAuthServiceInterface {
 
   async getUserByUid(
     uid: string
-  ): Promise<{ uid: string; phoneNumber?: string | null; providerIds?: string[] } | null> {
+  ): Promise<{
+    uid: string;
+    phoneNumber?: string | null;
+    providerIds?: string[];
+    hasEnrolledMfaFactor?: boolean;
+  } | null> {
     try {
       const userRecord = await this.auth.getUser(uid);
       return {
@@ -43,6 +48,7 @@ export class FirebaseAuthService implements FirebaseAuthServiceInterface {
         providerIds: (userRecord.providerData ?? [])
           .map((provider) => provider.providerId)
           .filter((providerId): providerId is string => Boolean(providerId)),
+        hasEnrolledMfaFactor: (userRecord.multiFactor?.enrolledFactors?.length ?? 0) > 0,
       };
     } catch (error) {
       const code = (error as any).code;

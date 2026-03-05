@@ -24,8 +24,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,11 +43,18 @@ fun RewardDetailsScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Rewards", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        text = stringResource(id = R.string.home_rewards_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.common_back)
+                        )
                     }
                 },
                 actions = {
@@ -53,7 +63,7 @@ fun RewardDetailsScreen(
                         color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
                         Text(
-                            text = "Get help",
+                            text = stringResource(id = R.string.get_help),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
@@ -83,18 +93,21 @@ fun RewardDetailsScreen(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = String.format("%.2f", points),
+                            text = String.format(Locale.US, "%.2f", points),
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = " pts",
+                            text = stringResource(id = R.string.home_rewards_points_suffix),
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Text(
-                        text = "£${String.format("%.2f", points / 100.0)}",
+                        text = stringResource(
+                            id = R.string.home_rewards_fiat_value,
+                            String.format(Locale.US, "%.2f", points / 100.0)
+                        ),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -110,7 +123,10 @@ fun RewardDetailsScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("What are Rewards", style = MaterialTheme.typography.titleSmall)
+                            Text(
+                                text = stringResource(id = R.string.home_rewards_what_are_rewards),
+                                style = MaterialTheme.typography.titleSmall
+                            )
                             Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null)
                         }
                     }
@@ -118,7 +134,7 @@ fun RewardDetailsScreen(
             }
 
             Text(
-                text = "Rewards history",
+                text = stringResource(id = R.string.home_rewards_history_title),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -132,10 +148,10 @@ fun RewardDetailsScreen(
                     modifier = Modifier.padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    RewardHistoryRow("+3.50 pts", "You earned points from your transaction", "Mar 14, 10:18 AM")
-                    RewardHistoryRow("+3.85 pts", "You earned points from your transaction", "Mar 12, 11:34 PM")
-                    RewardHistoryRow("+4.20 pts", "You earned points from your transaction", "Mar 05, 09:23 PM")
-                    RewardHistoryRow("+4.20 pts", "You earned points from your transaction", "Mar 05, 09:20 PM")
+                    RewardHistoryRow("+3.50 pts", stringResource(id = R.string.home_rewards_history_subtitle), "Mar 14, 10:18 AM")
+                    RewardHistoryRow("+3.85 pts", stringResource(id = R.string.home_rewards_history_subtitle), "Mar 12, 11:34 PM")
+                    RewardHistoryRow("+4.20 pts", stringResource(id = R.string.home_rewards_history_subtitle), "Mar 05, 09:23 PM")
+                    RewardHistoryRow("+4.20 pts", stringResource(id = R.string.home_rewards_history_subtitle), "Mar 05, 09:20 PM")
                 }
             }
         }

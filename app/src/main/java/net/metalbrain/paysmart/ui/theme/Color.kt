@@ -8,17 +8,21 @@ val PaySmartGreenDark = Color(0xFF0B7A53)
 val PaySmartGreenLight = Color(0xFFBEEEDC)
 val PaySmartAccent = Color(0xFF1FB981)
 
-val PaySmartOffWhite = Color(0xFFF7F8F3)
-val PaySmartSeaWhite = Color(0xFFEEF7F2)
-val PaySmartSurface = Color(0xFFFFFFFF)
+val PaySmartOffWhite = Color(0xFFF8FAFC)
+val PaySmartSeaWhite = Color(0xFFF1F7F4)
+val PaySmartSurface = Color(0xFFFDFEFD)
+val PaySmartSurfaceElevated = Color(0xFFFFFFFF)
+val PaySmartSurfaceTint = Color(0xFFEAF4EF)
 
 val PaySmartTextPrimary = Color(0xFF15231D)
 val PaySmartTextSecondary = Color(0xFF4A5A53)
-val PaySmartOutline = Color(0xFFB9C8C0)
+val PaySmartOutline = Color(0xFFB7C8BF)
 
 val PaySmartError = Color(0xFFBA1A1A)
 val PaySmartErrorContainer = Color(0xFFFFDAD6)
 val PaySmartOnErrorContainer = Color(0xFF410002)
 
-val PaySmartDarkBackground = Color(0xFF0F1512)
-val PaySmartDarkSurface = Color(0xFF131A16)
+// Deeper, neutral-dark foundation for better readability in auth flows.
+val PaySmartDarkBackground = Color(0xFF0B0F14)
+val PaySmartDarkSurface = Color(0xFF10151C)
+val PaySmartDarkSurfaceElevated = Color(0xFF171E27)

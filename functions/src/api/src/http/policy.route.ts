@@ -14,6 +14,7 @@ import { checkPhoneAvailabilityHandler } from "../handlers/checkPhoneAvailabilit
 import { confirmPhoneChangedHandler } from "../handlers/confirmPhoneChanged.js";
 import { lookupAddressHandler } from "../handlers/lookupAddress.js";
 import { setHomeAddressVerifiedHandler } from "../handlers/setHomeAddressVerified.js";
+import { setMfaEnrollmentPromptStateHandler } from "../handlers/setMfaEnrollmentPromptState.js";
 import { identityUploadSessionHandler } from "../handlers/identityUploadSession.js";
 import { identityUploadCommitHandler } from "../handlers/identityUploadCommit.js";
 import { identityUploadPayloadHandler } from "../handlers/identityUploadPayload.js";
@@ -25,6 +26,7 @@ import { passkeyRegisterOptionsHandler } from "../handlers/passkeyRegisterOption
 import { passkeyRegisterVerifyHandler } from "../handlers/passkeyRegisterVerify.js";
 import { passkeyAuthenticateOptionsHandler } from "../handlers/passkeyAuthenticateOptions.js";
 import { passkeyAuthenticateVerifyHandler } from "../handlers/passkeyAuthenticateVerify.js";
+import { setPasskeyEnabledHandler } from "../handlers/setPasskeyEnabled.js";
 
 export function mountAuthPolicyRoutes(app: Express) {
 
@@ -70,6 +72,16 @@ export function mountAuthPolicyRoutes(app: Express) {
 
   app.post("/auth/setHomeAddressVerified", requireActiveSession, setHomeAddressVerifiedHandler);
   app.options("/auth/setHomeAddressVerified", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post(
+    "/auth/setMfaEnrollmentPromptState",
+    requireActiveSession,
+    setMfaEnrollmentPromptStateHandler
+  );
+  app.options("/auth/setMfaEnrollmentPromptState", (_, res) => {
     corsify(res);
     res.status(204).end();
   });
@@ -168,6 +180,12 @@ export function mountAuthPolicyRoutes(app: Express) {
     passkeyAuthenticateVerifyHandler
   );
   app.options("/auth/passkeys/authenticate/verify", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post("/auth/setPasskeyEnabled", requireActiveSession, setPasskeyEnabledHandler);
+  app.options("/auth/setPasskeyEnabled", (_, res) => {
     corsify(res);
     res.status(204).end();
   });

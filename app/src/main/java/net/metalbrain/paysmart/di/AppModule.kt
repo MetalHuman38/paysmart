@@ -11,7 +11,6 @@ import kotlinx.coroutines.SupervisorJob
 import net.metalbrain.paysmart.Env
 import net.metalbrain.paysmart.core.auth.AuthApiConfig
 import net.metalbrain.paysmart.core.auth.AuthHook
-import net.metalbrain.paysmart.core.auth.AuthPolicyHandler
 import net.metalbrain.paysmart.core.auth.AuthService
 import net.metalbrain.paysmart.core.features.account.authorization.password.repository.PasswordPolicyHandler
 import net.metalbrain.paysmart.data.repository.AuthRepository

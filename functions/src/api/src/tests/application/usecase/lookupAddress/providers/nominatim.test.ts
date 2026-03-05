@@ -93,4 +93,40 @@ describe("nominatimSearch", () => {
       })
     );
   });
+
+  it("keeps candidates even when postcode is missing", async () => {
+    fetchMock.mockResolvedValueOnce(
+      okJson([
+        {
+          display_name: "Alausa, Ikeja, Lagos, Nigeria",
+          lat: "6.6018",
+          lon: "3.3515",
+          address: {
+            country_code: "ng",
+            road: "Alausa",
+            city: "Ikeja",
+            state: "Lagos",
+          },
+        },
+      ])
+    );
+
+    const result = await nominatimSearch("Alausa, Ikeja, Lagos", "ng");
+
+    expect(result).toEqual([
+      {
+        displayName: "Alausa, Ikeja, Lagos, Nigeria",
+        lat: 6.6018,
+        lon: 3.3515,
+        address: {
+          postcode: undefined,
+          countryCode: "ng",
+          line1: "Alausa",
+          line2: undefined,
+          city: "Ikeja",
+          stateOrRegion: "Lagos",
+        },
+      },
+    ]);
+  });
 });

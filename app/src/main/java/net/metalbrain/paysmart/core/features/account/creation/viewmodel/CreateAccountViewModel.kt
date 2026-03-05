@@ -1,17 +1,23 @@
 package net.metalbrain.paysmart.core.features.account.creation.viewmodel
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import net.metalbrain.paysmart.core.auth.AuthPolicyHandler
 import net.metalbrain.paysmart.core.features.account.creation.phone.data.PhoneVerifier
 import net.metalbrain.paysmart.domain.model.Country
+import net.metalbrain.paysmart.domain.model.DEFAULT_COUNTRY_ISO2
+import net.metalbrain.paysmart.domain.model.matchCountryByInternationalPrefix
+import net.metalbrain.paysmart.domain.model.normalizeCountryIso2
 import net.metalbrain.paysmart.domain.model.supportedCountries
 import javax.inject.Inject
 
@@ -20,8 +26,15 @@ class CreateAccountViewModel @Inject constructor(
     private val authPolicyHandler: AuthPolicyHandler,
     private val phoneVerifier: PhoneVerifier
 ) : ViewModel() {
+    private companion object {
+        private const val TAG = "CreateAccountViewModel"
+        private const val PHONE_PRECHECK_TIMEOUT_MS = 2_500L
+    }
 
-    private val _selectedCountry = mutableStateOf(supportedCountries.first())
+    private val _selectedCountry = mutableStateOf(
+        supportedCountries.firstOrNull { it.isoCode == DEFAULT_COUNTRY_ISO2 }
+            ?: supportedCountries.first()
+    )
     val selectedCountry: State<Country> = _selectedCountry
 
 
@@ -39,7 +52,25 @@ class CreateAccountViewModel @Inject constructor(
         val e164 = getFullPhoneNumber()
         viewModelScope.launch {
             try {
-                val exists = authPolicyHandler.isPhoneAlreadyRegistered(e164)
+                val exists = withTimeoutOrNull(PHONE_PRECHECK_TIMEOUT_MS) {
+                    runCatching {
+                        authPolicyHandler.isPhoneAlreadyRegistered(e164)
+                    }.getOrElse { error ->
+                        // Do not block OTP delivery on pre-check failures (network/AppCheck/transient).
+                        Log.w(
+                            TAG,
+                            "Phone availability pre-check failed; continuing with OTP flow",
+                            error
+                        )
+                        false
+                    }
+                } ?: run {
+                    Log.w(
+                        TAG,
+                        "Phone availability pre-check timed out; continuing with OTP flow"
+                    )
+                    false
+                }
                 if (exists) {
                     onPhoneAlreadyRegistered()
                     return@launch
@@ -47,6 +78,9 @@ class CreateAccountViewModel @Inject constructor(
 
                 phoneVerifier.setCallbacks(
                     onCodeSent = {
+                        onSuccess()
+                    },
+                    onAutoVerified = {
                         onSuccess()
                     },
                     onError = { error ->
@@ -67,9 +101,22 @@ class CreateAccountViewModel @Inject constructor(
     }
 
     fun getFullPhoneNumber(): String {
-        return (selectedCountry.value.dialCode + phoneNumber)
+        val nationalDigits = phoneNumber.filter { it.isDigit() }
+        val fallback = (selectedCountry.value.dialCode + nationalDigits)
             .replace(" ", "")
             .trim()
+
+        if (nationalDigits.isBlank()) {
+            return fallback
+        }
+
+        return runCatching {
+            val phoneUtil = PhoneNumberUtil.getInstance()
+            val parsed = phoneUtil.parse(nationalDigits, selectedCountry.value.isoCode)
+            phoneUtil.format(parsed, PhoneNumberUtil.PhoneNumberFormat.E164)
+        }.getOrElse {
+            fallback
+        }
     }
 
     var phoneNumber by mutableStateOf("")
@@ -102,13 +149,33 @@ class CreateAccountViewModel @Inject constructor(
         return phoneNumber.trim().length >= 8
     }
 
+    fun autoSelectCountry(rawIso2: String?) {
+        val normalizedIso2 = normalizeCountryIso2(rawIso2, DEFAULT_COUNTRY_ISO2)
+        val match = supportedCountries.firstOrNull {
+            it.isoCode.equals(normalizedIso2, ignoreCase = true)
+        } ?: return
+
+        val shouldReplaceSelection =
+            phoneNumber.isBlank() ||
+                selectedCountry.value.isoCode == DEFAULT_COUNTRY_ISO2
+        if (shouldReplaceSelection) {
+            _selectedCountry.value = match
+        }
+    }
 
     fun onCountrySelected(country: Country) {
         _selectedCountry.value = country
     }
 
     fun onPhoneNumberChanged(value: String) {
-        phoneNumber = value
+        val matched = matchCountryByInternationalPrefix(value)
+        if (matched != null) {
+            _selectedCountry.value = matched.first
+            phoneNumber = matched.second
+            return
+        }
+
+        phoneNumber = value.trim().filter { it.isDigit() }.take(15)
     }
 
     fun onToggleTerms() {

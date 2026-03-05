@@ -37,6 +37,9 @@ function makeSecurity(overrides = {}) {
         hasVerifiedEmail: false,
         hasAddedHomeAddress: false,
         hasVerifiedIdentity: false,
+        hasSkippedMfaEnrollmentPrompt: false,
+        hasEnrolledMfaFactor: false,
+        mfaEnrolledAt: null,
         localPassCodeSetAt: null,
         localPasswordSetAt: null,
         updatedAt: {},
@@ -77,6 +80,7 @@ describe("BeforeSignInPolicyUsecase", () => {
                 sid: expect.any(String),
                 sv: 1,
                 emailVerified: false,
+                mfaEnrolled: false,
             },
         });
         expect(authService.getUserByUid).toHaveBeenCalledWith("uid-1");
@@ -147,6 +151,7 @@ describe("BeforeSignInPolicyUsecase", () => {
                 sid: expect.any(String),
                 sv: 1,
                 emailVerified: false,
+                mfaEnrolled: false,
             },
         });
         expect(securityRepo.persistProviders).toHaveBeenCalledWith("uid-4", expect.arrayContaining(["phone", "google.com"]), { consumeLinkingGrant: true });
@@ -179,6 +184,7 @@ describe("BeforeSignInPolicyUsecase", () => {
                 sid: expect.any(String),
                 sv: 1,
                 emailVerified: false,
+                mfaEnrolled: false,
             },
         });
         expect(auditLogRepo.log).toHaveBeenCalledWith("uid-5", "session_log_failed", expect.objectContaining({

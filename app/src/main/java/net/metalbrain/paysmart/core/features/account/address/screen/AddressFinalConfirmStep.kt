@@ -75,7 +75,7 @@ fun AddressFinalConfirmStep(
     OutlinedTextField(
         value = postCode,
         onValueChange = onPostCodeChanged,
-        label = { Text(stringResource(R.string.address_resolver_postcode_short_label)) },
+        label = { Text(stringResource(R.string.profile_field_postal_code)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )

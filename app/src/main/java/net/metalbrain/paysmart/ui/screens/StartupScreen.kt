@@ -71,7 +71,7 @@ fun StartupScreen(
                         fontSize = 38.sp,
                         fontWeight = FontWeight.Bold,
                     ),
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 

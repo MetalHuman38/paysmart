@@ -8,6 +8,7 @@ import { FirestoreUserRepository } from "../firestore/FirestoreUserRepository.js
 import { FirestoreIdentityUploadRepository } from "../firestore/FirestoreIdentityUploadRepository.js";
 import { FirestoreIdentityProviderRepository } from "../firestore/FirestoreIdentityProviderRepository.js";
 import { FirestoreAddMoneyRepository } from "../firestore/FirestoreAddMoneyRepository.js";
+import { FirestoreAddMoneyFlutterwaveRepository } from "../firestore/FirestoreAddMoneyFlutterwaveRepository.js";
 import { FirestorePasskeyRepository } from "../firestore/FirestorePasskeyRepository.js";
 import { GoogleCloudAccessTokenProvider } from "../../services/googleCloudAccessTokenProvider.js";
 import { PlayIntegrityVerifier } from "../../services/playIntegrityVerifier.js";
@@ -15,12 +16,13 @@ import { KmsEnvelopeService } from "../../services/kmsEnvelopeService.js";
 import { GoogleVisionTextExtractionService } from "../../services/googleVisionTextExtractionService.js";
 import { PasskeyService } from "../../services/passkeyService.js";
 import { StripePaymentsService } from "../../services/stripePaymentsService.js";
+import { FlutterwavePaymentsService } from "../../services/flutterwavePaymentsService.js";
 
 export function authContainer() {
   const { auth, firestore, getConfig } = initDeps();
   const config = getConfig();
   const storageBucket =
-    config.storageBucket || `${config.projectId}.appspot.com`;
+    config.storageBucket || (config.projectId ? `${config.projectId}.appspot.com` : "");
   const tokenProvider = new GoogleCloudAccessTokenProvider();
   const attestationVerifier = new PlayIntegrityVerifier(tokenProvider, {
     packageName: config.playIntegrityPackageName,
@@ -38,6 +40,16 @@ export function authContainer() {
     secretKey: config.stripeSecretKey,
     webhookSigningSecret: config.stripeWebhookSecret,
     allowUnsignedWebhooks: config.stripeAllowUnsignedWebhooks,
+  });
+  const flutterwavePaymentsService = new FlutterwavePaymentsService({
+    secretKey: config.flutterwaveSecretKey,
+    webhookSecretHash: config.flutterwaveWebhookSecretHash,
+    allowUnsignedWebhooks: config.flutterwaveAllowUnsignedWebhooks,
+    baseUrl: config.flutterwaveBaseUrl,
+    idpBaseUrl: config.flutterwaveIdpBaseUrl,
+    clientId: config.flutterwaveClientId,
+    clientSecret: config.flutterwaveClientSecret,
+    virtualAccountExpirySeconds: config.flutterwaveVirtualAccountExpirySeconds,
   });
 
   const authService = new FirebaseAuthService(auth);
@@ -58,6 +70,13 @@ export function authContainer() {
     config.stripePublishableKey,
     config.stripeAllowedTopupCurrencies,
     config.stripeMinimumTopupAmountMinor
+  );
+  const addMoneyFlutterwaveRepo = new FirestoreAddMoneyFlutterwaveRepository(
+    firestore,
+    flutterwavePaymentsService,
+    config.flutterwavePublicKey,
+    config.flutterwaveAllowedTopupCurrencies,
+    config.flutterwaveMinimumTopupAmountMinor
   );
   const identityTextExtractionService = new GoogleVisionTextExtractionService(
     undefined,
@@ -82,5 +101,6 @@ export function authContainer() {
     identityTextExtraction: identityTextExtractionService,
     passkeys: passkeyService,
     addMoney: addMoneyRepo,
+    addMoneyFlutterwave: addMoneyFlutterwaveRepo,
   };
 }

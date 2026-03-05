@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,13 +24,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.domain.model.DEFAULT_COUNTRY_ISO2
+import net.metalbrain.paysmart.domain.model.matchCountryByInternationalPrefix
 import net.metalbrain.paysmart.domain.model.supportedCountries
 import androidx.fragment.app.FragmentActivity
 import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePhoneRecoveryViewModel
 import net.metalbrain.paysmart.ui.components.PhoneNumberInput
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.screens.CountryPickerBottomSheet
+import net.metalbrain.paysmart.utils.detectDeviceCountryIso2
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,9 +47,26 @@ fun ChangePhoneRecoveryScreen(
     onSuccess: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
     var showCountryPicker by rememberSaveable { mutableStateOf(false) }
-    var selectedCountry by remember { mutableStateOf(supportedCountries.first()) }
+    var selectedCountry by remember {
+        mutableStateOf(
+            supportedCountries.firstOrNull { it.isoCode == DEFAULT_COUNTRY_ISO2 }
+                ?: supportedCountries.first()
+        )
+    }
     var nationalPhoneInput by rememberSaveable { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        val detectedIso = detectDeviceCountryIso2(context)
+        val detected = supportedCountries.firstOrNull {
+            it.isoCode.equals(detectedIso, ignoreCase = true)
+        }
+        if (detected != null && nationalPhoneInput.isBlank()) {
+            selectedCountry = detected
+            viewModel.onPhoneNumberChanged("${detected.dialCode}$nationalPhoneInput")
+        }
+    }
 
     if (state.isSuccess) {
         onSuccess()
@@ -51,10 +75,13 @@ fun ChangePhoneRecoveryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Change phone number") },
+                title = { Text(stringResource(R.string.change_phone_recovery_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_back)
+                        )
                     }
                 }
             )
@@ -68,7 +95,7 @@ fun ChangePhoneRecoveryScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Verify a new phone number to keep account recovery and sign-in secure.",
+                text = stringResource(R.string.change_phone_recovery_description),
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -76,9 +103,16 @@ fun ChangePhoneRecoveryScreen(
                 selectedCountry = selectedCountry,
                 phoneNumber = nationalPhoneInput,
                 onPhoneNumberChange = {
-                    val digits = it.filter(Char::isDigit)
-                    nationalPhoneInput = digits
-                    viewModel.onPhoneNumberChanged("${selectedCountry.dialCode}$digits")
+                    val matched = matchCountryByInternationalPrefix(it)
+                    if (matched != null) {
+                        selectedCountry = matched.first
+                        nationalPhoneInput = matched.second
+                        viewModel.onPhoneNumberChanged("${matched.first.dialCode}${matched.second}")
+                    } else {
+                        val digits = it.filter(Char::isDigit).take(15)
+                        nationalPhoneInput = digits
+                        viewModel.onPhoneNumberChanged("${selectedCountry.dialCode}$digits")
+                    }
                 },
                 onFlagClick = {
                     showCountryPicker = true
@@ -87,28 +121,28 @@ fun ChangePhoneRecoveryScreen(
             )
 
             PrimaryButton(
-                text = "Send OTP",
+                text = stringResource(R.string.change_phone_send_otp),
                 onClick = { viewModel.sendCode(activity) },
                 enabled = nationalPhoneInput.isNotBlank(),
                 isLoading = state.isLoading,
-                loadingText = "Sending..."
+                loadingText = stringResource(R.string.change_phone_sending)
             )
 
             if (state.isCodeSent) {
                 OutlinedTextField(
                     value = state.otpCode,
                     onValueChange = viewModel::onOtpChanged,
-                    label = { Text("OTP code") },
+                    label = { Text(stringResource(R.string.change_phone_otp_code)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 PrimaryButton(
-                    text = "Confirm phone change",
+                    text = stringResource(R.string.change_phone_confirm_action),
                     onClick = { viewModel.confirmCode() },
                     enabled = state.otpCode.length >= 6,
                     isLoading = state.isLoading,
-                    loadingText = "Verifying..."
+                    loadingText = stringResource(R.string.reauth_verifying)
                 )
             }
 

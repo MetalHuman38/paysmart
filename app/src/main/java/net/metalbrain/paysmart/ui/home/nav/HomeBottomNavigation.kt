@@ -11,7 +11,6 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import net.metalbrain.paysmart.ui.Screen
-import net.metalbrain.paysmart.ui.home.nav.NavItem
 
 @Composable
 fun HomeBottomNavigation(

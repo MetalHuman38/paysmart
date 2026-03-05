@@ -17,7 +17,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
 
 
 @Composable
@@ -29,7 +31,10 @@ fun StatusFilterSheet(
     val state = remember { mutableStateOf(selected.toSet()) }
 
     Column(Modifier.padding(16.dp)) {
-        Text("Select status", style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = stringResource(R.string.sheet_select_status_title),
+            style = MaterialTheme.typography.titleLarge
+        )
         Spacer(Modifier.height(16.dp))
 
         options.forEach { status ->
@@ -63,7 +68,7 @@ fun StatusFilterSheet(
             onClick = { onSelect(state.value) },
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text("Filter")
+            Text(stringResource(R.string.sheet_filter_apply))
         }
     }
 }

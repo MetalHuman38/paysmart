@@ -2,6 +2,7 @@ export type AuthUserByUid = {
   uid: string;
   phoneNumber?: string | null;
   providerIds?: string[];
+  hasEnrolledMfaFactor?: boolean;
 };
 
 export interface FirebaseAuthServiceInterface {

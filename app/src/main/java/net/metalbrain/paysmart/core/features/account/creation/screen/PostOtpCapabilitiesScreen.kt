@@ -24,9 +24,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.PostOtpCapabilitiesViewModel
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 
@@ -51,7 +53,7 @@ fun PostOtpCapabilitiesScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.common_back)
                         )
                     }
                 }
@@ -72,12 +74,15 @@ fun PostOtpCapabilitiesScreen(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             Text(
-                text = "What you can do with PaySmart in ${uiState.profile.countryName}",
+                text = stringResource(
+                    R.string.post_otp_capabilities_title,
+                    uiState.profile.countryName
+                ),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Your available features depend on your selected country.",
+                text = stringResource(R.string.post_otp_capabilities_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -90,7 +95,7 @@ fun PostOtpCapabilitiesScreen(
             }
 
             PrimaryButton(
-                text = "Next",
+                text = stringResource(R.string.post_otp_capabilities_next),
                 onClick = onNext,
                 modifier = Modifier
                     .fillMaxWidth()

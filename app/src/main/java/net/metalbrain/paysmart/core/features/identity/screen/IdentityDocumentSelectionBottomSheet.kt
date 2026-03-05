@@ -29,8 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.profile.data.type.KycDocumentType
 import net.metalbrain.paysmart.core.features.identity.provider.formattedLabel
 
@@ -75,7 +77,7 @@ fun IdentityDocumentSelectionBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Select document type",
+                    text = stringResource(R.string.sheet_select_document_type_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -89,7 +91,7 @@ fun IdentityDocumentSelectionBottomSheet(
                 onValueChange = { search = it },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                placeholder = { Text("Search") },
+                placeholder = { Text(stringResource(R.string.sheet_search_placeholder)) },
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = null)
                 }
@@ -104,7 +106,7 @@ fun IdentityDocumentSelectionBottomSheet(
                 if (acceptedDocuments.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Accepted",
+                            text = stringResource(R.string.sheet_section_accepted),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(top = 2.dp, bottom = 2.dp)
@@ -128,7 +130,7 @@ fun IdentityDocumentSelectionBottomSheet(
                     item {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Not accepted",
+                            text = stringResource(R.string.sheet_section_not_accepted),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(top = 2.dp, bottom = 2.dp)

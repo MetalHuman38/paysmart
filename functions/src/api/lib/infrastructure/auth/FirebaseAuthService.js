@@ -16,6 +16,7 @@ export class FirebaseAuthService {
             uid: user.uid,
             email: user.email ?? undefined,
             emailVerified: user.emailVerified,
+            tenantId: user.tenantId ?? null,
         };
     }
     async updateUserEmail(uid, email) {

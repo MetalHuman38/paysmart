@@ -2,6 +2,7 @@ package net.metalbrain.paysmart.domain.model
 import androidx.annotation.Keep
 
 import androidx.annotation.StringRes
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import net.metalbrain.paysmart.R
 import java.util.Locale
 
@@ -42,18 +43,68 @@ fun normalizeCountryIso2(
     return normalized.takeIf(::isValidIso2CountryCode) ?: fallback
 }
 
-val supportedCountries = listOf(
-    Country("GB", R.string.country_uk, iso2ToFlagEmoji("GB"), "+44"),
-    Country("US", R.string.country_us, iso2ToFlagEmoji("US"), "+1"),
-    Country("DE", R.string.country_germany, iso2ToFlagEmoji("DE"), "+49"),
-    Country("FR", R.string.country_france, iso2ToFlagEmoji("FR"), "+33"),
-    Country("ES", R.string.country_spain, iso2ToFlagEmoji("ES"), "+34"),
-    Country("CN", R.string.country_china, iso2ToFlagEmoji("CN"), "+86"),
-    Country("PT", R.string.country_portugal, iso2ToFlagEmoji("PT"), "+351"),
-    Country("JP", R.string.country_japan, iso2ToFlagEmoji("JP"), "+81"),
-    Country("KR", R.string.country_korea, iso2ToFlagEmoji("KR"), "+82"),
-    Country("IT", R.string.country_italy, iso2ToFlagEmoji("IT"), "+39")
-)
+val supportedCountries: List<Country> by lazy {
+    val phoneUtil = PhoneNumberUtil.getInstance()
+    val regions = phoneUtil.supportedRegions
+        .map { it.uppercase(Locale.US) }
+        .filter { it.length == 2 && it.all(Char::isLetter) }
+        .distinct()
+
+    val countries = regions.mapNotNull { iso2 ->
+        val countryCode = runCatching {
+            phoneUtil.getCountryCodeForRegion(iso2)
+        }.getOrNull()
+        if (countryCode == null || countryCode <= 0) return@mapNotNull null
+
+        Country(
+            isoCode = iso2,
+            nameRes = R.string.select_country,
+            flagEmoji = iso2ToFlagEmoji(iso2),
+            dialCode = "+$countryCode"
+        )
+    }
+
+    countries.sortedWith(
+        compareBy(
+            { countryDisplayName(it).lowercase(Locale.getDefault()) },
+            { it.isoCode }
+        )
+    )
+}
+
+fun countryDisplayName(country: Country, locale: Locale = Locale.getDefault()): String {
+    val iso2 = country.isoCode.trim().uppercase(Locale.US)
+    if (!isValidIso2CountryCode(iso2)) return iso2
+    return runCatching {
+        Locale.Builder()
+            .setRegion(iso2)
+            .build()
+            .getDisplayCountry(locale)
+    }.getOrDefault(iso2).ifBlank { iso2 }
+}
+
+fun matchCountryByInternationalPrefix(
+    rawValue: String,
+    countries: List<Country> = supportedCountries
+): Pair<Country, String>? {
+    val trimmed = rawValue.trim()
+    if (!trimmed.startsWith("+")) return null
+
+    val compact = "+${trimmed.filter { it.isDigit() }}"
+    if (compact.length <= 1) return null
+
+    val matched = countries
+        .sortedByDescending { it.dialCode.length }
+        .firstOrNull { compact.startsWith(it.dialCode) }
+        ?: return null
+
+    val nationalDigits = compact
+        .removePrefix(matched.dialCode)
+        .filter { it.isDigit() }
+        .take(15)
+
+    return matched to nationalDigits
+}
 
 private fun iso2ToFlagEmoji(rawIso2: String): String {
     val iso2 = rawIso2.trim().uppercase(Locale.US)

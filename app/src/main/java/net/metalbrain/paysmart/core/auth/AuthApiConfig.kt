@@ -12,6 +12,8 @@ data class AuthApiConfig (
     val confirmPhoneChanged: String = "/auth/confirmPhoneChanged",
     val lookupAddress: String = "/auth/lookupAddress",
     val setHomeAddressVerified: String = "/auth/setHomeAddressVerified",
+    val setMfaEnrollmentPromptState: String = "/auth/setMfaEnrollmentPromptState",
+    val setPasskeyEnabled: String = "/auth/setPasskeyEnabled",
     val identityUploadSession: String = "/auth/identity/upload/session",
     val identityUploadPayload: String = "/auth/identity/upload/payload",
     val identityUploadCommit: String = "/auth/identity/upload/commit",
@@ -25,6 +27,7 @@ data class AuthApiConfig (
     val passkeyAuthenticateOptions: String = "/auth/passkeys/authenticate/options",
     val passkeyAuthenticateVerify: String = "/auth/passkeys/authenticate/verify",
     val addMoneySession: String = "/payments/add-money/session",
+    val addMoneyFlutterwaveSession: String = "/payments/flutterwave/add-money/session",
     val setPassCodeEnabled: String = "/auth/setPassCodeEnabled",
     val getPassCodeEnabled: String = "/auth/getPassCodeEnabled",
     val generateEmailVerificationHandler: String = "/auth/generate",
@@ -59,6 +62,10 @@ data class AuthApiConfig (
 
     val setHomeAddressVerifiedUrl get() = "$apiBase$setHomeAddressVerified"
 
+    val setMfaEnrollmentPromptStateUrl get() = "$apiBase$setMfaEnrollmentPromptState"
+
+    val setPasskeyEnabledUrl get() = "$apiBase$setPasskeyEnabled"
+
     val identityUploadSessionUrl get() = "$apiBase$identityUploadSession"
 
     val identityUploadCommitUrl get() = "$apiBase$identityUploadCommit"
@@ -84,9 +91,14 @@ data class AuthApiConfig (
     val passkeyAuthenticateVerifyUrl get() = "$apiBase$passkeyAuthenticateVerify"
 
     val addMoneySessionUrl get() = "$apiBase$addMoneySession"
+    val addMoneyFlutterwaveSessionUrl get() = "$apiBase$addMoneyFlutterwaveSession"
 
     fun addMoneySessionStatusUrl(sessionId: String): String {
         return "$apiBase$addMoneySession/${sessionId.trim()}"
+    }
+
+    fun addMoneyFlutterwaveSessionStatusUrl(sessionId: String): String {
+        return "$apiBase$addMoneyFlutterwaveSession/${sessionId.trim()}"
     }
 
     val setPassCodeEnabledUrl get() = "$apiBase$setPassCodeEnabled"

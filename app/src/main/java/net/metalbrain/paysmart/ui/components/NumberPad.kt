@@ -17,7 +17,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
 
 @Composable
 fun NumberPad(
@@ -45,7 +47,10 @@ fun NumberPad(
                             onClick = onBackspace,
                             modifier = Modifier.size(64.dp)
                         ) {
-                            Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = "Backspace")
+                            Icon(
+                                Icons.AutoMirrored.Filled.Backspace,
+                                contentDescription = stringResource(R.string.content_desc_backspace)
+                            )
                         }
                         else -> Button(
                             onClick = { onDigitPressed(key) },

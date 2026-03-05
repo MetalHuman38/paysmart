@@ -6,6 +6,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 
@@ -16,8 +18,16 @@ fun SecondaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
-    contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+    contentColor: Color = Color.Unspecified,
+    textMaxLines: Int = 1,
+    textOverflow: TextOverflow = TextOverflow.Ellipsis,
 ) {
+    val resolvedContentColor = if (contentColor == Color.Unspecified) {
+        contentColorFor(containerColor)
+    } else {
+        contentColor
+    }
+
     Button(
         onClick = onClick,
         enabled = enabled,
@@ -27,11 +37,19 @@ fun SecondaryButton(
         shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
-            contentColor = contentColor,
-            disabledContainerColor = containerColor.copy(alpha = 0.5f),
-            disabledContentColor = contentColor.copy(alpha = 0.7f)
+            contentColor = resolvedContentColor,
+            disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         )
     ) {
-        Text(text)
+        Text(
+            text = text,
+            color = resolvedContentColor,
+            style = MaterialTheme.typography.labelLarge,
+            textAlign = TextAlign.Center,
+            maxLines = textMaxLines,
+            overflow = textOverflow,
+            softWrap = textMaxLines > 1
+        )
     }
 }

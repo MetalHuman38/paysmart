@@ -1,5 +1,7 @@
 # PaySmart Implementation Backlog
 
+_Last updated: 2026-03-05_
+
 ## Status legend
 - `done`: implemented and validated in this slice
 - `next`: queued for next slice
@@ -105,3 +107,56 @@
   - mapping tests for JSON -> Kotlin quote model
   - repository tests for online + cache fallback
   - ViewModel tests for stale/refresh states
+
+### APP-021 (`done`)
+- **Scope**: biometric opt-in route fix with password-ready branching.
+- **Android modules**:
+  - `app/src/main/java/net/metalbrain/paysmart/ui/NavGraph.kt`
+- **Behavior contract**:
+  - after biometric success/skip:
+    - route to `Home` if `passwordEnabled && localPasswordSetAt != null`
+    - otherwise route to `CreatePassword`
+  - avoids regressions where flow returned to `ProtectAccount`.
+
+### APP-022 (`done`)
+- **Scope**: session idle lock re-trigger fix after first unlock.
+- **Android modules**:
+  - `app/src/main/java/net/metalbrain/paysmart/core/session/IdleSessionManager.kt`
+- **Behavior contract**:
+  - reset idle baseline whenever idle watcher is re-enabled.
+  - prevents immediate stale-timestamp lock after unlock.
+
+### PERF-001 (`done`)
+- **Scope**: Firebase Performance Monitoring integration with cost controls.
+- **Android modules**:
+  - `app/build.gradle.kts`
+  - `app/src/main/AndroidManifest.xml`
+  - `app/src/main/java/net/metalbrain/paysmart/App.kt`
+  - `app/src/main/java/net/metalbrain/paysmart/core/service/performance/*`
+  - `app/src/main/java/net/metalbrain/paysmart/core/features/addmoney/repository/AddMoneyRepository.kt`
+  - `app/src/main/java/net/metalbrain/paysmart/core/features/identity/provider/RemoteIdentityUploadRepository.kt`
+- **Behavior contract**:
+  - collection disabled for local/debug, enabled for release
+  - targeted traces for add-money and identity upload paths only
+  - no direct Firebase Perf SDK calls from screen layer.
+
+### ADMIN-001 (`next`)
+- **Scope**: minimal admin panel foundation on existing Firebase Hosting.
+- **Reference doc**:
+  - `app/docs/admin_panel_roadmap.md`
+- **Planned acceptance checks**:
+  - role-gated admin auth
+  - audit trail writes for status-changing actions
+  - strict endpoint surface (no public mutation APIs).
+
+### REL-003 (`done`)
+- **Scope**: release-note slice for current public tester build and docs alignment.
+- **Docs modules**:
+  - `app/docs/playstore_release_notes.md`
+  - `app/docs/implementation_backlog.md`
+- **Release summary**:
+  - improved identity verification reliability and security across upload, encryption, and commit steps
+  - fixed final submission issue in document verification
+  - added Flutterwave add-money provider flow (alongside Stripe) for supported regions
+  - improved add-money stability with clearer payment/webhook error handling
+  - general bug fixes, UI polish, and performance improvements

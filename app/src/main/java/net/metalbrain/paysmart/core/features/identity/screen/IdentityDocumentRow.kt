@@ -16,7 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.profile.data.type.KycDocumentType
 import net.metalbrain.paysmart.core.features.identity.provider.formattedLabel
 
@@ -43,7 +45,7 @@ fun IdentityDocumentRow(
             )
             if (!enabled) {
                 Text(
-                    text = "(not accepted)",
+                    text = stringResource(R.string.sheet_not_accepted_inline),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

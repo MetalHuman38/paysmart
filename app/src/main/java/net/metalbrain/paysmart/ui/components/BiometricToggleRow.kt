@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
@@ -43,14 +44,20 @@ fun BiometricToggleRow(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_face_id), // your Face ID icon
-                contentDescription = "Face ID",
+                contentDescription = stringResource(R.string.biometric_face_id),
                 tint = Color.Black,
                 modifier = Modifier.size(28.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column {
-                Text("Face ID", fontWeight = FontWeight.SemiBold)
-                Text("Use face ID authentication", style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = stringResource(R.string.biometric_face_id),
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = stringResource(R.string.biometric_face_id_description),
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
 

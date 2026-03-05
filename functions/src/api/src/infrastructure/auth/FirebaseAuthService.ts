@@ -2,7 +2,14 @@ import { Auth } from "firebase-admin/auth";
 
 export interface AuthService {
   verifyIdToken(idToken: string): Promise<{ uid: string; email?: string }>;
-  getUser(uid: string): Promise<{ uid: string; email?: string; emailVerified?: boolean }>;
+  getUser(
+    uid: string
+  ): Promise<{
+    uid: string;
+    email?: string;
+    emailVerified?: boolean;
+    tenantId?: string | null;
+  }>;
   getUserByPhone(phone: string): Promise<{ uid: string } | null>;
   updateUserEmail(uid: string, email: string): Promise<void>;
   generateEmailVerificationLink(
@@ -28,6 +35,7 @@ export class FirebaseAuthService implements AuthService {
       uid: user.uid,
       email: user.email ?? undefined,
       emailVerified: user.emailVerified,
+      tenantId: user.tenantId ?? null,
     };
   }
 

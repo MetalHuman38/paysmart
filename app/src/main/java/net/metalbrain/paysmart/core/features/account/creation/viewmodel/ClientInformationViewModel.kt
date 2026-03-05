@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.core.features.account.creation.viewmodel
 
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -115,13 +116,22 @@ class ClientInformationViewModel @Inject constructor(
 
     private fun validate(state: ClientInformationUiState): String? {
         if (!state.canContinue) return "Complete all required client information fields"
-        if (!state.email.contains("@")) return "Enter a valid email address"
+        if (!Patterns.EMAIL_ADDRESS.matcher(state.email.trim()).matches()) {
+            return "Enter a valid email address"
+        }
         val dob = try {
             LocalDate.parse(state.dateOfBirth.trim())
         } catch (_: DateTimeParseException) {
             return "Date of birth must use YYYY-MM-DD format"
         }
-        if (dob.plusYears(18).isAfter(LocalDate.now())) {
+        val now = LocalDate.now()
+        if (dob.isAfter(now)) {
+            return "Date of birth cannot be in the future"
+        }
+        if (dob.isBefore(now.minusYears(120))) {
+            return "Enter a valid date of birth"
+        }
+        if (dob.plusYears(18).isAfter(now)) {
             return "You must be 18 or older to continue"
         }
         return null

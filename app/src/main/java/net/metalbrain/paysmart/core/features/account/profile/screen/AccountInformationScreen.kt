@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
@@ -26,18 +27,21 @@ import androidx.compose.ui.unit.dp
 import androidx.annotation.StringRes
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.profile.components.ProfileMenuItem
+import net.metalbrain.paysmart.core.features.theme.data.AppThemeMode
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountInformationScreen(
     currentLanguage: String,
+    currentThemeMode: AppThemeMode,
     profileStatusLabel: String,
     onBack: () -> Unit,
     onProfileClick: () -> Unit,
     onAccountLimitsClick: () -> Unit,
     onAccountStatementClick: () -> Unit,
-    onLanguageClick: () -> Unit
+    onLanguageClick: () -> Unit,
+    onThemeModeClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -94,6 +98,14 @@ fun AccountInformationScreen(
                         trailingText = stringResource(languageDisplayRes(currentLanguage)),
                         onClick = onLanguageClick
                     )
+                    HorizontalDivider()
+                    ProfileMenuItem(
+                        title = stringResource(R.string.profile_theme_title),
+                        subtitle = stringResource(R.string.profile_account_info_theme_subtitle),
+                        leadingIcon = Icons.Default.DarkMode,
+                        trailingText = stringResource(themeModeDisplayRes(currentThemeMode)),
+                        onClick = onThemeModeClick
+                    )
                 }
             }
         }
@@ -114,5 +126,14 @@ private fun languageDisplayRes(code: String): Int {
         "ja" -> R.string.lang_japanese
         "ko" -> R.string.lang_korean
         else -> R.string.lang_english_uk
+    }
+}
+
+@StringRes
+private fun themeModeDisplayRes(mode: AppThemeMode): Int {
+    return when (mode) {
+        AppThemeMode.SYSTEM -> R.string.theme_mode_system
+        AppThemeMode.LIGHT -> R.string.theme_mode_light
+        AppThemeMode.DARK -> R.string.theme_mode_dark
     }
 }

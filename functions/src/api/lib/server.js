@@ -8,6 +8,7 @@ import { mountAuthPolicyRoutes } from "./http/policy.route.js";
 import { mountPhoneCheckRoutes } from "./http/policy.js";
 import { mountFxRoutes } from "./http/fx.route.js";
 import { mountPaymentsRoutes, mountPaymentsWebhookRoute } from "./http/payment.route.js";
+import { mountAdminRoutes } from "./http/admin.route.js";
 import { facebookDataDeletionHandler } from "./facebookDataDeletion.js";
 import { requireAppCheck } from "./config/appcheck.js";
 import { checkEmailOrPhone } from "./checkEmailOrPhone.js";
@@ -26,6 +27,7 @@ export function buildApp() {
     mountFxRoutes(app);
     mountPhoneCheckRoutes(app);
     mountPaymentsRoutes(app);
+    mountAdminRoutes(app);
     app.use(bodyParser.text({ type: "*/*" }));
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());

@@ -1,5 +1,7 @@
 export type GoogleAddressValidationLookupInput = {
-  house: string;
+  line1: string;
+  city: string;
+  stateOrRegion: string;
   postcode: string;
   country: string;
 };

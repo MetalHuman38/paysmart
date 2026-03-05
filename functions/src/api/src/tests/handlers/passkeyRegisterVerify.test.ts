@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const verifyIdToken = vi.fn();
 const completeRegistration = vi.fn();
+const createIfMissing = vi.fn();
+const update = vi.fn();
 
 vi.mock("../../dependencies.js", () => ({
   initDeps: () => ({
@@ -15,6 +17,10 @@ vi.mock("../../infrastructure/di/authContainer.js", () => ({
   authContainer: () => ({
     passkeys: {
       completeRegistration,
+    },
+    securitySettings: {
+      createIfMissing,
+      update,
     },
   }),
 }));
@@ -85,6 +91,14 @@ describe("passkeyRegisterVerifyHandler", () => {
     expect(res.statusCode).toBe(200);
     expect(verifyIdToken).toHaveBeenCalledWith("token-1");
     expect(completeRegistration).toHaveBeenCalledWith("uid-1", "{\"id\":\"cred-1\"}");
+    expect(createIfMissing).toHaveBeenCalledWith("uid-1");
+    expect(update).toHaveBeenCalledWith(
+      "uid-1",
+      expect.objectContaining({
+        passkeyEnabled: true,
+        hasSkippedPasskeyEnrollmentPrompt: false,
+      })
+    );
     expect(res.payload).toEqual({
       verified: true,
       credentialId: "cred-1",

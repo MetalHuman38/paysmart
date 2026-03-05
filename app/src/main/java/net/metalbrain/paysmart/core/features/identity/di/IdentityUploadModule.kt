@@ -8,7 +8,7 @@ import net.metalbrain.paysmart.core.features.identity.config.ConfigurableIdentit
 import net.metalbrain.paysmart.core.features.identity.config.ConfigurableIdentityImageAuthenticityDetector
 import net.metalbrain.paysmart.core.features.identity.config.HttpRemoteIdentityDocumentTextExtractionApi
 import net.metalbrain.paysmart.core.features.identity.config.HttpRemoteIdentityImageAttestationApi
-import net.metalbrain.paysmart.core.features.identity.provider.FallbackDeviceAttestationProvider
+import net.metalbrain.paysmart.core.features.identity.provider.ConfigurableDeviceAttestationProvider
 import net.metalbrain.paysmart.core.features.identity.provider.IdentityDocumentTextExtractor
 import net.metalbrain.paysmart.core.features.identity.provider.IdentityImageAuthenticityDetector
 import net.metalbrain.paysmart.core.features.identity.provider.RemoteIdentityDocumentTextExtractionApi
@@ -39,7 +39,7 @@ abstract class IdentityUploadModule {
     @Binds
     @Singleton
     abstract fun bindDeviceAttestationProvider(
-        impl: FallbackDeviceAttestationProvider
+        impl: ConfigurableDeviceAttestationProvider
     ): DeviceAttestationProvider
 
     @Binds

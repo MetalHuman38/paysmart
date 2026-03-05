@@ -104,6 +104,14 @@ fun CreateLocalPasswordScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     AuthScreenSubtitle(text = stringResource(R.string.enter_secure_password))
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = "This password is stored locally for secure account recovery. Never share it. PaySmart will never ask for it.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 

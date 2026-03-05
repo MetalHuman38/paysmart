@@ -101,4 +101,28 @@ describe("createAddMoneySessionHandler", () => {
       })
     );
   });
+
+  it("returns 503 with a specific error code when Stripe config is missing", async () => {
+    verifyIdToken.mockResolvedValue({ uid: "uid-1" });
+    createSession.mockRejectedValue(new Error("STRIPE_PUBLISHABLE_KEY is not configured"));
+
+    const req = {
+      headers: {
+        authorization: "Bearer token-1",
+      },
+      body: {
+        amountMinor: 1000,
+        currency: "GBP",
+      },
+    } as TestReq;
+    const res = createResponseRecorder();
+
+    await createAddMoneySessionHandler(req as any, res as any);
+
+    expect(res.statusCode).toBe(503);
+    expect(res.payload).toEqual({
+      error: "Payments service is not configured",
+      code: "MISSING_STRIPE_PUBLISHABLE_KEY",
+    });
+  });
 });

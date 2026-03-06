@@ -8,6 +8,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * Unit tests for [CountryCapabilityCatalog], ensuring correct retrieval of default profiles,
+ * proper mapping of capability keys, and accurate generation of top-up policy hints based
+ * on available payment methods.
+ */
 class CountryCapabilityCatalogTest {
 
     @Test

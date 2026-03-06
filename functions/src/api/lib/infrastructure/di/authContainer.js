@@ -9,6 +9,7 @@ import { FirestoreIdentityUploadRepository } from "../firestore/FirestoreIdentit
 import { FirestoreIdentityProviderRepository } from "../firestore/FirestoreIdentityProviderRepository.js";
 import { FirestoreAddMoneyRepository } from "../firestore/FirestoreAddMoneyRepository.js";
 import { FirestoreAddMoneyFlutterwaveRepository } from "../firestore/FirestoreAddMoneyFlutterwaveRepository.js";
+import { FirestoreInvoiceRepository } from "../firestore/FirestoreInvoiceRepository.js";
 import { FirestorePasskeyRepository } from "../firestore/FirestorePasskeyRepository.js";
 import { GoogleCloudAccessTokenProvider } from "../../services/googleCloudAccessTokenProvider.js";
 import { PlayIntegrityVerifier } from "../../services/playIntegrityVerifier.js";
@@ -54,6 +55,7 @@ export function authContainer() {
     const passkeyRepo = new FirestorePasskeyRepository(firestore);
     const addMoneyRepo = new FirestoreAddMoneyRepository(firestore, stripePaymentsService, config.stripePublishableKey, config.stripeAllowedTopupCurrencies, config.stripeMinimumTopupAmountMinor);
     const addMoneyFlutterwaveRepo = new FirestoreAddMoneyFlutterwaveRepository(firestore, flutterwavePaymentsService, config.flutterwavePublicKey, config.flutterwaveAllowedTopupCurrencies, config.flutterwaveMinimumTopupAmountMinor);
+    const invoiceRepo = new FirestoreInvoiceRepository(firestore, storageBucket);
     const identityTextExtractionService = new GoogleVisionTextExtractionService(undefined, config.identityOcrEnabled);
     const passkeyService = new PasskeyService(passkeyRepo, {
         enabled: config.passkeyEnabled,
@@ -74,6 +76,7 @@ export function authContainer() {
         passkeys: passkeyService,
         addMoney: addMoneyRepo,
         addMoneyFlutterwave: addMoneyFlutterwaveRepo,
+        invoices: invoiceRepo,
     };
 }
 //# sourceMappingURL=authContainer.js.map

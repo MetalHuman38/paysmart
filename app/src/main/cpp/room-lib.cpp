@@ -44,6 +44,9 @@ Java_net_metalbrain_paysmart_data_native_RoomNativeBridge_encryptString(
     }
 }
 
+/**
+ * Decrypts a Room payload previously encrypted via AES-GCM in the JNI layer.
+ */
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_net_metalbrain_paysmart_data_native_RoomNativeBridge_decryptString(
@@ -62,12 +65,12 @@ Java_net_metalbrain_paysmart_data_native_RoomNativeBridge_decryptString(
         return env->NewStringUTF(decrypted.c_str());
 
     } catch (const std::invalid_argument& e) {
-        env->ReleaseStringUTFChars(cipher, k);
+        env->ReleaseStringUTFChars(cipher, c);
         env->ReleaseStringUTFChars(key, k);
         jclass exClass = env->FindClass("java/lang/IllegalArgumentException");
         env->ThrowNew(exClass, e.what());
         return nullptr;
-} catch (const std::exception& e) {
+    } catch (const std::exception& e) {
         env->ReleaseStringUTFChars(cipher, c);
         env->ReleaseStringUTFChars(key, k);
         jclass exClass = env->FindClass("java/lang/RuntimeException");
@@ -78,6 +81,9 @@ Java_net_metalbrain_paysmart_data_native_RoomNativeBridge_decryptString(
 
 
 
+/**
+ * Derives a Room encryption key from passphrase + salt using PBKDF2-SHA256.
+ */
 // Room Derived Key
 extern "C"
 JNIEXPORT jbyteArray JNICALL

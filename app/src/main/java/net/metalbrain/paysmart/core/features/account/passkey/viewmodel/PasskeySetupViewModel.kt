@@ -29,16 +29,19 @@ class PasskeySetupViewModel @Inject constructor(
     val uiState: StateFlow<PasskeySetupUiState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            val local = securityPreference.loadLocalSecurityState()
-            _uiState.update { it.copy(isRegistered = local.passkeyEnabled) }
-        }
+        bootstrapState()
     }
 
     fun registerPasskey(activity: Activity) {
         if (_uiState.value.isLoading) return
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, statusMessage = "Preparing passkey registration...") }
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    statusMessage = "Preparing passkey registration..."
+                )
+            }
             try {
                 val session = authRepository.getCurrentSessionOrThrow()
                 val userName = session.user.email.orEmpty().ifBlank { session.user.uid }
@@ -53,6 +56,7 @@ class PasskeySetupViewModel @Inject constructor(
                         it.copy(statusMessage = "Preparing passkey registration (rp.id=$rpId)...")
                     }
                 }
+
                 val credentialJson = passkeyCredentialManager
                     .createPasskey(activity, options)
                     .getOrThrow()
@@ -64,6 +68,8 @@ class PasskeySetupViewModel @Inject constructor(
                 }
 
                 val synced = passkeyApiRepository.setPasskeyEnabled(true).getOrElse { false }
+                saveLocalPasskeyState(enabled = true)
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -76,7 +82,7 @@ class PasskeySetupViewModel @Inject constructor(
                         error = null
                     )
                 }
-                saveLocalPasskeyState(enabled = true)
+                refreshCredentialsInternal(silent = true)
             } catch (error: Exception) {
                 val rawMessage = error.localizedMessage ?: "Unable to register passkey"
                 val rpIdFromState = parseRpIdFromStatus(_uiState.value.statusMessage)
@@ -97,38 +103,117 @@ class PasskeySetupViewModel @Inject constructor(
                 it.copy(
                     isLoading = true,
                     error = null,
-                    statusMessage = "Disabling passkey..."
+                    statusMessage = "Disabling passkey and revoking credentials..."
                 )
             }
 
+            val credentialsToRevoke = passkeyApiRepository.listCredentials().getOrElse { emptyList() }
+            var revokedCount = 0
+            var failedCount = 0
+
+            credentialsToRevoke.forEach { credential ->
+                val revoked = passkeyApiRepository.revokeCredential(credential.credentialId).getOrElse { false }
+                if (revoked) revokedCount += 1 else failedCount += 1
+            }
+
             val session = authRepository.getCurrentSession()
-            if (session != null) {
-                val synced = passkeyApiRepository.setPasskeyEnabled(false).getOrElse {
-                    false
-                }
-                if (!synced) {
-                    _uiState.update {
-                        it.copy(error = "Saved locally. Server sync pending.")
-                    }
-                }
+            val synced = if (session == null) {
+                false
+            } else {
+                passkeyApiRepository.setPasskeyEnabled(false).getOrElse { false }
             }
 
             saveLocalPasskeyState(enabled = false)
+            val refreshedCredentials = passkeyApiRepository.listCredentials().getOrElse { emptyList() }
+
+            val baseStatus = when {
+                credentialsToRevoke.isEmpty() -> "Passkey disabled for this account."
+                failedCount == 0 -> "Passkey disabled. Revoked $revokedCount credential(s)."
+                else -> "Passkey disabled with partial revoke: $revokedCount succeeded, $failedCount failed."
+            }
+
             _uiState.update {
                 it.copy(
                     isLoading = false,
                     isRegistered = false,
-                    statusMessage = "Passkey disabled for this account.",
-                    error = it.error
+                    credentials = refreshedCredentials,
+                    activeRevokeCredentialId = null,
+                    statusMessage = if (!synced && session != null) {
+                        "$baseStatus Server sync pending."
+                    } else {
+                        baseStatus
+                    },
+                    error = if (failedCount > 0) {
+                        "Some credentials could not be revoked. Try again from device list."
+                    } else {
+                        null
+                    }
                 )
             }
+        }
+    }
+
+    fun revokeCredential(credentialId: String) {
+        if (_uiState.value.isLoading || _uiState.value.activeRevokeCredentialId != null) return
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    activeRevokeCredentialId = credentialId,
+                    error = null,
+                    statusMessage = null
+                )
+            }
+
+            val revoked = passkeyApiRepository.revokeCredential(credentialId).getOrElse { false }
+            if (!revoked) {
+                _uiState.update {
+                    it.copy(
+                        activeRevokeCredentialId = null,
+                        error = "Unable to revoke credential. Try again."
+                    )
+                }
+                return@launch
+            }
+
+            val refreshedCredentials = passkeyApiRepository.listCredentials().getOrElse { emptyList() }
+            val allRemoved = refreshedCredentials.isEmpty()
+            if (allRemoved && _uiState.value.isRegistered) {
+                passkeyApiRepository.setPasskeyEnabled(false)
+                saveLocalPasskeyState(enabled = false)
+            }
+
+            _uiState.update {
+                it.copy(
+                    activeRevokeCredentialId = null,
+                    isRegistered = if (allRemoved) false else it.isRegistered,
+                    credentials = refreshedCredentials,
+                    statusMessage = if (allRemoved) {
+                        "All passkeys removed from this account."
+                    } else {
+                        "Credential revoked."
+                    },
+                    error = null
+                )
+            }
+        }
+    }
+
+    fun refreshCredentialList() {
+        viewModelScope.launch {
+            refreshCredentialsInternal(silent = false)
         }
     }
 
     fun verifyPasskey(activity: Activity) {
         if (_uiState.value.isLoading) return
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, statusMessage = "Verifying passkey...") }
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    statusMessage = "Verifying passkey..."
+                )
+            }
             try {
                 val options = passkeyApiRepository.fetchAuthenticationOptions().getOrThrow()
                 val assertionJson = passkeyCredentialManager.getAssertion(activity, options).getOrThrow()
@@ -157,6 +242,38 @@ class PasskeySetupViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.update { it.copy(error = null) }
+    }
+
+    private fun bootstrapState() {
+        viewModelScope.launch {
+            val local = securityPreference.loadLocalSecurityState()
+            _uiState.update { it.copy(isRegistered = local.passkeyEnabled) }
+            refreshCredentialsInternal(silent = true)
+        }
+    }
+
+    private suspend fun refreshCredentialsInternal(silent: Boolean) {
+        val session = authRepository.getCurrentSession()
+        if (session == null) {
+            _uiState.update { it.copy(credentials = emptyList()) }
+            return
+        }
+
+        passkeyApiRepository.listCredentials()
+            .onSuccess { credentials ->
+                _uiState.update {
+                    it.copy(
+                        credentials = credentials
+                    )
+                }
+            }
+            .onFailure { error ->
+                if (!silent) {
+                    _uiState.update {
+                        it.copy(error = error.localizedMessage ?: "Unable to load credentials")
+                    }
+                }
+            }
     }
 
     private fun parseRpId(optionsJson: String): String? {

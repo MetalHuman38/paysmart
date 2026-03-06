@@ -41,6 +41,7 @@ facebook-login = "18.1.3"
 playServicesMaps = "20.0.0"
 cameraX = "1.5.3"
 stripeAndroid = "22.8.1"
+stripeJava = "31.4.0"
 playServicesAnalytics = "18.1.1"
 playIntegrity = "1.6.0"
 
@@ -139,6 +140,7 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 stripe-android = { group = "com.stripe", name = "stripe-android", version.ref = "stripeAndroid" }
+stripe-java = { group = "com.stripe", name = "stripe-java", version.ref = "stripeJava" }
 play-services-analytics = { group = "com.google.android.gms", name = "play-services-analytics", version.ref = "playServicesAnalytics" }
 google-play-integrity = { group = "com.google.android.play", name = "integrity", version.ref = "playIntegrity" }
 firebase-performance = { group = "com.google.firebase", name = "firebase-perf" }

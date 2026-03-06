@@ -121,6 +121,7 @@ functions/.vscode/
 functions/.env.paysmart-7ee79
 functions/.env.sample
 functions/.gcloudignore
+sandbox/local.env.properties
 
 .env
 

@@ -26,7 +26,8 @@ fun EmptyTransactionsBlock(onAddMoneyClick: () -> Unit) {
         Text(
             text = stringResource(R.string.home_no_transaction_activity_title),
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = stringResource(R.string.home_no_transaction_activity_subtitle),
@@ -38,8 +39,9 @@ fun EmptyTransactionsBlock(onAddMoneyClick: () -> Unit) {
             text = stringResource(R.string.add_money),
             onClick = onAddMoneyClick,
             containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onSurface,
             borderColor = MaterialTheme.colorScheme.primary
         )
     }
 }
+

@@ -16,6 +16,22 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class PasskeySignInVerificationResult(
+    val verified: Boolean,
+    val customToken: String,
+    val uid: String?,
+    val credentialId: String?
+)
+
+data class PasskeyCredentialItem(
+    val credentialId: String,
+    val deviceType: String?,
+    val backedUp: Boolean,
+    val transports: List<String>,
+    val createdAtMs: Long,
+    val updatedAtMs: Long
+)
+
 @Singleton
 class PasskeyApiRepository @Inject constructor(
     private val authRepository: AuthRepository,
@@ -82,6 +98,37 @@ class PasskeyApiRepository @Inject constructor(
         }
     }
 
+    suspend fun fetchSignInOptions(): Result<String> = runCatching {
+        post(
+            url = config.passkeySignInOptionsUrl,
+            body = "{}",
+            includeAuth = false
+        ) { payload ->
+            JSONObject(payload).getJSONObject("options").toString()
+        }
+    }
+
+    suspend fun verifySignIn(credentialJson: String): Result<PasskeySignInVerificationResult> =
+        runCatching {
+            val body = JSONObject()
+                .put("credentialJson", credentialJson)
+                .toString()
+
+            post(
+                url = config.passkeySignInVerifyUrl,
+                body = body,
+                includeAuth = false
+            ) { payload ->
+                val json = JSONObject(payload)
+                PasskeySignInVerificationResult(
+                    verified = json.optBoolean("verified", false),
+                    customToken = json.optString("customToken").trim(),
+                    uid = json.optString("uid").takeIf { it.isNotBlank() },
+                    credentialId = json.optString("credentialId").takeIf { it.isNotBlank() }
+                )
+            }
+        }
+
     suspend fun setPasskeyEnabled(passkeyEnabled: Boolean): Result<Boolean> = runCatching {
         val body = JSONObject()
             .put("passkeyEnabled", passkeyEnabled)
@@ -95,19 +142,98 @@ class PasskeyApiRepository @Inject constructor(
         }
     }
 
+    suspend fun revokeCredential(credentialId: String): Result<Boolean> = runCatching {
+        val body = JSONObject()
+            .put("credentialId", credentialId)
+            .toString()
+
+        post(
+            url = config.passkeyRevokeUrl,
+            body = body
+        ) { payload ->
+            JSONObject(payload).optBoolean("revoked", false)
+        }
+    }
+
+    suspend fun listCredentials(): Result<List<PasskeyCredentialItem>> = runCatching {
+        get(
+            url = config.passkeyListUrl
+        ) { payload ->
+            val json = JSONObject(payload)
+            val items = json.optJSONArray("credentials")
+            if (items == null) {
+                emptyList()
+            } else {
+                List(items.length()) { index ->
+                    val item = items.optJSONObject(index) ?: JSONObject()
+                    val transportsArray = item.optJSONArray("transports")
+                    val transports = if (transportsArray == null) {
+                        emptyList()
+                    } else {
+                        List(transportsArray.length()) { transportIndex ->
+                            transportsArray.optString(transportIndex).trim()
+                        }.filter { it.isNotBlank() }
+                    }
+
+                    PasskeyCredentialItem(
+                        credentialId = item.optString("credentialId").trim(),
+                        deviceType = item.optString("deviceType").trim().ifBlank { null },
+                        backedUp = item.optBoolean("backedUp", false),
+                        transports = transports,
+                        createdAtMs = item.optLong("createdAtMs", 0L),
+                        updatedAtMs = item.optLong("updatedAtMs", 0L)
+                    )
+                }.filter { it.credentialId.isNotBlank() }
+            }
+        }
+    }
+
     private suspend fun <T> post(
         url: String,
         body: String,
+        includeAuth: Boolean = true,
         onSuccess: (String) -> T
     ): T {
-        val session = authRepository.getCurrentSessionOrThrow()
         return withContext(Dispatchers.IO) {
-            val request = Request.Builder()
+            val requestBuilder = Request.Builder()
                 .url(url)
-                .header("Authorization", "Bearer ${session.idToken}")
                 .attachOptionalAppCheckToken(appCheckTokenProvider)
                 .post(body.toRequestBody("application/json".toMediaTypeOrNull()))
-                .build()
+
+            if (includeAuth) {
+                val session = authRepository.getCurrentSessionOrThrow()
+                requestBuilder.header("Authorization", "Bearer ${session.idToken}")
+            }
+
+            val request = requestBuilder.build()
+
+            client.newCall(request).execute().use { response ->
+                val raw = response.body?.string().orEmpty()
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(parseErrorMessage(raw, "Passkey request failed"))
+                }
+                onSuccess(raw)
+            }
+        }
+    }
+
+    private suspend fun <T> get(
+        url: String,
+        includeAuth: Boolean = true,
+        onSuccess: (String) -> T
+    ): T {
+        return withContext(Dispatchers.IO) {
+            val requestBuilder = Request.Builder()
+                .url(url)
+                .attachOptionalAppCheckToken(appCheckTokenProvider)
+                .get()
+
+            if (includeAuth) {
+                val session = authRepository.getCurrentSessionOrThrow()
+                requestBuilder.header("Authorization", "Bearer ${session.idToken}")
+            }
+
+            val request = requestBuilder.build()
 
             client.newCall(request).execute().use { response ->
                 val raw = response.body?.string().orEmpty()

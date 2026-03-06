@@ -17,7 +17,8 @@ export const api = onRequest(
       "FLUTTERWAVE_PUBLIC_KEY",
       "FLUTTERWAVE_WEBHOOK_SECRET_HASH",
       "FLUTTER_WAVE_CLIENT_ID",
-      "FLUTTER_WAVE_CLIENT_SECRET"
+      "FLUTTER_WAVE_CLIENT_SECRET",
+      "INVOICE_PDF_TASK_TOKEN"
     ],
     cors: false,
   },

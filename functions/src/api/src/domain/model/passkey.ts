@@ -11,8 +11,28 @@ export type StoredPasskeyCredential = {
   updatedAtMs: number;
 };
 
+export type PasskeyCredentialSummary = Pick<
+  StoredPasskeyCredential,
+  | "credentialId"
+  | "deviceType"
+  | "backedUp"
+  | "transports"
+  | "createdAtMs"
+  | "updatedAtMs"
+>;
+
 export type StoredPasskeyChallenge = {
   kind: PasskeyChallengeKind;
   challenge: string;
   expiresAtMs: number;
+};
+
+export type StoredPasskeySignInChallenge = {
+  challenge: string;
+  expiresAtMs: number;
+};
+
+export type PasskeyCredentialOwner = {
+  uid: string;
+  credential: StoredPasskeyCredential;
 };

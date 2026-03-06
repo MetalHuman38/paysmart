@@ -2,27 +2,29 @@ package net.metalbrain.paysmart.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Core brand palette (green + off-white)
-val PaySmartGreen = Color(0xFF119C6B)
-val PaySmartGreenDark = Color(0xFF0B7A53)
-val PaySmartGreenLight = Color(0xFFBEEEDC)
-val PaySmartAccent = Color(0xFF1FB981)
+// Brand palette
+val TranquilWaters = Color(0xFF1F363D)
+val LightSteel = Color(0xFFE9ECEF)
+val FreshGreen = Color(0xFF52B788)
+val ForestGreen = Color(0xFF49A078)
+val DeepBlueOcean = Color(0xFF065A60)
 
-val PaySmartOffWhite = Color(0xFFF8FAFC)
-val PaySmartSeaWhite = Color(0xFFF1F7F4)
-val PaySmartSurface = Color(0xFFFDFEFD)
+// Light surfaces and text
+val PaySmartSurface = Color(0xFFF7F9FB)
 val PaySmartSurfaceElevated = Color(0xFFFFFFFF)
-val PaySmartSurfaceTint = Color(0xFFEAF4EF)
+val PaySmartSurfaceTint = Color(0xFFDDE4E8)
+val PaySmartTextPrimary = TranquilWaters
+val PaySmartTextSecondary = Color(0xFF4F646A)
+val PaySmartOutline = Color(0xFF91A2A8)
 
-val PaySmartTextPrimary = Color(0xFF15231D)
-val PaySmartTextSecondary = Color(0xFF4A5A53)
-val PaySmartOutline = Color(0xFFB7C8BF)
+// Dark surfaces and text
+val PaySmartDarkBackground = Color(0xFF102127)
+val PaySmartDarkSurface = Color(0xFF132A31)
+val PaySmartDarkSurfaceElevated = Color(0xFF1B353D)
+val PaySmartDarkOnSurface = Color(0xFFE6ECEF)
+val PaySmartDarkOnSurfaceVariant = Color(0xFFB9C7CC)
+val PaySmartDarkOutline = Color(0xFF688087)
 
 val PaySmartError = Color(0xFFBA1A1A)
 val PaySmartErrorContainer = Color(0xFFFFDAD6)
 val PaySmartOnErrorContainer = Color(0xFF410002)
-
-// Deeper, neutral-dark foundation for better readability in auth flows.
-val PaySmartDarkBackground = Color(0xFF0B0F14)
-val PaySmartDarkSurface = Color(0xFF10151C)
-val PaySmartDarkSurfaceElevated = Color(0xFF171E27)

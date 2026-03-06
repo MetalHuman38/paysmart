@@ -3,6 +3,7 @@ package net.metalbrain.paysmart.core.features.referral.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,19 +24,21 @@ fun ReferralActionButtons(
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         PrimaryButton(
-            text = if (isSubmitting) {
-                stringResource(R.string.common_processing)
-            } else {
-                stringResource(R.string.referral_submit_action)
-            },
+            text = stringResource(R.string.referral_submit_action),
             onClick = onSubmit,
             enabled = canSubmit,
+            isLoading = isSubmitting,
+            loadingText = stringResource(R.string.common_processing),
             modifier = Modifier.fillMaxWidth()
         )
         OutlinedButton(
             text = stringResource(R.string.referral_no_code_action),
             onClick = onNoCode,
+            enabled = !isSubmitting,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            borderColor = MaterialTheme.colorScheme.primary,
             modifier = Modifier.fillMaxWidth()
         )
     }
 }
+

@@ -56,6 +56,14 @@ fun HomeScreen(
                 onTransactionsClick = {
                     navController.navigate(Screen.Transactions.route)
                 },
+                onCreateInvoiceClick = {
+                    navController.navigate(
+                        Screen.FeatureGate.routeWithArgs(
+                            feature = FeatureKey.CREATE_INVOICE.id,
+                            resumeRoute = Screen.InvoiceFlow.route
+                        )
+                    )
+                },
                 onSendMoneyClick = {
                     navController.navigate(
                         Screen.FeatureGate.routeWithArgs(

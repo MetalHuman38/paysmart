@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
 
 object ButtonTokens {
-    val height = 52.dp
-    val cornerRadius = 14.dp
+    val height = Dimens.buttonHeight
+    val cornerRadius = Dimens.cornerRadius
     val borderWidth = 1.dp
-    val contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+    val contentPadding = PaddingValues(
+        horizontal = Dimens.space8,
+        vertical = Dimens.space6
+    )
 }

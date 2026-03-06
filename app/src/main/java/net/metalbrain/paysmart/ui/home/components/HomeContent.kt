@@ -5,20 +5,27 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.components.AccountsHeader
 import net.metalbrain.paysmart.core.features.account.profile.card.ProfileCompletionCard
@@ -46,6 +53,7 @@ fun HomeContent(
     onProfileClick: () -> Unit,
     onReferralClick: () -> Unit,
     onTransactionsClick: () -> Unit,
+    onCreateInvoiceClick: () -> Unit,
     onSendMoneyClick: () -> Unit,
     onBalanceCardClick: () -> Unit,
     onRewardCardClick: () -> Unit,
@@ -66,12 +74,14 @@ fun HomeContent(
     isBalanceVisible: Boolean,
     onToggleBalanceVisibility: () -> Unit
 ) {
-    val availableServices = remember(capabilities, localSettings) {
-        resolveAvailableServices(
-            capabilities = capabilities,
-            localSettings = localSettings
-        )
-    }
+    val availableServices = resolveAvailableServices(
+        capabilities = capabilities,
+        localSettings = localSettings,
+        createInvoiceTitle = stringResource(R.string.home_service_create_invoice),
+        onCreateInvoiceClick = onCreateInvoiceClick,
+        onSendMoneyClick = onSendMoneyClick,
+        onAddMoneyClick = onAddMoneyClick
+    )
     val setupSecurity = localSettings?.takeIf { settings ->
         !settings.hasCompletedEmailVerification ||
             !settings.hasCompletedAddress ||
@@ -80,7 +90,7 @@ fun HomeContent(
 
     LazyColumn(
         modifier = Modifier.padding(horizontal = Dimens.mediumScreenPadding),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        verticalArrangement = Arrangement.spacedBy(Dimens.space10)
     ) {
         item {
             HomeTopBarContainer(
@@ -99,7 +109,7 @@ fun HomeContent(
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(Dimens.space6)
             ) {
                 HomeBalanceSummaryCard(
                     isBalanceVisible = isBalanceVisible,
@@ -120,7 +130,7 @@ fun HomeContent(
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(Dimens.space4),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedButton(
@@ -128,7 +138,7 @@ fun HomeContent(
                     modifier = Modifier.weight(1f),
                     text = stringResource(id = R.string.send_money),
                     containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                     borderColor = MaterialTheme.colorScheme.primary
                 )
 
@@ -155,25 +165,18 @@ fun HomeContent(
             Text(
                 text = stringResource(R.string.home_services_title),
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
 
         item {
-            if (availableServices.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.home_services_unavailable),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                    items(
-                        items = availableServices,
-                        key = { service: CapabilityItem -> service.key.name + service.title }
-                    ) { service: CapabilityItem ->
-                        ServiceItemCard(service = service)
-                    }
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(Dimens.space10)) {
+                items(
+                    items = availableServices,
+                    key = { service: HomeServiceTile -> service.id }
+                ) { service: HomeServiceTile ->
+                    ServiceItemCard(service = service)
                 }
             }
         }
@@ -195,7 +198,7 @@ fun HomeContent(
                 Column(modifier = Modifier.fillMaxWidth()) {
                     TransactionItem(transaction = transaction)
                     HorizontalDivider(
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier.padding(top = Dimens.smallSpacing),
                         color = MaterialTheme.colorScheme.surfaceVariant
                     )
                 }
@@ -205,11 +208,12 @@ fun HomeContent(
 
 
         item {
-            Spacer(modifier = Modifier.padding(bottom = 20.dp))
+            Spacer(modifier = Modifier.height(Dimens.space10))
             Text(
                 text = stringResource(R.string.home_account_information_title),
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
 
@@ -222,17 +226,19 @@ fun HomeContent(
                 onViewRatesClick = onViewRatesClick,
                 onViewAllLimitsClick = onViewAllLimitsClick
             )
-            Spacer(modifier = Modifier.padding(bottom = 20.dp))
+            Spacer(modifier = Modifier.height(Dimens.space10))
         }
     }
 }
 
 private fun resolveAvailableServices(
     capabilities: List<CapabilityItem>,
-    localSettings: LocalSecuritySettingsModel?
-): List<CapabilityItem> {
-    if (capabilities.isEmpty()) return emptyList()
-
+    localSettings: LocalSecuritySettingsModel?,
+    createInvoiceTitle: String,
+    onCreateInvoiceClick: () -> Unit,
+    onSendMoneyClick: () -> Unit,
+    onAddMoneyClick: () -> Unit
+): List<HomeServiceTile> {
     val sendAllowed = FeatureAccessPolicy.evaluate(
         feature = FeatureKey.SEND_MONEY,
         settings = localSettings
@@ -242,7 +248,16 @@ private fun resolveAvailableServices(
         settings = localSettings
     ).isAllowed
 
-    return capabilities.filter { item ->
+    val tiles = mutableListOf(
+        HomeServiceTile(
+            id = FeatureKey.CREATE_INVOICE.id,
+            title = createInvoiceTitle,
+            icon = Icons.Filled.Description,
+            onClick = onCreateInvoiceClick
+        )
+    )
+
+    capabilities.filter { item ->
         when (item.key) {
             CapabilityKey.SEND_INTERNATIONAL -> sendAllowed
             CapabilityKey.CARD_SPEND_ABROAD,
@@ -250,5 +265,37 @@ private fun resolveAvailableServices(
             CapabilityKey.RECEIVE_MONEY,
             CapabilityKey.EARN_RETURN -> addMoneyAllowed
         }
+    }.forEach { item ->
+        tiles += item.toHomeServiceTile(
+            onClick = when (item.key) {
+                CapabilityKey.SEND_INTERNATIONAL -> onSendMoneyClick
+                CapabilityKey.CARD_SPEND_ABROAD,
+                CapabilityKey.HOLD_AND_CONVERT,
+                CapabilityKey.RECEIVE_MONEY,
+                CapabilityKey.EARN_RETURN -> onAddMoneyClick
+            }
+        )
+    }
+
+    return tiles
+}
+
+private fun CapabilityItem.toHomeServiceTile(onClick: () -> Unit): HomeServiceTile {
+    return HomeServiceTile(
+        id = key.name,
+        title = title,
+        icon = key.icon(),
+        onClick = onClick
+    )
+}
+
+private fun CapabilityKey.icon(): ImageVector {
+    return when (this) {
+        CapabilityKey.SEND_INTERNATIONAL -> Icons.Filled.Public
+        CapabilityKey.CARD_SPEND_ABROAD -> Icons.Filled.CreditCard
+        CapabilityKey.HOLD_AND_CONVERT -> Icons.Filled.SwapHoriz
+        CapabilityKey.RECEIVE_MONEY -> Icons.Filled.AccountBalance
+        CapabilityKey.EARN_RETURN -> Icons.AutoMirrored.Filled.TrendingUp
     }
 }
+

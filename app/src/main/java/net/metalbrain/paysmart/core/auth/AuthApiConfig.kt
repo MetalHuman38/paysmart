@@ -1,5 +1,7 @@
 package net.metalbrain.paysmart.core.auth
 
+import android.net.Uri
+
 data class AuthApiConfig (
     val baseUrl: String,
     val checkPhoneOrEmail: String = "/auth/check-email-or-phone",
@@ -26,6 +28,15 @@ data class AuthApiConfig (
     val passkeyRegisterVerify: String = "/auth/passkeys/register/verify",
     val passkeyAuthenticateOptions: String = "/auth/passkeys/authenticate/options",
     val passkeyAuthenticateVerify: String = "/auth/passkeys/authenticate/verify",
+    val passkeyList: String = "/auth/passkeys/list",
+    val passkeyRevoke: String = "/auth/passkeys/revoke",
+    val passkeySignInOptions: String = "/auth/passkeys/signin/options",
+    val passkeySignInVerify: String = "/auth/passkeys/signin/verify",
+    val invoiceFinalize: String = "/invoices/finalize",
+    val invoiceList: String = "/invoices",
+    val invoiceById: String = "/invoices/{invoiceId}",
+    val invoiceQueuePdf: String = "/invoices/{invoiceId}/pdf",
+    val invoiceDownloadPdf: String = "/invoices/{invoiceId}/pdf/download",
     val addMoneySession: String = "/payments/add-money/session",
     val addMoneyFlutterwaveSession: String = "/payments/flutterwave/add-money/session",
     val setPassCodeEnabled: String = "/auth/setPassCodeEnabled",
@@ -89,6 +100,38 @@ data class AuthApiConfig (
     val passkeyAuthenticateOptionsUrl get() = "$apiBase$passkeyAuthenticateOptions"
 
     val passkeyAuthenticateVerifyUrl get() = "$apiBase$passkeyAuthenticateVerify"
+
+    val passkeyListUrl get() = "$apiBase$passkeyList"
+
+    val passkeyRevokeUrl get() = "$apiBase$passkeyRevoke"
+
+    val passkeySignInOptionsUrl get() = "$apiBase$passkeySignInOptions"
+
+    val passkeySignInVerifyUrl get() = "$apiBase$passkeySignInVerify"
+
+    val invoiceFinalizeUrl get() = "$apiBase$invoiceFinalize"
+    fun invoiceListUrl(limit: Int, cursor: String? = null): String {
+        val safeLimit = limit.coerceIn(1, 100)
+        val base = "$apiBase$invoiceList?limit=$safeLimit"
+        val cleanCursor = cursor?.trim().orEmpty()
+        return if (cleanCursor.isNotEmpty()) {
+            "$base&cursor=${Uri.encode(cleanCursor)}"
+        } else {
+            base
+        }
+    }
+
+    fun invoiceByIdUrl(invoiceId: String): String {
+        return "$apiBase$invoiceById".replace("{invoiceId}", Uri.encode(invoiceId.trim()))
+    }
+
+    fun invoiceQueuePdfUrl(invoiceId: String): String {
+        return "$apiBase$invoiceQueuePdf".replace("{invoiceId}", Uri.encode(invoiceId.trim()))
+    }
+
+    fun invoiceDownloadPdfUrl(invoiceId: String): String {
+        return "$apiBase$invoiceDownloadPdf".replace("{invoiceId}", Uri.encode(invoiceId.trim()))
+    }
 
     val addMoneySessionUrl get() = "$apiBase$addMoneySession"
     val addMoneyFlutterwaveSessionUrl get() = "$apiBase$addMoneyFlutterwaveSession"

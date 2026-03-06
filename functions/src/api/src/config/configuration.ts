@@ -3,11 +3,16 @@ import { Mailer } from "../services/mailer.js";
 import { ConsoleMailer } from "../services/consoleMailer.js";
 import { ResendMailer } from "../services/resendMailer.js";
 import {
+  normalizeAndroidPasskeyOrigin,
+  normalizePasskeyOrigin,
+} from "../utils/passkeyOrigin.js";
+import {
   RESEND_API_KEY,
   MAIL_FROM,
   VERIFY_URL,
   SEND_REAL_EMAILS,
 } from "./params.js";
+import { ensureLocalEnvLoaded } from "./localEnv.js";
 
 export type Config = {
   projectId: string;
@@ -50,6 +55,10 @@ export type Config = {
   flutterwaveVirtualAccountExpirySeconds: number;
   flutterwaveAllowedTopupCurrencies: Set<string>;
   flutterwaveMinimumTopupAmountMinor: number;
+  invoicePdfTaskQueue: string;
+  invoicePdfTaskLocation: string;
+  invoicePdfTaskTargetUrl: string;
+  invoicePdfTaskToken: string;
 
   getMailer(): Mailer;
   getVerifyUrl(): string;
@@ -121,16 +130,8 @@ function readNumber(name: string, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function normalizeAndroidPasskeyOrigin(raw: string): string {
-  const trimmed = raw.trim();
-  if (!trimmed) return "";
-  if (trimmed.startsWith("android:apk-key-hash:")) {
-    return trimmed;
-  }
-  return `android:apk-key-hash:${trimmed}`;
-}
-
 export function loadConfig(): Config {
+  ensureLocalEnvLoaded();
   const firebaseConfig = parseFirebaseConfig();
   const firebaseProjectId = stringValue(firebaseConfig.projectId);
   const firebaseStorageBucket = stringValue(firebaseConfig.storageBucket);
@@ -196,10 +197,15 @@ export function loadConfig(): Config {
       ),
     ].filter(Boolean)
   );
+  const webPasskeyOrigins = new Set(
+    Array.from(configuredPasskeyOrigins)
+      .map(normalizePasskeyOrigin)
+      .filter(Boolean)
+  );
   const passkeyExpectedOrigins =
-    configuredPasskeyOrigins.size > 0 || androidPasskeyOrigins.size > 0 ?
+    webPasskeyOrigins.size > 0 || androidPasskeyOrigins.size > 0 ?
       new Set([
-        ...Array.from(configuredPasskeyOrigins),
+        ...Array.from(webPasskeyOrigins),
         ...Array.from(androidPasskeyOrigins),
       ]) :
       passkeyRpId ?
@@ -316,6 +322,15 @@ export function loadConfig(): Config {
       "FLUTTERWAVE_MINIMUM_TOPUP_AMOUNT_MINOR",
       100
     ),
+    invoicePdfTaskQueue: (process.env.INVOICE_PDF_TASK_QUEUE || "").trim(),
+    invoicePdfTaskLocation: (
+      process.env.INVOICE_PDF_TASK_LOCATION ||
+      process.env.FUNCTION_REGION ||
+      process.env.FUNCTIONS_REGION ||
+      "europe-west2"
+    ).trim(),
+    invoicePdfTaskTargetUrl: (process.env.INVOICE_PDF_TASK_TARGET_URL || "").trim(),
+    invoicePdfTaskToken: (process.env.INVOICE_PDF_TASK_TOKEN || "").trim(),
 
     shouldSendRealEmails() {
       return SEND_REAL_EMAILS.value() === "true";

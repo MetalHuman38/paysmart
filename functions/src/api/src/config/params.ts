@@ -1,7 +1,4 @@
 import { defineSecret, defineString } from "firebase-functions/params";
-import * as dotenv from "dotenv";
-
-dotenv.config();
 
 // Secret — must be stored in Secret Manager
 // 🔐 Secrets (Secret Manager)

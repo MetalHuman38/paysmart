@@ -8,6 +8,11 @@ import net.metalbrain.paysmart.core.auth.appcheck.provider.AppCheckTokenProvider
 import net.metalbrain.paysmart.core.auth.appcheck.provider.FirebaseAppCheckTokenProvider
 import javax.inject.Singleton
 
+/**
+ * Dagger module that provides dependencies for App Check functionality.
+ * This module is installed in the [SingletonComponent] to ensure that the
+ * [AppCheckTokenProvider] is available throughout the application's lifecycle.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AppCheckModule {

@@ -1,6 +1,7 @@
 import { fxContainer } from "../infrastructure/di/fxContainer.js";
-export function createGetFxQuoteHandler(rateProvider = fxContainer().exchangeRateProvider) {
+export function createGetFxQuoteHandler(rateProvider) {
     return async function getFxQuoteHandler(req, res) {
+        const resolvedRateProvider = rateProvider ?? fxContainer().exchangeRateProvider;
         const sourceCurrency = normalizeCurrency(req.query.source || "USD");
         const targetCurrency = normalizeCurrency(req.query.target || "EUR");
         const amount = normalizeAmount(req.query.amount || "100");
@@ -12,7 +13,7 @@ export function createGetFxQuoteHandler(rateProvider = fxContainer().exchangeRat
             return res.status(400).json({ error: "invalid_amount" });
         }
         try {
-            const rateResult = await rateProvider.getRate(sourceCurrency, targetCurrency);
+            const rateResult = await resolvedRateProvider.getRate(sourceCurrency, targetCurrency);
             const methodFee = feeForMethod(method);
             const ourFee = 3.76;
             const totalFees = methodFee + ourFee;
@@ -58,7 +59,9 @@ export function createGetFxQuoteHandler(rateProvider = fxContainer().exchangeRat
         }
     };
 }
-export const getFxQuoteHandler = createGetFxQuoteHandler();
+export async function getFxQuoteHandler(req, res) {
+    return createGetFxQuoteHandler()(req, res);
+}
 function normalizeCurrency(value) {
     const normalized = value.trim().toUpperCase();
     return normalized.length === 3 ? normalized : "";

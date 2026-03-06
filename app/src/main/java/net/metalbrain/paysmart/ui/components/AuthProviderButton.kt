@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.ui.theme.ButtonTokens
 
 @Composable
 internal fun AuthProviderButton(
@@ -57,9 +58,10 @@ internal fun AuthProviderButton(
         enabled = enabled && !isLoading,
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp),
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(width = 1.dp, color = borderColor),
+            .height(ButtonTokens.height),
+        shape = RoundedCornerShape(ButtonTokens.cornerRadius),
+        border = BorderStroke(width = ButtonTokens.borderWidth, color = borderColor),
+        contentPadding = ButtonTokens.contentPadding,
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = containerColor,
             contentColor = contentColor,
@@ -76,7 +78,8 @@ internal fun AuthProviderButton(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = loadingText,
-                color = contentColor
+                color = contentColor,
+                style = MaterialTheme.typography.labelLarge
             )
         } else {
             Icon(
@@ -89,8 +92,8 @@ internal fun AuthProviderButton(
             Text(
                 text = text,
                 color = contentColor,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }

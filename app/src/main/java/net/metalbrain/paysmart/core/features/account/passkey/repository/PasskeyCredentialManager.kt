@@ -27,11 +27,13 @@ class PasskeyCredentialManager @Inject constructor() {
 
     suspend fun getAssertion(
         activity: Activity,
-        requestJson: String
+        requestJson: String,
+        preferImmediatelyAvailableCredentials: Boolean = false
     ): Result<String> = runCatching {
         val credentialManager = CredentialManager.create(activity)
         val request = GetCredentialRequest(
-            credentialOptions = listOf(GetPublicKeyCredentialOption(requestJson))
+            credentialOptions = listOf(GetPublicKeyCredentialOption(requestJson)),
+            preferImmediatelyAvailableCredentials = preferImmediatelyAvailableCredentials
         )
         val response = credentialManager.getCredential(activity, request)
         val publicKeyCredential = response.credential as? PublicKeyCredential

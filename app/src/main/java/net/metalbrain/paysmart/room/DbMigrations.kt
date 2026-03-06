@@ -162,4 +162,64 @@ object DbMigrations {
             )
         }
     }
+
+    val MIGRATION_9_10: Migration = object : Migration(9, 10) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS invoice_profile_draft (
+                    userId TEXT NOT NULL,
+                    fullName TEXT NOT NULL,
+                    address TEXT NOT NULL,
+                    badgeNumber TEXT NOT NULL,
+                    badgeExpiryDate TEXT NOT NULL,
+                    utrNumber TEXT NOT NULL,
+                    email TEXT NOT NULL,
+                    contactPhone TEXT NOT NULL,
+                    paymentMethod TEXT NOT NULL,
+                    accountNumber TEXT NOT NULL,
+                    sortCode TEXT NOT NULL,
+                    paymentInstructions TEXT NOT NULL,
+                    defaultHourlyRateInput TEXT NOT NULL,
+                    declaration TEXT NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    PRIMARY KEY(userId)
+                )
+                """.trimIndent()
+            )
+
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS invoice_venues (
+                    venueId TEXT NOT NULL,
+                    userId TEXT NOT NULL,
+                    venueName TEXT NOT NULL,
+                    venueAddress TEXT NOT NULL,
+                    defaultHourlyRateInput TEXT NOT NULL,
+                    createdAtMs INTEGER NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    PRIMARY KEY(venueId)
+                )
+                """.trimIndent()
+            )
+            db.execSQL(
+                "CREATE INDEX IF NOT EXISTS index_invoice_venues_userId ON invoice_venues(userId)"
+            )
+
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS invoice_weekly_draft (
+                    userId TEXT NOT NULL,
+                    selectedVenueId TEXT NOT NULL,
+                    invoiceDate TEXT NOT NULL,
+                    weekEndingDate TEXT NOT NULL,
+                    shiftsJson TEXT NOT NULL,
+                    hourlyRateInput TEXT NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    PRIMARY KEY(userId)
+                )
+                """.trimIndent()
+            )
+        }
+    }
 }

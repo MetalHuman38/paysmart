@@ -39,7 +39,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.ui.Screen
@@ -78,6 +77,7 @@ fun LoginScreen(
     val selectedCountry by viewModel.selectedCountry
     val phoneNumber = viewModel.phoneNumber
     val isAuthLoading = viewModel.loading
+    val isPasskeyLoading = viewModel.passkeyLoading
     val currentLang by languageViewModel.currentLanguage.collectAsState()
     var showCountryPicker by remember { mutableStateOf(false) }
     val backendError = remember { mutableStateOf<String?>(null) }
@@ -129,7 +129,7 @@ fun LoginScreen(
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .clickable { onBackClicked() }
-                    .padding(start = 8.dp)
+                    .padding(start = Dimens.smallSpacing)
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -143,7 +143,7 @@ fun LoginScreen(
             )
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(Dimens.largeSpacing))
 
         // 🔹 Title
         Text(
@@ -153,12 +153,12 @@ fun LoginScreen(
             color = MaterialTheme.colorScheme.onSurface
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Dimens.smallSpacing))
 
         Text(
             text = stringResource(R.string.enter_phone_to_associated_to_account),
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier.padding(bottom = Dimens.mediumSpacing),
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.95f)
         )
 
@@ -170,7 +170,7 @@ fun LoginScreen(
             onFlagClick = { showCountryPicker = true }
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(Dimens.mediumSpacing))
 
         backendError.value?.let { message ->
             BackendErrorModal(
@@ -201,13 +201,13 @@ fun LoginScreen(
             loadingText = stringResource(R.string.common_processing)
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Dimens.space6))
 
         // 🔹 Forgot Password
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .padding(vertical = Dimens.smallSpacing),
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
@@ -215,7 +215,7 @@ fun LoginScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(Dimens.space2))
             Text(
                 text = stringResource(R.string.recover_your_account),
                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -232,27 +232,27 @@ fun LoginScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .padding(vertical = Dimens.smallSpacing),
             verticalAlignment = Alignment.CenterVertically
         ) {
             HorizontalDivider(
                 modifier = Modifier.weight(1f),
-                thickness = 2.dp,
+                thickness = Dimens.space2 / 2,
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
             )
 
-            Spacer(modifier =  Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Dimens.smallSpacing))
 
             Text(
                 text = stringResource(R.string.or),
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            Spacer(modifier =  Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Dimens.smallSpacing))
 
             HorizontalDivider(
                 modifier = Modifier.weight(1f),
-                thickness = 2.dp,
+                thickness = Dimens.space2 / 2,
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
             )
         }
@@ -321,13 +321,18 @@ fun LoginScreen(
 
         PasskeySignBtn(
             modifier = Modifier.fillMaxWidth(),
-            enabled = !isAuthLoading,
-            isLoading = isAuthLoading,
+            enabled = !isAuthLoading && !isPasskeyLoading,
+            isLoading = isPasskeyLoading,
             loadingText = stringResource(R.string.common_processing),
             onClick = {
-                navController.navigate(Screen.PasskeySetup.route) {
-                    launchSingleTop = true
-                }
+                viewModel.signInWithPasskey(
+                    activity = activity,
+                    autoAttempt = false,
+                    onSuccess = onContinue,
+                    onError = { error ->
+                        backendError.value = extractSimpleBackendError(error)
+                    }
+                )
             }
         )
 
@@ -338,7 +343,7 @@ fun LoginScreen(
             variant = AccountSwitchVariant.DONT_HAVE_ACCOUNT,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(top = 8.dp),
+                .padding(top = Dimens.smallSpacing),
             onActionClick = onSignUp,
         )
 

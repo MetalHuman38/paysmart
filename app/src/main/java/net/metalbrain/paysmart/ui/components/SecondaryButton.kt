@@ -2,6 +2,7 @@ package net.metalbrain.paysmart.ui.components
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -9,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.ui.theme.ButtonTokens
 
 
 @Composable
@@ -33,8 +35,9 @@ fun SecondaryButton(
         enabled = enabled,
         modifier = modifier
             .fillMaxWidth()
-            .height(40.dp),
-        shape = MaterialTheme.shapes.small,
+            .height(ButtonTokens.height),
+        shape = RoundedCornerShape(ButtonTokens.cornerRadius),
+        contentPadding = ButtonTokens.contentPadding,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = resolvedContentColor,
@@ -46,9 +49,9 @@ fun SecondaryButton(
             text = text,
             color = resolvedContentColor,
             style = MaterialTheme.typography.labelLarge,
-            textAlign = TextAlign.Center,
             maxLines = textMaxLines,
             overflow = textOverflow,
+            textAlign = TextAlign.Center,
             softWrap = textMaxLines > 1
         )
     }

@@ -51,8 +51,8 @@ describe("loadConfig", () => {
     process.env = {
       ...ORIGINAL_ENV,
       PASSKEY_RP_ID: "pay-smart.net",
-      PASSKEY_EXPECTED_ORIGINS: "https://pay-smart.net",
-      PASSKEY_ANDROID_APK_KEY_HASHES: "abc123==,android:apk-key-hash:def456==",
+      PASSKEY_EXPECTED_ORIGINS: "https://pay-smart.net/,https://www.pay-smart.net",
+      PASSKEY_ANDROID_APK_KEY_HASHES: "abc123==,android:apk-key-hash:ab+c/==",
       PASSKEY_ANDROID_EXPECTED_ORIGINS: "android:apk-key-hash:ghi789==",
     };
 
@@ -61,8 +61,9 @@ describe("loadConfig", () => {
 
     expect(config.passkeyEnabled).toBe(true);
     expect(origins.has("https://pay-smart.net")).toBe(true);
-    expect(origins.has("android:apk-key-hash:abc123==")).toBe(true);
-    expect(origins.has("android:apk-key-hash:def456==")).toBe(true);
-    expect(origins.has("android:apk-key-hash:ghi789==")).toBe(true);
+    expect(origins.has("https://www.pay-smart.net")).toBe(true);
+    expect(origins.has("android:apk-key-hash:abc123")).toBe(true);
+    expect(origins.has("android:apk-key-hash:ab-c_")).toBe(true);
+    expect(origins.has("android:apk-key-hash:ghi789")).toBe(true);
   });
 });

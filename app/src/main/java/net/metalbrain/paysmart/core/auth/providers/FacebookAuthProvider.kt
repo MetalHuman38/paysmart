@@ -12,6 +12,13 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FacebookAuthProvider
 import kotlinx.coroutines.CompletableDeferred
 
+/**
+ * Helper object that simplifies Facebook Authentication integration with Firebase.
+ *
+ * This utility manages the Facebook [CallbackManager], provides a coroutine-based
+ * method for logging in with specific permissions, and includes convenience methods
+ * for checking the current login status and performing logout operations.
+ */
 object FacebookAuthProviderHelper {
 
     private val callbackManager: CallbackManager = CallbackManager.Factory.create()

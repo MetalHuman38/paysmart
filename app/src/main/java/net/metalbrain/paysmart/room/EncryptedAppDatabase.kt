@@ -5,6 +5,9 @@ import androidx.room.RoomDatabase
 import net.metalbrain.paysmart.room.doa.AuthSessionLogDao
 import net.metalbrain.paysmart.room.doa.CountryCapabilityDao
 import net.metalbrain.paysmart.room.doa.FxQuoteCacheDao
+import net.metalbrain.paysmart.room.doa.InvoiceProfileDraftDao
+import net.metalbrain.paysmart.room.doa.InvoiceVenueDao
+import net.metalbrain.paysmart.room.doa.InvoiceWeeklyDraftDao
 import net.metalbrain.paysmart.room.doa.SecureTokenDao
 import net.metalbrain.paysmart.room.doa.SendMoneyRecipientDraftDao
 import net.metalbrain.paysmart.room.doa.SecuritySettingsDao
@@ -13,6 +16,9 @@ import net.metalbrain.paysmart.room.doa.WalletBalanceDao
 import net.metalbrain.paysmart.room.entity.AuthSessionLogEntity
 import net.metalbrain.paysmart.room.entity.CountryCapabilityEntity
 import net.metalbrain.paysmart.room.entity.FxQuoteCacheEntity
+import net.metalbrain.paysmart.room.entity.InvoiceProfileDraftEntity
+import net.metalbrain.paysmart.room.entity.InvoiceVenueEntity
+import net.metalbrain.paysmart.room.entity.InvoiceWeeklyDraftEntity
 import net.metalbrain.paysmart.room.entity.SecureTokenEntity
 import net.metalbrain.paysmart.room.entity.SendMoneyRecipientDraftEntity
 import net.metalbrain.paysmart.room.entity.SecuritySettingsEntity
@@ -28,9 +34,12 @@ import net.metalbrain.paysmart.room.entity.WalletBalanceEntity
         UserProfileCacheEntity::class,
         FxQuoteCacheEntity::class,
         CountryCapabilityEntity::class,
-        SendMoneyRecipientDraftEntity::class
+        SendMoneyRecipientDraftEntity::class,
+        InvoiceProfileDraftEntity::class,
+        InvoiceVenueEntity::class,
+        InvoiceWeeklyDraftEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = true
 )
 abstract class EncryptedAppDatabase : RoomDatabase() {
@@ -49,5 +58,11 @@ abstract class EncryptedAppDatabase : RoomDatabase() {
     abstract fun countryCapabilityDao(): CountryCapabilityDao
 
     abstract fun sendMoneyRecipientDraftDao(): SendMoneyRecipientDraftDao
+
+    abstract fun invoiceProfileDraftDao(): InvoiceProfileDraftDao
+
+    abstract fun invoiceVenueDao(): InvoiceVenueDao
+
+    abstract fun invoiceWeeklyDraftDao(): InvoiceWeeklyDraftDao
 
 }

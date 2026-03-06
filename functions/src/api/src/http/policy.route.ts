@@ -26,7 +26,15 @@ import { passkeyRegisterOptionsHandler } from "../handlers/passkeyRegisterOption
 import { passkeyRegisterVerifyHandler } from "../handlers/passkeyRegisterVerify.js";
 import { passkeyAuthenticateOptionsHandler } from "../handlers/passkeyAuthenticateOptions.js";
 import { passkeyAuthenticateVerifyHandler } from "../handlers/passkeyAuthenticateVerify.js";
+import { passkeySignInOptionsHandler } from "../handlers/passkeySignInOptions.js";
+import { passkeySignInVerifyHandler } from "../handlers/passkeySignInVerify.js";
+import { passkeyListCredentialsHandler } from "../handlers/passkeyListCredentials.js";
+import { passkeyRevokeCredentialHandler } from "../handlers/passkeyRevokeCredential.js";
 import { setPasskeyEnabledHandler } from "../handlers/setPasskeyEnabled.js";
+import {
+  passkeySignInOptionsRateLimit,
+  passkeySignInVerifyRateLimit,
+} from "../middleware/passkeySignInRateLimit.js";
 
 export function mountAuthPolicyRoutes(app: Express) {
 
@@ -186,6 +194,40 @@ export function mountAuthPolicyRoutes(app: Express) {
 
   app.post("/auth/setPasskeyEnabled", requireActiveSession, setPasskeyEnabledHandler);
   app.options("/auth/setPasskeyEnabled", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post("/auth/passkeys/revoke", requireActiveSession, passkeyRevokeCredentialHandler);
+  app.options("/auth/passkeys/revoke", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.get("/auth/passkeys/list", requireActiveSession, passkeyListCredentialsHandler);
+  app.options("/auth/passkeys/list", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post(
+    "/auth/passkeys/signin/options",
+    requireAppCheck,
+    passkeySignInOptionsRateLimit,
+    passkeySignInOptionsHandler
+  );
+  app.options("/auth/passkeys/signin/options", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post(
+    "/auth/passkeys/signin/verify",
+    requireAppCheck,
+    passkeySignInVerifyRateLimit,
+    passkeySignInVerifyHandler
+  );
+  app.options("/auth/passkeys/signin/verify", (_, res) => {
     corsify(res);
     res.status(204).end();
   });

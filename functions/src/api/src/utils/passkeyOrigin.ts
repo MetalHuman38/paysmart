@@ -1,0 +1,57 @@
+const ANDROID_APK_KEY_HASH_PREFIX = "android:apk-key-hash:";
+
+export function normalizeBase64UrlNoPadding(raw: string): string {
+  const compact = (raw || "").trim().replace(/\s+/g, "");
+  if (!compact) return "";
+  return compact
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+export function normalizeAndroidPasskeyOrigin(raw: string): string {
+  const trimmed = (raw || "").trim();
+  if (!trimmed) return "";
+
+  const withPrefix = trimmed.startsWith(ANDROID_APK_KEY_HASH_PREFIX)
+    ? trimmed
+    : `${ANDROID_APK_KEY_HASH_PREFIX}${trimmed}`;
+  const hash = withPrefix.slice(ANDROID_APK_KEY_HASH_PREFIX.length);
+  const normalizedHash = normalizeBase64UrlNoPadding(hash);
+  if (!normalizedHash) return "";
+
+  return `${ANDROID_APK_KEY_HASH_PREFIX}${normalizedHash}`;
+}
+
+export function normalizeWebPasskeyOrigin(raw: string): string {
+  const trimmed = (raw || "").trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed.replace(/\/+$/g, "");
+  }
+  return trimmed;
+}
+
+export function normalizePasskeyOrigin(raw: string): string {
+  const trimmed = (raw || "").trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith(ANDROID_APK_KEY_HASH_PREFIX)) {
+    return normalizeAndroidPasskeyOrigin(trimmed);
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    return normalizeWebPasskeyOrigin(trimmed);
+  }
+  return normalizeAndroidPasskeyOrigin(trimmed);
+}
+
+export function normalizePasskeyOrigins(origins: Iterable<string>): string[] {
+  const normalized = new Set<string>();
+  for (const origin of origins) {
+    const value = normalizePasskeyOrigin(origin);
+    if (value) {
+      normalized.add(value);
+    }
+  }
+  return Array.from(normalized);
+}
+

@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import net.metalbrain.paysmart.data.repository.AuthRepository
+import net.metalbrain.paysmart.core.features.account.passkey.repository.PasskeyApiRepository
+import net.metalbrain.paysmart.core.features.account.passkey.repository.PasskeyCredentialManager
 import net.metalbrain.paysmart.core.features.account.security.repository.SecurityRepository
 import net.metalbrain.paysmart.domain.auth.SocialAuthUseCase
 import net.metalbrain.paysmart.core.features.account.authentication.email.data.EmailDraft
@@ -38,6 +40,8 @@ enum class GoogleAuthIntent {
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val passkeyApiRepository: PasskeyApiRepository,
+    private val passkeyCredentialManager: PasskeyCredentialManager,
     private val security: SecurityRepository,
     private val socialAuth: SocialAuthUseCase,
     private val emailLinkUseCase: EmailLinkUseCase,
@@ -60,6 +64,12 @@ class LoginViewModel @Inject constructor(
 
     var loading by mutableStateOf(false)
         private set
+
+    var passkeyLoading by mutableStateOf(false)
+        private set
+
+    private var autoPasskeyAttempted = false
+
     private var handledEmailLink: String? = null
 
     fun handleGoogleSignIn(
@@ -87,6 +97,57 @@ class LoginViewModel @Inject constructor(
                 onError(e)
             } finally {
                 loading = false
+            }
+        }
+    }
+
+    fun signInWithPasskey(
+        activity: Activity,
+        autoAttempt: Boolean,
+        onSuccess: () -> Unit,
+        onError: (Throwable) -> Unit = {}
+    ) {
+        if (passkeyLoading || loading) return
+        if (autoAttempt && autoPasskeyAttempted) return
+        if (autoAttempt) {
+            autoPasskeyAttempted = true
+        }
+
+        viewModelScope.launch {
+            passkeyLoading = true
+            if (!autoAttempt) {
+                loading = true
+                loginError = null
+            }
+            try {
+                val options = passkeyApiRepository.fetchSignInOptions().getOrThrow()
+                val assertionJson = passkeyCredentialManager.getAssertion(
+                    activity = activity,
+                    requestJson = options,
+                    preferImmediatelyAvailableCredentials = autoAttempt
+                ).getOrThrow()
+                val verification = passkeyApiRepository.verifySignIn(assertionJson).getOrThrow()
+                if (!verification.verified || verification.customToken.isBlank()) {
+                    throw IllegalStateException("Passkey sign-in verification failed")
+                }
+                authRepository.signInWithCustomToken(verification.customToken)
+                Log.d("LoginViewModel", "Passkey sign-in successful uid=${verification.uid}")
+                onSuccess()
+            } catch (error: Exception) {
+                if (autoAttempt) {
+                    Log.d(
+                        "LoginViewModel",
+                        "Auto passkey sign-in skipped: ${error.localizedMessage ?: "unknown error"}"
+                    )
+                } else {
+                    loginError = error.localizedMessage ?: "Unable to sign in with passkey"
+                    onError(error)
+                }
+            } finally {
+                passkeyLoading = false
+                if (!autoAttempt) {
+                    loading = false
+                }
             }
         }
     }

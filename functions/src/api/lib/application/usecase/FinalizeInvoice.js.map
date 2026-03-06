@@ -1,0 +1,1 @@
+{"version":3,"file":"FinalizeInvoice.js","sourceRoot":"","sources":["../../../src/application/usecase/FinalizeInvoice.ts"],"names":[],"mappings":"AAGA,MAAM,OAAO,eAAe;IACG;IAA7B,YAA6B,QAA2B;QAA3B,aAAQ,GAAR,QAAQ,CAAmB;IAAG,CAAC;IAE5D,KAAK,CAAC,OAAO,CAAC,GAAW,EAAE,KAA2B;QACpD,OAAO,IAAI,CAAC,QAAQ,CAAC,QAAQ,CAAC,GAAG,EAAE,KAAK,CAAC,CAAC;IAC5C,CAAC;CACF"}

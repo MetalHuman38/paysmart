@@ -1,0 +1,4 @@
+INVOICE_PDF_TASK_QUEUE: create-invoice
+INVOICE_PDF_TASK_LOCATION: europe-west2
+INVOICE_PDF_TASK_TARGET_URL: https://europe-west2-paysmart-7ee79.cloudfunctions.net/api/invoices/create-pdf
+INVOICE_PDF_TASK_TOKEN: kbOsnEug7BTszGOyVJanfYfN5iTDU3mjiOZquoPKBFs=

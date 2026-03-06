@@ -29,3 +29,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Paysmart"
 include(":app")
+include(":sandbox")

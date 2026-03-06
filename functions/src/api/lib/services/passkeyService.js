@@ -1,10 +1,13 @@
 import { generateAuthenticationOptions, generateRegistrationOptions, verifyAuthenticationResponse, verifyRegistrationResponse, } from "@simplewebauthn/server";
+import { normalizePasskeyOrigins } from "../utils/passkeyOrigin.js";
 export class PasskeyService {
     passkeys;
     config;
+    expectedOrigins;
     constructor(passkeys, config) {
         this.passkeys = passkeys;
         this.config = config;
+        this.expectedOrigins = normalizePasskeyOrigins(config.expectedOrigins);
     }
     async beginRegistration(uid, input) {
         this.assertEnabled();
@@ -40,7 +43,7 @@ export class PasskeyService {
         const verification = await verifyRegistrationResponse({
             response: credentialJson,
             expectedChallenge: challenge,
-            expectedOrigin: Array.from(this.config.expectedOrigins),
+            expectedOrigin: this.expectedOrigins,
             expectedRPID: this.config.rpId,
             requireUserVerification: true,
         });
@@ -87,22 +90,32 @@ export class PasskeyService {
         });
         return options;
     }
+    async beginSignIn() {
+        this.assertEnabled();
+        const options = await generateAuthenticationOptions({
+            rpID: this.config.rpId,
+            userVerification: "required",
+            timeout: 60_000,
+        });
+        await this.passkeys.saveSignInChallenge(options.challenge, Date.now() + this.config.challengeTtlMs);
+        return options;
+    }
     async completeAuthentication(uid, credential) {
         this.assertEnabled();
         const challenge = await this.consumeChallenge(uid, "authentication");
         const credentialJson = parseCredentialPayload(credential);
-        const credentialId = (credentialJson?.id ?? "").toString();
-        if (!credentialId) {
+        const credentialIdCandidates = extractCredentialIdCandidates(credentialJson);
+        if (credentialIdCandidates.length === 0) {
             throw new Error("PASSKEY_CREDENTIAL_ID_MISSING");
         }
-        const stored = await this.passkeys.getCredential(uid, credentialId);
+        const stored = await findUserCredentialByCandidates(this.passkeys, uid, credentialIdCandidates);
         if (!stored) {
             throw new Error("PASSKEY_CREDENTIAL_NOT_REGISTERED");
         }
         const verification = await verifyAuthenticationResponse({
             response: credentialJson,
             expectedChallenge: challenge,
-            expectedOrigin: Array.from(this.config.expectedOrigins),
+            expectedOrigin: this.expectedOrigins,
             expectedRPID: this.config.rpId,
             credential: {
                 id: stored.credentialId,
@@ -121,6 +134,77 @@ export class PasskeyService {
             credentialId: stored.credentialId,
         };
     }
+    async completeSignIn(credential) {
+        this.assertEnabled();
+        const credentialJson = parseCredentialPayload(credential);
+        const challenge = extractChallengeFromCredential(credentialJson);
+        const storedChallenge = await this.passkeys.consumeSignInChallenge(challenge);
+        if (!storedChallenge) {
+            throw new Error("PASSKEY_CHALLENGE_MISSING");
+        }
+        if (storedChallenge.expiresAtMs < Date.now()) {
+            throw new Error("PASSKEY_CHALLENGE_EXPIRED");
+        }
+        const credentialIdCandidates = extractCredentialIdCandidates(credentialJson);
+        if (credentialIdCandidates.length === 0) {
+            throw new Error("PASSKEY_CREDENTIAL_ID_MISSING");
+        }
+        const owner = await findCredentialOwnerByCandidates(this.passkeys, credentialIdCandidates);
+        if (!owner) {
+            throw new Error("PASSKEY_CREDENTIAL_NOT_REGISTERED");
+        }
+        const verification = await verifyAuthenticationResponse({
+            response: credentialJson,
+            expectedChallenge: storedChallenge.challenge,
+            expectedOrigin: this.expectedOrigins,
+            expectedRPID: this.config.rpId,
+            credential: {
+                id: owner.credential.credentialId,
+                publicKey: Buffer.from(owner.credential.publicKeyBase64Url, "base64url"),
+                counter: owner.credential.counter,
+                transports: owner.credential.transports,
+            },
+            requireUserVerification: true,
+        });
+        if (!verification.verified) {
+            throw new Error("PASSKEY_AUTHENTICATION_VERIFICATION_FAILED");
+        }
+        await this.passkeys.updateCounter(owner.uid, owner.credential.credentialId, verification.authenticationInfo.newCounter);
+        return {
+            verified: true,
+            credentialId: owner.credential.credentialId,
+            uid: owner.uid,
+        };
+    }
+    async revokeCredential(uid, credentialId) {
+        const cleanCredentialId = credentialId.trim();
+        if (!cleanCredentialId) {
+            throw new Error("PASSKEY_CREDENTIAL_ID_MISSING");
+        }
+        const existing = await this.passkeys.getCredential(uid, cleanCredentialId);
+        if (!existing) {
+            throw new Error("PASSKEY_CREDENTIAL_NOT_REGISTERED");
+        }
+        await this.passkeys.deleteCredential(uid, cleanCredentialId);
+        return {
+            revoked: true,
+            credentialId: cleanCredentialId,
+        };
+    }
+    async listCredentials(uid) {
+        const credentials = await this.passkeys.listCredentials(uid);
+        const sanitized = credentials
+            .map((credential) => ({
+            credentialId: credential.credentialId,
+            deviceType: credential.deviceType,
+            backedUp: credential.backedUp,
+            transports: credential.transports,
+            createdAtMs: credential.createdAtMs,
+            updatedAtMs: credential.updatedAtMs,
+        }))
+            .sort((left, right) => right.updatedAtMs - left.updatedAtMs);
+        return { credentials: sanitized };
+    }
     async consumeChallenge(uid, kind) {
         const stored = await this.passkeys.consumeChallenge(uid, kind);
         if (!stored) {
@@ -132,7 +216,7 @@ export class PasskeyService {
         return stored.challenge;
     }
     assertEnabled() {
-        if (!this.config.enabled) {
+        if (!this.config.enabled || this.expectedOrigins.length === 0) {
             throw new Error("PASSKEY_NOT_CONFIGURED");
         }
     }
@@ -153,5 +237,82 @@ function parseCredentialPayload(input) {
         return input;
     }
     throw new Error("Missing credential");
+}
+async function findUserCredentialByCandidates(passkeys, uid, candidates) {
+    for (const candidate of candidates) {
+        const stored = await passkeys.getCredential(uid, candidate);
+        if (stored) {
+            return stored;
+        }
+    }
+    return null;
+}
+async function findCredentialOwnerByCandidates(passkeys, candidates) {
+    for (const candidate of candidates) {
+        const owner = await passkeys.getCredentialOwner(candidate);
+        if (owner) {
+            return owner;
+        }
+    }
+    return null;
+}
+function extractCredentialIdCandidates(credentialJson) {
+    const raw = [
+        (credentialJson.id ?? "").toString().trim(),
+        (credentialJson.rawId ?? "").toString().trim(),
+    ].filter((value) => value.length > 0);
+    const unique = new Set();
+    for (const value of raw) {
+        for (const normalized of normalizeCredentialIdVariants(value)) {
+            unique.add(normalized);
+        }
+    }
+    return Array.from(unique);
+}
+function normalizeCredentialIdVariants(value) {
+    const trimmed = value.trim();
+    if (!trimmed)
+        return [];
+    const variants = new Set();
+    variants.add(trimmed);
+    // Attempt canonical Base64URL without padding from both URL-safe and standard encodings.
+    if (/^[A-Za-z0-9+/_=-]+$/.test(trimmed)) {
+        try {
+            variants.add(Buffer.from(trimmed, "base64url").toString("base64url"));
+        }
+        catch {
+            // Ignore decode issues and keep original form.
+        }
+        try {
+            variants.add(Buffer.from(trimmed, "base64").toString("base64url"));
+        }
+        catch {
+            // Ignore decode issues and keep original form.
+        }
+    }
+    return Array.from(variants).filter((entry) => entry.length > 0);
+}
+function extractChallengeFromCredential(credentialJson) {
+    const response = credentialJson.response;
+    if (!response || typeof response !== "object") {
+        throw new Error("PASSKEY_CHALLENGE_MISSING");
+    }
+    const clientDataJson = response.clientDataJSON;
+    const encoded = (clientDataJson ?? "").toString().trim();
+    if (!encoded) {
+        throw new Error("PASSKEY_CHALLENGE_MISSING");
+    }
+    try {
+        const decodedClientData = Buffer.from(encoded, "base64url").toString("utf8");
+        const parsed = JSON.parse(decodedClientData);
+        const challenge = (parsed.challenge ?? "").toString().trim();
+        if (!challenge) {
+            throw new Error("PASSKEY_CHALLENGE_MISSING");
+        }
+        return challenge;
+    }
+    catch {
+        throw new Error("PASSKEY_CHALLENGE_MISSING");
+    }
 }
 //# sourceMappingURL=passkeyService.js.map

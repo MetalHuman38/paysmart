@@ -9,6 +9,9 @@
 
 
 extern "C"
+/**
+ * Derives a key using PBKDF2-SHA256 for app-side crypto operations.
+ */
 JNIEXPORT jbyteArray JNICALL
 Java_net_metalbrain_paysmart_data_native_NativeBridge_deriveKeyFromCpp(
         JNIEnv *env,
@@ -35,6 +38,9 @@ Java_net_metalbrain_paysmart_data_native_NativeBridge_deriveKeyFromCpp(
 }
 
 
+/**
+ * Hashes a password using the native password hasher implementation.
+ */
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_net_metalbrain_paysmart_data_native_NativePasswordBridge_hashPassword(
@@ -49,6 +55,9 @@ Java_net_metalbrain_paysmart_data_native_NativePasswordBridge_hashPassword(
     return env->NewStringUTF(hashed.c_str());
 }
 
+/**
+ * Verifies a plaintext password against a previously computed native hash.
+ */
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_net_metalbrain_paysmart_data_native_NativePasswordBridge_verifyPassword(

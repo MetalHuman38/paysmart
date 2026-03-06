@@ -27,7 +27,6 @@ import net.metalbrain.paysmart.ui.home.components.dailyLimitsHint
 import net.metalbrain.paysmart.ui.home.components.exchangeRateHeadline
 import net.metalbrain.paysmart.ui.home.state.HomeExchangeRateSnapshot
 
-
 @Composable
 fun AccountInformationCards(
     localSettings: LocalSecuritySettingsModel?,
@@ -69,11 +68,13 @@ fun AccountInformationCards(
                         Text(
                             text = exchangeRateHeadline(exchangeRateSnapshot),
                             style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "$baseFlag$targetFlag",
-                            style = MaterialTheme.typography.headlineSmall
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     Text(
@@ -85,7 +86,7 @@ fun AccountInformationCards(
                         text = stringResource(R.string.home_view_rates),
                         onClick = onViewRatesClick,
                         containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
                         borderColor = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -106,7 +107,8 @@ fun AccountInformationCards(
                     Text(
                         text = stringResource(R.string.home_daily_limits_title),
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = dailyLimitsHint(localSettings),
@@ -117,7 +119,7 @@ fun AccountInformationCards(
                         text = stringResource(R.string.see_all),
                         onClick = onViewAllLimitsClick,
                         containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
                         borderColor = MaterialTheme.colorScheme.primary
                     )
                 }

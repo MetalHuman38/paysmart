@@ -39,6 +39,10 @@ import net.metalbrain.paysmart.ui.home.screen.HomeScreen
 import net.metalbrain.paysmart.ui.home.screen.RewardDetailsScreen
 import net.metalbrain.paysmart.core.features.addmoney.screen.AddMoneyScreen
 import net.metalbrain.paysmart.core.features.sendmoney.screen.SendMoneyRecipientScreen
+import net.metalbrain.paysmart.core.features.invoicing.screen.InvoiceDetailRoute
+import net.metalbrain.paysmart.core.features.invoicing.screen.InvoiceVenueSetupRoute
+import net.metalbrain.paysmart.core.features.invoicing.screen.InvoiceWeeklyEntryRoute
+import net.metalbrain.paysmart.core.features.invoicing.screen.InvoiceWorkerProfileRoute
 import net.metalbrain.paysmart.core.features.language.screen.LanguageSelectionScreen
 import net.metalbrain.paysmart.core.features.featuregate.FeatureAccessPolicy
 import net.metalbrain.paysmart.core.features.featuregate.FeatureGateScreen
@@ -104,6 +108,8 @@ import net.metalbrain.paysmart.core.features.account.security.mfa.viewmodel.MfaN
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.PostOtpCapabilitiesViewModel
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.ClientInformationViewModel
 import net.metalbrain.paysmart.core.features.account.authentication.email.viewmodel.EmailSentViewModel
+import net.metalbrain.paysmart.core.features.invoicing.viewmodel.InvoiceSetupViewModel
+import net.metalbrain.paysmart.core.features.invoicing.viewmodel.InvoiceDetailViewModel
 import net.metalbrain.paysmart.core.features.theme.viewmodel.AppThemeViewModel
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 import net.metalbrain.paysmart.core.session.SessionViewModel
@@ -235,6 +241,15 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object AddMoney : Screen("wallet/add_money")
     object SendMoney : Screen("wallet/send_money")
+    object InvoiceFlow : Screen("invoice_flow")
+    object InvoiceWorkerProfile : Screen("invoice/profile")
+    object InvoiceVenueSetup : Screen("invoice/venue")
+    object InvoiceWeeklyEntry : Screen("invoice/weekly")
+    object InvoiceDetail : Screen("invoice/detail/{invoiceId}") {
+        fun routeWithInvoiceId(invoiceId: String): String {
+            return "invoice/detail/${Uri.encode(invoiceId)}"
+        }
+    }
 
     object FeatureGate : Screen("feature_gate?feature={feature}&resumeRoute={resumeRoute}") {
         const val BASEROUTE = "feature_gate"
@@ -382,6 +397,26 @@ fun AppNavGraph(
 
         composable(Screen.Startup.route) {
             val viewModel: LanguageViewModel = hiltViewModel()
+            val loginViewModel: LoginViewModel = hiltViewModel()
+            val hostActivity = LocalActivity.current as? FragmentActivity
+
+            LaunchedEffect(hostActivity) {
+                val activity = hostActivity ?: return@LaunchedEffect
+                loginViewModel.signInWithPasskey(
+                    activity = activity,
+                    autoAttempt = true,
+                    onSuccess = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Startup.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                    onError = {
+                        Log.d("NavGraph", "Startup auto passkey attempt skipped: ${it.localizedMessage}")
+                    }
+                )
+            }
+
             StartupScreen(
                 navController = navController,
                 onLoginClick = {
@@ -414,6 +449,12 @@ fun AppNavGraph(
             PasskeySetupScreen(
                 activity = activity,
                 viewModel = viewModel,
+                onRegistered = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.PasskeySetup.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
                 onBack = { navController.popBackStack() }
             )
         }
@@ -498,11 +539,6 @@ fun AppNavGraph(
                         },
                         onSetBiometricClick = {
                             navController.navigate(Screen.BiometricOptIn.route) {
-                                launchSingleTop = true
-                            }
-                        },
-                        onSetPasskeyClick = {
-                            navController.navigate(Screen.PasskeySetup.route) {
                                 launchSingleTop = true
                             }
                         }
@@ -1054,15 +1090,36 @@ fun AppNavGraph(
             val securityViewModel: SecurityViewModel = hiltViewModel()
             val localSecurityState by securityViewModel.localSecurityState.collectAsState()
             val settings = (localSecurityState as? LocalSecurityState.Ready)?.settings
-            val decision = FeatureAccessPolicy.evaluate(feature, settings)
+            val decision = settings?.let {
+                FeatureAccessPolicy.evaluate(feature, it)
+            }
 
-            LaunchedEffect(decision.isAllowed, resumeRoute) {
-                if (decision.isAllowed) {
+            LaunchedEffect(localSecurityState, decision?.isAllowed, feature, resumeRoute) {
+                Log.d(
+                    "FeatureGateDiag",
+                    "feature=${feature.id} " +
+                        "state=${localSecurityState::class.simpleName} " +
+                        "resumeRoute=$resumeRoute " +
+                        "settingsReady=${settings != null} " +
+                        "allowed=${decision?.isAllowed} " +
+                        "missing=${decision?.missingRequirements.orEmpty()} " +
+                        "strength=${decision?.currentSecurityStrength} " +
+                        "required=${decision?.requiredSecurityStrength}"
+                )
+            }
+
+            LaunchedEffect(decision?.isAllowed, resumeRoute) {
+                if (decision?.isAllowed == true) {
                     navController.navigate(resumeRoute) {
                         popUpTo(backStackEntry.destination.id) { inclusive = true }
                         launchSingleTop = true
                     }
                 }
+            }
+
+            if (localSecurityState is LocalSecurityState.Loading || decision == null) {
+                SplashScreen()
+                return@composable
             }
 
             FeatureGateScreen(
@@ -1082,6 +1139,12 @@ fun AppNavGraph(
 
                         FeatureRequirement.IDENTITY_VERIFIED -> {
                             navController.navigate(Screen.ProfileIdentityResolver.route)
+                        }
+
+                        FeatureRequirement.SECURITY_STRENGTH_TWO -> {
+                            navController.navigate(Screen.ProfileSecurityPrivacy.route) {
+                                launchSingleTop = true
+                            }
                         }
 
                         null -> {
@@ -1104,6 +1167,89 @@ fun AppNavGraph(
 
         composable(Screen.SendMoney.route) {
             SendMoneyRecipientScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        navigation(
+            route = Screen.InvoiceFlow.route,
+            startDestination = Screen.InvoiceWorkerProfile.route
+        ) {
+            composable(Screen.InvoiceWorkerProfile.route) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.InvoiceFlow.route)
+                }
+                val viewModel: InvoiceSetupViewModel = hiltViewModel(parentEntry)
+                InvoiceWorkerProfileRoute(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onContinue = {
+                        navController.navigate(Screen.InvoiceVenueSetup.route) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.InvoiceVenueSetup.route) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.InvoiceFlow.route)
+                }
+                val viewModel: InvoiceSetupViewModel = hiltViewModel(parentEntry)
+                InvoiceVenueSetupRoute(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onRequireProfile = {
+                        navController.navigate(Screen.InvoiceWorkerProfile.route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onContinue = {
+                        navController.navigate(Screen.InvoiceWeeklyEntry.route) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.InvoiceWeeklyEntry.route) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.InvoiceFlow.route)
+                }
+                val viewModel: InvoiceSetupViewModel = hiltViewModel(parentEntry)
+                InvoiceWeeklyEntryRoute(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onRequireProfileSetup = {
+                        navController.navigate(Screen.InvoiceWorkerProfile.route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onRequireVenueSetup = {
+                        navController.navigate(Screen.InvoiceVenueSetup.route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onOpenInvoice = { invoiceId ->
+                        navController.navigate(Screen.InvoiceDetail.routeWithInvoiceId(invoiceId)) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+        }
+
+        composable(
+            route = Screen.InvoiceDetail.route,
+            arguments = listOf(
+                navArgument("invoiceId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val viewModel: InvoiceDetailViewModel = hiltViewModel()
+            val invoiceId = Uri.decode(backStackEntry.arguments?.getString("invoiceId").orEmpty())
+            InvoiceDetailRoute(
+                invoiceId = invoiceId,
+                viewModel = viewModel,
                 onBack = { navController.popBackStack() }
             )
         }

@@ -6,8 +6,9 @@ export interface QuoteRateProvider {
   getRate(sourceCurrency: string, targetCurrency: string): Promise<RateFetchResult>;
 }
 
-export function createGetFxQuoteHandler(rateProvider: QuoteRateProvider = fxContainer().exchangeRateProvider) {
+export function createGetFxQuoteHandler(rateProvider?: QuoteRateProvider) {
   return async function getFxQuoteHandler(req: Request, res: Response) {
+    const resolvedRateProvider = rateProvider ?? fxContainer().exchangeRateProvider;
     const sourceCurrency = normalizeCurrency((req.query.source as string) || "USD");
     const targetCurrency = normalizeCurrency((req.query.target as string) || "EUR");
     const amount = normalizeAmount((req.query.amount as string) || "100");
@@ -21,7 +22,7 @@ export function createGetFxQuoteHandler(rateProvider: QuoteRateProvider = fxCont
     }
 
     try {
-      const rateResult = await rateProvider.getRate(sourceCurrency, targetCurrency);
+      const rateResult = await resolvedRateProvider.getRate(sourceCurrency, targetCurrency);
       const methodFee = feeForMethod(method);
       const ourFee = 3.76;
       const totalFees = methodFee + ourFee;
@@ -71,7 +72,9 @@ export function createGetFxQuoteHandler(rateProvider: QuoteRateProvider = fxCont
   };
 }
 
-export const getFxQuoteHandler = createGetFxQuoteHandler();
+export async function getFxQuoteHandler(req: Request, res: Response) {
+  return createGetFxQuoteHandler()(req, res);
+}
 
 function normalizeCurrency(value: string): string {
   const normalized = value.trim().toUpperCase();

@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -25,9 +26,17 @@ import net.metalbrain.paysmart.ui.components.PrimaryButton
 fun PasskeySetupScreen(
     activity: Activity,
     viewModel: PasskeySetupViewModel,
+    onRegistered: () -> Unit = {},
     onBack: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(state.isRegistered) {
+        if (state.isRegistered) {
+            onRegistered()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

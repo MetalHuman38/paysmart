@@ -85,6 +85,14 @@ class FirebaseAuthRepository @Inject constructor(
 
     override suspend fun signInAnonymously(): AuthResult = firebaseAuth.signInAnonymously().await()
 
+    override suspend fun signInWithCustomToken(customToken: String): AuthResult {
+        val result = firebaseAuth.signInWithCustomToken(customToken).await()
+        // Force-refresh token so sid/sv claims from custom token are immediately available
+        // to first protected API calls after one-tap passkey sign-in.
+        result.user?.getIdToken(true)?.await()
+        return result
+    }
+
     override suspend fun signInWithCredential(credential: AuthCredential): AuthResult =
         firebaseAuth.signInWithCredential(credential).await()
 

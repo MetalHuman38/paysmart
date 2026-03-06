@@ -45,6 +45,18 @@ import net.metalbrain.paysmart.ui.screens.NoConnectionGateScreen
 import net.metalbrain.paysmart.ui.theme.PaySmartAppBackground
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
+/**
+ * The main entry point for the PaySmart application.
+ *
+ * This activity serves as the primary host for the application's Compose UI and is responsible for:
+ * - Initializing core system components such as the [SessionStateManager] and [RoomKeyManager].
+ * - Managing application-wide state including authentication, theme, and localization.
+ * - Implementing security logic such as session locking, idle timeouts, and navigation redirects based on account security status.
+ * - Handling global connectivity states and displaying the no-connection gate when offline.
+ * - Hosting the primary [AppNavGraph] and managing top-level navigation intents.
+ *
+ * It inherits from [FragmentActivity] to provide compatibility for features like Biometric authentication.
+ */
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 

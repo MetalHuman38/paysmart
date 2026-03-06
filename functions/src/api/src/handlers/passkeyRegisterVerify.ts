@@ -32,7 +32,7 @@ export async function passkeyRegisterVerifyHandler(req: Request, res: Response) 
     if (message.includes("PASSKEY_NOT_CONFIGURED")) {
       return res.status(503).json({
         error:
-          "Passkey service is not configured. Set PASSKEY_RP_ID and PASSKEY_EXPECTED_ORIGINS (or PASSKEY_ANDROID_APK_KEY_HASHES).",
+          "Passkey service is not configured. Set PASSKEY_RP_ID and PASSKEY_EXPECTED_ORIGINS (or PASSKEY_ANDROID_APK_KEY_HASHES). Android hashes must be Base64URL without padding.",
         code: "PASSKEY_NOT_CONFIGURED",
       });
     }

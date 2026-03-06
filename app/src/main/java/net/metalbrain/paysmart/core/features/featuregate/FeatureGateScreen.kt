@@ -39,12 +39,7 @@ fun FeatureGateScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = when (feature) {
-                            FeatureKey.ADD_MONEY -> "Before you add money"
-                            FeatureKey.SEND_MONEY -> "Before you send money"
-                        }
-                    )
+                    Text(text = stringResource(feature.titleResId()))
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -70,13 +65,22 @@ fun FeatureGateScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = when (feature) {
-                            FeatureKey.ADD_MONEY -> "Complete these checks to unlock add money."
-                            FeatureKey.SEND_MONEY -> "Complete these checks to unlock send money."
-                        },
+                        text = stringResource(feature.descriptionResId()),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+
+                    decision.requiredSecurityStrength?.let { requiredStrength ->
+                        Text(
+                            text = stringResource(
+                                R.string.feature_gate_security_strength_progress,
+                                decision.currentSecurityStrength,
+                                requiredStrength
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
 
                     decision.missingRequirements.forEach { requirement ->
                         RequirementRow(requirement.toActionLabel())
@@ -122,5 +126,23 @@ private fun FeatureRequirement.toActionLabel(): String {
         FeatureRequirement.VERIFIED_EMAIL -> stringResource(R.string.profile_action_verify_email)
         FeatureRequirement.HOME_ADDRESS_VERIFIED -> stringResource(R.string.profile_action_complete_address)
         FeatureRequirement.IDENTITY_VERIFIED -> stringResource(R.string.profile_action_verify_identity)
+        FeatureRequirement.SECURITY_STRENGTH_TWO ->
+            stringResource(R.string.feature_gate_requirement_security_strength_two)
+    }
+}
+
+private fun FeatureKey.titleResId(): Int {
+    return when (this) {
+        FeatureKey.ADD_MONEY -> R.string.feature_gate_add_money_title
+        FeatureKey.SEND_MONEY -> R.string.feature_gate_send_money_title
+        FeatureKey.CREATE_INVOICE -> R.string.feature_gate_invoice_title
+    }
+}
+
+private fun FeatureKey.descriptionResId(): Int {
+    return when (this) {
+        FeatureKey.ADD_MONEY -> R.string.feature_gate_add_money_description
+        FeatureKey.SEND_MONEY -> R.string.feature_gate_send_money_description
+        FeatureKey.CREATE_INVOICE -> R.string.feature_gate_invoice_description
     }
 }

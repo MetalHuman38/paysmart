@@ -1,5 +1,11 @@
 import { LookupAddress } from "../application/usecase/LookupAddress.js";
-const lookupAddressUseCase = new LookupAddress();
+let lookupAddressUseCase = null;
+function getLookupAddressUseCase() {
+    if (!lookupAddressUseCase) {
+        lookupAddressUseCase = new LookupAddress();
+    }
+    return lookupAddressUseCase;
+}
 function readString(value, fallback = "") {
     if (typeof value !== "string") {
         return fallback;
@@ -31,7 +37,7 @@ export async function lookupAddressHandler(req, res) {
         if (![line1, city, stateOrRegion, postcode].some((value) => value.length > 0)) {
             return res.status(400).json({ error: "at least one address field is required" });
         }
-        const resolved = await lookupAddressUseCase.execute({
+        const resolved = await getLookupAddressUseCase().execute({
             line1,
             city,
             stateOrRegion,

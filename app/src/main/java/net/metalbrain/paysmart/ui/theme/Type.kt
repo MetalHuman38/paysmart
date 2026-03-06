@@ -54,64 +54,63 @@ val Typography = Typography(
     ),
     titleLarge = TextStyle(
         fontFamily = DisplayFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 21.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 20.sp,
         lineHeight = 27.sp
     ),
     titleMedium = TextStyle(
         fontFamily = BodyFamily,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 17.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.15.sp
+        lineHeight = 25.sp,
+        letterSpacing = 0.1.sp
     ),
     titleSmall = TextStyle(
         fontFamily = BodyFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 15.sp,
-        lineHeight = 22.sp,
-        letterSpacing = 0.1.sp
+        lineHeight = 22.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = BodyFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
+        lineHeight = 25.sp,
+        letterSpacing = 0.2.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = BodyFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 21.sp,
-        letterSpacing = 0.25.sp
+        fontSize = 15.sp,
+        lineHeight = 23.sp,
+        letterSpacing = 0.15.sp
     ),
     bodySmall = TextStyle(
         fontFamily = BodyFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 12.sp,
-        lineHeight = 18.sp,
-        letterSpacing = 0.4.sp
+        fontSize = 13.sp,
+        lineHeight = 19.sp,
+        letterSpacing = 0.2.sp
     ),
     labelLarge = TextStyle(
         fontFamily = BodyFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 15.sp,
         lineHeight = 20.sp,
-        letterSpacing = 0.1.sp
+        letterSpacing = 0.sp
     ),
     labelMedium = TextStyle(
         fontFamily = BodyFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.4.sp
+        lineHeight = 17.sp,
+        letterSpacing = 0.2.sp
     ),
     labelSmall = TextStyle(
         fontFamily = BodyFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
         lineHeight = 14.sp,
-        letterSpacing = 0.5.sp
+        letterSpacing = 0.2.sp
     )
 )

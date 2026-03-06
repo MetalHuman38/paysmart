@@ -20,6 +20,8 @@ interface AuthRepository {
 
     suspend fun signInAnonymously(): AuthResult
 
+    suspend fun signInWithCustomToken(customToken: String): AuthResult
+
     suspend fun signInWithCredential(credential: AuthCredential): AuthResult
     
     suspend fun linkWithCredential(credential: AuthCredential): AuthResult

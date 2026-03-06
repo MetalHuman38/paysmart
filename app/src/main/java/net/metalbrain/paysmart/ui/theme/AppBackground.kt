@@ -23,13 +23,15 @@ fun PaySmartAppBackground(
                     colorStops = if (darkMode) {
                         arrayOf(
                             0f to colors.background,
-                            0.55f to colors.surfaceVariant.copy(alpha = 0.50f),
+                            0.45f to DeepBlueOcean.copy(alpha = 0.18f),
+                            0.75f to colors.surfaceVariant.copy(alpha = 0.45f),
                             1f to colors.background
                         )
                     } else {
                         arrayOf(
                             0f to colors.background,
-                            0.50f to colors.primaryContainer.copy(alpha = 0.24f),
+                            0.40f to FreshGreen.copy(alpha = 0.10f),
+                            0.70f to DeepBlueOcean.copy(alpha = 0.06f),
                             1f to colors.background
                         )
                     }

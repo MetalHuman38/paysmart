@@ -27,7 +27,8 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/hint-report/**"
     ],
     "cleanUrls": true,
     "headers": [
@@ -72,6 +73,10 @@
           {
             "key": "Cache-Control",
             "value": "public, max-age=300"
+          },
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; frame-src 'none'; script-src 'self' https://www.gstatic.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://europe-west2-paysmart-7ee79.cloudfunctions.net https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com; form-action 'self'; manifest-src 'self'; upgrade-insecure-requests"
           }
         ]
       },

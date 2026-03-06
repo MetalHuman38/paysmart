@@ -1,6 +1,6 @@
 PROJECT_NAME           = "PaySmart Native Bridges"
-PROJECT_BRIEF          = "JNI bridge and native crypto documentation"
-OUTPUT_DIRECTORY       = ../../../../public/codedocs
+PROJECT_BRIEF          = "JNI bridge, native crypto, and Room bridge developer reference"
+OUTPUT_DIRECTORY       = ../../../../codesource
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 
@@ -8,10 +8,16 @@ INPUT                  = native-lib.cpp \
                          room-lib.cpp \
                          crypto \
                          room \
-                         ../java/net/metalbrain/paysmart/data/native
-FILE_PATTERNS          = *.h *.hpp *.c *.cpp *.kt
+                         ../java/net/metalbrain/paysmart/data/native \
+                         ../../../docs/native_jni_pipeline.md
+FILE_PATTERNS          = *.h *.hpp *.c *.cpp *.kt *.md
 RECURSIVE              = YES
 EXCLUDE_PATTERNS       = */openssl/* */build/*
+STRIP_FROM_PATH        = ../../../../
+
+MARKDOWN_SUPPORT       = YES
+TOC_INCLUDE_HEADINGS   = 3
+USE_MDFILE_AS_MAINPAGE = ../../../docs/native_jni_pipeline.md
 
 EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = NO
@@ -21,6 +27,11 @@ OPTIMIZE_OUTPUT_JAVA   = YES
 
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
+HTML_FILE_EXTENSION    = .html
+GENERATE_TREEVIEW      = YES
+FULL_SIDEBAR           = YES
+HTML_DYNAMIC_SECTIONS  = YES
+DISABLE_INDEX          = NO
 GENERATE_LATEX         = NO
 GENERATE_XML           = NO
 

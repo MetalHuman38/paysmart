@@ -1,2 +1,48 @@
+name: Publish Code Docs
+
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/src/main/cpp/**'
+      - 'app/src/main/java/net/metalbrain/paysmart/data/native/**'
+      - 'app/docs/native_jni_pipeline.md'
+      - 'codesource/index.html'
+      - '.github/workflows/main.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages-codedocs
+  cancel-in-progress: true
+
 jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Doxygen
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen
+
+      - name: Generate code docs
+        working-directory: app/src/main/cpp
+        run: |
+          doxygen Doxyfile
+          touch ../../../../codesource/.nojekyll
+
+      - name: Publish to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./codesource

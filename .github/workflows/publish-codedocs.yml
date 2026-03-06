@@ -1,0 +1,16 @@
+name: Publish Code Docs Legacy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  note:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain legacy workflow
+        run: echo "Use .github/workflows/main.yml for active gh-pages publishing. This workflow is retained for manual fallback only."

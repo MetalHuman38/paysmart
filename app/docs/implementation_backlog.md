@@ -160,3 +160,19 @@ _Last updated: 2026-03-05_
   - added Flutterwave add-money provider flow (alongside Stripe) for supported regions
   - improved add-money stability with clearer payment/webhook error handling
   - general bug fixes, UI polish, and performance improvements
+
+### APP-023 (`done`)
+- **Scope**: production-grade Google Play in-app updates with safe-route gating.
+- **Android modules**:
+  - `app/src/main/java/net/metalbrain/paysmart/core/service/update/*`
+  - `app/src/main/java/net/metalbrain/paysmart/core/service/di/UpdateModule.kt`
+  - `app/src/main/java/net/metalbrain/paysmart/MainActivity.kt`
+  - `app/src/main/java/net/metalbrain/paysmart/App.kt`
+  - `app/src/test/java/net/metalbrain/paysmart/core/service/update/*`
+  - `app/docs/in_app_update_testing.md`
+- **Behavior contract**:
+  - uses Activity Result APIs with Play Core `FLEXIBLE` and `IMMEDIATE` flows
+  - resumes immediate updates when Play reports `DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS`
+  - suppresses prompts during OTP, PIN/passcode, KYC, add-money, invoice, and transaction-critical routes
+  - listens for flexible download completion, prompts restart, and delegates install completion to `completeUpdate()`
+  - exposes policy knobs through a config provider that can be backed by Firebase Remote Config

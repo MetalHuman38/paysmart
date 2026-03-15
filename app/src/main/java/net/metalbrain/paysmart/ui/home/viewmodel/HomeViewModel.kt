@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
@@ -21,32 +21,33 @@ import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
 import net.metalbrain.paysmart.data.repository.WalletBalanceRepository
 import net.metalbrain.paysmart.domain.auth.UserManager
 import net.metalbrain.paysmart.domain.auth.state.AuthState
-import net.metalbrain.paysmart.domain.model.Transaction
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityProfile
 import net.metalbrain.paysmart.core.features.capabilities.repository.CountryCapabilityRepository
 import net.metalbrain.paysmart.core.features.fx.data.FxPaymentMethod
 import net.metalbrain.paysmart.core.features.fx.data.FxQuoteQuery
 import net.metalbrain.paysmart.core.features.fx.repository.FxQuoteRepository
+import net.metalbrain.paysmart.core.service.update.UpdateCoordinator
 import net.metalbrain.paysmart.ui.home.state.HomeBalanceSnapshot
 import net.metalbrain.paysmart.ui.home.state.HomeExchangeRateSnapshot
+import net.metalbrain.paysmart.ui.home.state.HomeNotificationKind
+import net.metalbrain.paysmart.ui.home.state.HomeNotificationUiState
+import net.metalbrain.paysmart.ui.home.state.HomeTransactionProviderFilter
 import net.metalbrain.paysmart.ui.home.state.HomeUiState
 import net.metalbrain.paysmart.ui.home.state.RewardEarnedSnapshot
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel @Inject constructor(
-    private val transactionRepository: TransactionRepository,
+    transactionRepository: TransactionRepository,
     securityPreference: SecurityPreference,
     private val walletBalanceRepository: WalletBalanceRepository,
     private val profileCacheRepository: UserProfileCacheRepository,
     private val countryCapabilityRepository: CountryCapabilityRepository,
     private val fxQuoteRepository: FxQuoteRepository,
-    private val userManager: UserManager
+    private val userManager: UserManager,
+    private val updateCoordinator: UpdateCoordinator,
 ) : ViewModel() {
     private val transactions = transactionRepository.observeTransactions()
         .stateIn(
@@ -54,6 +55,10 @@ class HomeViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
+
+    private val transactionSearchQuery = MutableStateFlow("")
+    private val selectedTransactionProviders =
+        MutableStateFlow<Set<HomeTransactionProviderFilter>>(emptySet())
 
     private val walletBalances = userManager.authState
         .flatMapLatest { auth ->
@@ -85,6 +90,19 @@ class HomeViewModel @Inject constructor(
             initialValue = CountryCapabilityCatalog.defaultProfile()
         )
 
+    private val profile = userManager.authState
+        .flatMapLatest { auth ->
+            when (auth) {
+                is AuthState.Authenticated -> profileCacheRepository.observeByUid(auth.uid)
+                else -> flowOf(null)
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
+
     private val exchangeRateSnapshot: StateFlow<HomeExchangeRateSnapshot> = countryCapabilities
         .flatMapLatest { profile ->
             observeExchangeRate(profile)
@@ -95,20 +113,48 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeExchangeRateSnapshot()
         )
 
+    private val transactionSearch = observeHomeTransactionSearch(
+        transactions = transactions,
+        searchQuery = transactionSearchQuery,
+        selectedProviders = selectedTransactionProviders,
+    ).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = HomeTransactionSearchSnapshot()
+    )
+
+    private val headerState = combine(
+        profile,
+        transactionSearch,
+        updateCoordinator.uiState,
+    ) { profile, transactionSearch, updateUiState ->
+        HomeHeaderState(
+            displayName = profile?.displayName.orEmpty(),
+            transactionSearch = transactionSearch,
+            notification = resolveNotification(updateUiState.showRestartPrompt),
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = HomeHeaderState()
+    )
+
     val uiState: StateFlow<HomeUiState> = combine(
         securityPreference.localSecurityStateFlow,
-        transactions,
         walletBalances,
         countryCapabilities,
-        exchangeRateSnapshot
-    ) { localSecurity, transactions, wallet, capabilityProfile, exchangeRate ->
-        val sortedTransactions = transactions.sortedByDescending { transaction ->
-            transaction.toSortEpochMillis()
-        }
-
+        exchangeRateSnapshot,
+        headerState,
+    ) { localSecurity, wallet, capabilityProfile, exchangeRate, headerState ->
         HomeUiState(
             security = localSecurity,
-            recentTransactions = sortedTransactions.take(3),
+            displayName = headerState.displayName,
+            recentTransactions = headerState.transactionSearch.visibleTransactions,
+            transactionSearchQuery = headerState.transactionSearch.searchQuery,
+            isTransactionSearchActive = headerState.transactionSearch.isSearchActive,
+            availableTransactionProviders = headerState.transactionSearch.availableProviders,
+            selectedTransactionProviders = headerState.transactionSearch.selectedProviders,
+            notification = headerState.notification,
             balanceSnapshot = HomeBalanceSnapshot(
                 balancesByCurrency = wallet?.balancesByCurrency ?: emptyMap(),
                 preferredCurrencyCode = capabilityProfile.currencyCode
@@ -116,6 +162,7 @@ class HomeViewModel @Inject constructor(
             rewardEarned = RewardEarnedSnapshot(
                 points = wallet?.rewardsPoints ?: 0.0
             ),
+            countryIso2 = capabilityProfile.iso2,
             countryFlagEmoji = capabilityProfile.flagEmoji,
             countryCurrencyCode = capabilityProfile.currencyCode,
             topUpPolicyHint = CountryCapabilityCatalog.topUpPolicyHint(capabilityProfile),
@@ -130,6 +177,27 @@ class HomeViewModel @Inject constructor(
 
     init {
         syncWalletOnAuth()
+    }
+
+    fun onTransactionSearchQueryChanged(value: String) {
+        transactionSearchQuery.value = value
+    }
+
+    fun onTransactionProviderToggled(provider: HomeTransactionProviderFilter) {
+        val current = selectedTransactionProviders.value
+        selectedTransactionProviders.value = if (provider in current) {
+            current - provider
+        } else {
+            current + provider
+        }
+    }
+
+    fun onNotificationPrimaryAction() {
+        if (uiState.value.notification.kind != HomeNotificationKind.APP_UPDATE_READY) {
+            return
+        }
+        updateCoordinator.completeUpdate()
+        updateCoordinator.acknowledgeRestartPrompt()
     }
 
     private fun syncWalletOnAuth() {
@@ -203,15 +271,19 @@ class HomeViewModel @Inject constructor(
     }
 }
 
-private val HOME_TRANSACTION_SORT_FORMAT: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("d MMM yyyy HH:mm", Locale.US)
-
-private fun Transaction.toSortEpochMillis(): Long {
-    val rawDateTime = "${date.trim()} ${time.trim()}"
-    return runCatching {
-        LocalDateTime.parse(rawDateTime, HOME_TRANSACTION_SORT_FORMAT)
-            .atZone(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
-    }.getOrDefault(0L)
+private fun resolveNotification(hasPendingUpdate: Boolean): HomeNotificationUiState {
+    return if (hasPendingUpdate) {
+        HomeNotificationUiState(
+            kind = HomeNotificationKind.APP_UPDATE_READY,
+            isUnread = true,
+        )
+    } else {
+        HomeNotificationUiState(kind = HomeNotificationKind.PRODUCT)
+    }
 }
+
+private data class HomeHeaderState(
+    val displayName: String = "",
+    val transactionSearch: HomeTransactionSearchSnapshot = HomeTransactionSearchSnapshot(),
+    val notification: HomeNotificationUiState = HomeNotificationUiState(),
+)

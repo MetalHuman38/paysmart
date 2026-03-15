@@ -16,13 +16,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CurrencyFlagResolver
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 import net.metalbrain.paysmart.ui.components.OutlinedButton
 import net.metalbrain.paysmart.ui.home.state.HomeExchangeRateSnapshot
+import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.HomeCardTokens
 
 @Composable
 fun AccountInformationCards(
@@ -45,17 +46,17 @@ fun AccountInformationCards(
         preferredFlagEmoji = countryFlagEmoji
     )
 
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(Dimens.md)) {
         item {
             Surface(
-                modifier = Modifier.width(310.dp),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                modifier = Modifier.width(HomeCardTokens.accountInfoCardWidth),
+                shape = HomeCardTokens.cardShape,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = HomeCardTokens.OUTLINE_ALPHA)),
                 color = MaterialTheme.colorScheme.surface
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    modifier = Modifier.padding(HomeCardTokens.contentPadding),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.sm)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -65,7 +66,6 @@ fun AccountInformationCards(
                         Text(
                             text = exchangeRateHeadline(exchangeRateSnapshot),
                             style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
@@ -92,19 +92,18 @@ fun AccountInformationCards(
 
         item {
             Surface(
-                modifier = Modifier.width(310.dp),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                modifier = Modifier.width(HomeCardTokens.accountInfoCardWidth),
+                shape = HomeCardTokens.cardShape,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = HomeCardTokens.OUTLINE_ALPHA)),
                 color = MaterialTheme.colorScheme.surface
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    modifier = Modifier.padding(HomeCardTokens.contentPadding),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.sm)
                 ) {
                     Text(
                         text = stringResource(R.string.home_daily_limits_title),
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(

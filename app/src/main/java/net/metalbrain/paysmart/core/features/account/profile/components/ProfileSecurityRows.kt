@@ -55,7 +55,8 @@ fun ProfileSecurityToggleRow(
     icon: ImageVector,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    subtitle: String? = null
+    subtitle: String? = null,
+    enabled: Boolean = true
 ) {
     ListItem(
         headlineContent = { Text(title) },
@@ -78,7 +79,8 @@ fun ProfileSecurityToggleRow(
         trailingContent = {
             Switch(
                 checked = checked,
-                onCheckedChange = onCheckedChange
+                onCheckedChange = onCheckedChange,
+                enabled = enabled
             )
         }
     )

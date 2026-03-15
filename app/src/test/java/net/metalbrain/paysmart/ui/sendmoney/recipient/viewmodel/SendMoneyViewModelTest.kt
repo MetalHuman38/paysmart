@@ -34,6 +34,17 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * Unit tests for [SendMoneyViewModel].
+ *
+ * This class verifies the business logic and state transitions within the money transfer flow,
+ * including:
+ * - Navigation between flow steps (Method Selection, Details, Review, and Done).
+ * - Validation logic that prevents proceeding to the next step when details are incomplete.
+ * - Persistence and restoration of transfer drafts using [SendMoneyRecipientDraftRepository].
+ * - Currency exchange (FX) quote fetching, snapshot persistence, and handling of race
+ *   conditions during asynchronous updates.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SendMoneyViewModelTest {
 

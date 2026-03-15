@@ -9,13 +9,15 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
+import net.metalbrain.paysmart.core.features.capabilities.catalog.AddMoneyMarketPolicy
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityItem
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityKey
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityProfile
+import net.metalbrain.paysmart.core.features.fx.data.FxPaymentMethod
 import net.metalbrain.paysmart.room.doa.CountryCapabilityDao
 import net.metalbrain.paysmart.room.entity.CountryCapabilityEntity
-import net.metalbrain.paysmart.core.features.fx.data.FxPaymentMethod
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Locale
@@ -103,7 +105,15 @@ class CountryCapabilityRepository @Inject constructor(
             "WALES" to "GB",
             "USA" to "US",
             "UNITED STATES" to "US",
-            "UNITED STATES OF AMERICA" to "US"
+            "UNITED STATES OF AMERICA" to "US",
+            "AMERICA" to "US",
+            "CANADA" to "CA",
+            "AUSTRALIA" to "AU",
+            "NEW ZEALAND" to "NZ",
+            "SWITZERLAND" to "CH",
+            "SWISS" to "CH",
+            "SWISS" to "CH",
+            "SWISSLAND" to "CH",
         )
 
         Locale.getISOCountries().forEach { iso2 ->
@@ -126,9 +136,24 @@ private fun CountryCapabilityEntity.toDomain(): CountryCapabilityProfile {
         countryName = countryName,
         flagEmoji = flagEmoji,
         currencyCode = currencyCode,
-        addMoneyMethods = parsePaymentMethods(addMoneyMethodsJson),
+        addMoney = AddMoneyMarketPolicy(
+            providers = parseAddMoneyProviders(addMoneyProvidersJson),
+            methods = parsePaymentMethods(addMoneyMethodsJson)
+        ),
         capabilities = parseCapabilities(capabilitiesJson)
     )
+}
+
+private fun parseAddMoneyProviders(raw: String): List<AddMoneyProvider> {
+    val result = mutableListOf<AddMoneyProvider>()
+    val array = runCatching { JSONArray(raw) }.getOrNull() ?: JSONArray()
+    for (index in 0 until array.length()) {
+        val provider = AddMoneyProvider.fromRawOrNull(array.optString(index)) ?: continue
+        if (provider !in result) {
+            result += provider
+        }
+    }
+    return result
 }
 
 private fun parsePaymentMethods(raw: String): List<FxPaymentMethod> {
@@ -197,6 +222,8 @@ internal object CountryCapabilityJsonParser {
             val currencyCode = country.optString("currencyCode").trim()
                 .uppercase(Locale.US)
                 .ifBlank { "GBP" }
+            val providers = country.optJSONArray("addMoneyProviders")
+                ?: JSONArray()
 
             val methods = country.optJSONArray("addMoneyMethods")
                 ?: JSONArray().put("debitCard").put("creditCard")
@@ -211,6 +238,7 @@ internal object CountryCapabilityJsonParser {
                 countryName = name,
                 flagEmoji = flag,
                 currencyCode = currencyCode,
+                addMoneyProvidersJson = providers.toString(),
                 addMoneyMethodsJson = methods.toString(),
                 capabilitiesJson = capabilities.toString(),
                 catalogVersion = catalogVersion

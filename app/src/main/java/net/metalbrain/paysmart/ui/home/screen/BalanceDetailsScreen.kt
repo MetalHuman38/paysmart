@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.ui.home.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,23 +9,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Autorenew
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.NorthEast
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -37,30 +36,44 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CurrencyFlagResolver
+import net.metalbrain.paysmart.domain.model.Transaction
+import net.metalbrain.paysmart.ui.home.state.BalanceDetailsUiState
+import net.metalbrain.paysmart.ui.theme.Dimens
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BalanceDetailsScreen(
-    currencyCode: String,
-    amountLabel: String,
+    state: BalanceDetailsUiState,
     onBack: () -> Unit,
+    onViewAccountLimitsClick: () -> Unit = {},
     onSendClick: () -> Unit = {},
     onAddClick: () -> Unit = {},
     onWithdrawClick: () -> Unit = {},
-    onConvertClick: () -> Unit = {}
+    onConvertClick: () -> Unit = {},
+    onTransactionClick: (Transaction) -> Unit = {}
 ) {
     val context = LocalContext.current
-    val normalizedCurrency = currencyCode.trim().uppercase(Locale.US).ifBlank {
+    val normalizedCurrency = state.currencyCode.trim().uppercase(Locale.US).ifBlank {
         CountryCapabilityCatalog.defaultProfile().currencyCode
     }
     val flag = CurrencyFlagResolver.resolve(context, normalizedCurrency)
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+    val orderedBalances = state.balancesByCurrency.entries
+        .sortedWith(
+            compareByDescending<Map.Entry<String, Double>> { entry ->
+                entry.key.equals(normalizedCurrency, ignoreCase = true)
+            }.thenBy { entry ->
+                entry.key.uppercase(Locale.US)
+            }
+        )
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -75,27 +88,37 @@ fun BalanceDetailsScreen(
                         )
                     }
                 },
-                actions = {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Filled.MoreHoriz,
-                            contentDescription = stringResource(id = R.string.home_more_actions_content_description)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { innerPadding ->
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = Dimens.screenPadding)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(Dimens.md)
         ) {
-            Text(text = flag, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.align(Alignment.CenterHorizontally))
+            Text(
+                text = flag,
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
             Text(
                 text = stringResource(id = R.string.home_balance_currency_title, normalizedCurrency),
                 style = MaterialTheme.typography.titleMedium,
@@ -104,33 +127,40 @@ fun BalanceDetailsScreen(
             Text(
                 text = stringResource(
                     id = R.string.home_balance_amount_value,
-                    amountLabel,
+                    formatAmount(state.amount),
                     normalizedCurrency
                 ),
                 style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
-            Surface(
-                shape = RoundedCornerShape(20.dp),
+            androidx.compose.material3.Surface(
+                shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                onClick = onViewAccountLimitsClick
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = Dimens.md, vertical = Dimens.sm),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(imageVector = Icons.Filled.AccountBalance, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(
+                        imageVector = Icons.Filled.AccountBalance,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
                     Text(
                         text = stringResource(id = R.string.home_view_account_limits),
                         style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(start = 8.dp)
+                        modifier = Modifier.padding(start = Dimens.sm)
                     )
                 }
             }
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
                 BalanceQuickAction(
                     icon = Icons.Filled.NorthEast,
                     label = stringResource(id = R.string.home_quick_action_send),
@@ -153,8 +183,13 @@ fun BalanceDetailsScreen(
                 )
             }
 
-            Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
-                Row(modifier = Modifier.fillMaxWidth().padding(4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            HomeDetailSectionCard(tonal = true) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Dimens.xs),
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.sm)
+                ) {
                     SegmentChip(
                         label = stringResource(id = R.string.home_segment_transactions),
                         selected = selectedTabIndex == 0,
@@ -170,31 +205,82 @@ fun BalanceDetailsScreen(
                 }
             }
 
-            Text(
-                text = stringResource(id = R.string.home_recent_activity_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            BalanceActivityRow(
-                title = stringResource(id = R.string.home_balance_activity_transfer_out),
-                time = "15:51",
-                amount = stringResource(id = R.string.home_balance_amount_negative, "10.00", normalizedCurrency),
-                status = stringResource(id = R.string.home_status_successful)
-            )
-            HorizontalDivider()
-            BalanceActivityRow(
-                title = stringResource(id = R.string.home_balance_activity_topup),
-                time = "15:50",
-                amount = stringResource(id = R.string.home_balance_amount_positive, "10.00", normalizedCurrency),
-                status = stringResource(id = R.string.home_status_successful)
-            )
-            HorizontalDivider()
-            BalanceActivityRow(
-                title = stringResource(id = R.string.home_balance_activity_topup),
-                time = "15:49",
-                amount = stringResource(id = R.string.home_balance_amount_positive, "10.00", normalizedCurrency),
-                status = stringResource(id = R.string.home_status_failed)
-            )
+            if (selectedTabIndex == 0) {
+                HomeDetailSectionTitle(text = stringResource(id = R.string.home_recent_activity_title))
+
+                if (state.recentTransactions.isEmpty()) {
+                    HomeDetailSectionCard {
+                        HomeDetailEmptyText(
+                            text = stringResource(id = R.string.home_balance_no_transactions)
+                        )
+                    }
+                } else {
+                    HomeDetailSectionCard {
+                        state.recentTransactions.forEachIndexed { index, transaction ->
+                            BalanceActivityRow(
+                                title = transaction.title,
+                                subtitle = "${transaction.status} • ${transaction.date}, ${transaction.time}",
+                                amount = transaction.toSignedAmountLabel(),
+                                onClick = { onTransactionClick(transaction) }
+                            )
+                            if (index < state.recentTransactions.lastIndex) {
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+                }
+            } else {
+                HomeDetailSectionTitle(
+                    text = stringResource(id = R.string.home_segment_account_details)
+                )
+
+                HomeDetailSectionCard {
+                    if (orderedBalances.isEmpty()) {
+                        HomeDetailEmptyText(
+                            text = stringResource(id = R.string.home_balance_no_account_data)
+                        )
+                    } else {
+                        orderedBalances.forEachIndexed { index, entry ->
+                            BalanceDetailLine(
+                                label = entry.key.uppercase(Locale.US),
+                                value = formatCurrencyAmount(entry.value, entry.key)
+                            )
+                            if (index < orderedBalances.lastIndex || state.walletUpdatedAtMs != null) {
+                                HorizontalDivider()
+                            }
+                        }
+
+                        state.walletUpdatedAtMs?.let { updatedAtMs ->
+                            BalanceDetailLine(
+                                label = stringResource(id = R.string.home_balance_last_synced),
+                                value = updatedAtMs.toBalanceDateTimeLabel()
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
+}
+
+private fun formatAmount(amount: Double): String {
+    return String.format(Locale.US, "%.2f", amount)
+}
+
+private fun formatCurrencyAmount(amount: Double, currencyCode: String): String {
+    return String.format(Locale.US, "%.2f %s", amount, currencyCode.uppercase(Locale.US))
+}
+
+private fun Transaction.toSignedAmountLabel(): String {
+    val prefix = if (amount > 0) "+" else ""
+    return prefix + String.format(Locale.US, "%.2f %s", amount, currency)
+}
+
+private val BALANCE_UPDATED_FORMAT: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", Locale.US)
+
+private fun Long.toBalanceDateTimeLabel(): String {
+    return Instant.ofEpochMilli(this)
+        .atZone(ZoneId.systemDefault())
+        .format(BALANCE_UPDATED_FORMAT)
 }

@@ -11,7 +11,11 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.PersistentCacheSettings
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.perf.FirebasePerformance
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
+import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.HiltAndroidApp
+import net.metalbrain.paysmart.core.service.update.FirebaseRemoteConfigUpdatePolicyConfigProvider
 
 @HiltAndroidApp
 class App : BaseApp() {
@@ -22,6 +26,7 @@ class App : BaseApp() {
         val firebaseAppCheck = FirebaseAppCheck.getInstance()
         val crashlytics = FirebaseCrashlytics.getInstance()
         val firebasePerformance = FirebasePerformance.getInstance()
+        val firebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
         val crashlyticsEnabled = !BuildConfig.IS_LOCAL
         val performanceEnabled = !BuildConfig.IS_LOCAL && !BuildConfig.DEBUG
         crashlytics.isCrashlyticsCollectionEnabled = crashlyticsEnabled
@@ -46,6 +51,18 @@ class App : BaseApp() {
             FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099)
             FirebaseFirestore.getInstance().useEmulator("10.0.2.2", 8082)
             FirebaseFunctions.getInstance().useEmulator("10.0.2.2", 5001)
+            FirebaseStorage.getInstance().useEmulator("10.0.2.2", 9199)
+        }
+
+        val remoteConfigSettings = FirebaseRemoteConfigSettings.Builder()
+            .setMinimumFetchIntervalInSeconds(if (BuildConfig.DEBUG) 0 else 21_600)
+            .build()
+        runCatching {
+            firebaseRemoteConfig.setConfigSettingsAsync(remoteConfigSettings)
+            firebaseRemoteConfig.setDefaultsAsync(
+                FirebaseRemoteConfigUpdatePolicyConfigProvider.DEFAULT_VALUES
+            )
+            firebaseRemoteConfig.fetchAndActivate()
         }
 
         // 🔄 Configure Firestore Offline Caching

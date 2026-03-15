@@ -26,8 +26,9 @@ import net.metalbrain.paysmart.ui.Screen
 @Composable
 fun EmailVerificationBtn(
     navController: NavController,
-    returnRoute: String = Screen.Home.route,
     modifier: Modifier = Modifier,
+    returnRoute: String = Screen.Home.route,
+
 ) {
 
     OutlinedButton(

@@ -7,6 +7,8 @@ import { stripeWebhookHandler } from "../handlers/stripeWebhook.js";
 import { createFlutterwaveAddMoneySessionHandler } from "../handlers/createFlutterwaveAddMoneySession.js";
 import { getFlutterwaveAddMoneySessionStatusHandler } from "../handlers/getFlutterwaveAddMoneySessionStatus.js";
 import { flutterwaveWebhookHandler } from "../handlers/flutterwaveWebhook.js";
+import { getFlutterwaveFundingAccountHandler } from "../handlers/getFlutterwaveFundingAccount.js";
+import { provisionFlutterwaveFundingAccountHandler } from "../handlers/provisionFlutterwaveFundingAccount.js";
 
 export function mountPaymentsWebhookRoute(app: Express) {
   app.post(
@@ -67,6 +69,26 @@ export function mountPaymentsRoutes(app: Express) {
     getFlutterwaveAddMoneySessionStatusHandler
   );
   app.options("/payments/flutterwave/add-money/session/:sessionId", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.get(
+    "/payments/flutterwave/funding-account",
+    requireActiveSession,
+    getFlutterwaveFundingAccountHandler
+  );
+  app.options("/payments/flutterwave/funding-account", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post(
+    "/payments/flutterwave/funding-account/provision",
+    requireActiveSession,
+    provisionFlutterwaveFundingAccountHandler
+  );
+  app.options("/payments/flutterwave/funding-account/provision", (_, res) => {
     corsify(res);
     res.status(204).end();
   });

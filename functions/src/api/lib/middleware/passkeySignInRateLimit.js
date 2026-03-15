@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { APP, SECURITY } from "../config/globals.js";
 import { logPasskeyAuditEvent } from "../handlers/passkeyAudit.js";
 function buildLimiter(maxRequests) {
@@ -8,7 +8,7 @@ function buildLimiter(maxRequests) {
         standardHeaders: true,
         legacyHeaders: false,
         keyGenerator: (req) => {
-            const ip = (req.ip || "").trim() || "unknown";
+            const ip = req.ip?.trim() ? ipKeyGenerator(req.ip) : "unknown";
             const appId = (req.appCheck?.app_id || "").trim() || "unknown-app";
             return `${appId}:${ip}`;
         },

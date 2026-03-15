@@ -48,13 +48,40 @@ class UserProfileCacheRepository @Inject constructor(
                     ?: resolveDisplayName(user.displayName, user.phoneNumber),
                 email = user.email ?: existing?.email,
                 phoneNumber = user.phoneNumber ?: existing?.phoneNumber,
-                photoURL = user.photoURL ?: existing?.photoURL,
+                photoURL = mergePhotoUrl(existing?.photoURL, user.photoURL),
                 dateOfBirth = user.dateOfBirth ?: existing?.dateOfBirth,
                 addressLine1 = user.addressLine1 ?: existing?.addressLine1,
                 addressLine2 = user.addressLine2 ?: existing?.addressLine2,
                 city = user.city ?: existing?.city,
                 country = user.country ?: existing?.country,
                 postalCode = user.postalCode ?: existing?.postalCode,
+            )
+        )
+    }
+
+    suspend fun getPhotoUrl(uid: String): String? {
+        return dao.getByUserId(uid)?.photoURL
+    }
+
+    suspend fun updatePhotoUrl(uid: String, photoUrl: String?) {
+        val existing = dao.getByUserId(uid)
+        val displayName = existing?.displayName
+            ?: resolveDisplayName(rawDisplayName = null, phoneNumber = existing?.phoneNumber)
+
+        dao.upsert(
+            UserProfileCacheEntity(
+                userId = uid,
+                displayName = displayName,
+                photoURL = photoUrl,
+                email = existing?.email,
+                phoneNumber = existing?.phoneNumber,
+                dateOfBirth = existing?.dateOfBirth,
+                addressLine1 = existing?.addressLine1,
+                addressLine2 = existing?.addressLine2,
+                city = existing?.city,
+                country = existing?.country,
+                postalCode = existing?.postalCode,
+                updatedAt = System.currentTimeMillis()
             )
         )
     }
@@ -98,6 +125,17 @@ class UserProfileCacheRepository @Inject constructor(
             "PaySmart User"
         }
     }
+
+    private fun mergePhotoUrl(existing: String?, remote: String?): String? {
+        if (existing.isLocalPresetPhotoUrl()) {
+            return existing
+        }
+        return remote ?: existing
+    }
+}
+
+private fun String?.isLocalPresetPhotoUrl(): Boolean {
+    return this?.startsWith("preset:") == true
 }
 
 private fun UserProfileCacheEntity.toDomain(): AuthUserModel {
@@ -115,3 +153,4 @@ private fun UserProfileCacheEntity.toDomain(): AuthUserModel {
         postalCode = postalCode
     )
 }
+

@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.core.features.account.profile.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,35 +10,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import net.metalbrain.paysmart.BuildConfig
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.ui.theme.Dimens
 
 @Composable
 fun ProfileDetailRow(
     label: String,
     value: String?
 ) {
+    val hasValue = !value.isNullOrBlank()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = Dimens.md, vertical = Dimens.md),
+        horizontalArrangement = Arrangement.spacedBy(Dimens.md),
         verticalAlignment = Alignment.Top
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(0.9f)
         )
 
         Text(
             text = value?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_field_not_provided),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (hasValue) {
+                MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            modifier = Modifier.weight(1.1f)
         )
     }
 }

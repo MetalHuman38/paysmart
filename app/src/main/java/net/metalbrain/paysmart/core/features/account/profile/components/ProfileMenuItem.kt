@@ -13,16 +13,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.ui.theme.Dimens
 
 @Composable
 fun ProfileMenuItem(
     title: String,
     subtitle: String? = null,
     leadingIcon: ImageVector? = null,
+    leadingIconTint: Color = MaterialTheme.colorScheme.primary,
     trailingText: String? = null,
     onClick: () -> Unit
 ) {
@@ -41,20 +43,19 @@ fun ProfileMenuItem(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = leadingIconTint
                 )
             }
         },
         trailingContent = {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(Dimens.sm)
             ) {
                 if (!trailingText.isNullOrBlank()) {
                     Text(
                         text = trailingText,
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 2.dp)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Icon(

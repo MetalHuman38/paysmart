@@ -2,6 +2,7 @@ package net.metalbrain.paysmart.core.features.account.security.mfa.provider
 
 import android.app.Activity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.MultiFactorSession
 import com.google.firebase.auth.PhoneAuthCredential
@@ -24,6 +25,13 @@ import kotlin.coroutines.resumeWithException
 class FirebaseMfaEnrollmentProvider @Inject constructor(
     private val firebaseAuth: FirebaseAuth
 ) : MfaEnrollmentProvider {
+    private companion object {
+        private const val PROVIDER_PHONE = "phone"
+        private const val PROVIDER_ANONYMOUS = "anonymous"
+        private const val PROVIDER_APPLE_GAME_CENTER = "gc.apple.com"
+        private const val ERROR_UNSUPPORTED_FIRST_FACTOR = "ERROR_UNSUPPORTED_FIRST_FACTOR"
+    }
+
     private var multiFactorSession: MultiFactorSession? = null
     private var verificationId: String? = null
     private var forceResendingToken: PhoneAuthProvider.ForceResendingToken? = null
@@ -32,29 +40,42 @@ class FirebaseMfaEnrollmentProvider @Inject constructor(
 
     override suspend fun loadStatus(): MfaEnrollmentStatus {
         val user = firebaseAuth.currentUser
+        val firstFactorBlockMessage = user?.let { resolveEnrollmentBlockMessage(it) }
         return MfaEnrollmentStatus(
             signedIn = user != null,
             emailVerified = user?.isEmailVerified == true,
             hasEnrolledFactor = user?.multiFactor
                 ?.enrolledFactors
-                ?.isNotEmpty() == true
+                ?.isNotEmpty() == true,
+            supportsEnrollment = firstFactorBlockMessage == null,
+            enrollmentBlockMessage = firstFactorBlockMessage,
+            blockedActionLabel = user?.takeIf { firstFactorBlockMessage != null }?.let {
+                resolveBlockedActionLabel(it)
+            }
         )
     }
 
-    override suspend fun startSession(): Result<MfaEnrollmentChallenge> = runCatching {
-        val user = requireCurrentUser()
-        val phoneNumber = requirePhoneNumber(user)
-        if (!user.isEmailVerified) {
-            throw IllegalStateException("Verified email is required before enabling 2-step verification")
-        }
+    override suspend fun startSession(): Result<MfaEnrollmentChallenge> {
+        return try {
+            val user = requireCurrentUser()
+            val phoneNumber = requirePhoneNumber(user)
+            requireSupportedFirstFactor(user)
+            if (!user.isEmailVerified) {
+                throw IllegalStateException("Verified email is required before enabling 2-step verification")
+            }
 
-        multiFactorSession = user.multiFactor.session.await()
-        destinationHint = maskPhone(phoneNumber)
-        MfaEnrollmentChallenge(destinationHint = destinationHint ?: maskPhone(phoneNumber))
+            multiFactorSession = user.multiFactor.session.await()
+            destinationHint = maskPhone(phoneNumber)
+            Result.success(
+                MfaEnrollmentChallenge(destinationHint = destinationHint ?: maskPhone(phoneNumber))
+            )
+        } catch (exception: Exception) {
+            Result.failure(mapEnrollmentException(exception))
+        }
     }
 
     override suspend fun sendVerificationCode(activity: Activity): Result<MfaEnrollmentChallenge> {
-        return runCatching {
+        return try {
             val user = requireCurrentUser()
             val phoneNumber = requirePhoneNumber(user)
             val session = multiFactorSession ?: user.multiFactor.session.await().also {
@@ -104,58 +125,66 @@ class FirebaseMfaEnrollmentProvider @Inject constructor(
                 }
             }
 
-            MfaEnrollmentChallenge(destinationHint = hint)
+            Result.success(MfaEnrollmentChallenge(destinationHint = hint))
+        } catch (exception: Exception) {
+            Result.failure(mapEnrollmentException(exception))
         }
     }
 
-    override suspend fun resendVerificationCode(activity: Activity): Result<Unit> = runCatching {
-        val user = requireCurrentUser()
-        val phoneNumber = requirePhoneNumber(user)
-        val session = multiFactorSession ?: user.multiFactor.session.await().also {
-            multiFactorSession = it
-        }
-        val token = forceResendingToken
-            ?: throw IllegalStateException("Cannot resend code before initial send")
-
-        withContext(Dispatchers.Main) {
-            suspendCancellableCoroutine { continuation ->
-                val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                    override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                        autoResolvedCredential = credential
-                        if (continuation.isActive) {
-                            continuation.resume(Unit)
-                        }
-                    }
-
-                    override fun onVerificationFailed(exception: com.google.firebase.FirebaseException) {
-                        if (continuation.isActive) {
-                            continuation.resumeWithException(exception)
-                        }
-                    }
-
-                    override fun onCodeSent(
-                        newVerificationId: String,
-                        newToken: PhoneAuthProvider.ForceResendingToken
-                    ) {
-                        verificationId = newVerificationId
-                        forceResendingToken = newToken
-                        if (continuation.isActive) {
-                            continuation.resume(Unit)
-                        }
-                    }
-                }
-
-                val options = PhoneAuthOptions.newBuilder(firebaseAuth)
-                    .setPhoneNumber(phoneNumber)
-                    .setTimeout(60L, TimeUnit.SECONDS)
-                    .setActivity(activity)
-                    .setCallbacks(callbacks)
-                    .setMultiFactorSession(session)
-                    .setForceResendingToken(token)
-                    .build()
-
-                PhoneAuthProvider.verifyPhoneNumber(options)
+    override suspend fun resendVerificationCode(activity: Activity): Result<Unit> {
+        return try {
+            val user = requireCurrentUser()
+            val phoneNumber = requirePhoneNumber(user)
+            val session = multiFactorSession ?: user.multiFactor.session.await().also {
+                multiFactorSession = it
             }
+            val token = forceResendingToken
+                ?: throw IllegalStateException("Cannot resend code before initial send")
+
+            withContext(Dispatchers.Main) {
+                suspendCancellableCoroutine { continuation ->
+                    val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                        override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                            autoResolvedCredential = credential
+                            if (continuation.isActive) {
+                                continuation.resume(Unit)
+                            }
+                        }
+
+                        override fun onVerificationFailed(exception: com.google.firebase.FirebaseException) {
+                            if (continuation.isActive) {
+                                continuation.resumeWithException(exception)
+                            }
+                        }
+
+                        override fun onCodeSent(
+                            newVerificationId: String,
+                            newToken: PhoneAuthProvider.ForceResendingToken
+                        ) {
+                            verificationId = newVerificationId
+                            forceResendingToken = newToken
+                            if (continuation.isActive) {
+                                continuation.resume(Unit)
+                            }
+                        }
+                    }
+
+                    val options = PhoneAuthOptions.newBuilder(firebaseAuth)
+                        .setPhoneNumber(phoneNumber)
+                        .setTimeout(60L, TimeUnit.SECONDS)
+                        .setActivity(activity)
+                        .setCallbacks(callbacks)
+                        .setMultiFactorSession(session)
+                        .setForceResendingToken(token)
+                        .build()
+
+                    PhoneAuthProvider.verifyPhoneNumber(options)
+                }
+            }
+
+            Result.success(Unit)
+        } catch (exception: Exception) {
+            Result.failure(mapEnrollmentException(exception))
         }
     }
 
@@ -191,6 +220,70 @@ class FirebaseMfaEnrollmentProvider @Inject constructor(
     private fun requirePhoneNumber(user: FirebaseUser): String {
         return user.phoneNumber?.takeIf { it.isNotBlank() }
             ?: throw IllegalStateException("Phone number is required for phone-based MFA enrollment")
+    }
+
+    private suspend fun requireSupportedFirstFactor(user: FirebaseUser) {
+        resolveEnrollmentBlockMessage(user)?.let { message ->
+            throw IllegalStateException(message)
+        }
+    }
+
+    private suspend fun resolveEnrollmentBlockMessage(user: FirebaseUser): String? {
+        val signInProvider = user.getIdToken(false).await().signInProvider?.lowercase()
+        return when (signInProvider) {
+            PROVIDER_PHONE ->
+                "2-step verification can't be enabled from a phone sign-in session. Sign in with email link or a linked provider, then try again."
+            PROVIDER_ANONYMOUS ->
+                "2-step verification isn't available for anonymous sessions. Sign in with a saved account first."
+            PROVIDER_APPLE_GAME_CENTER ->
+                "2-step verification isn't available from this Apple Game Center session. Sign in with another linked method and try again."
+            else -> null
+        }
+    }
+
+    private fun resolveBlockedActionLabel(user: FirebaseUser): String {
+        val linkedProviderLabels = user.providerData
+            .mapNotNull { profile ->
+                when (profile.providerId?.lowercase()) {
+                    "google.com" -> "Google"
+                    "facebook.com" -> "Facebook"
+                    "password" -> "email"
+                    "apple.com" -> "Apple"
+                    else -> null
+                }
+            }
+            .distinct()
+
+        if (linkedProviderLabels.isEmpty()) {
+            return "Sign out and use another sign-in method"
+        }
+
+        if (linkedProviderLabels.size == 1) {
+            return if (linkedProviderLabels.first() == "email") {
+                "Sign in with email link to continue"
+            } else {
+                "Use linked ${linkedProviderLabels.first()} to continue"
+            }
+        }
+
+        val providersText = when (linkedProviderLabels.size) {
+            2 -> "${linkedProviderLabels[0]} or ${linkedProviderLabels[1]}"
+            else -> linkedProviderLabels.dropLast(1).joinToString(", ") +
+                ", or ${linkedProviderLabels.last()}"
+        }
+        return "Use linked $providersText to continue"
+    }
+
+    private fun mapEnrollmentException(exception: Exception): Throwable {
+        if (exception is FirebaseAuthException &&
+            exception.errorCode == ERROR_UNSUPPORTED_FIRST_FACTOR
+        ) {
+            return IllegalStateException(
+                "2-step verification can't be enabled from the current sign-in session. Sign in with email link or another linked provider, then try again.",
+                exception
+            )
+        }
+        return exception
     }
 
     private fun maskPhone(phone: String): String {

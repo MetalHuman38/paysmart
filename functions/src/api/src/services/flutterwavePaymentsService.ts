@@ -6,11 +6,43 @@ export interface CreateFlutterwaveTopupSessionInput {
   currency: string;
   idempotencyKey?: string;
   reference: string;
+  customerId?: string;
   customer: {
     email: string;
     firstName: string;
     lastName: string;
   };
+}
+
+export interface FlutterwaveFundingAccountKycInput {
+  bvn?: string;
+  nin?: string;
+}
+
+export interface CreateFlutterwavePermanentFundingAccountInput {
+  uid: string;
+  reference: string;
+  idempotencyKey?: string;
+  customerId?: string;
+  customer: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  kyc?: FlutterwaveFundingAccountKycInput;
+}
+
+export interface FlutterwavePermanentFundingAccount {
+  accountId: string;
+  accountNumber: string;
+  bankName: string;
+  accountName: string;
+  reference: string;
+  status: string;
+  customerId: string;
+  note?: string;
+  createdAtMs: number;
+  updatedAtMs: number;
 }
 
 export interface FlutterwaveTopupSession {
@@ -21,6 +53,7 @@ export interface FlutterwaveTopupSession {
   amountMinor: number;
   currency: string;
   createdAtMs: number;
+  customerId: string;
 }
 
 export interface FlutterwaveTransactionStatus {
@@ -53,6 +86,20 @@ type CachedToken = {
   expiresAtMs: number;
 };
 
+export class FlutterwaveProviderRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code?: string,
+    readonly details: string[] = [],
+    readonly type?: string,
+    readonly payload: Record<string, unknown> = {}
+  ) {
+    super(message);
+    this.name = "FlutterwaveProviderRequestError";
+  }
+}
+
 export class FlutterwavePaymentsService {
   private tokenCache: CachedToken | null = null;
 
@@ -72,16 +119,16 @@ export class FlutterwavePaymentsService {
   ): Promise<FlutterwaveTopupSession> {
     this.ensureConfigured();
 
-    const customer = await this.createCustomer(input);
+    const customerId = await this.resolveCustomerId(input);
     const amountMajor = roundMajorFromMinor(input.amountMinor);
     const payload = {
       reference: input.reference,
-      customer_id: customer.id,
+      customer_id: customerId,
       account_type: "dynamic",
       currency: input.currency,
       amount: amountMajor,
       expiry: this.options.virtualAccountExpirySeconds,
-      narration: `PaySmart add money (${input.currency})`,
+      narration: buildVirtualAccountNarration(input.customer),
     };
 
     const data = await this.providerRequest("/virtual-accounts", "POST", payload, {
@@ -107,7 +154,50 @@ export class FlutterwavePaymentsService {
       amountMinor: input.amountMinor,
       currency: input.currency,
       createdAtMs,
+      customerId,
     };
+  }
+
+  async createPermanentFundingAccount(
+    input: CreateFlutterwavePermanentFundingAccountInput
+  ): Promise<FlutterwavePermanentFundingAccount> {
+    this.ensureConfigured();
+
+    const customerId = await this.resolveCustomerId(input);
+    const payload = {
+      reference: input.reference,
+      customer_id: customerId,
+      account_type: "static",
+      amount: 0,
+      currency: "NGN",
+      narration: buildVirtualAccountNarration(input.customer),
+      ...(input.kyc?.bvn ? { bvn: input.kyc.bvn } : {}),
+      ...(input.kyc?.nin ? { nin: input.kyc.nin } : {}),
+    };
+
+    const data = await this.providerRequest("/virtual-accounts", "POST", payload, {
+      "X-Idempotency-Key": input.idempotencyKey || input.reference,
+      "X-Trace-Id": `${input.reference}-static-account`,
+    });
+
+    return this.mapPermanentFundingAccount(data, customerId, input.reference);
+  }
+
+  async retrievePermanentFundingAccount(
+    accountId: string
+  ): Promise<FlutterwavePermanentFundingAccount> {
+    this.ensureConfigured();
+
+    const cleanAccountId = accountId.trim();
+    if (!cleanAccountId) {
+      throw new Error("Missing Flutterwave funding account id");
+    }
+
+    const data = await this.providerRequest(
+      `/virtual-accounts/${encodeURIComponent(cleanAccountId)}`,
+      "GET"
+    );
+    return this.mapPermanentFundingAccount(data);
   }
 
   async retrieveTransactionStatus(
@@ -225,8 +315,20 @@ export class FlutterwavePaymentsService {
     );
   }
 
+  private async resolveCustomerId(
+    input: CustomerResolutionInput
+  ): Promise<string> {
+    const existingCustomerId = input.customerId?.trim();
+    if (existingCustomerId) {
+      return existingCustomerId;
+    }
+
+    const customer = await this.createCustomer(input);
+    return customer.id;
+  }
+
   private async createCustomer(
-    input: CreateFlutterwaveTopupSessionInput
+    input: CustomerResolutionInput
   ): Promise<{ id: string }> {
     const payload = {
       name: {
@@ -235,16 +337,163 @@ export class FlutterwavePaymentsService {
       },
       email: input.customer.email,
     };
-    const data = await this.providerRequest("/customers", "POST", payload, {
-      "X-Idempotency-Key": input.idempotencyKey || input.reference,
-      "X-Trace-Id": `${input.reference}-customer`,
-    });
-    const customer = asRecord(data.data);
-    const id = asString(customer.id);
-    if (!id) {
-      throw new Error("Flutterwave customer response is incomplete");
+    try {
+      const data = await this.providerRequest("/customers", "POST", payload, {
+        "X-Idempotency-Key": input.idempotencyKey || input.reference,
+        "X-Trace-Id": `${input.reference}-customer`,
+      });
+      const customer = asRecord(data.data);
+      const id = asString(customer.id);
+      if (!id) {
+        throw new Error("Flutterwave customer response is incomplete");
+      }
+      return { id };
+    } catch (error) {
+      if (this.isExistingCustomerConflict(error)) {
+        const existingCustomerId = await this.findExistingCustomerIdByEmail(
+          input.customer.email,
+          error.payload
+        );
+        if (existingCustomerId) {
+          return { id: existingCustomerId };
+        }
+      }
+      throw error;
     }
-    return { id };
+  }
+
+  private mapPermanentFundingAccount(
+    payload: Record<string, unknown>,
+    fallbackCustomerId?: string,
+    fallbackReference?: string
+  ): FlutterwavePermanentFundingAccount {
+    const response = resolveFlutterwaveData(payload);
+    const bank = asRecord(response.bank);
+    const accountId = asString(response.id) || asString(response.account_id);
+    const accountNumber =
+      asString(response.account_number) || asString(response.accountNumber);
+    const bankName =
+      asString(response.bank_name) ||
+      asString(bank.name) ||
+      asString(bank.bank_name);
+    const accountName =
+      asString(response.account_name) ||
+      asString(response.accountName) ||
+      asString(response.name);
+    const reference =
+      asString(response.reference) ||
+      asString(response.tx_ref) ||
+      fallbackReference ||
+      "";
+    const status = asString(response.status) || "pending";
+    const customerId =
+      asString(response.customer_id) ||
+      asString(asRecord(response.customer).id) ||
+      fallbackCustomerId ||
+      "";
+    const note =
+      asString(response.note) ||
+      asString(response.narration) ||
+      asString(response.description) ||
+      undefined;
+    const createdAtMs =
+      parseDateToMs(asString(response.created_datetime)) ??
+      parseDateToMs(asString(response.createdAt)) ??
+      Date.now();
+    const updatedAtMs =
+      parseDateToMs(asString(response.updated_datetime)) ??
+      parseDateToMs(asString(response.updatedAt)) ??
+      createdAtMs;
+
+    if (
+      !accountId ||
+      !accountNumber ||
+      !bankName ||
+      !accountName ||
+      !reference ||
+      !customerId
+    ) {
+      throw new Error("Flutterwave permanent funding account response is incomplete");
+    }
+
+    return {
+      accountId,
+      accountNumber,
+      bankName,
+      accountName,
+      reference,
+      status,
+      customerId,
+      note,
+      createdAtMs,
+      updatedAtMs,
+    };
+  }
+
+  private isExistingCustomerConflict(
+    error: unknown
+  ): error is FlutterwaveProviderRequestError {
+    return (
+      error instanceof FlutterwaveProviderRequestError &&
+      error.status === 409 &&
+      (error.code === "10409" ||
+        error.type === "RESOURCE_CONFLICT" ||
+        error.message.toLowerCase().includes("already exists"))
+    );
+  }
+
+  private async findExistingCustomerIdByEmail(
+    email: string,
+    conflictPayload?: Record<string, unknown>
+  ): Promise<string | null> {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      return null;
+    }
+
+    const fromConflictPayload = extractCustomerIdFromLookupResponse(
+      conflictPayload ?? {},
+      cleanEmail
+    );
+    if (fromConflictPayload) {
+      return fromConflictPayload;
+    }
+
+    const directLookup = await this.tryLookupCustomerId(
+      `/customers?email=${encodeURIComponent(cleanEmail)}`,
+      "GET",
+      undefined,
+      cleanEmail
+    );
+    if (directLookup) {
+      return directLookup;
+    }
+
+    const searchLookup = await this.tryLookupCustomerId(
+      "/customers/search",
+      "POST",
+      { email: cleanEmail },
+      cleanEmail
+    );
+    if (searchLookup) {
+      return searchLookup;
+    }
+
+    return this.tryLookupCustomerId("/customers", "GET", undefined, cleanEmail);
+  }
+
+  private async tryLookupCustomerId(
+    path: string,
+    method: "GET" | "POST",
+    body: Record<string, unknown> | undefined,
+    email: string
+  ): Promise<string | null> {
+    try {
+      const response = await this.providerRequest(path, method, body);
+      return extractCustomerIdFromLookupResponse(response, email);
+    } catch {
+      return null;
+    }
   }
 
   private async providerRequest(
@@ -258,6 +507,7 @@ export class FlutterwavePaymentsService {
     const url = `${normalizedBaseUrl}${path}`;
     const headers: Record<string, string> = {
       Authorization: authorizationHeader,
+      Accept: "application/json",
       ...extraHeaders,
     };
 
@@ -274,12 +524,37 @@ export class FlutterwavePaymentsService {
     const rawBody = await response.text();
     const parsed = safeJsonParse(rawBody);
     if (!response.ok) {
-      const message =
-        asString(asRecord(parsed.error).message) ||
-        asString(asRecord(parsed.error).type) ||
+      const providerError = asRecord(parsed.error);
+      const details = extractFlutterwaveValidationDetails(
+        (parsed as Record<string, unknown>).validation_errors,
+        providerError.validation_errors,
+        (parsed as Record<string, unknown>).errors,
+        providerError.errors
+      );
+      const baseMessage =
+        asString(providerError.message) ||
+        asString(providerError.type) ||
         asString((parsed as Record<string, unknown>).message) ||
+        asString((parsed as Record<string, unknown>).error_description) ||
         `Flutterwave request failed (${response.status})`;
-      throw new Error(message);
+      const message =
+        details.length > 0 ? `${baseMessage}: ${details.join("; ")}` : baseMessage;
+      const code =
+        asString((parsed as Record<string, unknown>).code) ||
+        asString(providerError.code) ||
+        undefined;
+      const type =
+        asString(providerError.type) ||
+        asString((parsed as Record<string, unknown>).type) ||
+        undefined;
+      throw new FlutterwaveProviderRequestError(
+        message,
+        response.status,
+        code,
+        details,
+        type,
+        parsed
+      );
     }
     return parsed;
   }
@@ -299,10 +574,11 @@ export class FlutterwavePaymentsService {
     tokenPayload.set("client_id", this.options.clientId.trim());
     tokenPayload.set("client_secret", this.options.clientSecret.trim());
 
-    const idpUrl = `${normalizeBaseUrl(this.options.idpBaseUrl)}/oauth2/token`;
+    const idpUrl = buildFlutterwaveOauthTokenUrl(this.options.idpBaseUrl);
     const tokenResponse = await fetch(idpUrl, {
       method: "POST",
       headers: {
+        Accept: "application/json",
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: tokenPayload.toString(),
@@ -312,7 +588,10 @@ export class FlutterwavePaymentsService {
     if (!tokenResponse.ok) {
       const message =
         asString(asRecord(parsed.error).message) ||
+        asString(parsed.error_description) ||
+        asString(asRecord(parsed.error).error_description) ||
         asString((parsed as Record<string, unknown>).message) ||
+        asString((parsed as Record<string, unknown>).error) ||
         `Flutterwave auth failed (${tokenResponse.status})`;
       throw new Error(message);
     }
@@ -356,15 +635,103 @@ export class FlutterwavePaymentsService {
   }
 }
 
+function extractCustomerIdFromLookupResponse(
+  response: Record<string, unknown>,
+  email: string
+): string | null {
+  const normalizedEmail = email.trim().toLowerCase();
+  for (const customer of collectCustomerRecords(response)) {
+    const id = asString(customer.id) || asString(customer.customer_id);
+    const customerEmail = asString(customer.email).toLowerCase();
+    if (!id) {
+      continue;
+    }
+    if (!normalizedEmail || !customerEmail || customerEmail === normalizedEmail) {
+      return id;
+    }
+  }
+  return null;
+}
+
+type CustomerResolutionInput = {
+  idempotencyKey?: string;
+  reference: string;
+  customerId?: string;
+  customer: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+};
+
+function resolveFlutterwaveData(payload: Record<string, unknown>): Record<string, unknown> {
+  const data = asRecord(payload.data);
+  return Object.keys(data).length > 0 ? data : payload;
+}
+
+function collectCustomerRecords(response: Record<string, unknown>): Record<string, unknown>[] {
+  const data = response.data;
+  const candidates: Record<string, unknown>[] = [];
+
+  const direct = asRecord(data);
+  if (Object.keys(direct).length > 0) {
+    candidates.push(direct);
+  }
+
+  for (const row of asArray(data)) {
+    const candidate = asRecord(row);
+    if (Object.keys(candidate).length > 0) {
+      candidates.push(candidate);
+    }
+  }
+
+  const nestedCollections = [
+    asArray(direct.data),
+    asArray(direct.records),
+    asArray(direct.customers),
+    asArray((response as Record<string, unknown>).customers),
+  ];
+
+  for (const rows of nestedCollections) {
+    for (const row of rows) {
+      const candidate = asRecord(row);
+      if (Object.keys(candidate).length > 0) {
+        candidates.push(candidate);
+      }
+    }
+  }
+
+  return candidates;
+}
+
 function normalizeBaseUrl(raw: string): string {
   const trimmed = raw.trim();
   if (!trimmed) {
-    return "https://api.flutterwave.cloud";
+    return "https://developersandbox-api.flutterwave.com";
   }
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
     return trimmed.replace(/\/+$/, "");
   }
   return `https://${trimmed.replace(/\/+$/, "")}`;
+}
+
+export function buildFlutterwaveOauthTokenUrl(rawBaseUrl: string): string {
+  const normalized = rawBaseUrl.trim()
+    ? normalizeBaseUrl(rawBaseUrl)
+    : "https://idp.flutterwave.com";
+  if (normalized.endsWith("/realms/flutterwave/protocol/openid-connect/token")) {
+    return normalized;
+  }
+  if (normalized.endsWith("/realms/flutterwave/protocol/openid-connect")) {
+    return `${normalized}/token`;
+  }
+  if (normalized.endsWith("/oauth2/token")) {
+    return normalized.replace(
+      /\/oauth2\/token$/,
+      "/realms/flutterwave/protocol/openid-connect/token"
+    );
+  }
+  return `${normalized}/realms/flutterwave/protocol/openid-connect/token`;
 }
 
 function verifyFlutterwaveHmac(
@@ -438,4 +805,114 @@ function parseDateToMs(raw: string): number | null {
 
 function roundMajorFromMinor(amountMinor: number): number {
   return Math.round((amountMinor / 100 + Number.EPSILON) * 100) / 100;
+}
+
+function buildVirtualAccountNarration(
+  customer: CreateFlutterwaveTopupSessionInput["customer"]
+): string {
+  const fullName = [customer.firstName, customer.lastName]
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ");
+
+  const fallback = "PaySmart User";
+  const narration = fullName || fallback;
+  return narration.slice(0, 35);
+}
+
+function extractFlutterwaveValidationDetails(...sources: unknown[]): string[] {
+  const details = new Set<string>();
+  for (const source of sources) {
+    collectValidationDetails(source, details);
+  }
+  return Array.from(details);
+}
+
+function collectValidationDetails(source: unknown, out: Set<string>) {
+  if (!source) {
+    return;
+  }
+
+  if (Array.isArray(source)) {
+    for (const item of source) {
+      collectValidationDetails(item, out);
+    }
+    return;
+  }
+
+  if (typeof source === "string") {
+    const value = source.trim();
+    if (value) {
+      out.add(value);
+    }
+    return;
+  }
+
+  if (typeof source !== "object") {
+    return;
+  }
+
+  const record = source as Record<string, unknown>;
+  const field =
+    asString(record.field) ||
+    asString(record.field_name) ||
+    asString(record.property);
+  const message =
+    asString(record.message) ||
+    asString(record.error) ||
+    asString(record.description);
+
+  if (field || message) {
+    out.add(field && message ? `${field}: ${message}` : field || message);
+    return;
+  }
+
+  for (const [key, value] of Object.entries(record)) {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const nested = formatValidationDetail(item, key);
+        if (nested) {
+          out.add(nested);
+        }
+      }
+      continue;
+    }
+
+    const nested = formatValidationDetail(value, key);
+    if (nested) {
+      out.add(nested);
+    }
+  }
+}
+
+function formatValidationDetail(value: unknown, fallbackField?: string): string {
+  if (typeof value === "string") {
+    const message = value.trim();
+    if (!message) {
+      return "";
+    }
+    return fallbackField ? `${fallbackField}: ${message}` : message;
+  }
+
+  if (!value || typeof value !== "object") {
+    return "";
+  }
+
+  const record = value as Record<string, unknown>;
+  const field =
+    asString(record.field) ||
+    asString(record.field_name) ||
+    asString(record.property) ||
+    fallbackField ||
+    "";
+  const message =
+    asString(record.message) ||
+    asString(record.error) ||
+    asString(record.description);
+
+  if (!field && !message) {
+    return "";
+  }
+  return field && message ? `${field}: ${message}` : field || message;
 }

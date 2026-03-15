@@ -41,7 +41,9 @@ fun AccountSetupSheetContent(
 
     val progress = completedSteps.toFloat() / totalSteps
     val label = "$completedSteps/$totalSteps"
-    val subLabel = if (completedSteps == totalSteps) "ALL DONE" else "COMPLETED"
+    val allDone = stringResource(id = R.string.all_done)
+    val completed = stringResource(id = R.string.completed)
+    val subLabel = if (completedSteps == totalSteps) allDone else completed
 
     Column(
         modifier = Modifier

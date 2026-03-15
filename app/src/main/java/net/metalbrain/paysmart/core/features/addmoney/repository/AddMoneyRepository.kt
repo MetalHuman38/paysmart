@@ -4,9 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.metalbrain.paysmart.Env
 import net.metalbrain.paysmart.core.auth.AuthApiConfig
-import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
+import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData
 import net.metalbrain.paysmart.core.service.performance.AppPerformanceMonitor
+import net.metalbrain.paysmart.data.repository.AuthRepository
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -35,7 +36,7 @@ class AddMoneyRepository @Inject constructor(
         amountMinor: Int,
         currency: String,
         provider: AddMoneyProvider
-    ): Result<net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData> = runCatching {
+    ): Result<AddMoneySessionData> = runCatching {
         performanceMonitor.trace(
             name = "add_money_create_session",
             attributes = mapOf(
@@ -60,10 +61,14 @@ class AddMoneyRepository @Inject constructor(
                 httpClient.newCall(request).execute().use { response ->
                     val rawBody = response.body?.string().orEmpty()
                     if (!response.isSuccessful) {
-                        throw IllegalStateException(parseError(rawBody, "Unable to create add money session"))
+                        throw parseAddMoneyApiException(
+                            statusCode = response.code,
+                            rawBody = rawBody,
+                            fallbackMessage = "Unable to create add money session"
+                        )
                     }
 
-                    parseSession(rawBody, provider)
+                    parseAddMoneySession(rawBody, provider)
                 }
             }
         }
@@ -72,7 +77,7 @@ class AddMoneyRepository @Inject constructor(
     suspend fun getSessionStatus(
         sessionId: String,
         provider: AddMoneyProvider
-    ): Result<net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData> = runCatching {
+    ): Result<AddMoneySessionData> = runCatching {
         performanceMonitor.trace(
             name = "add_money_get_session_status",
             attributes = mapOf(
@@ -91,10 +96,14 @@ class AddMoneyRepository @Inject constructor(
                 httpClient.newCall(request).execute().use { response ->
                     val rawBody = response.body?.string().orEmpty()
                     if (!response.isSuccessful) {
-                        throw IllegalStateException(parseError(rawBody, "Unable to load add money status"))
+                        throw parseAddMoneyApiException(
+                            statusCode = response.code,
+                            rawBody = rawBody,
+                            fallbackMessage = "Unable to load add money status"
+                        )
                     }
 
-                    parseSession(rawBody, provider)
+                    parseAddMoneySession(rawBody, provider)
                 }
             }
         }
@@ -113,47 +122,4 @@ class AddMoneyRepository @Inject constructor(
             AddMoneyProvider.FLUTTERWAVE -> config.addMoneyFlutterwaveSessionStatusUrl(sessionId)
         }
     }
-
-    private fun parseSession(
-        rawBody: String,
-        fallbackProvider: AddMoneyProvider
-    ): net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData {
-        if (rawBody.isBlank()) {
-            throw IllegalStateException("Add money API returned an empty response")
-        }
-
-        val json = JSONObject(rawBody)
-        return net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData(
-            sessionId = json.optString("sessionId"),
-            amountMinor = json.optInt("amountMinor"),
-            currency = json.optString("currency", "GBP").uppercase(),
-            status = net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionStatus.Companion.fromRaw(
-                json.optString("status")
-            ),
-            expiresAtMs = json.optLong("expiresAtMs"),
-            provider = AddMoneyProvider.fromRaw(json.optNullableString("provider"))
-                .takeIf { json.optNullableString("provider") != null }
-                ?: fallbackProvider,
-            checkoutUrl = json.optNullableString("checkoutUrl"),
-            flutterwaveTransactionId = json.optNullableString("flutterwaveTransactionId"),
-            paymentIntentId = json.optNullableString("paymentIntentId"),
-            paymentIntentClientSecret = json.optNullableString("paymentIntentClientSecret"),
-            publishableKey = json.optNullableString("publishableKey")
-        )
-    }
-
-    private fun parseError(rawBody: String, fallback: String): String {
-        if (rawBody.isBlank()) return fallback
-        return runCatching {
-            val json = JSONObject(rawBody)
-            val error = json.optString("error", fallback).ifBlank { fallback }
-            val code = json.optString("code").trim()
-            if (code.isBlank()) error else "$error (code=$code)"
-        }.getOrDefault(fallback)
-    }
-}
-
-private fun JSONObject.optNullableString(key: String): String? {
-    if (!has(key)) return null
-    return optString(key).trim().takeIf { it.isNotEmpty() && !it.equals("null", ignoreCase = true) }
 }

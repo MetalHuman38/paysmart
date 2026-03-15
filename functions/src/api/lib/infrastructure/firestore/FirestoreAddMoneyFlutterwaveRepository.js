@@ -56,13 +56,14 @@ export class FirestoreAddMoneyFlutterwaveRepository {
         const currency = this.normalizeCurrency(input.currency);
         const amountMinor = this.normalizeAmount(input.amountMinor);
         const customer = await this.resolveCustomerProfile(uid);
-        const reference = buildReference(uid);
+        const reference = buildReference();
         const providerSession = await this.flutterwave.createTopupSession({
             uid,
             amountMinor,
             currency,
             idempotencyKey: input.idempotencyKey,
             reference,
+            customerId: customer.customerId,
             customer,
         });
         const status = this.deriveProviderStatus(providerSession.status);
@@ -79,6 +80,7 @@ export class FirestoreAddMoneyFlutterwaveRepository {
             flutterwaveStatus: providerSession.status,
             flutterwaveReference: providerSession.txRef,
             flutterwaveVirtualAccountId: providerSession.sessionId,
+            flutterwaveCustomerId: providerSession.customerId,
             createdAt: FieldValue.serverTimestamp(),
             updatedAt: FieldValue.serverTimestamp(),
         });
@@ -91,6 +93,7 @@ export class FirestoreAddMoneyFlutterwaveRepository {
             updatedAt: FieldValue.serverTimestamp(),
         };
         await this.lookupRef(providerSession.txRef).set(lookupDoc, { merge: true });
+        await this.persistFlutterwaveCustomerProfile(uid, providerSession.customerId, customer.email);
         if (status === "succeeded") {
             await this.applySettlementIfNeeded(uid, providerSession.sessionId, amountMinor, currency, providerSession.sessionId);
         }
@@ -316,11 +319,30 @@ export class FirestoreAddMoneyFlutterwaveRepository {
         const lastName = nameParts.slice(1).join(" ") || "User";
         const emailFromUser = asString(user?.email);
         const email = emailFromUser || `${uid}@users.pay-smart.net`;
+        const paymentProviders = asRecord(user?.paymentProviders);
+        const flutterwaveProvider = asRecord(paymentProviders.flutterwave);
+        const customerId = asString(flutterwaveProvider.customerId);
         return {
             email,
             firstName,
             lastName,
+            customerId: customerId || undefined,
         };
+    }
+    async persistFlutterwaveCustomerProfile(uid, customerId, email) {
+        const cleanCustomerId = customerId.trim();
+        if (!cleanCustomerId) {
+            return;
+        }
+        await this.userRef(uid).set({
+            paymentProviders: {
+                flutterwave: {
+                    customerId: cleanCustomerId,
+                    email: email.trim().toLowerCase(),
+                    updatedAt: FieldValue.serverTimestamp(),
+                },
+            },
+        }, { merge: true });
     }
     deriveProviderStatus(rawStatus) {
         const status = rawStatus.trim().toLowerCase();
@@ -364,10 +386,8 @@ export class FirestoreAddMoneyFlutterwaveRepository {
         return raw;
     }
 }
-function buildReference(uid) {
-    const shortUid = uid.slice(0, 8);
-    const nonce = randomUUID().replace(/-/g, "").slice(0, 16);
-    return `ps_add_${shortUid}_${Date.now()}_${nonce}`;
+function buildReference() {
+    return randomUUID();
 }
 function roundMoney(value) {
     return Math.round((value + Number.EPSILON) * 100) / 100;
@@ -402,5 +422,8 @@ function parseNumeric(raw) {
 }
 function asString(raw) {
     return typeof raw === "string" ? raw.trim() : "";
+}
+function asRecord(raw) {
+    return raw && typeof raw === "object" ? raw : {};
 }
 //# sourceMappingURL=FirestoreAddMoneyFlutterwaveRepository.js.map

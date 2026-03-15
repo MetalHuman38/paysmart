@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.core.features.account.security.mfa.viewmodel
 
 import android.app.Activity
+import com.google.firebase.Timestamp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,6 +34,9 @@ data class MfaNudgeUiState(
     val isSignedIn: Boolean = false,
     val hasVerifiedEmail: Boolean = false,
     val hasEnrolledFactor: Boolean = false,
+    val supportsEnrollment: Boolean = true,
+    val enrollmentBlockMessage: String? = null,
+    val blockedActionLabel: String? = null,
     val isStartingEnrollment: Boolean = false,
     val isSendingCode: Boolean = false,
     val hasSentCode: Boolean = false,
@@ -73,6 +77,9 @@ class MfaNudgeViewModel @Inject constructor(
             isSignedIn = currentStatus.signedIn,
             hasVerifiedEmail = currentStatus.emailVerified,
             hasEnrolledFactor = currentStatus.hasEnrolledFactor,
+            supportsEnrollment = currentStatus.supportsEnrollment,
+            enrollmentBlockMessage = currentStatus.enrollmentBlockMessage,
+            blockedActionLabel = currentStatus.blockedActionLabel,
             isStartingEnrollment = currentRuntime.isStartingEnrollment,
             isSendingCode = currentRuntime.isSendingCode,
             hasSentCode = currentRuntime.hasSentCode,
@@ -98,6 +105,7 @@ class MfaNudgeViewModel @Inject constructor(
                 .onSuccess {
                     status.value = it
                     error.value = null
+                    syncLocalMfaState(it.hasEnrolledFactor)
                     if (it.hasEnrolledFactor) {
                         runtime.value = runtime.value.copy(
                             hasSentCode = false,
@@ -231,6 +239,20 @@ class MfaNudgeViewModel @Inject constructor(
         securityPreference.saveLocalSecurityState(
             current.copy(
                 hasSkippedMfaEnrollmentPrompt = skipped,
+                lastSynced = System.currentTimeMillis()
+            )
+        )
+    }
+
+    private suspend fun syncLocalMfaState(hasEnrolledFactor: Boolean) {
+        val current = securityPreference.loadLocalSecurityState()
+        securityPreference.saveLocalSecurityState(
+            current.copy(
+                hasEnrolledMfaFactor = hasEnrolledFactor,
+                mfaEnrolledAt = when {
+                    hasEnrolledFactor -> current.mfaEnrolledAt ?: Timestamp.now()
+                    else -> null
+                },
                 lastSynced = System.currentTimeMillis()
             )
         )

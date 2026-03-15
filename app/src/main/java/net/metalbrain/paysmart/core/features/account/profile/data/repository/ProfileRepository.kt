@@ -7,4 +7,11 @@ interface ProfileRepository {
     fun observeProfileState(): Flow<ProfileAccountState>
     suspend fun saveProfileDraft(draft: ProfileDetailsDraft): Result<Unit>
     suspend fun markHomeAddressVerified(): Result<Unit>
+    suspend fun savePresetAvatar(token: String): Result<Unit>
+    suspend fun uploadProfilePhoto(
+        fileName: String,
+        mimeType: String,
+        bytes: ByteArray
+    ): Result<Unit>
+    suspend fun removeProfilePhoto(): Result<Unit>
 }

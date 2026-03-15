@@ -2,57 +2,13 @@ package net.metalbrain.paysmart.core.features.featuregate
 
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 
-enum class FeatureKey(val id: String) {
-    ADD_MONEY("add_money"),
-    SEND_MONEY("send_money"),
-    CREATE_INVOICE("create_invoice");
-
-    companion object {
-        fun fromId(raw: String?): FeatureKey {
-            return entries.firstOrNull { it.id == raw } ?: ADD_MONEY
-        }
-    }
-}
-
-enum class FeatureRequirement {
-    VERIFIED_EMAIL,
-    HOME_ADDRESS_VERIFIED,
-    IDENTITY_VERIFIED,
-    SECURITY_STRENGTH_TWO
-}
-
-enum class SecurityStrengthMethod {
-    PASSWORD,
-    PASSCODE,
-    BIOMETRIC,
-    PASSKEY
-}
-
-data class SecurityStrengthScore(
-    val methods: Set<SecurityStrengthMethod>
-) {
-    val level: Int
-        get() = methods.size
-
-    fun meets(minimumLevel: Int): Boolean = level >= minimumLevel
-}
-
-data class FeatureGateDecision(
-    val feature: FeatureKey,
-    val missingRequirements: List<FeatureRequirement>,
-    val currentSecurityStrength: Int = 0,
-    val requiredSecurityStrength: Int? = null
-) {
-    val isAllowed: Boolean
-        get() = missingRequirements.isEmpty()
-
-    val nextRequirement: FeatureRequirement?
-        get() = missingRequirements.firstOrNull()
-}
-
 object FeatureAccessPolicy {
     private val requirementsByFeature: Map<FeatureKey, List<FeatureRequirement>> = mapOf(
         FeatureKey.ADD_MONEY to listOf(
+            FeatureRequirement.VERIFIED_EMAIL,
+            FeatureRequirement.HOME_ADDRESS_VERIFIED
+        ),
+        FeatureKey.RECEIVE_MONEY to listOf(
             FeatureRequirement.VERIFIED_EMAIL,
             FeatureRequirement.HOME_ADDRESS_VERIFIED
         ),

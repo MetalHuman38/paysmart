@@ -6,12 +6,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -32,9 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.ui.theme.Dimens
 
 data class CatalogSelectionOption(
     val key: String,
@@ -70,13 +69,13 @@ fun CatalogSelectionBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+        shape = MaterialTheme.shapes.extraLarge
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 12.dp)
+                .padding(horizontal = Dimens.md, vertical = Dimens.md),
+            verticalArrangement = Arrangement.spacedBy(Dimens.md)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -85,8 +84,7 @@ fun CatalogSelectionBottomSheet(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
+                    style = MaterialTheme.typography.titleLarge
                 )
                 IconButton(onClick = onDismiss) {
                     Icon(Icons.Default.Close, contentDescription = null)
@@ -104,26 +102,28 @@ fun CatalogSelectionBottomSheet(
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                verticalArrangement = Arrangement.spacedBy(Dimens.sm)
             ) {
                 items(filtered, key = { it.key }) { option ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .heightIn(min = 56.dp)
                             .clickable {
                                 onSelect(option)
                                 onDismiss()
                             }
-                            .padding(vertical = 12.dp),
+                            .padding(horizontal = Dimens.sm, vertical = Dimens.sm),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         option.leadingEmoji?.takeIf { it.isNotBlank() }?.let { emoji ->
-                            Text(text = emoji)
-                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = emoji,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(modifier = Modifier.width(Dimens.sm))
                         }
 
                         Column(modifier = Modifier.weight(1f)) {

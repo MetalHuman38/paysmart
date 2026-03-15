@@ -212,6 +212,9 @@ export function loadConfig(): Config {
         new Set([`https://${passkeyRpId}`]) :
         new Set<string>();
   const passkeyEnabled = passkeyRpId.length > 0 && passkeyExpectedOrigins.size > 0;
+  const defaultFlutterwaveBaseUrl = isProduction
+    ? "https://f4bexperience.flutterwave.com"
+    : "https://developersandbox-api.flutterwave.com";
 
   let cachedMailer: Mailer | null = null;
 
@@ -302,7 +305,7 @@ export function loadConfig(): Config {
       !isProduction
     ),
     flutterwaveBaseUrl: (
-      process.env.FLUTTERWAVE_BASE_URL || "https://api.flutterwave.cloud"
+      process.env.FLUTTERWAVE_BASE_URL || defaultFlutterwaveBaseUrl
     ).trim(),
     flutterwaveIdpBaseUrl: (
       process.env.FLUTTERWAVE_IDP_BASE_URL || "https://idp.flutterwave.com"

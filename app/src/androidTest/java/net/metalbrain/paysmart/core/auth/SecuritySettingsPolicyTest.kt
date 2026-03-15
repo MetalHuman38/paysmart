@@ -14,6 +14,13 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * Instrumented unit tests for [SecuritySettingsPolicy].
+ *
+ * This class verifies the parsing logic of security settings from the authentication server,
+ * ensuring that nested JSON payloads are correctly mapped to domain models and that
+ * missing optional fields are handled as null.
+ */
 @RunWith(AndroidJUnit4::class)
 class SecuritySettingsPolicyTest {
 

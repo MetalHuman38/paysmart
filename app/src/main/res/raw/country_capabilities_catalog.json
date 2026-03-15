@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2026-02-24-v1",
+  "schemaVersion": "2026-03-11-v4",
   "capabilitySets": {
     "default": [
       {
@@ -68,6 +68,11 @@
         "subtitle": "Convert balances quickly between supported currencies."
       },
       {
+        "key": "receive_money",
+        "title": "Receive money",
+        "subtitle": "Get a permanent NGN account number to fund your PaySmart wallet."
+      },
+      {
         "key": "earn_return",
         "title": "Earn a return",
         "subtitle": "Earn returns on selected balances.",
@@ -82,6 +87,7 @@
       "name": "United Kingdom",
       "flag": "🇬🇧",
       "currencyCode": "GBP",
+      "addMoneyProviders": ["stripe"],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "gb_us"
     },
@@ -91,6 +97,7 @@
       "name": "United States",
       "flag": "🇺🇸",
       "currencyCode": "USD",
+      "addMoneyProviders": ["stripe"],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "gb_us"
     },
@@ -100,7 +107,8 @@
       "name": "Nigeria",
       "flag": "🇳🇬",
       "currencyCode": "NGN",
-      "addMoneyMethods": ["debitCard", "creditCard"],
+      "addMoneyProviders": ["flutterwave"],
+      "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "ng"
     },
     {
@@ -109,6 +117,7 @@
       "name": "Germany",
       "flag": "🇩🇪",
       "currencyCode": "EUR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -118,6 +127,7 @@
       "name": "Spain",
       "flag": "🇪🇸",
       "currencyCode": "EUR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -127,6 +137,7 @@
       "name": "France",
       "flag": "🇫🇷",
       "currencyCode": "EUR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -136,6 +147,7 @@
       "name": "Italy",
       "flag": "🇮🇹",
       "currencyCode": "EUR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -145,6 +157,7 @@
       "name": "Japan",
       "flag": "🇯🇵",
       "currencyCode": "JPY",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -154,6 +167,7 @@
       "name": "Ireland",
       "flag": "🇮🇪",
       "currencyCode": "EUR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -163,6 +177,7 @@
       "name": "Netherlands",
       "flag": "🇳🇱",
       "currencyCode": "EUR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -172,6 +187,7 @@
       "name": "Belgium",
       "flag": "🇧🇪",
       "currencyCode": "EUR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -181,6 +197,7 @@
       "name": "Portugal",
       "flag": "🇵🇹",
       "currencyCode": "EUR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -190,6 +207,7 @@
       "name": "Sweden",
       "flag": "🇸🇪",
       "currencyCode": "SEK",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -199,6 +217,7 @@
       "name": "Norway",
       "flag": "🇳🇴",
       "currencyCode": "NOK",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -208,6 +227,7 @@
       "name": "Denmark",
       "flag": "🇩🇰",
       "currencyCode": "DKK",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -217,6 +237,7 @@
       "name": "Finland",
       "flag": "🇫🇮",
       "currencyCode": "EUR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -226,6 +247,7 @@
       "name": "Austria",
       "flag": "🇦🇹",
       "currencyCode": "EUR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -235,6 +257,7 @@
       "name": "Switzerland",
       "flag": "🇨🇭",
       "currencyCode": "CHF",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -244,6 +267,7 @@
       "name": "Turkey",
       "flag": "🇹🇷",
       "currencyCode": "TRY",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -253,6 +277,7 @@
       "name": "United Arab Emirates",
       "flag": "🇦🇪",
       "currencyCode": "AED",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -262,6 +287,7 @@
       "name": "Saudi Arabia",
       "flag": "🇸🇦",
       "currencyCode": "SAR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -271,6 +297,7 @@
       "name": "Canada",
       "flag": "🇨🇦",
       "currencyCode": "CAD",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -280,6 +307,7 @@
       "name": "Australia",
       "flag": "🇦🇺",
       "currencyCode": "AUD",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -289,6 +317,7 @@
       "name": "India",
       "flag": "🇮🇳",
       "currencyCode": "INR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -298,6 +327,7 @@
       "name": "Kenya",
       "flag": "🇰🇪",
       "currencyCode": "KES",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard"],
       "capabilitySet": "default"
     },
@@ -307,6 +337,7 @@
       "name": "South Africa",
       "flag": "🇿🇦",
       "currencyCode": "ZAR",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard"],
       "capabilitySet": "default"
     },
@@ -316,6 +347,7 @@
       "name": "Ghana",
       "flag": "🇬🇭",
       "currencyCode": "GHS",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard"],
       "capabilitySet": "default"
     },
@@ -325,6 +357,7 @@
       "name": "Poland",
       "flag": "🇵🇱",
       "currencyCode": "PLN",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -334,6 +367,7 @@
       "name": "Brazil",
       "flag": "🇧🇷",
       "currencyCode": "BRL",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     },
@@ -343,6 +377,7 @@
       "name": "Mexico",
       "flag": "🇲🇽",
       "currencyCode": "MXN",
+      "addMoneyProviders": [],
       "addMoneyMethods": ["debitCard", "creditCard", "accountTransfer"],
       "capabilitySet": "default"
     }

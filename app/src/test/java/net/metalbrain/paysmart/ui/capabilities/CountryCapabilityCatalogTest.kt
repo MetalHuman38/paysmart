@@ -1,5 +1,7 @@
 package net.metalbrain.paysmart.ui.capabilities
 
+import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
+import net.metalbrain.paysmart.core.features.capabilities.catalog.AddMoneyMarketPolicy
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityKey
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityProfile
@@ -21,6 +23,8 @@ class CountryCapabilityCatalogTest {
 
         assertEquals("GB", profile.iso2)
         assertEquals("GBP", profile.currencyCode)
+        assertEquals(listOf(AddMoneyProvider.STRIPE), profile.addMoneyProviders)
+        assertTrue(profile.isAddMoneySupported)
         assertTrue(profile.addMoneyMethods.contains(FxPaymentMethod.DEBIT_CARD))
         assertTrue(profile.addMoneyMethods.contains(FxPaymentMethod.CREDIT_CARD))
     }
@@ -44,21 +48,37 @@ class CountryCapabilityCatalogTest {
             countryName = "Nigeria",
             flagEmoji = "🇳🇬",
             currencyCode = "NGN",
-            addMoneyMethods = listOf(FxPaymentMethod.DEBIT_CARD, FxPaymentMethod.CREDIT_CARD),
+            addMoney = AddMoneyMarketPolicy(
+                providers = listOf(AddMoneyProvider.FLUTTERWAVE),
+                methods = listOf(FxPaymentMethod.DEBIT_CARD, FxPaymentMethod.CREDIT_CARD)
+            ),
             capabilities = emptyList()
         )
         val cardAndBank = cardOnly.copy(
             iso2 = "GB",
             countryName = "United Kingdom",
             currencyCode = "GBP",
-            addMoneyMethods = listOf(
-                FxPaymentMethod.DEBIT_CARD,
-                FxPaymentMethod.CREDIT_CARD,
-                FxPaymentMethod.ACCOUNT_TRANSFER
+            addMoney = AddMoneyMarketPolicy(
+                providers = listOf(AddMoneyProvider.STRIPE),
+                methods = listOf(
+                    FxPaymentMethod.DEBIT_CARD,
+                    FxPaymentMethod.CREDIT_CARD,
+                    FxPaymentMethod.ACCOUNT_TRANSFER
+                )
+            )
+        )
+        val unsupported = cardOnly.copy(
+            iso2 = "JP",
+            countryName = "Japan",
+            currencyCode = "JPY",
+            addMoney = AddMoneyMarketPolicy(
+                providers = emptyList(),
+                methods = listOf(FxPaymentMethod.DEBIT_CARD)
             )
         )
 
         assertTrue(CountryCapabilityCatalog.topUpPolicyHint(cardOnly).contains("Card top up"))
         assertTrue(CountryCapabilityCatalog.topUpPolicyHint(cardAndBank).contains("bank transfer"))
+        assertTrue(CountryCapabilityCatalog.topUpPolicyHint(unsupported).contains("not available"))
     }
 }

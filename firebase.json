@@ -51,6 +51,49 @@
           {
             "key": "Cache-Control",
             "value": "no-cache"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow, noarchive"
+          }
+        ]
+      },
+      {
+        "source": "/finishSignUp/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow, noarchive"
+          }
+        ]
+      },
+      {
+        "source": "/components/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=300"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow, noarchive"
+          }
+        ]
+      },
+      {
+        "source": "/hint-report/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=300"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow, noarchive"
           }
         ]
       },
@@ -133,25 +176,139 @@
         "source": "/index.html",
         "destination": "/",
         "type": 301
-      }
-    ],
-    "rewrites": [
-      {
-        "source": "/privacy",
-        "destination": "/privacy/privacy.html"
       },
       {
-        "source": "/terms",
-        "destination": "/terms/terms.html"
+        "source": "/about.html",
+        "destination": "/about/",
+        "type": 301
+      },
+      {
+        "source": "/about/index.html",
+        "destination": "/about/",
+        "type": 301
+      },
+      {
+        "source": "/about/about",
+        "destination": "/about/",
+        "type": 301
+      },
+      {
+        "source": "/about/about.html",
+        "destination": "/about/",
+        "type": 301
+      },
+      {
+        "source": "/contact.html",
+        "destination": "/contact/",
+        "type": 301
+      },
+      {
+        "source": "/contact/index.html",
+        "destination": "/contact/",
+        "type": 301
+      },
+      {
+        "source": "/contact/contact",
+        "destination": "/contact/",
+        "type": 301
+      },
+      {
+        "source": "/contact/contact.html",
+        "destination": "/contact/",
+        "type": 301
+      },
+      {
+        "source": "/data-deletion/index.html",
+        "destination": "/data-deletion/",
+        "type": 301
+      },
+      {
+        "source": "/docs/index.html",
+        "destination": "/docs/",
+        "type": 301
+      },
+      {
+        "source": "/docs/oauth.html",
+        "destination": "/docs/oauth",
+        "type": 301
+      },
+      {
+        "source": "/docs/oauth/",
+        "destination": "/docs/oauth",
+        "type": 301
+      },
+      {
+        "source": "/mission/index.html",
+        "destination": "/mission/",
+        "type": 301
+      },
+      {
+        "source": "/policy/index.html",
+        "destination": "/policy/",
+        "type": 301
       },
       {
         "source": "/policies",
-        "destination": "/policies.html"
+        "destination": "/policy/",
+        "type": 301
       },
       {
-        "source": "/data-deletion",
-        "destination": "/data-deletion/index.html"
+        "source": "/policies.html",
+        "destination": "/policy/",
+        "type": 301
       },
+      {
+        "source": "/privacy/index.html",
+        "destination": "/privacy/",
+        "type": 301
+      },
+      {
+        "source": "/privacy/privacy",
+        "destination": "/privacy/",
+        "type": 301
+      },
+      {
+        "source": "/privacy/privacy.html",
+        "destination": "/privacy/",
+        "type": 301
+      },
+      {
+        "source": "/services",
+        "destination": "/mission/",
+        "type": 301
+      },
+      {
+        "source": "/services.html",
+        "destination": "/mission/",
+        "type": 301
+      },
+      {
+        "source": "/terms/index.html",
+        "destination": "/terms/",
+        "type": 301
+      },
+      {
+        "source": "/terms/terms",
+        "destination": "/terms/",
+        "type": 301
+      },
+      {
+        "source": "/terms/terms.html",
+        "destination": "/terms/",
+        "type": 301
+      },
+      {
+        "source": "/updates/index.html",
+        "destination": "/updates/",
+        "type": 301
+      },
+      {
+        "source": "/verify/index.html",
+        "destination": "/verify",
+        "type": 301
+      }
+    ],
+    "rewrites": [
       {
         "source": "/facebook/data-deletion",
         "run": {

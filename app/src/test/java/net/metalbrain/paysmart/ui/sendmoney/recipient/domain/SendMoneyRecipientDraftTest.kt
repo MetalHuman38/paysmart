@@ -11,6 +11,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * Unit tests for [SendMoneyRecipientDraft], ensuring that data normalization
+ * (trimming and casing) and method-specific validation logic function correctly.
+ */
 class SendMoneyRecipientDraftTest {
 
     @Test

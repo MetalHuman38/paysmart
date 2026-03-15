@@ -44,11 +44,16 @@ stripeAndroid = "22.8.1"
 stripeJava = "31.4.0"
 playServicesAnalytics = "18.1.1"
 playIntegrity = "1.6.0"
+playAppUpdate = "2.1.0"
+paging = "3.4.0"
+pagingCompose = "3.4.1"
 
 [libraries]
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
+androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 androidx-room-rxjava2 = { group = "androidx.room", name = "room-rxjava2", version.ref = "room" }
 androidx-room-guava = { group = "androidx.room", name = "room-guava", version.ref = "room" }
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
@@ -82,6 +87,7 @@ security-crypto = { module = "androidx.security:security-crypto", version.ref = 
 biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 tink = { group = "com.google.crypto.tink", name = "tink-android", version = "1.20.0" }
 firebase-functions = { module = "com.google.firebase:firebase-functions-ktx", version.ref = "firebase-functions" }
+firebase-config = { group = "com.google.firebase", name = "firebase-config" }
 kotlin-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlin-coroutines-play-services" }
 
 
@@ -105,6 +111,7 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-store = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 
@@ -143,7 +150,10 @@ stripe-android = { group = "com.stripe", name = "stripe-android", version.ref = 
 stripe-java = { group = "com.stripe", name = "stripe-java", version.ref = "stripeJava" }
 play-services-analytics = { group = "com.google.android.gms", name = "play-services-analytics", version.ref = "playServicesAnalytics" }
 google-play-integrity = { group = "com.google.android.play", name = "integrity", version.ref = "playIntegrity" }
+google-play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "playAppUpdate" }
+google-play-app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "playAppUpdate" }
 firebase-performance = { group = "com.google.firebase", name = "firebase-perf" }
+paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "pagingCompose" }
 
 [plugins]
 dotenv = { id = "co.uzzu.dotenv.gradle", version = "4.0.0" }

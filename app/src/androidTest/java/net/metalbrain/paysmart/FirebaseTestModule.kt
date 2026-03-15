@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.components.SingletonComponent
 import net.metalbrain.paysmart.di.AppModule
 import net.metalbrain.paysmart.di.FirebaseModule
@@ -24,5 +25,9 @@ object FirebaseTestModule {
 
     @Provides
     fun provideFirebaseAuth(): FirebaseAuth =
+        mockk(relaxed = true)
+
+    @Provides
+    fun provideFirebaseStorage(): FirebaseStorage =
         mockk(relaxed = true)
 }

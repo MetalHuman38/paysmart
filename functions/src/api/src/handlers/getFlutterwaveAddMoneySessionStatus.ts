@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { initDeps } from "../dependencies.js";
 import { authContainer } from "../infrastructure/di/authContainer.js";
 import { GetFlutterwaveAddMoneySessionStatus } from "../application/usecase/GetFlutterwaveAddMoneySessionStatus.js";
+import { resolveFlutterwavePaymentsConfigErrorCode } from "./utils/flutterwavePaymentsConfigError.js";
 
 export async function getFlutterwaveAddMoneySessionStatusHandler(
   req: Request,
@@ -29,6 +30,14 @@ export async function getFlutterwaveAddMoneySessionStatusHandler(
     return res.status(200).json(session);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal error";
+    const paymentsConfigErrorCode = resolveFlutterwavePaymentsConfigErrorCode(message);
+
+    if (paymentsConfigErrorCode) {
+      return res.status(503).json({
+        error: "Payments service is not configured",
+        code: paymentsConfigErrorCode,
+      });
+    }
 
     if (message.includes("not found")) {
       return res.status(404).json({ error: "Session not found" });

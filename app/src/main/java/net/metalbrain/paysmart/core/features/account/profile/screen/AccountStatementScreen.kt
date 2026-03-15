@@ -1,36 +1,34 @@
 package net.metalbrain.paysmart.core.features.account.profile.screen
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlin.math.abs
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.domain.model.Transaction
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountStatementScreen(
-    transactions: List<Transaction>,
+    transactions: LazyPagingItems<Transaction>,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -48,24 +46,39 @@ fun AccountStatementScreen(
             )
         }
     ) { innerPadding ->
-        if (transactions.isEmpty()) {
-            Column(
+        val refreshState = transactions.loadState.refresh
+        if (refreshState is LoadState.Loading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
+
+        if (refreshState is LoadState.Error && transactions.itemCount == 0) {
+            AccountStatementMessageCard(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(horizontal = 16.dp, vertical = 20.dp)
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = stringResource(R.string.account_statement_empty),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
+                    .padding(horizontal = 16.dp, vertical = 20.dp),
+                message = refreshState.error.localizedMessage
+                    ?: stringResource(R.string.account_statement_empty)
+            )
+            return@Scaffold
+        }
+
+        if (transactions.itemCount == 0) {
+            AccountStatementMessageCard(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp, vertical = 20.dp),
+                message = stringResource(R.string.account_statement_empty)
+            )
             return@Scaffold
         }
 
@@ -76,50 +89,40 @@ fun AccountStatementScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            items(transactions.take(30), key = { it.id }) { tx ->
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier.padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = tx.title,
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                text = formatAmountLabel(tx),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
+            items(
+                count = transactions.itemCount,
+                key = { index -> transactions.peek(index)?.id ?: "transaction_placeholder_$index" }
+            ) { index ->
+                val transaction = transactions[index] ?: return@items
+                AccountStatementTransactionCard(transaction = transaction)
+            }
 
-                        Text(
-                            text = stringResource(R.string.account_statement_datetime_format, tx.date, tx.time),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = stringResource(R.string.account_statement_status_format, tx.status),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+            when (val appendState = transactions.loadState.append) {
+                is LoadState.Loading -> {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+
+                is LoadState.Error -> {
+                    item {
+                        AccountStatementMessageCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            message = appendState.error.localizedMessage
+                                ?: stringResource(R.string.account_statement_empty)
                         )
                     }
                 }
+
+                else -> Unit
             }
         }
     }
-}
-
-@Composable
-private fun formatAmountLabel(transaction: Transaction): String {
-    val symbol = if (transaction.amount >= 0) "+" else "-"
-    return stringResource(
-        R.string.account_statement_amount_format,
-        symbol,
-        transaction.currency,
-        abs(transaction.amount)
-    )
 }

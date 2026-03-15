@@ -109,13 +109,14 @@ export class FirestoreAddMoneyFlutterwaveRepository
     const currency = this.normalizeCurrency(input.currency);
     const amountMinor = this.normalizeAmount(input.amountMinor);
     const customer = await this.resolveCustomerProfile(uid);
-    const reference = buildReference(uid);
+    const reference = buildReference();
     const providerSession = await this.flutterwave.createTopupSession({
       uid,
       amountMinor,
       currency,
       idempotencyKey: input.idempotencyKey,
       reference,
+      customerId: customer.customerId,
       customer,
     });
     const status = this.deriveProviderStatus(providerSession.status);
@@ -133,6 +134,7 @@ export class FirestoreAddMoneyFlutterwaveRepository
       flutterwaveStatus: providerSession.status,
       flutterwaveReference: providerSession.txRef,
       flutterwaveVirtualAccountId: providerSession.sessionId,
+      flutterwaveCustomerId: providerSession.customerId,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     });
@@ -146,6 +148,11 @@ export class FirestoreAddMoneyFlutterwaveRepository
       updatedAt: FieldValue.serverTimestamp(),
     };
     await this.lookupRef(providerSession.txRef).set(lookupDoc, { merge: true });
+    await this.persistFlutterwaveCustomerProfile(
+      uid,
+      providerSession.customerId,
+      customer.email
+    );
 
     if (status === "succeeded") {
       await this.applySettlementIfNeeded(
@@ -474,6 +481,7 @@ export class FirestoreAddMoneyFlutterwaveRepository
     email: string;
     firstName: string;
     lastName: string;
+    customerId?: string;
   }> {
     const userSnap = await this.userRef(uid).get();
     const user = userSnap.data() as Record<string, unknown> | undefined;
@@ -484,11 +492,39 @@ export class FirestoreAddMoneyFlutterwaveRepository
 
     const emailFromUser = asString(user?.email);
     const email = emailFromUser || `${uid}@users.pay-smart.net`;
+    const paymentProviders = asRecord(user?.paymentProviders);
+    const flutterwaveProvider = asRecord(paymentProviders.flutterwave);
+    const customerId = asString(flutterwaveProvider.customerId);
     return {
       email,
       firstName,
       lastName,
+      customerId: customerId || undefined,
     };
+  }
+
+  private async persistFlutterwaveCustomerProfile(
+    uid: string,
+    customerId: string,
+    email: string
+  ): Promise<void> {
+    const cleanCustomerId = customerId.trim();
+    if (!cleanCustomerId) {
+      return;
+    }
+
+    await this.userRef(uid).set(
+      {
+        paymentProviders: {
+          flutterwave: {
+            customerId: cleanCustomerId,
+            email: email.trim().toLowerCase(),
+            updatedAt: FieldValue.serverTimestamp(),
+          },
+        },
+      },
+      { merge: true }
+    );
   }
 
   private deriveProviderStatus(rawStatus: string): FlutterwaveAddMoneySessionStatus {
@@ -538,10 +574,8 @@ export class FirestoreAddMoneyFlutterwaveRepository
   }
 }
 
-function buildReference(uid: string): string {
-  const shortUid = uid.slice(0, 8);
-  const nonce = randomUUID().replace(/-/g, "").slice(0, 16);
-  return `ps_add_${shortUid}_${Date.now()}_${nonce}`;
+function buildReference(): string {
+  return randomUUID();
 }
 
 function roundMoney(value: number): number {
@@ -581,4 +615,8 @@ function parseNumeric(raw: unknown): number | null {
 
 function asString(raw: unknown): string {
   return typeof raw === "string" ? raw.trim() : "";
+}
+
+function asRecord(raw: unknown): Record<string, unknown> {
+  return raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
 }

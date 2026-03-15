@@ -9,6 +9,7 @@ import { FirestoreIdentityUploadRepository } from "../firestore/FirestoreIdentit
 import { FirestoreIdentityProviderRepository } from "../firestore/FirestoreIdentityProviderRepository.js";
 import { FirestoreAddMoneyRepository } from "../firestore/FirestoreAddMoneyRepository.js";
 import { FirestoreAddMoneyFlutterwaveRepository } from "../firestore/FirestoreAddMoneyFlutterwaveRepository.js";
+import { FirestoreFlutterwaveFundingAccountRepository } from "../firestore/FirestoreFlutterwaveFundingAccountRepository.js";
 import { FirestoreInvoiceRepository } from "../firestore/FirestoreInvoiceRepository.js";
 import { FirestorePasskeyRepository } from "../firestore/FirestorePasskeyRepository.js";
 import { GoogleCloudAccessTokenProvider } from "../../services/googleCloudAccessTokenProvider.js";
@@ -79,6 +80,10 @@ export function authContainer() {
     config.flutterwaveAllowedTopupCurrencies,
     config.flutterwaveMinimumTopupAmountMinor
   );
+  const flutterwaveFundingAccountRepo = new FirestoreFlutterwaveFundingAccountRepository(
+    firestore,
+    flutterwavePaymentsService
+  );
   const invoiceRepo = new FirestoreInvoiceRepository(firestore, storageBucket);
   const identityTextExtractionService = new GoogleVisionTextExtractionService(
     undefined,
@@ -104,6 +109,7 @@ export function authContainer() {
     passkeys: passkeyService,
     addMoney: addMoneyRepo,
     addMoneyFlutterwave: addMoneyFlutterwaveRepo,
+    flutterwaveFundingAccounts: flutterwaveFundingAccountRepo,
     invoices: invoiceRepo,
   };
 }

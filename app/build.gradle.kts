@@ -8,6 +8,21 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+val versionCodeValue = providers.gradleProperty("PAYSMART_VERSION_CODE").get().toInt()
+val versionMajor = providers.gradleProperty("PAYSMART_VERSION_MAJOR").get().toInt()
+val versionMinor = providers.gradleProperty("PAYSMART_VERSION_MINOR").get().toInt()
+val versionPatch = providers.gradleProperty("PAYSMART_VERSION_PATCH").get().toInt()
+val versionPreRelease = providers.gradleProperty("PAYSMART_VERSION_PRERELEASE")
+    .orNull
+    ?.trim()
+    .orEmpty()
+val paySmartSemVer = buildString {
+    append("$versionMajor.$versionMinor.$versionPatch")
+    if (versionPreRelease.isNotEmpty()) {
+        append("-")
+        append(versionPreRelease)
+    }
+}
 
 android {
     namespace = "net.metalbrain.paysmart"
@@ -37,8 +52,8 @@ android {
         applicationId = "net.metalbrain.paysmart"
         minSdk = 33
         targetSdk = 36
-        versionCode = 14
-        versionName = "1.14.0"
+        versionCode = versionCodeValue
+        versionName = paySmartSemVer
         testInstrumentationRunner = "net.metalbrain.paysmart.HiltTestRunner"
 
         ndk {
@@ -172,7 +187,6 @@ dependencies {
     implementation(libs.exoplayer.ui)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.lottie.compose)
-    implementation(libs.androidx.runner)
     implementation(libs.googleid)
     implementation(libs.google.play.services.maps)
     implementation(libs.stripe.android)
@@ -185,12 +199,13 @@ dependencies {
     implementation(libs.hilt.core)
     implementation(libs.play.services.analytics)
     implementation(libs.google.play.integrity)
+    implementation(libs.google.play.app.update)
+    implementation(libs.google.play.app.update.ktx)
+    implementation(libs.paging.compose)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.lifecycle.viewmodel.compose)
 
     // Hilt Testing
-    testImplementation(libs.hilt.android.testing)
-    kspTest(libs.hilt.compiler)
     androidTestImplementation(libs.hilt.android.testing)
     kspAndroidTest(libs.hilt.compiler)
 
@@ -202,7 +217,9 @@ dependencies {
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.config)
     implementation(libs.firebase.store)
+    implementation(libs.firebase.storage)
     implementation(libs.firebase.performance)
 
     // Facebook
@@ -231,7 +248,6 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     // Android Instrumented tests
-    androidTestImplementation(libs.androidx.junit)
     testImplementation(libs.arch.core.testing)
     androidTestImplementation(libs.mockk.android)
 
@@ -243,6 +259,8 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.androidx.paging.runtime)
 
     // Sqlite
     implementation(libs.androidx.sqlite.core)
@@ -265,6 +283,7 @@ dependencies {
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

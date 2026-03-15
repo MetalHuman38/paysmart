@@ -3,20 +3,27 @@ package net.metalbrain.paysmart.ui.theme
 import androidx.compose.ui.unit.dp
 
 object Dimens {
-    // 8pt spacing rhythm
-    val space2 = 4.dp
-    val space4 = 8.dp
+    // Standard spacing tokens for new UI work.
+    val xs = 4.dp
+    val sm = 8.dp
+    val md = 16.dp
+    val lg = 24.dp
+    val xl = 32.dp
+
+    // Legacy aliases kept for compatibility during migration.
+    val space2 = xs
+    val space4 = sm
     val space6 = 12.dp
-    val space8 = 16.dp
+    val space8 = md
     val space10 = 20.dp
-    val space12 = 24.dp
-    val space16 = 32.dp
+    val space12 = lg
+    val space16 = xl
 
     // Screen paddings
-    val screenPadding = space12
-    val smallScreenPadding = space4
-    val mediumScreenPadding = space8
-    val largeScreenPadding = space16
+    val screenPadding = lg
+    val smallScreenPadding = sm
+    val mediumScreenPadding = md
+    val largeScreenPadding = xl
 
     // Legacy aliases kept for compatibility
     val smallSpacing = space4
@@ -26,6 +33,7 @@ object Dimens {
     // Shared controls
     val buttonHeight = 52.dp
     val cornerRadius = 14.dp
+    val minimumTouchTarget = 48.dp
 }
 
 object ScreenDimensions {

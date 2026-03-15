@@ -7,6 +7,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.nio.ByteBuffer
 
+/**
+ * Unit tests for [IdentityUploadPayloadContract], ensuring that the encoding process correctly
+ * packs the header metadata and the raw document bytes into a single byte array.
+ *
+ * The tests verify:
+ * - Structural integrity of the encoded byte array (header length prefixing).
+ * - Correct serialization of the JSON header, including contract versioning and document metadata.
+ * - Proper inclusion of the raw document payload.
+ */
 class IdentityUploadPayloadContractTest {
 
     @Test

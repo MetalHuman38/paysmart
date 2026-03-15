@@ -1,6 +1,8 @@
 import { initDeps } from "../dependencies.js";
 import { authContainer } from "../infrastructure/di/authContainer.js";
 import { CreateFlutterwaveAddMoneySession } from "../application/usecase/CreateFlutterwaveAddMoneySession.js";
+import { resolveFlutterwavePaymentsConfigErrorCode } from "./utils/flutterwavePaymentsConfigError.js";
+import { FlutterwaveProviderRequestError } from "../services/flutterwavePaymentsService.js";
 export async function createFlutterwaveAddMoneySessionHandler(req, res) {
     try {
         const authHeader = req.headers.authorization;
@@ -24,18 +26,43 @@ export async function createFlutterwaveAddMoneySessionHandler(req, res) {
     }
     catch (error) {
         const message = error instanceof Error ? error.message : "Internal error";
-        const paymentsConfigErrorCode = resolvePaymentsConfigErrorCode(message);
+        if (error instanceof FlutterwaveProviderRequestError) {
+            if (error.status === 400 || error.status === 422) {
+                return res.status(400).json({
+                    error: message,
+                    code: error.code,
+                    details: error.details.length > 0 ? error.details : undefined,
+                });
+            }
+            if (error.status === 409) {
+                return res.status(409).json({
+                    error: message,
+                    code: error.code || error.type || "FLUTTERWAVE_PROVIDER_CONFLICT",
+                    details: error.details.length > 0 ? error.details : undefined,
+                });
+            }
+            if (error.status === 401 || error.status === 403) {
+                return res.status(503).json({
+                    error: "Payments provider rejected the request",
+                    code: error.code || error.type || "FLUTTERWAVE_PROVIDER_REJECTED",
+                    details: error.details.length > 0 ? error.details : undefined,
+                });
+            }
+        }
+        const paymentsConfigErrorCode = resolveFlutterwavePaymentsConfigErrorCode(message);
         if (paymentsConfigErrorCode) {
             return res.status(503).json({
                 error: "Payments service is not configured",
                 code: paymentsConfigErrorCode,
             });
         }
-        if (message.includes("Invalid") ||
-            message.includes("Unsupported") ||
-            message.includes("Missing") ||
-            message.includes("Amount must be") ||
-            message.includes("Amount exceeds")) {
+        const normalizedMessage = message.toLowerCase();
+        if (normalizedMessage.includes("invalid") ||
+            normalizedMessage.includes("unsupported") ||
+            normalizedMessage.includes("missing") ||
+            normalizedMessage.includes("amount must be") ||
+            normalizedMessage.includes("amount exceeds") ||
+            normalizedMessage.includes("request is not valid")) {
             return res.status(400).json({ error: message });
         }
         console.error("createFlutterwaveAddMoneySessionHandler failed", error);
@@ -75,18 +102,6 @@ function parseNumber(raw) {
         if (Number.isFinite(parsed)) {
             return parsed;
         }
-    }
-    return null;
-}
-function resolvePaymentsConfigErrorCode(message) {
-    if (message.includes("FLUTTERWAVE_SECRET_KEY is not configured")) {
-        return "MISSING_FLUTTERWAVE_SECRET_KEY";
-    }
-    if (message.includes("FLUTTERWAVE_PUBLIC_KEY is not configured")) {
-        return "MISSING_FLUTTERWAVE_PUBLIC_KEY";
-    }
-    if (message.includes("FLUTTERWAVE_NOT_IMPLEMENTED_FLW_001")) {
-        return "FLUTTERWAVE_NOT_IMPLEMENTED";
     }
     return null;
 }

@@ -10,11 +10,11 @@ import { corsify } from "../utils.js";
 
 export function mountInvoiceRoutes(app: Express) {
   app.post("/internal/tasks/invoices/pdf", processInvoicePdfTaskHandler);
-
+ 
   app.post("/invoices/finalize", requireActiveSession, finalizeInvoiceHandler);
   app.options("/invoices/finalize", (_, res) => {
     corsify(res);
-    res.status(204).end();
+    res.status(204).end();                       
   });
 
   app.get("/invoices", requireActiveSession, listInvoicesHandler);

@@ -22,6 +22,8 @@ interface UserProfileRepository {
 
     suspend fun updatePhoneNumber(uid: String, phoneNumber: String)
 
+    suspend fun updatePhotoUrl(uid: String, photoUrl: String?)
+
     /**
      * Update the `lastSignedIn` timestamp for a user.
      *

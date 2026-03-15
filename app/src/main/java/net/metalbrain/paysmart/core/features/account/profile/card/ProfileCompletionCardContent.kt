@@ -60,6 +60,10 @@ fun ProfileCompletionCardContent(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val showSheet = remember { mutableStateOf(false) }
 
+    val verifyEmail = stringResource(id = R.string.verify_email)
+    val addAddress = stringResource(id = R.string.add_address)
+    val verifyIdentity = stringResource(id = R.string.verify_identity)
+
     LaunchedEffect(showSheet.value) {
         if (showSheet.value) sheetState.show() else sheetState.hide()
     }
@@ -98,7 +102,7 @@ fun ProfileCompletionCardContent(
         )
 
         TextButton(onClick = { showSheet.value = true }) {
-            Text(stringResource(id = R.string.see_all),)
+            Text(stringResource(id = R.string.see_all))
 
         }
     }
@@ -143,9 +147,9 @@ fun ProfileCompletionCardContent(
 
             // Steps
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                ProfileStepItem("Verify your email", security.hasCompletedEmailVerification)
-                ProfileStepItem("Add your home address", security.hasCompletedAddress)
-                ProfileStepItem("Verify your identity", security.hasCompletedIdentity)
+                ProfileStepItem( verifyEmail, security.hasCompletedEmailVerification)
+                ProfileStepItem( addAddress, security.hasCompletedAddress)
+                ProfileStepItem( verifyIdentity, security.hasCompletedIdentity)
             }
 
 

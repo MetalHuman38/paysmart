@@ -27,6 +27,7 @@ fun EmptyTransactionsBlock(onAddMoneyClick: () -> Unit) {
             text = stringResource(R.string.home_no_transaction_activity_title),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
+            fontSize = MaterialTheme.typography.titleMedium.fontSize,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
@@ -44,4 +45,3 @@ fun EmptyTransactionsBlock(onAddMoneyClick: () -> Unit) {
         )
     }
 }
-

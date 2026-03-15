@@ -34,6 +34,8 @@ data class LocalSecuritySettingsModel(
     var hasVerifiedIdentity: Boolean = false,
     var identityVerificationSentAt: Timestamp? = null,
     var identityToVerify: String? = null,
+    var hasEnrolledMfaFactor: Boolean = false,
+    var mfaEnrolledAt: Timestamp? = null,
     var hasSkippedMfaEnrollmentPrompt: Boolean = false,
     var hasSkippedPasskeyEnrollmentPrompt: Boolean = true,
 

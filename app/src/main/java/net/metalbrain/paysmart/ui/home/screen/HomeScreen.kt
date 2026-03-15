@@ -12,14 +12,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import net.metalbrain.paysmart.ui.Screen
-import net.metalbrain.paysmart.core.features.featuregate.FeatureKey
-import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.account.security.viewmodel.SecurityViewModel
+import net.metalbrain.paysmart.core.features.featuregate.FeatureKey
+import net.metalbrain.paysmart.domain.model.Transaction
+import net.metalbrain.paysmart.ui.Screen
 import net.metalbrain.paysmart.ui.home.components.HomeContent
 import net.metalbrain.paysmart.ui.home.nav.HomeBottomNavigation
+import net.metalbrain.paysmart.ui.home.support.resolvePrimaryBalanceCurrency
 import net.metalbrain.paysmart.ui.home.viewmodel.HomeViewModel
-import java.util.Locale
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,15 +37,8 @@ fun HomeScreen(
         val securityViewModel = hiltViewModel<SecurityViewModel>()
         val uiState by homeViewModel.uiState.collectAsState()
         val isBalanceHidden by securityViewModel.hideBalanceEnabled.collectAsState()
-        val balances = uiState.balanceSnapshot.balancesByCurrency
-        val primaryCurrency = resolvePrimaryCurrency(
-            balancesByCurrency = balances,
-            preferredCurrency = uiState.balanceSnapshot.preferredCurrencyCode
-        )
-        val primaryAmount = balances[primaryCurrency] ?: 0.0
 
         Box(modifier = Modifier.padding(innerPadding)) {
-
             HomeContent(
                 onProfileClick = {
                     navController.navigate(Screen.ProfileScreen.route)
@@ -55,6 +48,9 @@ fun HomeScreen(
                 },
                 onTransactionsClick = {
                     navController.navigate(Screen.Transactions.route)
+                },
+                onTransactionClick = { transaction: Transaction ->
+                    navController.navigate(Screen.TransactionDetail.routeWithTransactionId(transaction.id))
                 },
                 onCreateInvoiceClick = {
                     navController.navigate(
@@ -72,15 +68,25 @@ fun HomeScreen(
                         )
                     )
                 },
-                onBalanceCardClick = {
+                onReceiveMoneyClick = {
                     navController.navigate(
-                        Screen.BalanceDetails.routeWithArgs(primaryCurrency, primaryAmount)
+                        Screen.FeatureGate.routeWithArgs(
+                            feature = FeatureKey.RECEIVE_MONEY.id,
+                            resumeRoute = Screen.FundingAccount.route
+                        )
+                    )
+                },
+                onBalanceCardClick = {
+                    val balanceCurrencyCode = resolvePrimaryBalanceCurrency(
+                        balancesByCurrency = uiState.balanceSnapshot.balancesByCurrency,
+                        preferredCurrencyCode = uiState.balanceSnapshot.preferredCurrencyCode
+                    )
+                    navController.navigate(
+                        Screen.BalanceDetails.routeWithCurrency(balanceCurrencyCode)
                     )
                 },
                 onRewardCardClick = {
-                    navController.navigate(
-                        Screen.RewardDetails.routeWithPoints(uiState.rewardEarned.points)
-                    )
+                    navController.navigate(Screen.RewardDetails.route)
                 },
                 onAddMoneyClick = {
                     navController.navigate(
@@ -113,14 +119,24 @@ fun HomeScreen(
                     navController.navigate(Screen.ProfileAccountLimits.route)
                 },
                 localSettings = uiState.security,
+                displayName = uiState.displayName,
                 transactions = uiState.recentTransactions,
+                transactionSearchQuery = uiState.transactionSearchQuery,
+                isTransactionSearchActive = uiState.isTransactionSearchActive,
+                availableTransactionProviders = uiState.availableTransactionProviders,
+                selectedTransactionProviders = uiState.selectedTransactionProviders,
+                notification = uiState.notification,
                 balanceSnapshot = uiState.balanceSnapshot,
                 rewardEarned = uiState.rewardEarned,
+                countryIso2 = uiState.countryIso2,
                 countryFlagEmoji = uiState.countryFlagEmoji,
                 countryCurrencyCode = uiState.countryCurrencyCode,
                 capabilities = uiState.capabilities,
                 exchangeRateSnapshot = uiState.exchangeRateSnapshot,
                 isBalanceVisible = !isBalanceHidden,
+                onTransactionSearchQueryChange = homeViewModel::onTransactionSearchQueryChanged,
+                onTransactionProviderToggle = homeViewModel::onTransactionProviderToggled,
+                onNotificationPrimaryAction = homeViewModel::onNotificationPrimaryAction,
                 onToggleBalanceVisibility = {
                     securityViewModel.setHideBalance(!isBalanceHidden)
                 }
@@ -129,19 +145,4 @@ fun HomeScreen(
     }
 }
 
-private fun resolvePrimaryCurrency(
-    balancesByCurrency: Map<String, Double>,
-    preferredCurrency: String
-): String {
-    val normalizedPreferred = preferredCurrency.trim().uppercase(Locale.US)
-    if (normalizedPreferred.isNotBlank() && balancesByCurrency.containsKey(normalizedPreferred)) {
-        return normalizedPreferred
-    }
 
-    if (balancesByCurrency.isEmpty()) {
-        return normalizedPreferred.ifBlank {
-            CountryCapabilityCatalog.defaultProfile().currencyCode
-        }
-    }
-    return balancesByCurrency.keys.minOf { it.uppercase(Locale.US) }
-}

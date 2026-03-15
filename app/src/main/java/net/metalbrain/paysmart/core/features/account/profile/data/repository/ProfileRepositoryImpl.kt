@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import net.metalbrain.paysmart.core.features.account.profile.data.storage.ProfilePhotoStorage
 import net.metalbrain.paysmart.core.features.account.profile.state.ProfileAccountState
 import net.metalbrain.paysmart.core.features.account.profile.state.ProfileMissingItem
 import net.metalbrain.paysmart.core.features.account.profile.state.ProfileNextStep
@@ -27,6 +28,7 @@ class ProfileRepositoryImpl @Inject constructor(
     private val authRepository: AuthRepository,
     private val userProfileRepository: UserProfileRepository,
     private val profileCacheRepository: UserProfileCacheRepository,
+    private val profilePhotoStorage: ProfilePhotoStorage,
     private val securityRepository: SecurityRepositoryInterface,
     private val securityPreference: SecurityPreference
 ) : ProfileRepository {
@@ -92,6 +94,60 @@ class ProfileRepositoryImpl @Inject constructor(
                 userId = session.user.uid,
                 idToken = session.idToken
             ).getOrThrow()
+        }
+    }
+
+    override suspend fun savePresetAvatar(token: String): Result<Unit> {
+        val uid = authRepository.currentUser?.uid
+            ?: return Result.failure(IllegalStateException("No authenticated user"))
+
+        return runCatching {
+            val existingPhotoUrl = profileCacheRepository.getPhotoUrl(uid)
+            profileCacheRepository.updatePhotoUrl(uid, token)
+            if (existingPhotoUrl.isRemoteProfilePhotoUrl()) {
+                runCatching {
+                    profilePhotoStorage.delete(uid)
+                    userProfileRepository.updatePhotoUrl(uid, null)
+                }
+            }
+        }
+    }
+
+    override suspend fun uploadProfilePhoto(
+        fileName: String,
+        mimeType: String,
+        bytes: ByteArray
+    ): Result<Unit> {
+        val uid = authRepository.currentUser?.uid
+            ?: return Result.failure(IllegalStateException("No authenticated user"))
+
+        return runCatching {
+            val photoUrl = profilePhotoStorage.upload(
+                uid = uid,
+                fileName = fileName,
+                mimeType = mimeType,
+                bytes = bytes
+            )
+            userProfileRepository.updatePhotoUrl(uid, photoUrl)
+            profileCacheRepository.updatePhotoUrl(uid, photoUrl)
+        }
+    }
+
+    override suspend fun removeProfilePhoto(): Result<Unit> {
+        val uid = authRepository.currentUser?.uid
+            ?: return Result.failure(IllegalStateException("No authenticated user"))
+
+        return runCatching {
+            val existingPhotoUrl = profileCacheRepository.getPhotoUrl(uid)
+            profileCacheRepository.updatePhotoUrl(uid, null)
+            if (existingPhotoUrl.isRemoteProfilePhotoUrl()) {
+                runCatching {
+                    profilePhotoStorage.delete(uid)
+                    userProfileRepository.updatePhotoUrl(uid, null)
+                }
+            } else {
+                userProfileRepository.updatePhotoUrl(uid, null)
+            }
         }
     }
 
@@ -196,4 +252,9 @@ class ProfileRepositoryImpl @Inject constructor(
             else -> null
         }
     }
+}
+
+private fun String?.isRemoteProfilePhotoUrl(): Boolean {
+    return this?.startsWith("http", ignoreCase = true) == true ||
+        this?.startsWith("gs://", ignoreCase = true) == true
 }

@@ -1,38 +1,18 @@
 package net.metalbrain.paysmart.core.features.account.creation.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.account.creation.components.AccountCreationScaffold
+import net.metalbrain.paysmart.core.features.account.creation.components.PostOtpCapabilitiesContent
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.PostOtpCapabilitiesViewModel
-import net.metalbrain.paysmart.ui.components.PrimaryButton
+import net.metalbrain.paysmart.ui.theme.Dimens
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostOtpCapabilitiesScreen(
     countryIso2: String,
@@ -45,62 +25,14 @@ fun PostOtpCapabilitiesScreen(
     }
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back)
-                        )
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
-        Column(
+    AccountCreationScaffold(onBack = onBack) { innerPadding ->
+        PostOtpCapabilitiesContent(
+            profile = uiState.profile,
+            onNext = onNext,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 18.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            Text(
-                text = uiState.profile.flagEmoji,
-                style = MaterialTheme.typography.displaySmall,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Text(
-                text = stringResource(
-                    R.string.post_otp_capabilities_title,
-                    uiState.profile.countryName
-                ),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = stringResource(R.string.post_otp_capabilities_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            HorizontalDivider()
-
-            uiState.profile.capabilities.forEach { capability ->
-                PostOtpCapabilityRow(item = capability)
-                HorizontalDivider()
-            }
-
-            PrimaryButton(
-                text = stringResource(R.string.post_otp_capabilities_next),
-                onClick = onNext,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-            )
-        }
+                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.space6)
+        )
     }
 }

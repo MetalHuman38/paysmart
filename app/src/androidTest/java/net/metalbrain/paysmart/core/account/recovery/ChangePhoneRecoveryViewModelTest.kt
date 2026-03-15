@@ -21,6 +21,16 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * Unit tests for [ChangePhoneRecoveryViewModel].
+ *
+ * This test class verifies the business logic for updating a user's phone number,
+ * ensuring that the UI state updates correctly and that the local profile is only
+ * updated if the backend policy handler confirms the change.
+ *
+ * It uses a [FakeGateway] to simulate Firebase Phone Authentication and mocks for
+ * [UserProfileRepository] and [PhoneChangePolicyHandler] to validate interactions.
+ */
 @RunWith(AndroidJUnit4::class)
 class ChangePhoneRecoveryViewModelTest {
 

@@ -93,6 +93,8 @@ class SecuritySettingsPolicy(
             hasVerifiedIdentity = optNullableBoolean(json, "hasVerifiedIdentity"),
             hasSkippedMfaEnrollmentPrompt = optNullableBoolean(json, "hasSkippedMfaEnrollmentPrompt"),
             hasSkippedPasskeyEnrollmentPrompt = optNullableBoolean(json, "hasSkippedPasskeyEnrollmentPrompt"),
+            hasEnrolledMfaFactor = optNullableBoolean(json, "hasEnrolledMfaFactor"),
+            mfaEnrolledAt = parseFirestoreTimestamp(json.optJSONObject("mfaEnrolledAt")),
             emailVerificationSentAt = parseFirestoreTimestamp(json.optJSONObject("emailVerificationSentAt")),
             emailToVerify = optNullableString(json, "emailToVerify"),
             emailVerificationAttemptsToday = optNullableInt(json, "emailVerificationAttemptsToday") ?: 0,

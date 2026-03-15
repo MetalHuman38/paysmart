@@ -4,7 +4,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import net.metalbrain.paysmart.data.repository.FakeTransactionRepository
+import net.metalbrain.paysmart.data.repository.LocalTransactionRepository
+import net.metalbrain.paysmart.data.repository.TransactionHistoryRepository
 import net.metalbrain.paysmart.data.repository.TransactionRepository
 import javax.inject.Singleton
 
@@ -15,6 +16,12 @@ abstract class TransactionModule {
     @Binds
     @Singleton
     abstract fun bindTransactionRepository(
-        impl: FakeTransactionRepository
+        impl: LocalTransactionRepository
     ): TransactionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTransactionHistoryRepository(
+        impl: LocalTransactionRepository
+    ): TransactionHistoryRepository
 }

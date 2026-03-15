@@ -3,4 +3,7 @@
     <cache-path
         name="invoice_share"
         path="invoice-share/" />
+    <cache-path
+        name="profile_photo"
+        path="profile-photo/" />
 </paths>

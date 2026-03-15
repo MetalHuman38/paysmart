@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -44,8 +43,8 @@ import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.OTPViewModel
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.components.OtpTextFieldRow
-import net.metalbrain.paysmart.ui.screens.LoadingState
-import net.metalbrain.paysmart.ui.screens.rememberStabilizedLoading
+import net.metalbrain.paysmart.ui.screens.loader.LoadingState
+import net.metalbrain.paysmart.ui.screens.loader.rememberStabilizedLoading
 import net.metalbrain.paysmart.ui.theme.Dimens
 
 @OptIn(ExperimentalComposeUiApi::class)

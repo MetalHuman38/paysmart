@@ -38,6 +38,7 @@ object BiometricHelper {
         onSuccess: () -> Unit,
         onError: (String) -> Unit,
         onFailureLimitReached: (() -> Unit)? = null,
+        onAuthenticationFailed: (() -> Unit)? = null,
         failureCounter: FailureCounter = FailureCounter()
     ) {
         val executor: Executor = ContextCompat.getMainExecutor(activity)
@@ -67,6 +68,7 @@ object BiometricHelper {
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
+                    onAuthenticationFailed?.invoke()
                     resultChannel.trySend(BiometricResult.AuthenticationFailed)
                 }
             })

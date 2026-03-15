@@ -1,43 +1,47 @@
 package net.metalbrain.paysmart.ui.home.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.domain.model.Transaction
+import net.metalbrain.paysmart.ui.home.state.RewardDetailsUiState
+import net.metalbrain.paysmart.ui.theme.Dimens
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RewardDetailsScreen(
-    pointsLabel: String,
-    onBack: () -> Unit
+    state: RewardDetailsUiState,
+    onBack: () -> Unit,
+    onHelpClick: () -> Unit,
+    onTransactionClick: (Transaction) -> Unit = {}
 ) {
-    val points = pointsLabel.toDoubleOrNull() ?: 0.0
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -45,8 +49,7 @@ fun RewardDetailsScreen(
                 title = {
                     Text(
                         text = stringResource(id = R.string.home_rewards_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
+                        style = MaterialTheme.typography.titleMedium
                     )
                 },
                 navigationIcon = {
@@ -58,102 +61,105 @@ fun RewardDetailsScreen(
                     }
                 },
                 actions = {
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    ) {
+                    TextButton(onClick = onHelpClick) {
                         Text(
                             text = stringResource(id = R.string.get_help),
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { innerPadding ->
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = Dimens.screenPadding)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(Dimens.md)
         ) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surface
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = String.format(Locale.US, "%.2f", points),
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(id = R.string.home_rewards_points_suffix),
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+            HomeDetailSectionCard {
+                Text(
+                    text = String.format(
+                        Locale.US,
+                        "%.2f%s",
+                        state.points,
+                        stringResource(id = R.string.home_rewards_points_suffix)
+                    ),
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                state.walletUpdatedAtMs?.let { updatedAtMs ->
                     Text(
                         text = stringResource(
-                            id = R.string.home_rewards_fiat_value,
-                            String.format(Locale.US, "%.2f", points / 100.0)
+                            id = R.string.home_rewards_balance_updated,
+                            updatedAtMs.toRewardDateTimeLabel()
                         ),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.home_rewards_what_are_rewards),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null)
+                }
+            }
+
+            HomeDetailSectionCard(tonal = true) {
+                HomeDetailEmptyText(
+                    text = stringResource(id = R.string.home_rewards_sync_note),
+                )
+            }
+
+            HomeDetailSectionTitle(
+                text = stringResource(id = R.string.home_rewards_recent_transactions_title)
+            )
+
+            HomeDetailSectionCard {
+                if (state.recentTransactions.isEmpty()) {
+                    HomeDetailEmptyText(
+                        text = stringResource(id = R.string.home_rewards_no_recent_transactions)
+                    )
+                } else {
+                    state.recentTransactions.forEachIndexed { index, transaction ->
+                        RewardTransactionRow(
+                            title = transaction.title,
+                            subtitle = "${transaction.status} • ${transaction.date}, ${transaction.time}",
+                            amount = transaction.toRewardAmountLabel(),
+                            onClick = { onTransactionClick(transaction) }
+                        )
+                        if (index < state.recentTransactions.lastIndex) {
+                            HorizontalDivider()
                         }
                     }
                 }
             }
-
-            Text(
-                text = stringResource(id = R.string.home_rewards_history_title),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                color = MaterialTheme.colorScheme.surface
-            ) {
-                Column(
-                    modifier = Modifier.padding(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    RewardHistoryRow("+3.50 pts", stringResource(id = R.string.home_rewards_history_subtitle), "Mar 14, 10:18 AM")
-                    RewardHistoryRow("+3.85 pts", stringResource(id = R.string.home_rewards_history_subtitle), "Mar 12, 11:34 PM")
-                    RewardHistoryRow("+4.20 pts", stringResource(id = R.string.home_rewards_history_subtitle), "Mar 05, 09:23 PM")
-                    RewardHistoryRow("+4.20 pts", stringResource(id = R.string.home_rewards_history_subtitle), "Mar 05, 09:20 PM")
-                }
-            }
         }
     }
+}
+
+private fun Transaction.toRewardAmountLabel(): String {
+    val prefix = if (amount > 0) "+" else ""
+    return prefix + String.format(Locale.US, "%.2f %s", amount, currency)
+}
+
+private val REWARD_UPDATED_FORMAT: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", Locale.US)
+
+private fun Long.toRewardDateTimeLabel(): String {
+    return Instant.ofEpochMilli(this)
+        .atZone(ZoneId.systemDefault())
+        .format(REWARD_UPDATED_FORMAT)
 }

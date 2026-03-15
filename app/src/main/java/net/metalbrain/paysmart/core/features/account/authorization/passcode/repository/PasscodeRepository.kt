@@ -11,6 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.first
+import com.google.firebase.Timestamp
 import net.metalbrain.paysmart.core.features.account.authorization.passcode.remote.PassCodePolicyHandler
 import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
 import net.metalbrain.paysmart.domain.crypto.CryptoUseCase
@@ -65,24 +66,35 @@ class PasscodeRepository @Inject constructor(
     }
 
     suspend fun setPasscode(passcode: String, idToken: String) {
-        val salt = ByteArray(16).apply { SecureRandom().nextBytes(this) }
-        val iterations = 150_000
-        val hash = cryptoUseCase.deriveKey(passcode, salt, iterations, 32)
+        val previousSnapshot = snapshot()
+        persistPasscode(passcode)
 
-        dataStore.edit { prefs ->
-            prefs[Keys.HASH] = Base64.encodeToString(hash, Base64.NO_WRAP)
-            prefs[Keys.SALT] = Base64.encodeToString(salt, Base64.NO_WRAP)
-            prefs[Keys.ITERS] = iterations
+        try {
+            val serverAccepted = passcodePolicyHandler.setPassCodeEnabled(idToken)
+            if (!serverAccepted) {
+                throw IllegalStateException("Server failed to acknowledge passcode enablement")
+            }
+
+            markPasscodeReady(setAt = Timestamp.now())
+        } catch (e: Exception) {
+            restoreSnapshot(previousSnapshot)
+            throw e
+        }
+    }
+
+    suspend fun changePasscode(currentPasscode: String, newPasscode: String): Boolean {
+        if (!verify(currentPasscode)) {
+            return false
         }
 
-        val serverAccepted = passcodePolicyHandler.setPassCodeEnabled(idToken)
-        val updated = securityPreference
-            .loadLocalSecurityState()
-            .copy(passcodeEnabled = serverAccepted)
-        securityPreference.saveLocalSecurityState(updated)
-
-        if (!serverAccepted) {
-            throw IllegalStateException("Server failed to acknowledge passcode enablement")
+        val previousSnapshot = snapshot()
+        return try {
+            persistPasscode(newPasscode)
+            markPasscodeReady(setAt = Timestamp.now())
+            true
+        } catch (e: Exception) {
+            restoreSnapshot(previousSnapshot)
+            throw e
         }
     }
 
@@ -108,4 +120,73 @@ class PasscodeRepository @Inject constructor(
         val timeoutMillis = lockAfterMinutes * 60 * 1000
         return (now - lastUnlock) > timeoutMillis
     }
+
+    private suspend fun persistPasscode(passcode: String) {
+        val salt = ByteArray(16).apply { SecureRandom().nextBytes(this) }
+        val iterations = 150_000
+        val hash = cryptoUseCase.deriveKey(passcode, salt, iterations, 32)
+
+        dataStore.edit { prefs ->
+            prefs[Keys.HASH] = Base64.encodeToString(hash, Base64.NO_WRAP)
+            prefs[Keys.SALT] = Base64.encodeToString(salt, Base64.NO_WRAP)
+            prefs[Keys.ITERS] = iterations
+        }
+    }
+
+    private suspend fun markPasscodeReady(setAt: Timestamp) {
+        val updated = securityPreference
+            .loadLocalSecurityState()
+            .copy(
+                passcodeEnabled = true,
+                localPassCodeSetAt = setAt,
+                sessionLocked = false
+            )
+        securityPreference.saveLocalSecurityState(updated)
+        securityPreference.updateLastUnlock()
+    }
+
+    private suspend fun snapshot(): PasscodeSnapshot {
+        val prefs = dataStore.data.first()
+        return PasscodeSnapshot(
+            hash = prefs[Keys.HASH],
+            salt = prefs[Keys.SALT],
+            iterations = prefs[Keys.ITERS],
+            lastUnlock = prefs[Keys.LAST_UNLOCK]
+        )
+    }
+
+    private suspend fun restoreSnapshot(snapshot: PasscodeSnapshot) {
+        dataStore.edit { prefs ->
+            if (snapshot.hash == null) {
+                prefs.remove(Keys.HASH)
+            } else {
+                prefs[Keys.HASH] = snapshot.hash
+            }
+
+            if (snapshot.salt == null) {
+                prefs.remove(Keys.SALT)
+            } else {
+                prefs[Keys.SALT] = snapshot.salt
+            }
+
+            if (snapshot.iterations == null) {
+                prefs.remove(Keys.ITERS)
+            } else {
+                prefs[Keys.ITERS] = snapshot.iterations
+            }
+
+            if (snapshot.lastUnlock == null) {
+                prefs.remove(Keys.LAST_UNLOCK)
+            } else {
+                prefs[Keys.LAST_UNLOCK] = snapshot.lastUnlock
+            }
+        }
+    }
+
+    private data class PasscodeSnapshot(
+        val hash: String?,
+        val salt: String?,
+        val iterations: Int?,
+        val lastUnlock: Long?
+    )
 }

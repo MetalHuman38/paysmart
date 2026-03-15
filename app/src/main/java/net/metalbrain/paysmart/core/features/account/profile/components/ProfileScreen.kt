@@ -6,15 +6,17 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Card
@@ -33,14 +35,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 import net.metalbrain.paysmart.BuildConfig
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.room.manager.RoomKeyManager
 import net.metalbrain.paysmart.domain.model.AuthUserModel
+import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 
 @Composable
@@ -49,6 +51,7 @@ fun ProfileScreen(
     user: AuthUserModel,
     isVerified: Boolean,
     viewModel: UserViewModel,
+    onChangePhotoClick: () -> Unit,
     onAccountInformationClick: () -> Unit,
     onSecurityPrivacyClick: () -> Unit,
     onConnectedAccountsClick: () -> Unit,
@@ -73,7 +76,7 @@ fun ProfileScreen(
         ProfileMenuEntry(
             title = stringResource(R.string.profile_menu_connected_accounts_title),
             subtitle = stringResource(R.string.profile_menu_connected_accounts_subtitle),
-            icon = Icons.Default.Link,
+            icon = Icons.Default.AccountBalanceWallet,
             onClick = onConnectedAccountsClick
         ),
         ProfileMenuEntry(
@@ -115,61 +118,76 @@ fun ProfileScreen(
             enter = fadeIn() + slideInVertically { it / 12 },
             exit = fadeOut() + slideOutVertically { it / 12 }
         ) {
-            Column(
+            LazyColumn(
                 modifier = Modifier
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentPadding = PaddingValues(
+                    start = Dimens.mediumScreenPadding,
+                    top = Dimens.md,
+                    end = Dimens.mediumScreenPadding,
+                    bottom = Dimens.lg
+                ),
+                verticalArrangement = Arrangement.spacedBy(Dimens.md)
             ) {
-                ProfileHeader(
-                    displayName = user.displayName.orEmpty(),
-                    photoURL = user.photoURL,
-                    isVerified = isVerified
-                )
+                item {
+                    ProfileHeader(
+                        displayName = user.displayName.orEmpty(),
+                        contactText = user.email ?: user.phoneNumber,
+                        photoURL = user.photoURL,
+                        isVerified = isVerified,
+                        onChangePhotoClick = onChangePhotoClick
+                    )
+                }
 
-                Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column {
-                        menuEntries.forEachIndexed { index, entry ->
-                            ProfileMenuItem(
-                                title = entry.title,
-                                subtitle = entry.subtitle,
-                                leadingIcon = entry.icon,
-                                onClick = entry.onClick
-                            )
-                            if (index < menuEntries.lastIndex) {
-                                HorizontalDivider()
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column {
+                            menuEntries.forEachIndexed { index, entry ->
+                                ProfileMenuItem(
+                                    title = entry.title,
+                                    subtitle = entry.subtitle,
+                                    leadingIcon = entry.icon,
+                                    onClick = entry.onClick
+                                )
+                                if (index < menuEntries.lastIndex) {
+                                    HorizontalDivider()
+                                }
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
-
-                TextButton(
-                    onClick = {
-                        viewModel.signOut()
-                        onLogout()
-                        RoomKeyManager.deleteKey()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = stringResource(R.string.profile_logout),
-                        color = MaterialTheme.colorScheme.error
-                    )
+                item {
+                    TextButton(
+                        onClick = {
+                            viewModel.signOut()
+                            onLogout()
+                            RoomKeyManager.deleteKey()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.profile_logout),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
 
-                Text(
-                    text = stringResource(
-                        R.string.profile_version_format,
-                        BuildConfig.VERSION_NAME,
-                        BuildConfig.VERSION_CODE
-                    ),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                item {
+                    Text(
+                        text = stringResource(
+                            R.string.profile_version_format,
+                            BuildConfig.VERSION_NAME,
+                            BuildConfig.VERSION_CODE
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }

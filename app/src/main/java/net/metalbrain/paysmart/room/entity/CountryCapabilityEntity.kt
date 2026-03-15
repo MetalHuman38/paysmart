@@ -9,6 +9,7 @@ data class CountryCapabilityEntity(
     val countryName: String,
     val flagEmoji: String,
     val currencyCode: String,
+    val addMoneyProvidersJson: String,
     val addMoneyMethodsJson: String,
     val capabilitiesJson: String,
     val catalogVersion: String,

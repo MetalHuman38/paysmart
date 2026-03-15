@@ -104,6 +104,9 @@ export function loadConfig() {
             new Set([`https://${passkeyRpId}`]) :
             new Set();
     const passkeyEnabled = passkeyRpId.length > 0 && passkeyExpectedOrigins.size > 0;
+    const defaultFlutterwaveBaseUrl = isProduction
+        ? "https://f4bexperience.flutterwave.com"
+        : "https://developersandbox-api.flutterwave.com";
     let cachedMailer = null;
     return {
         projectId,
@@ -154,7 +157,7 @@ export function loadConfig() {
             process.env.FLW_WEBHOOK_SECRET_HASH ||
             "").trim(),
         flutterwaveAllowUnsignedWebhooks: readBoolean("FLUTTERWAVE_ALLOW_UNSIGNED_WEBHOOKS", !isProduction),
-        flutterwaveBaseUrl: (process.env.FLUTTERWAVE_BASE_URL || "https://api.flutterwave.cloud").trim(),
+        flutterwaveBaseUrl: (process.env.FLUTTERWAVE_BASE_URL || defaultFlutterwaveBaseUrl).trim(),
         flutterwaveIdpBaseUrl: (process.env.FLUTTERWAVE_IDP_BASE_URL || "https://idp.flutterwave.com").trim(),
         flutterwaveClientId: (process.env.FLUTTERWAVE_CLIENT_ID || process.env.FLW_CLIENT_ID || "").trim(),
         flutterwaveClientSecret: (process.env.FLUTTERWAVE_CLIENT_SECRET || process.env.FLW_CLIENT_SECRET || "").trim(),

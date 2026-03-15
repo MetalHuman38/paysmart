@@ -18,8 +18,14 @@ import net.metalbrain.paysmart.Env
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyPaymentSheetLaunch
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionStatus
+import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyUiError
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyUiState
 import net.metalbrain.paysmart.core.features.addmoney.repository.AddMoneyRepository
+import net.metalbrain.paysmart.core.features.addmoney.util.AddMoneyFailurePhase
+import net.metalbrain.paysmart.core.features.addmoney.util.addMoneyUnavailableMessage
+import net.metalbrain.paysmart.core.features.addmoney.util.addMoneyUnavailableSupportingText
+import net.metalbrain.paysmart.core.features.addmoney.util.resolvePreferredAddMoneyProvider
+import net.metalbrain.paysmart.core.features.addmoney.util.resolveAddMoneyUiError
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.TransactionRepository
 import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
@@ -104,7 +110,7 @@ class AddMoneyViewModel @Inject constructor(
         if (method !in _uiState.value.availableMethods) {
             _uiState.update {
                 it.copy(
-                    error = "Payment method unavailable for this country"
+                    error = plainUiError("Payment method unavailable for this country")
                 )
             }
             return
@@ -187,16 +193,25 @@ class AddMoneyViewModel @Inject constructor(
         val amountMinor = parseAmountToMinor(_uiState.value.amountInput)
         if (amountMinor == null || amountMinor <= 0) {
             _uiState.update {
-                it.copy(error = "Enter a valid amount")
+                it.copy(error = plainUiError("Enter a valid amount"))
             }
             return
         }
 
         val currency = _uiState.value.currency.ifBlank { "GBP" }.uppercase()
-        val requestedProvider = resolveProviderForRequest(
-            currency = currency,
-            countryIso2 = _uiState.value.countryIso2
-        )
+        val requestedProvider = resolveProviderForRequest()
+        if (requestedProvider == null) {
+            _uiState.update {
+                it.copy(
+                    error = AddMoneyUiError(
+                        title = "Add money unavailable",
+                        message = addMoneyUnavailableMessage(it.countryName),
+                        supportingText = addMoneyUnavailableSupportingText(it.countryName)
+                    )
+                )
+            }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update {
@@ -228,21 +243,25 @@ class AddMoneyViewModel @Inject constructor(
                                 sessionId = session.sessionId,
                                 activeSessionProvider = resolvedProvider,
                                 sessionStatus = session.status,
-                                error = "Payment session is missing PaymentSheet configuration (publishable key)"
+                                error = AddMoneyUiError(
+                                    title = "Payment configuration missing",
+                                    message = "Payment session is missing PaymentSheet configuration."
+                                )
                             )
                         }
                         return@onSuccess
                     }
 
-                    _uiState.update {
-                        it.copy(
-                            isSubmitting = false,
-                            sessionId = session.sessionId,
-                            activeSessionProvider = resolvedProvider,
-                            sessionStatus = session.status,
-                            paymentSheetLaunch = if (resolvedProvider == AddMoneyProvider.STRIPE) {
-                                AddMoneyPaymentSheetLaunch(
-                                    publishableKey = publishableKey!!,
+                        _uiState.update {
+                            it.copy(
+                                isSubmitting = false,
+                                sessionId = session.sessionId,
+                                activeSessionProvider = resolvedProvider,
+                                activeSessionMethod = it.quoteMethod,
+                                sessionStatus = session.status,
+                                paymentSheetLaunch = if (resolvedProvider == AddMoneyProvider.STRIPE) {
+                                    AddMoneyPaymentSheetLaunch(
+                                        publishableKey = publishableKey!!,
                                     paymentIntentClientSecret = paymentIntentClientSecret!!
                                 )
                             } else {
@@ -267,28 +286,14 @@ class AddMoneyViewModel @Inject constructor(
                     mirrorSessionStatusToTransactions(session)
                 }
                 .onFailure { error ->
-                    val message = error.localizedMessage.orEmpty()
-                    val resolvedMessage = when {
-                        message.contains("MISSING_STRIPE_PUBLISHABLE_KEY") ->
-                            "Payments backend missing publishable key configuration"
-                        message.contains("MISSING_STRIPE_SECRET_KEY") ->
-                            "Payments backend missing secret key configuration"
-                        message.contains("INVALID_STRIPE_SECRET_KEY") ->
-                            "Payments backend has invalid Stripe secret key"
-                        message.contains("MISSING_FLUTTERWAVE_SECRET_KEY") ->
-                            "Flutterwave backend missing secret key configuration"
-                        message.contains("MISSING_FLUTTERWAVE_PUBLIC_KEY") ->
-                            "Flutterwave backend missing public key configuration"
-                        message.contains("FLUTTERWAVE_NOT_IMPLEMENTED") ->
-                            "Flutterwave flow is not fully enabled on backend"
-                        message.contains("SESSION_VALIDATION_UNAVAILABLE") ->
-                            "Session validation is temporarily unavailable. Try again."
-                        else -> message.ifBlank { "Unable to start add money flow" }
-                    }
                     _uiState.update {
                         it.copy(
                             isSubmitting = false,
-                            error = resolvedMessage
+                            error = resolveAddMoneyUiError(
+                                throwable = error,
+                                isLocal = Env.isLocal,
+                                phase = AddMoneyFailurePhase.CREATE_SESSION
+                            )
                         )
                     }
                 }
@@ -324,8 +329,11 @@ class AddMoneyViewModel @Inject constructor(
         stopSessionStatusPolling()
         _uiState.update {
             it.copy(
-                error = message?.takeIf { value -> value.isNotBlank() }
-                    ?: "Payment failed before confirmation",
+                error = AddMoneyUiError(
+                    title = "Payment error",
+                    message = message?.takeIf { value -> value.isNotBlank() }
+                        ?: "Payment failed before confirmation"
+                ),
                 infoMessage = null
             )
         }
@@ -334,10 +342,19 @@ class AddMoneyViewModel @Inject constructor(
     fun refreshSessionStatus() {
         val sessionId = _uiState.value.sessionId
         if (sessionId.isNullOrBlank() || _uiState.value.isCheckingStatus) return
-        val provider = _uiState.value.activeSessionProvider ?: resolveProviderForRequest(
-            currency = _uiState.value.currency,
-            countryIso2 = _uiState.value.countryIso2
-        )
+        val provider = _uiState.value.activeSessionProvider ?: resolveProviderForRequest()
+        if (provider == null) {
+            _uiState.update {
+                it.copy(
+                    error = AddMoneyUiError(
+                        title = "Add money unavailable",
+                        message = addMoneyUnavailableMessage(it.countryName),
+                        supportingText = addMoneyUnavailableSupportingText(it.countryName)
+                    )
+                )
+            }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update {
@@ -380,7 +397,11 @@ class AddMoneyViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isCheckingStatus = false,
-                            error = error.localizedMessage ?: "Unable to refresh payment status"
+                            error = resolveAddMoneyUiError(
+                                throwable = error,
+                                isLocal = Env.isLocal,
+                                phase = AddMoneyFailurePhase.REFRESH_STATUS
+                            )
                         )
                     }
                 }
@@ -458,9 +479,11 @@ class AddMoneyViewModel @Inject constructor(
 
             state.copy(
                 countryIso2 = profile.iso2,
+                countryName = profile.countryName,
                 countryFlagEmoji = profile.flagEmoji,
                 countryCurrencyCode = profile.currencyCode,
                 topUpPolicyHint = CountryCapabilityCatalog.topUpPolicyHint(profile),
+                availableAddMoneyProviders = profile.addMoneyProviders,
                 availableMethods = allowedMethods,
                 countryCapabilities = profile.capabilities,
                 quoteMethod = nextMethod,
@@ -495,12 +518,7 @@ class AddMoneyViewModel @Inject constructor(
         session: net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData
     ) {
         viewModelScope.launch {
-            transactionRepository.upsertAddMoneySimulation(
-                sessionId = session.sessionId,
-                amountMinor = session.amountMinor,
-                currency = session.currency,
-                status = session.status.name
-            )
+            transactionRepository.recordAddMoneySession(session = session)
         }
     }
 
@@ -536,16 +554,11 @@ class AddMoneyViewModel @Inject constructor(
         stopSessionStatusPolling()
     }
 
-    private fun resolveProviderForRequest(
-        currency: String,
-        countryIso2: String
-    ): AddMoneyProvider {
-        val normalizedCurrency = currency.trim().uppercase()
-        val normalizedCountry = countryIso2.trim().uppercase()
-        return if (normalizedCurrency == "NGN" || normalizedCountry == "NG") {
-            AddMoneyProvider.FLUTTERWAVE
-        } else {
-            AddMoneyProvider.STRIPE
-        }
+    private fun resolveProviderForRequest(): AddMoneyProvider? {
+        return resolvePreferredAddMoneyProvider(_uiState.value.availableAddMoneyProviders)
+    }
+
+    private fun plainUiError(message: String): AddMoneyUiError {
+        return AddMoneyUiError(message = message)
     }
 }

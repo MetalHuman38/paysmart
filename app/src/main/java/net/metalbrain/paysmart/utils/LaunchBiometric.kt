@@ -1,33 +1,33 @@
 package net.metalbrain.paysmart.utils
 
 import android.content.Context
-import androidx.biometric.BiometricPrompt
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.account.authorization.biometric.provider.BiometricHelper
 
-fun launchBiometricPrompt(context: Context, onSuccess: () -> Unit, onFail: () -> Unit) {
-    val executor = ContextCompat.getMainExecutor(context)
-    val promptInfo = BiometricPrompt.PromptInfo.Builder()
-        .setTitle(context.getString(R.string.biometric_prompt_title))
-        .setSubtitle(context.getString(R.string.biometric_prompt_subtitle))
-        .setNegativeButtonText(context.getString(R.string.biometric_prompt_negative))
-        .build()
+fun launchBiometricPrompt(
+    context: Context,
+    onSuccess: () -> Unit,
+    onFail: () -> Unit,
+    onError: () -> Unit = onFail
+) {
+    val activity = context as? FragmentActivity ?: run {
+        onError()
+        return
+    }
 
-    val biometricPrompt = BiometricPrompt(
-        context as FragmentActivity,
-        executor,
-        object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                super.onAuthenticationSucceeded(result)
-                onSuccess()
-            }
+    if (!BiometricHelper.isBiometricAvailable(activity)) {
+        onError()
+        return
+    }
 
-            override fun onAuthenticationFailed() {
-                super.onAuthenticationFailed()
-                onFail()
-            }
-        })
-
-    biometricPrompt.authenticate(promptInfo)
+    BiometricHelper.showPrompt(
+        activity = activity,
+        title = context.getString(R.string.biometric_prompt_title),
+        subtitle = context.getString(R.string.biometric_prompt_subtitle),
+        onSuccess = onSuccess,
+        onError = { onError() },
+        onFailureLimitReached = onError,
+        onAuthenticationFailed = onFail
+    )
 }

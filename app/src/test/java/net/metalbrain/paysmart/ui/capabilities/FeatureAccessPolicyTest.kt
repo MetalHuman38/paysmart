@@ -10,6 +10,13 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * Unit tests for [FeatureAccessPolicy].
+ *
+ * Verifies that feature access decisions are correctly evaluated based on the user's
+ * security configuration, ensuring that sensitive features are blocked or allowed
+ * according to the required security strength.
+ */
 class FeatureAccessPolicyTest {
 
     @Test
@@ -48,5 +55,40 @@ class FeatureAccessPolicyTest {
         assertTrue(decision.isAllowed)
         assertEquals(2, decision.currentSecurityStrength)
         assertEquals(2, decision.requiredSecurityStrength)
+    }
+
+    @Test
+    fun `receive money is blocked until email and address are complete`() {
+        val settings = LocalSecuritySettingsModel(
+            hasVerifiedEmail = true,
+            hasAddedHomeAddress = false
+        )
+
+        val decision = FeatureAccessPolicy.evaluate(
+            feature = FeatureKey.RECEIVE_MONEY,
+            settings = settings
+        )
+
+        assertFalse(decision.isAllowed)
+        assertEquals(
+            listOf(FeatureRequirement.HOME_ADDRESS_VERIFIED),
+            decision.missingRequirements
+        )
+    }
+
+    @Test
+    fun `receive money is allowed when email and address are complete`() {
+        val settings = LocalSecuritySettingsModel(
+            hasVerifiedEmail = true,
+            hasAddedHomeAddress = true
+        )
+
+        val decision = FeatureAccessPolicy.evaluate(
+            feature = FeatureKey.RECEIVE_MONEY,
+            settings = settings
+        )
+
+        assertTrue(decision.isAllowed)
+        assertTrue(decision.missingRequirements.isEmpty())
     }
 }

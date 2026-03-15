@@ -31,8 +31,8 @@ import androidx.fragment.app.FragmentActivity
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.ReauthOtpViewModel
 import net.metalbrain.paysmart.ui.components.PrimaryButton
-import net.metalbrain.paysmart.ui.screens.AppLoadingScreen
-import net.metalbrain.paysmart.ui.screens.rememberStabilizedLoading
+import net.metalbrain.paysmart.ui.screens.loader.AppLoadingScreen
+import net.metalbrain.paysmart.ui.screens.loader.rememberStabilizedLoading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

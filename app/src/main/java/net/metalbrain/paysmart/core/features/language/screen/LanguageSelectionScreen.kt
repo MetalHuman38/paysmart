@@ -1,59 +1,24 @@
 package net.metalbrain.paysmart.core.features.language.screen
 
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import net.metalbrain.paysmart.R
-import net.metalbrain.paysmart.core.features.capabilities.catalog.CountrySelectionCatalog
+import androidx.compose.ui.platform.LocalResources
+import net.metalbrain.paysmart.core.features.language.data.layoutDirectionFor
 import net.metalbrain.paysmart.domain.model.Language
 import net.metalbrain.paysmart.domain.model.supportedLanguages
 import net.metalbrain.paysmart.ui.theme.Dimens
@@ -69,10 +34,11 @@ fun LanguageSelectionScreen(
     modifier: Modifier = Modifier
 ) {
     var search by remember { mutableStateOf("") }
-    val context = LocalContext.current
+    val resources = LocalResources.current
 
-    val filteredLanguages = supportedLanguages.filter {
-        stringResource(it.nameRes).contains(search, ignoreCase = true)
+    val filteredLanguages = supportedLanguages.filter { language ->
+        resources.getString(language.nameRes).contains(search, ignoreCase = true) ||
+            language.code.contains(search, ignoreCase = true)
     }
 
     CompositionLocalProvider(LocalLayoutDirection provides layoutDirectionFor(selectedLanguage)) {
@@ -85,132 +51,23 @@ fun LanguageSelectionScreen(
                 .padding(horizontal = Dimens.screenPadding),
             verticalArrangement = Arrangement.spacedBy(ScreenDimensions.smallSpacing)
         ) {
-            // 🔙 Back
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.common_back),
-                    modifier = Modifier
-                        .padding(end = 16.dp)
-                        .clickable { onBack() },
-                )
-            }
+            LanguageSelectionHeader(onBack = onBack)
 
-            // Title
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.select_language),
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
+            LanguageSelectionTitleBlock()
 
-            // Subtitle
-            Text(
-                text = stringResource(R.string.language_description),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            // Search
-            OutlinedTextField(
+            LanguageSelectionSearchField(
                 value = search,
-                onValueChange = { search = it },
-                placeholder = { Text(stringResource(R.string.search_hint)) },
-                leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = null)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp)
+                onValueChange = { search = it }
             )
 
-            // 🌍 Language list
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(filteredLanguages) { language ->
-                    val flagEmoji = CountrySelectionCatalog.flagForCountry(
-                        context = context,
-                        rawIso2 = language.countryIso2
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onLanguageSelected(language) }
-                            .padding(vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = flagEmoji,
-                            fontSize = 24.sp,
-                            modifier = Modifier.size(28.dp)
-                            .padding(end = 12.dp)
-                            .align(Alignment.CenterVertically),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+            LanguageSelectionList(
+                languages = filteredLanguages,
+                selectedLanguage = selectedLanguage,
+                onLanguageSelected = onLanguageSelected,
+                modifier = Modifier.weight(1f)
+            )
 
-                        Spacer(Modifier.width(12.dp))
-
-                        Text(
-                            text = stringResource(id = language.nameRes),
-                            modifier = Modifier.weight(1f),
-                            fontSize = 16.sp
-                        )
-
-                        AnimatedContent(
-                            targetState = (language.code == selectedLanguage.code),
-                            transitionSpec = {
-                                (fadeIn(tween(200)) + scaleIn()).togetherWith(fadeOut(tween(100)))
-                            },
-                            label = "Checkmark Animation"
-                        ) { isSelected ->
-                            if (isSelected) {
-                                Icon(
-                                    Icons.Default.CheckCircle,
-                                    contentDescription = stringResource(R.string.content_desc_selected),
-                                    tint = Color(0xFF009E5D)
-                                )
-                            } else {
-                                RadioButton(
-                                    selected = false,
-                                    onClick = { onLanguageSelected(language) }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Continue Button
-            Button(
-                onClick = onContinue,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(28.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF00B86B),
-                    contentColor = Color.White
-                )
-            ) {
-                Text(stringResource(R.string.continue_text))
-            }
+            LanguageSelectionContinueButton(onClick = onContinue)
         }
     }
-}
-
-fun layoutDirectionFor(language: Language): LayoutDirection {
-    return if (language.isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
 }

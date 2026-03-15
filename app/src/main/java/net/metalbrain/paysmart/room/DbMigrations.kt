@@ -222,4 +222,76 @@ object DbMigrations {
             )
         }
     }
+
+    val MIGRATION_10_11: Migration = object : Migration(10, 11) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS transactions (
+                    userId TEXT NOT NULL,
+                    id TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    amount REAL NOT NULL,
+                    currency TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    iconRes INTEGER NOT NULL,
+                    createdAtMs INTEGER NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    provider TEXT,
+                    paymentRail TEXT,
+                    reference TEXT NOT NULL,
+                    externalReference TEXT,
+                    statusTimelineJson TEXT NOT NULL,
+                    PRIMARY KEY(userId, id)
+                )
+                """.trimIndent()
+            )
+            db.execSQL(
+                "CREATE INDEX IF NOT EXISTS index_transactions_userId ON transactions(userId)"
+            )
+            db.execSQL(
+                """
+                CREATE INDEX IF NOT EXISTS index_transactions_userId_createdAtMs
+                ON transactions(userId, createdAtMs)
+                """.trimIndent()
+            )
+        }
+    }
+
+    val MIGRATION_11_12: Migration = object : Migration(11, 12) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                ALTER TABLE country_capability_catalog
+                ADD COLUMN addMoneyProvidersJson TEXT NOT NULL DEFAULT '[]'
+                """.trimIndent()
+            )
+        }
+    }
+
+    val MIGRATION_12_13: Migration = object : Migration(12, 13) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS funding_accounts (
+                    userId TEXT NOT NULL,
+                    accountId TEXT NOT NULL,
+                    provider TEXT NOT NULL,
+                    currency TEXT NOT NULL,
+                    accountNumber TEXT NOT NULL,
+                    bankName TEXT NOT NULL,
+                    accountName TEXT NOT NULL,
+                    reference TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    providerStatus TEXT NOT NULL,
+                    customerId TEXT NOT NULL,
+                    note TEXT,
+                    createdAtMs INTEGER NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    PRIMARY KEY(userId)
+                )
+                """.trimIndent()
+            )
+        }
+    }
 }

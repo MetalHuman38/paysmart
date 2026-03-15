@@ -3,6 +3,8 @@ package net.metalbrain.paysmart.core.features.invoicing.screen
 /**
  * Test tag used to identify the UI element that displays the total number of hours in an invoice.
  */
+const val INVOICE_WEEKLY_LIST_TAG = "invoice_weekly_list"
+const val INVOICE_FINALIZE_BUTTON_TAG = "invoice_finalize_button"
 const val INVOICE_TOTAL_HOURS_TAG = "invoice_total_hours"
 const val INVOICE_SUBTOTAL_TAG = "invoice_subtotal"
 

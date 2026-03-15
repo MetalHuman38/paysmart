@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,21 +20,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.account.authentication.email.viewmodel.AddEmailViewModel
 import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.ui.components.AuthScreenSubtitle
+import net.metalbrain.paysmart.ui.components.AuthScreenTitle
 import net.metalbrain.paysmart.ui.components.EmailInputField
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
-import net.metalbrain.paysmart.core.features.account.authentication.email.viewmodel.AddEmailViewModel
-
 
 @Composable
 fun AddEmailScreen(
@@ -50,21 +47,16 @@ fun AddEmailScreen(
             .fillMaxSize()
             .padding(WindowInsets.systemBars.asPaddingValues())
             .padding(top = Dimens.largeScreenPadding)
-            .padding(horizontal = Dimens.screenPadding)
+            .padding(horizontal = Dimens.screenPadding),
+        verticalArrangement = Arrangement.spacedBy(Dimens.sm)
     ) {
-
-        Text(
+        AuthScreenTitle(
             text = stringResource(R.string.verify_your_email),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
         )
 
-        Spacer(Modifier.height(8.dp))
-
-        Text(
+        AuthScreenSubtitle(
             text = stringResource(R.string.why_verifying_your_email),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = Dimens.sm)
         )
 
         EmailInputField(
@@ -75,11 +67,12 @@ fun AddEmailScreen(
         )
 
         if (uiState.error != null) {
-            Spacer(Modifier.height(8.dp))
-            Text(uiState.error!!, color = Color.Red)
+            Text(
+                text = uiState.error!!,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
-
-        Spacer(Modifier.height(16.dp))
 
         PrimaryButton(
             text = stringResource(R.string.send_verification),
@@ -95,17 +88,16 @@ fun AddEmailScreen(
             },
             enabled = uiState.emailValid,
             isLoading = uiState.loading,
-            loadingText = "Sending...",
+            loadingText = stringResource(R.string.common_processing),
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.weight(1f))
-        // PaySmart and Logo
+        androidx.compose.foundation.layout.Spacer(modifier = Modifier.weight(1f))
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp),
+                .padding(vertical = Dimens.lg),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -115,15 +107,12 @@ fun AddEmailScreen(
                 modifier = Modifier.height(34.dp)
             )
 
-            Spacer(modifier = Modifier.width(2.dp))
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(Dimens.xs))
 
             Text(
                 text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

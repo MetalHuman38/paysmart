@@ -10,6 +10,7 @@ enum class SecurityParityField(val key: String) {
     PASSKEY_ENABLED("passkeyEnabled"),
     BIOMETRICS_REQUIRED("biometricsRequired"),
     BIOMETRICS_ENABLED("biometricsEnabled"),
+    HAS_ENROLLED_MFA_FACTOR("hasEnrolledMfaFactor"),
     HAS_VERIFIED_EMAIL("hasVerifiedEmail"),
     LOCK_AFTER_MINUTES("lockAfterMinutes"),
 }
@@ -94,6 +95,7 @@ object SecurityParity {
             SecurityParityField.PASSKEY_ENABLED to model.passkeyEnabled,
             SecurityParityField.BIOMETRICS_REQUIRED to model.biometricsRequired,
             SecurityParityField.BIOMETRICS_ENABLED to model.biometricsEnabled,
+            SecurityParityField.HAS_ENROLLED_MFA_FACTOR to model.hasEnrolledMfaFactor,
             SecurityParityField.HAS_VERIFIED_EMAIL to model.hasVerifiedEmail,
             SecurityParityField.LOCK_AFTER_MINUTES to model.lockAfterMinutes
         )
@@ -110,6 +112,7 @@ object SecurityParity {
             SecurityParityField.PASSKEY_ENABLED to model.passkeyEnabled,
             SecurityParityField.BIOMETRICS_REQUIRED to model.biometricsRequired,
             SecurityParityField.BIOMETRICS_ENABLED to model.biometricsEnabled,
+            SecurityParityField.HAS_ENROLLED_MFA_FACTOR to model.hasEnrolledMfaFactor,
             SecurityParityField.HAS_VERIFIED_EMAIL to model.hasVerifiedEmail,
             SecurityParityField.LOCK_AFTER_MINUTES to model.lockAfterMinutes
         )

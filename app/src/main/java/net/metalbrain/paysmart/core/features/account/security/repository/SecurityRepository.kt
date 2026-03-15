@@ -63,6 +63,8 @@ class SecurityRepository @Inject constructor(
             emailVerificationSentAt = roomModel.emailVerificationSentAt ?: currentLocal.emailVerificationSentAt,
             emailToVerify = roomModel.emailToVerify ?: currentLocal.emailToVerify,
             hasVerifiedIdentity = roomModel.hasVerifiedIdentity ?: currentLocal.hasVerifiedIdentity,
+            hasEnrolledMfaFactor = (roomModel.hasEnrolledMfaFactor == true) || currentLocal.hasEnrolledMfaFactor,
+            mfaEnrolledAt = roomModel.mfaEnrolledAt ?: currentLocal.mfaEnrolledAt,
             hasSkippedMfaEnrollmentPrompt = roomModel.hasSkippedMfaEnrollmentPrompt
                 ?: currentLocal.hasSkippedMfaEnrollmentPrompt,
             hasSkippedPasskeyEnrollmentPrompt = roomModel.hasSkippedPasskeyEnrollmentPrompt

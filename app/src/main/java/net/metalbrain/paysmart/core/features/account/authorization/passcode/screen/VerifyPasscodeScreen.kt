@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.core.features.account.authorization.passcode.screen
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -31,10 +31,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.compose.ui.res.stringResource
+import androidx.fragment.app.FragmentActivity
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.account.authorization.biometric.provider.BiometricHelper
 import net.metalbrain.paysmart.ui.components.NumberPad
+import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.core.features.account.authorization.passcode.viewmodel.VerifyPasscodeViewModel
-import net.metalbrain.paysmart.utils.launchBiometricPrompt
 import net.metalbrain.paysmart.utils.shake
 
 @Composable
@@ -46,7 +48,7 @@ fun VerifyPasscodeScreen(
     val error by viewModel.error.collectAsState()
     val biometricPrompt by viewModel.biometricPrompt.collectAsState()
     val verified by viewModel.verified.collectAsState()
-    val context = LocalContext.current
+    val activity = LocalActivity.current as? FragmentActivity
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
@@ -63,15 +65,32 @@ fun VerifyPasscodeScreen(
         Spacer(Modifier.height(8.dp))
     }
 
-    LaunchedEffect(biometricPrompt) {
+    LaunchedEffect(biometricPrompt, activity) {
         if (biometricPrompt) {
-            launchBiometricPrompt(
-                context = context,
+            val hostActivity = activity
+            if (hostActivity == null || !BiometricHelper.isBiometricAvailable(hostActivity)) {
+                viewModel.onBiometricDismissed()
+                scope.launch {
+                    snackbarHostState.showSnackbar(biometricFailedMessage)
+                }
+                return@LaunchedEffect
+            }
+
+            BiometricHelper.showPrompt(
+                activity = hostActivity,
+                title = hostActivity.getString(R.string.biometric_prompt_title),
+                subtitle = hostActivity.getString(R.string.biometric_prompt_subtitle),
                 onSuccess = {
                     viewModel.onBiometricDismissed()
                     onVerified()
                 },
-                onFail = {
+                onError = {
+                    viewModel.onBiometricDismissed()
+                    scope.launch {
+                        snackbarHostState.showSnackbar(biometricFailedMessage)
+                    }
+                },
+                onFailureLimitReached = {
                     viewModel.onBiometricDismissed()
                     scope.launch {
                         snackbarHostState.showSnackbar(biometricFailedMessage)
@@ -135,6 +154,14 @@ fun VerifyPasscodeScreen(
 
             Text(error ?: "", color = MaterialTheme.colorScheme.error)
             Spacer(Modifier.height(8.dp))
+        }
+
+        if (passcode.length in 4..5 && !isLockedOut) {
+            PrimaryButton(
+                text = stringResource(R.string.continue_text),
+                onClick = viewModel::submitPasscode
+            )
+            Spacer(Modifier.height(16.dp))
         }
 
         NumberPad(

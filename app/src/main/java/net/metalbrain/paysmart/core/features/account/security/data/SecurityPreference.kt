@@ -4,6 +4,7 @@ package net.metalbrain.paysmart.core.features.account.security.data
 import android.content.Context
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.firebase.Timestamp
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -40,6 +41,7 @@ class SecurityPreference @Inject constructor(
         private val HAS_VERIFIED_EMAIL = booleanPreferencesKey("has_verified_email")
         private val HAS_ADDED_HOME_ADDRESS = booleanPreferencesKey("has_added_home_address")
         private val HAS_VERIFIED_IDENTITY = booleanPreferencesKey("has_verified_identity")
+        private val HAS_ENROLLED_MFA_FACTOR = booleanPreferencesKey("has_enrolled_mfa_factor")
         private val HAS_SKIPPED_MFA_ENROLLMENT_PROMPT =
             booleanPreferencesKey("has_skipped_mfa_enrollment_prompt")
         private val HAS_SKIPPED_PASSKEY_ENROLLMENT_PROMPT =
@@ -68,6 +70,7 @@ class SecurityPreference @Inject constructor(
             hasVerifiedEmail = prefs[HAS_VERIFIED_EMAIL] ?: false,
             hasAddedHomeAddress = prefs[HAS_ADDED_HOME_ADDRESS],
             hasVerifiedIdentity = prefs[HAS_VERIFIED_IDENTITY] ?: false,
+            hasEnrolledMfaFactor = prefs[HAS_ENROLLED_MFA_FACTOR] ?: false,
             hasSkippedMfaEnrollmentPrompt = prefs[HAS_SKIPPED_MFA_ENROLLMENT_PROMPT] ?: false,
             hasSkippedPasskeyEnrollmentPrompt = prefs[HAS_SKIPPED_PASSKEY_ENROLLMENT_PROMPT] ?: true,
             allowFederatedLinking = prefs[ALLOW_FEDERATED_LINKING] ?: false,
@@ -98,6 +101,7 @@ class SecurityPreference @Inject constructor(
             hasVerifiedEmail = prefs[HAS_VERIFIED_EMAIL] ?: fromJson.hasVerifiedEmail,
             hasAddedHomeAddress = prefs[HAS_ADDED_HOME_ADDRESS] ?: fromJson.hasAddedHomeAddress,
             hasVerifiedIdentity = prefs[HAS_VERIFIED_IDENTITY] ?: fromJson.hasVerifiedIdentity,
+            hasEnrolledMfaFactor = prefs[HAS_ENROLLED_MFA_FACTOR] ?: fromJson.hasEnrolledMfaFactor,
             hasSkippedMfaEnrollmentPrompt = prefs[HAS_SKIPPED_MFA_ENROLLMENT_PROMPT]
                 ?: fromJson.hasSkippedMfaEnrollmentPrompt,
             hasSkippedPasskeyEnrollmentPrompt = prefs[HAS_SKIPPED_PASSKEY_ENROLLMENT_PROMPT]
@@ -123,6 +127,7 @@ class SecurityPreference @Inject constructor(
             prefs[HAS_VERIFIED_EMAIL] = state.hasVerifiedEmail
             prefs[HAS_ADDED_HOME_ADDRESS] = state.hasAddedHomeAddress == true
             prefs[HAS_VERIFIED_IDENTITY] = state.hasVerifiedIdentity
+            prefs[HAS_ENROLLED_MFA_FACTOR] = state.hasEnrolledMfaFactor
             prefs[HAS_SKIPPED_MFA_ENROLLMENT_PROMPT] = state.hasSkippedMfaEnrollmentPrompt
             prefs[HAS_SKIPPED_PASSKEY_ENROLLMENT_PROMPT] = state.hasSkippedPasskeyEnrollmentPrompt
             prefs[ALLOW_FEDERATED_LINKING] = state.allowFederatedLinking ?: false
@@ -205,6 +210,8 @@ class SecurityPreference @Inject constructor(
         val hasAddedHomeAddressMerged =
             (local.hasAddedHomeAddress == true) || (server?.hasAddedHomeAddress == true)
         val hasVerifiedIdentityMerged = local.hasVerifiedIdentity || (server?.hasVerifiedIdentity == true)
+        val hasEnrolledMfaFactorMerged =
+            local.hasEnrolledMfaFactor || (server?.hasEnrolledMfaFactor == true)
 
         return local.copy(
             // Server overrides requirements (e.g. what's required)
@@ -215,8 +222,14 @@ class SecurityPreference @Inject constructor(
             passkeyEnabled = server?.passkeyEnabled ?: local.passkeyEnabled,
             biometricsEnabled = server?.biometricsEnabled ?: local.biometricsEnabled,
             biometricsEnabledAt = server?.biometricsEnabledAt ?: local.biometricsEnabledAt,
-            localPassCodeSetAt = server?.localPassCodeSetAt ?: local.localPassCodeSetAt,
-            localPasswordSetAt = server?.localPasswordSetAt ?: local.localPasswordSetAt,
+            localPassCodeSetAt = mostRecentTimestamp(
+                local.localPassCodeSetAt,
+                server?.localPassCodeSetAt
+            ),
+            localPasswordSetAt = mostRecentTimestamp(
+                local.localPasswordSetAt,
+                server?.localPasswordSetAt
+            ),
             killSwitchActive = server?.killswitch ?: local.killSwitchActive,
             
             allowFederatedLinking = server?.allowFederatedLinking ?: local.allowFederatedLinking,
@@ -230,6 +243,8 @@ class SecurityPreference @Inject constructor(
             emailToVerify = server?.emailToVerify ?: local.emailToVerify,
             hasAddedHomeAddress = hasAddedHomeAddressMerged,
             hasVerifiedIdentity = hasVerifiedIdentityMerged,
+            hasEnrolledMfaFactor = hasEnrolledMfaFactorMerged,
+            mfaEnrolledAt = mostRecentTimestamp(local.mfaEnrolledAt, server?.mfaEnrolledAt),
             hasSkippedMfaEnrollmentPrompt = server?.hasSkippedMfaEnrollmentPrompt
                 ?: local.hasSkippedMfaEnrollmentPrompt,
             hasSkippedPasskeyEnrollmentPrompt = server?.hasSkippedPasskeyEnrollmentPrompt
@@ -240,6 +255,20 @@ class SecurityPreference @Inject constructor(
             updatedAt = server?.updatedAt ?: local.updatedAt,
             lastSynced = System.currentTimeMillis()
         )
+    }
+
+    private fun mostRecentTimestamp(
+        local: Timestamp?,
+        remote: Timestamp?
+    ): Timestamp? {
+        return when {
+            local == null -> remote
+            remote == null -> local
+            local.seconds > remote.seconds -> local
+            local.seconds < remote.seconds -> remote
+            local.nanoseconds >= remote.nanoseconds -> local
+            else -> remote
+        }
     }
 
     /* ---------------- HELPERS ---------------- */

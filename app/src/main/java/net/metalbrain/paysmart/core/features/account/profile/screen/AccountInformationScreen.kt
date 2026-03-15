@@ -21,12 +21,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.annotation.StringRes
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.profile.components.ProfileMenuItem
+import net.metalbrain.paysmart.core.features.account.profile.util.accountInformationLanguageLabel
+import net.metalbrain.paysmart.core.features.account.profile.util.accountInformationThemeModeRes
+import net.metalbrain.paysmart.core.features.capabilities.catalog.CountrySelectionCatalog
 import net.metalbrain.paysmart.core.features.theme.data.AppThemeMode
 
 
@@ -43,6 +46,13 @@ fun AccountInformationScreen(
     onLanguageClick: () -> Unit,
     onThemeModeClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val languageLabel = accountInformationLanguageLabel(currentLanguage)
+    val languageFlag = CountrySelectionCatalog.flagForCountry(
+        context = context,
+        rawIso2 = languageLabel.countryIso2
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -95,7 +105,7 @@ fun AccountInformationScreen(
                         title = stringResource(R.string.profile_language_title),
                         subtitle = stringResource(R.string.profile_account_info_language_subtitle),
                         leadingIcon = Icons.Default.Language,
-                        trailingText = stringResource(languageDisplayRes(currentLanguage)),
+                        trailingText = "$languageFlag ${stringResource(languageLabel.nameRes)}",
                         onClick = onLanguageClick
                     )
                     HorizontalDivider()
@@ -103,37 +113,11 @@ fun AccountInformationScreen(
                         title = stringResource(R.string.profile_theme_title),
                         subtitle = stringResource(R.string.profile_account_info_theme_subtitle),
                         leadingIcon = Icons.Default.DarkMode,
-                        trailingText = stringResource(themeModeDisplayRes(currentThemeMode)),
+                        trailingText = stringResource(accountInformationThemeModeRes(currentThemeMode)),
                         onClick = onThemeModeClick
                     )
                 }
             }
         }
-    }
-}
-
-@StringRes
-private fun languageDisplayRes(code: String): Int {
-    return when (code) {
-        "en" -> R.string.lang_english_uk
-        "en-US" -> R.string.lang_english_us
-        "de" -> R.string.lang_german
-        "fr" -> R.string.lang_french
-        "zh" -> R.string.lang_chinese
-        "pt" -> R.string.lang_portuguese
-        "es" -> R.string.lang_spanish
-        "it" -> R.string.lang_italian
-        "ja" -> R.string.lang_japanese
-        "ko" -> R.string.lang_korean
-        else -> R.string.lang_english_uk
-    }
-}
-
-@StringRes
-private fun themeModeDisplayRes(mode: AppThemeMode): Int {
-    return when (mode) {
-        AppThemeMode.SYSTEM -> R.string.theme_mode_system
-        AppThemeMode.LIGHT -> R.string.theme_mode_light
-        AppThemeMode.DARK -> R.string.theme_mode_dark
     }
 }

@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData
 import net.metalbrain.paysmart.domain.model.Transaction
 
 interface TransactionRepository {
@@ -8,11 +9,8 @@ interface TransactionRepository {
 
     suspend fun getTransactions(): List<Transaction>
 
-    suspend fun upsertAddMoneySimulation(
-        sessionId: String,
-        amountMinor: Int,
-        currency: String,
-        status: String,
-        createdAtMs: Long = System.currentTimeMillis()
+    suspend fun recordAddMoneySession(
+        session: AddMoneySessionData,
+        recordedAtMs: Long = System.currentTimeMillis()
     )
 }

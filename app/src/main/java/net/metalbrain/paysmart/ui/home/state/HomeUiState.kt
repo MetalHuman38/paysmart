@@ -6,6 +6,21 @@ import net.metalbrain.paysmart.domain.model.Transaction
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.fx.data.FxQuoteDataSource
 
+enum class HomeTransactionProviderFilter {
+    STRIPE,
+    FLUTTERWAVE
+}
+
+enum class HomeNotificationKind {
+    PRODUCT,
+    APP_UPDATE_READY
+}
+
+data class HomeNotificationUiState(
+    val kind: HomeNotificationKind = HomeNotificationKind.PRODUCT,
+    val isUnread: Boolean = false
+)
+
 data class HomeBalanceSnapshot(
     val balancesByCurrency: Map<String, Double> = emptyMap(),
     val preferredCurrencyCode: String = CountryCapabilityCatalog.defaultProfile().currencyCode
@@ -26,9 +41,16 @@ data class HomeExchangeRateSnapshot(
 
 data class HomeUiState(
     val security: LocalSecuritySettingsModel? = null,
+    val displayName: String = "",
     val recentTransactions: List<Transaction> = emptyList(),
+    val transactionSearchQuery: String = "",
+    val isTransactionSearchActive: Boolean = false,
+    val availableTransactionProviders: List<HomeTransactionProviderFilter> = emptyList(),
+    val selectedTransactionProviders: Set<HomeTransactionProviderFilter> = emptySet(),
+    val notification: HomeNotificationUiState = HomeNotificationUiState(),
     val balanceSnapshot: HomeBalanceSnapshot = HomeBalanceSnapshot(),
     val rewardEarned: RewardEarnedSnapshot = RewardEarnedSnapshot(),
+    val countryIso2: String = CountryCapabilityCatalog.defaultProfile().iso2,
     val countryFlagEmoji: String = "🌍",
     val countryCurrencyCode: String = CountryCapabilityCatalog.defaultProfile().currencyCode,
     val topUpPolicyHint: String? = null,

@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.ui.theme
 
+import android.annotation.SuppressLint
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -8,6 +9,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
 
 private val DarkColorScheme = darkColorScheme(
     primary = FreshGreen,
@@ -57,14 +60,15 @@ private val LightColorScheme = lightColorScheme(
     onErrorContainer = PaySmartOnErrorContainer
 )
 
+@SuppressLint("ObsoleteSdkInt")
 @Composable
 fun PaysmartTheme(
-    darkTheme: Boolean = false,
-    dynamicColor: Boolean = false,
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor -> {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
@@ -75,7 +79,7 @@ fun PaysmartTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
+        shapes = PaySmartShapes,
         content = content
     )
 }
-

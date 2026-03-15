@@ -35,6 +35,7 @@ fun ProfileSecurityPrivacyScreen(
     onBack: () -> Unit,
     onResetPassword: () -> Unit,
     onTransactionPin: () -> Unit,
+    onMfaSettings: () -> Unit,
     onPasskeySettings: () -> Unit,
     onBiometricToggle: (Boolean) -> Unit,
     onViewPrivacySettings: () -> Unit,
@@ -42,6 +43,7 @@ fun ProfileSecurityPrivacyScreen(
 ) {
     val isPasswordReady = settings?.passwordEnabled == true && settings.localPasswordSetAt != null
     val isPasscodeReady = settings?.passcodeEnabled == true && settings.localPassCodeSetAt != null
+    val isMfaEnabled = settings?.hasEnrolledMfaFactor == true
     val isPasskeyEnabled = settings?.passkeyEnabled == true
     val isBiometricEnabled = settings?.biometricsEnabled == true
 
@@ -89,6 +91,23 @@ fun ProfileSecurityPrivacyScreen(
                             stringResource(R.string.common_required)
                         },
                         onClick = onTransactionPin
+                    )
+                    HorizontalDivider()
+                    ProfileSecurityToggleRow(
+                        title = stringResource(R.string.profile_security_mfa_title),
+                        icon = Icons.Default.Security,
+                        subtitle = if (isMfaEnabled) {
+                            stringResource(R.string.profile_security_mfa_subtitle_enabled)
+                        } else {
+                            stringResource(R.string.profile_security_mfa_subtitle_disabled)
+                        },
+                        checked = isMfaEnabled,
+                        onCheckedChange = { enabled ->
+                            if (enabled) {
+                                onMfaSettings()
+                            }
+                        },
+                        enabled = !isMfaEnabled
                     )
                     HorizontalDivider()
                     ProfileSecurityActionRow(

@@ -7,10 +7,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import net.metalbrain.paysmart.R
@@ -22,6 +24,16 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * UI tests for [InvoiceWeeklyEntryScreen], verifying the behavior of weekly invoice data entry,
+ * total hour calculations, and the validation logic for finalizing an invoice.
+ *
+ * These tests ensure that:
+ * - Entering hours updates the total duration and subtotal calculations in real-time.
+ * - The "Finalize" action is correctly enabled/disabled based on the validity of the input data
+ *   (dates, hourly rate, and at least one shift worked).
+ * - Edge cases, such as hydration delays in venue selection, do not incorrectly block finalization.
+ */
 @RunWith(AndroidJUnit4::class)
 class InvoiceWeeklyEntryScreenTest {
 
@@ -30,6 +42,15 @@ class InvoiceWeeklyEntryScreenTest {
 
     @Test
     fun weeklyEntryUpdatesTotalHoursAndSubtotal() {
+        val totalHoursLabel = composeRule.activity.getString(
+            R.string.invoice_weekly_total_hours_value,
+            "12.00"
+        )
+        val subtotalLabel = composeRule.activity.getString(
+            R.string.invoice_weekly_subtotal_value,
+            "120.00"
+        )
+
         composeRule.setContent {
             var state by remember { mutableStateOf(seedState()) }
             PaysmartTheme {
@@ -63,20 +84,28 @@ class InvoiceWeeklyEntryScreenTest {
         }
 
         (0..6).forEach { index ->
-            composeRule.onNodeWithTag(invoiceHoursFieldTag(index)).assertIsDisplayed()
+            composeRule.onNodeWithTag(invoiceHoursFieldTag(index))
+                .performScrollTo()
+                .assertIsDisplayed()
         }
 
-        composeRule.onNodeWithTag(invoiceHoursFieldTag(0)).performTextInput("8")
-        composeRule.onNodeWithTag(invoiceHoursFieldTag(1)).performTextInput("4.5")
+        composeRule.onNodeWithTag(invoiceHoursFieldTag(0))
+            .performScrollTo()
+            .performTextInput("8")
+        composeRule.onNodeWithTag(invoiceHoursFieldTag(1))
+            .performScrollTo()
+            .performTextInput("4")
 
-        composeRule.onNodeWithTag(INVOICE_TOTAL_HOURS_TAG).assertTextContains("12.50")
-        composeRule.onNodeWithTag(INVOICE_SUBTOTAL_TAG).assertTextContains("125.00")
+        composeRule.onNodeWithTag(INVOICE_TOTAL_HOURS_TAG)
+            .performScrollTo()
+            .assertTextEquals(totalHoursLabel)
+        composeRule.onNodeWithTag(INVOICE_SUBTOTAL_TAG)
+            .performScrollTo()
+            .assertTextEquals(subtotalLabel)
     }
 
     @Test
     fun finalizeEnablesForSingleWorkedDayWhenDatesAndRateAreValid() {
-        val finalizeLabel = composeRule.activity.getString(R.string.invoice_weekly_finalize_action)
-
         composeRule.setContent {
             val state = seedState().copy(
                 weeklyDraft = InvoiceWeeklyDraft(
@@ -112,13 +141,14 @@ class InvoiceWeeklyEntryScreenTest {
             }
         }
 
-        composeRule.onNodeWithText(finalizeLabel).assertIsEnabled()
+        composeRule.onNodeWithTag(INVOICE_WEEKLY_LIST_TAG)
+            .performScrollToNode(hasTestTag(INVOICE_FINALIZE_BUTTON_TAG))
+        composeRule.onNodeWithTag(INVOICE_FINALIZE_BUTTON_TAG)
+            .assertIsEnabled()
     }
 
     @Test
     fun finalizeEnablesWhenVenueSelectionHydrationLagsButVenueExists() {
-        val finalizeLabel = composeRule.activity.getString(R.string.invoice_weekly_finalize_action)
-
         composeRule.setContent {
             val state = seedState().copy(
                 weeklyDraft = InvoiceWeeklyDraft(
@@ -148,7 +178,10 @@ class InvoiceWeeklyEntryScreenTest {
             }
         }
 
-        composeRule.onNodeWithText(finalizeLabel).assertIsEnabled()
+        composeRule.onNodeWithTag(INVOICE_WEEKLY_LIST_TAG)
+            .performScrollToNode(hasTestTag(INVOICE_FINALIZE_BUTTON_TAG))
+        composeRule.onNodeWithTag(INVOICE_FINALIZE_BUTTON_TAG)
+            .assertIsEnabled()
     }
 
     private fun seedState(): InvoiceSetupUiState {

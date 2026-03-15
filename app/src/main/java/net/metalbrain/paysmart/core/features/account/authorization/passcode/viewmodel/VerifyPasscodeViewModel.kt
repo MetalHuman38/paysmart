@@ -70,6 +70,12 @@ class VerifyPasscodeViewModel @Inject constructor(
         _error.value = null
     }
 
+    fun submitPasscode() {
+        if (_passcode.value.length in 4..6 && !isLocked) {
+            verifyPasscode()
+        }
+    }
+
     private fun verifyPasscode() {
         val input = _passcode.value
         viewModelScope.launch {

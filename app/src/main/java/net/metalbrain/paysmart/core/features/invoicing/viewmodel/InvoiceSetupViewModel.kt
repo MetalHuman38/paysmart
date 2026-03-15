@@ -423,9 +423,22 @@ class InvoiceSetupViewModel @Inject constructor(
                         "InvoiceFinalizeDiag",
                         "success invoiceId=${finalized.invoiceId} invoiceNumber=${finalized.invoiceNumber}"
                     )
+                    val nextDraft = buildNextWeeklyDraftAfterFinalize(
+                        venueId = venue.venueId,
+                        fallbackHourlyRate = weekly.hourlyRateInput
+                    )
+                    runCatching {
+                        weeklyDraftRepository.upsert(current.userId, nextDraft)
+                    }.onFailure { resetError ->
+                        Log.w(
+                            "InvoiceFinalizeDiag",
+                            "post_finalize_draft_reset_failed message=${resetError.localizedMessage.orEmpty()}"
+                        )
+                    }
                     _uiState.update {
                         it.copy(
                             isFinalizing = false,
+                            weeklyDraft = nextDraft,
                             finalizedInvoice = finalized,
                             infoMessage = "Invoice ${finalized.invoiceNumber} finalized"
                         )
@@ -695,4 +708,14 @@ private fun InvoiceProfileDraft.isBlankForSetup(): Boolean {
         sortCode.isBlank() &&
         paymentInstructions.isBlank() &&
         defaultHourlyRateInput.isBlank()
+}
+
+private fun buildNextWeeklyDraftAfterFinalize(
+    venueId: String,
+    fallbackHourlyRate: String
+): InvoiceWeeklyDraft {
+    return InvoiceWeeklyDraft(
+        selectedVenueId = venueId.trim(),
+        hourlyRateInput = fallbackHourlyRate.trim()
+    ).withFullWeek()
 }

@@ -44,6 +44,21 @@ class FirestoreUserProfileRepository @Inject constructor(
         ).await()
     }
 
+    override suspend fun updatePhotoUrl(uid: String, photoUrl: String?) {
+        val payload = if (photoUrl.isNullOrBlank()) {
+            mapOf(
+                "photoURL" to FieldValue.delete(),
+                "lastSignedIn" to FieldValue.serverTimestamp()
+            )
+        } else {
+            mapOf(
+                "photoURL" to photoUrl,
+                "lastSignedIn" to FieldValue.serverTimestamp()
+            )
+        }
+        users.document(uid).set(payload, SetOptions.merge()).await()
+    }
+
 
     override suspend fun upsertNewUser(user: AuthUserModel, providerId: String) {
         val docRef = users.document(user.uid)

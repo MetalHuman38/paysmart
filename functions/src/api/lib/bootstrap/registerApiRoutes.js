@@ -26,7 +26,7 @@ export function registerPostBodyParserRoutes(app) {
     app.post("/auth/check-email-or-phone", requireAppCheck, checkEmailOrPhone);
     app.post("/facebook/data-deletion", facebookDataDeletionHandler);
     app.get("/", (_, res) => {
-        res.status(200).json({ ok: true, service: "api" });
+        return res.status(200).json({ ok: true, service: "api" });
     });
     app.get("/favicon.ico", (_, res) => {
         res.status(204).end();

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -8,14 +10,27 @@ plugins {
     id("com.google.gms.google-services")
 }
 
-val versionCodeValue = providers.gradleProperty("PAYSMART_VERSION_CODE").get().toInt()
-val versionMajor = providers.gradleProperty("PAYSMART_VERSION_MAJOR").get().toInt()
-val versionMinor = providers.gradleProperty("PAYSMART_VERSION_MINOR").get().toInt()
-val versionPatch = providers.gradleProperty("PAYSMART_VERSION_PATCH").get().toInt()
-val versionPreRelease = providers.gradleProperty("PAYSMART_VERSION_PRERELEASE")
-    .orNull
-    ?.trim()
-    .orEmpty()
+val trackedVersionProperties = Properties().apply {
+    val versionFile = rootProject.file("version.properties")
+    if (versionFile.exists()) {
+        versionFile.inputStream().use(::load)
+    }
+}
+
+fun Project.stringPropertyOrEnv(name: String, defaultValue: String = ""): String =
+    providers.gradleProperty(name).orNull?.trim().takeUnless { it.isNullOrEmpty() }
+        ?: providers.environmentVariable(name).orNull?.trim().takeUnless { it.isNullOrEmpty() }
+        ?: trackedVersionProperties.getProperty(name)?.trim()?.takeUnless { it.isNullOrEmpty() }
+        ?: defaultValue
+
+fun Project.intPropertyOrEnv(name: String, defaultValue: Int): Int =
+    stringPropertyOrEnv(name, defaultValue.toString()).toInt()
+
+val versionCodeValue = intPropertyOrEnv("PAYSMART_VERSION_CODE", defaultValue = 1)
+val versionMajor = intPropertyOrEnv("PAYSMART_VERSION_MAJOR", defaultValue = 1)
+val versionMinor = intPropertyOrEnv("PAYSMART_VERSION_MINOR", defaultValue = 0)
+val versionPatch = intPropertyOrEnv("PAYSMART_VERSION_PATCH", defaultValue = 0)
+val versionPreRelease = stringPropertyOrEnv("PAYSMART_VERSION_PRERELEASE")
 val paySmartSemVer = buildString {
     append("$versionMajor.$versionMinor.$versionPatch")
     if (versionPreRelease.isNotEmpty()) {

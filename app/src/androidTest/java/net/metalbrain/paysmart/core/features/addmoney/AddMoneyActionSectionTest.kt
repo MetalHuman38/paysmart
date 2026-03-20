@@ -1,4 +1,4 @@
-package net.metalbrain.paysmart.core.features.addmoney.screen
+package net.metalbrain.paysmart.core.features.addmoney
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertCountEquals
@@ -12,6 +12,7 @@ import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionStatus
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyUiState
+import net.metalbrain.paysmart.core.features.addmoney.screen.AddMoneyActionSection
 import net.metalbrain.paysmart.core.features.fx.data.FxPaymentMethod
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 import org.junit.Assert.assertEquals

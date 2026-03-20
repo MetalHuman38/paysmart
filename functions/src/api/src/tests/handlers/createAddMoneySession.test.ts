@@ -71,6 +71,9 @@ describe("createAddMoneySessionHandler", () => {
       paymentIntentId: "pi_test_123",
       paymentIntentClientSecret: "pi_test_123_secret_456",
       publishableKey: "pk_test_123",
+      customerId: "cus_123",
+      customerEphemeralKeySecret: "ephkey_123",
+      defaultPaymentMethodId: "pm_123",
     });
 
     const req = {

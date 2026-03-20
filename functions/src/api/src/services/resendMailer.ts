@@ -11,14 +11,15 @@ export class ResendMailer implements Mailer {
     if (!apiKey) {
       throw new Error("ResendMailer: API key is required");
     }
-    if (!from || !from.includes("<") || !from.includes(">")) {
+    const normalizedFrom = normalizeLegacySender(from);
+    if (!normalizedFrom || !normalizedFrom.includes("<") || !normalizedFrom.includes(">")) {
       throw new Error(
         "ResendMailer: 'from' must be in the format 'Name <email@domain>'"
       );
     }
 
     this.resend = new Resend(apiKey);
-    this.from = from;
+    this.from = normalizedFrom;
   }
 
   async sendVerificationEmail({
@@ -44,4 +45,11 @@ export class ResendMailer implements Mailer {
       throw new Error(`ResendMailer failed: ${error.message}`);
     }
   }
+}
+
+function normalizeLegacySender(from: string): string {
+  return from.replace(
+    /<([^<>@\s]+)@metalbrain\.net>/i,
+    "<$1@pay-smart.net>"
+  );
 }

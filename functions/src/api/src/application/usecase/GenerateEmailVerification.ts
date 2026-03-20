@@ -1,11 +1,18 @@
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { SecuritySettingsRepository } from "../../domain/repository/SecuritySettingsRepository.js";
 import { UserRepository } from "../../domain/repository/UserRepository.js";
-import { evaluateEmailVerificationPolicy } from "../../domain/service/EmailVerificationPolicy.js";
+import {
+  evaluateEmailVerificationPolicy,
+  getEmailVerificationAttemptCountForCurrentDay,
+} from "../../domain/service/EmailVerificationPolicy.js";
 
 export type GenerateEmailVerificationResult =
   | { sent: true }
-  | { retryAfter: number };
+  | {
+      sent: false;
+      reason: "already_verified" | "cooldown" | "daily_limit";
+      retryAfter?: number;
+    };
 
 export class GenerateEmailVerification {
   constructor(
@@ -60,8 +67,14 @@ export class GenerateEmailVerification {
     const decision = evaluateEmailVerificationPolicy(sec, now);
 
     if (!decision.allowed) {
-      return { retryAfter: decision.retryAfter ?? 0 };
+      return {
+        sent: false,
+        reason: decision.reason,
+        retryAfter: decision.retryAfter,
+      };
     }
+
+    const attemptsToday = getEmailVerificationAttemptCountForCurrentDay(sec, now);
 
     /* ---------- Bind email to current auth owner ---------- */
     await this.authService.updateUserEmail(uid, email);
@@ -70,7 +83,7 @@ export class GenerateEmailVerification {
     await this.securityRepo.update(uid, {
       emailToVerify: email,
       emailVerificationSentAt: now,
-      emailVerificationAttemptsToday: FieldValue.increment(1) as any,
+      emailVerificationAttemptsToday: attemptsToday + 1,
       updatedAt: FieldValue.serverTimestamp(),
     });
 

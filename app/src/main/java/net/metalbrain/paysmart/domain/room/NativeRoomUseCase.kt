@@ -5,7 +5,7 @@ import jakarta.inject.Inject
 import net.metalbrain.paysmart.data.native.RoomNativeBridge
 import net.metalbrain.paysmart.data.repository.RoomPassphraseRepository
 import net.metalbrain.paysmart.domain.model.SecuritySettingsModel
-import net.metalbrain.paysmart.room.doa.SecuritySettingsDao
+import net.metalbrain.paysmart.room.dao.SecuritySettingsDao
 import net.metalbrain.paysmart.room.entity.SecuritySettingsEntity
 
 

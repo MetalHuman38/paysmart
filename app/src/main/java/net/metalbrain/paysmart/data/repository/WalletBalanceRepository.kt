@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import net.metalbrain.paysmart.data.native.RoomNativeBridge
 import net.metalbrain.paysmart.domain.model.WalletBalanceModel
-import net.metalbrain.paysmart.room.doa.WalletBalanceDao
+import net.metalbrain.paysmart.room.dao.WalletBalanceDao
 import net.metalbrain.paysmart.room.entity.WalletBalanceEntity
 import net.metalbrain.paysmart.utils.toHexString
 import java.util.Locale

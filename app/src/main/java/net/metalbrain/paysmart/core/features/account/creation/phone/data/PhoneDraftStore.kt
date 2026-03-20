@@ -22,7 +22,8 @@ class PhoneDraftStore @Inject constructor(
         PhoneDraft(
             e164 = prefs[PhonePrefsKeys.e164],
             verificationId = prefs[PhonePrefsKeys.verificationId],
-            verified = prefs[PhonePrefsKeys.verified] ?: false
+            verified = prefs[PhonePrefsKeys.verified] ?: false,
+            errorMessage = prefs[PhonePrefsKeys.errorMessage]
         )
     }
 
@@ -30,11 +31,20 @@ class PhoneDraftStore @Inject constructor(
         store.edit { prefs ->
             if (draft.e164 != null) {
                 prefs[PhonePrefsKeys.e164] = draft.e164
+            } else {
+                prefs.remove(PhonePrefsKeys.e164)
             }
             if (draft.verificationId != null) {
                 prefs[PhonePrefsKeys.verificationId] = draft.verificationId
+            } else {
+                prefs.remove(PhonePrefsKeys.verificationId)
             }
             prefs[PhonePrefsKeys.verified] = draft.verified
+            if (draft.errorMessage != null) {
+                prefs[PhonePrefsKeys.errorMessage] = draft.errorMessage
+            } else {
+                prefs.remove(PhonePrefsKeys.errorMessage)
+            }
         }
     }
 

@@ -7,7 +7,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import net.metalbrain.paysmart.core.features.account.creation.card.PostOtpSecurityStepCard
-import net.metalbrain.paysmart.core.features.account.creation.components.SecurityStepSpec
+import net.metalbrain.paysmart.core.features.account.creation.data.SecurityStepSpec
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 import org.junit.Rule
 import org.junit.Test

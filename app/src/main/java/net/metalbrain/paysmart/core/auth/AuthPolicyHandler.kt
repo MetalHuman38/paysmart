@@ -35,4 +35,16 @@ class AuthPolicyHandler @Inject constructor(
             )
         }
     }
+
+    suspend fun finalizePhoneSignup(idToken: String): Boolean {
+        return try {
+            client.finalizePhoneSignup(idToken)
+        } catch (e: Exception) {
+            Log.e("AuthPolicyHandler", "Phone signup finalization failed", e)
+            throw IllegalStateException(
+                "Unable to finish account setup. Please retry.",
+                e
+            )
+        }
+    }
 }

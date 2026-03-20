@@ -14,55 +14,55 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import net.metalbrain.paysmart.ui.animate.AnimatedLottieBackground
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaySmartAppBackground
 
 @Composable
-internal fun StartupContent(
+fun StartupContent(
     currentLanguage: String,
     onLanguageClick: () -> Unit,
     onCreateAccountClick: () -> Unit,
     onLoginClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(WindowInsets.systemBars.asPaddingValues())
-            .padding(horizontal = Dimens.screenPadding)
-    ) {
-        StartupTopBar(
-            currentLanguage = currentLanguage,
-            onLanguageClick = onLanguageClick,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
-
-        Column(
+    PaySmartAppBackground {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = Dimens.largeSpacing)
-                .padding(bottom = Dimens.largeSpacing),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(WindowInsets.systemBars.asPaddingValues())
+                .padding(horizontal = Dimens.screenPadding)
         ) {
-            StartupBrandSection(
-                modifier = Modifier.fillMaxWidth()
+            StartupTopBar(
+                currentLanguage = currentLanguage,
+                onLanguageClick = onLanguageClick,
+                modifier = Modifier.align(Alignment.TopCenter)
             )
 
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 240.dp, max = 320.dp)
-                    .weight(1f),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(top = Dimens.largeSpacing)
+                    .padding(bottom = Dimens.largeSpacing),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AnimatedLottieBackground()
-            }
+                StartupBrandSection(
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            StartupActionCard(
-                onCreateAccountClick = onCreateAccountClick,
-                onLoginClick = onLoginClick,
-                modifier = Modifier.fillMaxWidth()
-            )
+                StartupAnimationStage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 240.dp, max = 320.dp)
+                        .weight(1f)
+                )
+
+                StartupActionCard(
+                    onCreateAccountClick = onCreateAccountClick,
+                    onLoginClick = onLoginClick,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }

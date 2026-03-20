@@ -19,17 +19,12 @@ internal fun StartupBrandSection(
     Column(
         modifier = modifier.padding(top = Dimens.largeSpacing),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Dimens.sm)
+        verticalArrangement = Arrangement.spacedBy(Dimens.xs)
     ) {
         Text(
             text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            text = stringResource(R.string.main_welcome_message),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

@@ -214,6 +214,7 @@
     <string name="account_limits_email_status">电子邮件验证</string>
     <string name="account_limits_last_synced">上次同步: %1$s</string>
     <string name="account_limits_info_note">限制源自当前的验证状态，并在成功同步后更新。</string>
+    <string name="select_account_limits_to_see_or_receive">选择账户以查看发送和接收限额。</string>
     <string name="account_statement_title">帐户对帐单</string>
     <string name="account_statement_empty">尚无对帐单条目。</string>
     <string name="account_statement_amount_format">%1$s %2$s %3$.2f</string>
@@ -314,6 +315,19 @@
     <string name="home_balance_no_transactions">目前尚无该货币的交易记录。</string>
     <string name="home_balance_no_account_data">目前尚无钱包余额数据</string>
     <string name="home_balance_last_synced">上次同步</string>
+    <string name="common_copy">Copy</string>
+    <string name="add_money_view_account_details_action">View account details</string>
+    <string name="home_balance_transfer_account_supporting">Use these details to complete your one-time bank transfer top up.</string>
+    <string name="home_balance_transfer_account_holder_label">Account holder</string>
+    <string name="home_balance_transfer_exact_amount_label">Exact amount</string>
+    <string name="home_balance_transfer_expires_label">Expires</string>
+    <string name="home_balance_transfer_instruction_title">Before you send money</string>
+    <string name="home_balance_transfer_instruction_exact_amount">Transfer the exact amount shown above.</string>
+    <string name="home_balance_transfer_instruction_one_time">This virtual account is for this top up only and cannot be reused.</string>
+    <string name="home_balance_transfer_instruction_expiry_format">Send the transfer before %1$s.</string>
+    <string name="home_balance_transfer_instruction_confirmation">Your wallet updates after Flutterwave confirms the transfer.</string>
+    <string name="home_balance_transfer_copy_success_format">%1$s copied</string>
+    <string name="home_balance_transfer_share_title">Share transfer details</string>
 
     <string name="home_balance_activity_transfer_out">转账给收款人</string>
     <string name="home_balance_activity_topup">通过银行转账充值</string>
@@ -717,6 +731,38 @@
     <string name="profile_change_photo_saving">保存中…</string>
     <string name="profile_change_photo_error">目前无法更新照片。</string>
     <string name="profile_change_photo_contact_fallback">添加邮箱或电话号码</string>
+    <string name="profile_connected_accounts_cards_loading_title">加载保存的卡片</string>
+    <string name="profile_connected_accounts_cards_loading_supporting">正在向 Stripe 检查您钱包中保存的最新银行卡</string>
+    <string name="profile_connected_accounts_cards_error_title">已保存的卡片不可用</string>
+    <string name="profile_connected_accounts_cards_error_supporting">我们暂时无法加载您保存的卡片。请稍后再试。</string>
+    <string name="profile_connected_accounts_cards_refresh_action">刷新卡牌</string>
+    <string name="profile_connected_accounts_cards_make_default_action">设为默认</string>
+    <string name="account_statement_supporting">请选择账单时间范围并选择所需的格式。</string>
+    <string name="account_statement_currency_label">选择货币</string>
+    <string name="account_statement_start_date_label">开始日期</string>
+    <string name="account_statement_end_date_label">结束日期</string>
+    <string name="account_statement_date_placeholder">DD/MM/YYYY</string>
+    <string name="account_statement_format_label">格式</string>
+    <string name="account_statement_format_pdf">PDF 格式</string>
+    <string name="account_statement_get_action">获取账单</string>
+    <string name="account_statement_export_pending">账单导出尚未连接。此表单已为账单流程做好准备。</string>
+
+    <string name="mfa_sign_in_title">确认登录</string>
+    <string name="mfa_sign_in_description">输入您已注册的第二验证方式的验证码以完成登录。</string>
+    <string name="mfa_sign_in_card_title">需要两步验证</string>
+    <string name="mfa_sign_in_factor_title">选择验证码发送位置</string>
+    <string name="mfa_sign_in_send_action">发送验证码</string>
+    <string name="mfa_sign_in_verify_action">验证并登录</string>
+    <string name="mfa_sign_in_back_to_login">返回登录</string>
+    <string name="exchange_rates_title">汇率</string>
+    <string name="exchange_rates_supporting">热门目的地的实时外汇报价，由当前 PaySmart 汇率数据源提供。</string>
+    <string name="exchange_rates_empty_title">汇率不可用</string>
+    <string name="exchange_rates_empty_supporting">目前无法加载实时外汇报价。请刷新或稍后再试。</string>
+
+    <string name="profile_change_photo_camera_permission_error">需要相机权限才能拍摄头像。您仍然可以从图库中选择一张。</string>
+    <string name="profile_connected_accounts_cards_remove_action">消除</string>
+    <string name="profile_connected_accounts_cards_default_label">默认</string>
+    <string name="profile_connected_accounts_cards_expiry_format">过期 %1$02d/%2$d</string>
     <string name="common_clear">清除</string>
     <string name="home_top_bar_search_content_description">搜索交易</string>
     <string name="home_top_bar_notifications_content_description">查看通知</string>
@@ -743,7 +789,14 @@
     <string name="change_passcode_biometric_action">使用生物识别验证</string>
     <string name="change_passcode_biometric_retry">重试</string>
     <string name="change_passcode_biometric_error">生物识别验证未完成。</string>
-    <string name="profile_security_mfa_title">2-step verification</string>
-    <string name="profile_security_mfa_subtitle_enabled">2-step verification is enabled</string>
-    <string name="profile_security_mfa_subtitle_disabled">Add an extra sign-in check</string>
+    <string name="profile_security_mfa_title">两步验证</string>
+    <string name="profile_security_mfa_subtitle_enabled">已启用两步验证</string>
+    <string name="profile_security_mfa_subtitle_disabled">添加额外的登录检查</string>
+
+    <string name="account_limits_empty_accounts">目前暂无钱包账户可用。</string>
+    <string name="account_limits_account_descriptor_bank_transfer">银行转账</string>
+    <string name="account_limits_currency_title_format">%1$s 限制</string>
+    <string name="account_limits_details_subtitle_format">您可以使用您的 %1$s PaySmart 账户发送和接收多少金额</string>
+    <string name="account_limits_spent_of_limit_format">已花费 %1$s 美元 %2$s 美元</string>
+    <string name="account_limits_left_format">剩余 %1$s</string>
 </resources>

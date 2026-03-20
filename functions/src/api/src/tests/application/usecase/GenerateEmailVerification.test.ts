@@ -117,4 +117,145 @@ describe("GenerateEmailVerification", () => {
     expect(securityRepo.createIfMissing).toHaveBeenCalledWith("uid-1");
     expect(mailer.sendVerificationEmail).not.toHaveBeenCalled();
   });
+
+  it("returns cooldown metadata instead of sending again during the resend window", async () => {
+    const now = Timestamp.fromMillis(Date.UTC(2026, 2, 19, 12, 0, 30));
+    vi.spyOn(Timestamp, "now").mockReturnValue(now);
+    securityRepo.get.mockResolvedValue({
+      ...getDefaultSecuritySettings(),
+      emailVerificationSentAt: Timestamp.fromMillis(Date.UTC(2026, 2, 19, 12, 0, 0)),
+      emailVerificationAttemptsToday: 1,
+      hasVerifiedEmail: false,
+    });
+
+    const usecase = new GenerateEmailVerification(
+      securityRepo,
+      userRepo,
+      authService,
+      mailer,
+      {
+        allowedTenants: new Set(["production"]),
+        getVerifyUrl: () => "https://pay-smart.net/verify",
+        shouldSendRealEmails: () => true,
+      }
+    );
+
+    const result = await usecase.execute({
+      uid: "uid-1",
+      email: "tester@example.com",
+    });
+
+    expect(result).toEqual({
+      sent: false,
+      reason: "cooldown",
+      retryAfter: 30,
+    });
+    expect(authService.updateUserEmail).not.toHaveBeenCalled();
+    expect(mailer.sendVerificationEmail).not.toHaveBeenCalled();
+  });
+
+  it("resets the daily attempt count when the last send happened on a previous utc day", async () => {
+    const now = Timestamp.fromMillis(Date.UTC(2026, 2, 19, 8, 0, 0));
+    vi.spyOn(Timestamp, "now").mockReturnValue(now);
+    securityRepo.get.mockResolvedValue({
+      ...getDefaultSecuritySettings(),
+      emailVerificationSentAt: Timestamp.fromMillis(Date.UTC(2026, 2, 18, 23, 0, 0)),
+      emailVerificationAttemptsToday: 5,
+      hasVerifiedEmail: false,
+    });
+
+    const usecase = new GenerateEmailVerification(
+      securityRepo,
+      userRepo,
+      authService,
+      mailer,
+      {
+        allowedTenants: new Set(["production"]),
+        getVerifyUrl: () => "https://pay-smart.net/verify",
+        shouldSendRealEmails: () => true,
+      }
+    );
+
+    const result = await usecase.execute({
+      uid: "uid-1",
+      email: "tester@example.com",
+    });
+
+    expect(result).toEqual({ sent: true });
+    expect(securityRepo.update).toHaveBeenCalledWith(
+      "uid-1",
+      expect.objectContaining({
+        emailVerificationAttemptsToday: 1,
+      })
+    );
+    expect(mailer.sendVerificationEmail).toHaveBeenCalled();
+  });
+
+  it("returns a daily limit response when the limit is reached on the same utc day", async () => {
+    const now = Timestamp.fromMillis(Date.UTC(2026, 2, 19, 22, 0, 0));
+    vi.spyOn(Timestamp, "now").mockReturnValue(now);
+    securityRepo.get.mockResolvedValue({
+      ...getDefaultSecuritySettings(),
+      emailVerificationSentAt: Timestamp.fromMillis(Date.UTC(2026, 2, 19, 10, 0, 0)),
+      emailVerificationAttemptsToday: 5,
+      hasVerifiedEmail: false,
+    });
+
+    const usecase = new GenerateEmailVerification(
+      securityRepo,
+      userRepo,
+      authService,
+      mailer,
+      {
+        allowedTenants: new Set(["production"]),
+        getVerifyUrl: () => "https://pay-smart.net/verify",
+        shouldSendRealEmails: () => true,
+      }
+    );
+
+    const result = await usecase.execute({
+      uid: "uid-1",
+      email: "tester@example.com",
+    });
+
+    expect(result).toEqual({
+      sent: false,
+      reason: "daily_limit",
+      retryAfter: 7200,
+    });
+    expect(authService.updateUserEmail).not.toHaveBeenCalled();
+    expect(mailer.sendVerificationEmail).not.toHaveBeenCalled();
+  });
+
+  it("returns already verified when the account email is already confirmed", async () => {
+    securityRepo.get.mockResolvedValue({
+      ...getDefaultSecuritySettings(),
+      hasVerifiedEmail: true,
+    });
+
+    const usecase = new GenerateEmailVerification(
+      securityRepo,
+      userRepo,
+      authService,
+      mailer,
+      {
+        allowedTenants: new Set(["production"]),
+        getVerifyUrl: () => "https://pay-smart.net/verify",
+        shouldSendRealEmails: () => true,
+      }
+    );
+
+    const result = await usecase.execute({
+      uid: "uid-1",
+      email: "tester@example.com",
+    });
+
+    expect(result).toEqual({
+      sent: false,
+      reason: "already_verified",
+      retryAfter: undefined,
+    });
+    expect(authService.updateUserEmail).not.toHaveBeenCalled();
+    expect(mailer.sendVerificationEmail).not.toHaveBeenCalled();
+  });
 });

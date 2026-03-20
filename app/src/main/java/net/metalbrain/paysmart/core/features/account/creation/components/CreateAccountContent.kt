@@ -31,6 +31,7 @@ internal fun CreateAccountContent(
     acceptedMarketing: Boolean,
     acceptedTerms: Boolean,
     isSubmitting: Boolean,
+    errorMessage: String?,
     isContinueEnabled: Boolean,
     onFlagClick: () -> Unit,
     onPhoneNumberChange: (String) -> Unit,
@@ -108,6 +109,14 @@ internal fun CreateAccountContent(
             isLoading = isSubmitting,
             loadingText = stringResource(R.string.common_processing)
         )
+
+        if (!errorMessage.isNullOrBlank()) {
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
 
         AccountSwitchPrompt(
             variant = AccountSwitchVariant.HAVE_ACCOUNT,

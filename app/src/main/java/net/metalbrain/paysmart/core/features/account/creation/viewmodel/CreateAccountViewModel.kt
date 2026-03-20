@@ -40,7 +40,7 @@ class CreateAccountViewModel @Inject constructor(
 
     fun startPhoneVerification(
         activity: Activity?,
-        onSuccess: () -> Unit,
+        onVerificationStarted: () -> Unit,
         onPhoneAlreadyRegistered: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
@@ -52,47 +52,25 @@ class CreateAccountViewModel @Inject constructor(
         val e164 = getFullPhoneNumber()
         viewModelScope.launch {
             try {
-                val exists = withTimeoutOrNull(PHONE_PRECHECK_TIMEOUT_MS) {
-                    runCatching {
+                val exists = runCatching {
+                    withTimeoutOrNull(PHONE_PRECHECK_TIMEOUT_MS) {
                         authPolicyHandler.isPhoneAlreadyRegistered(e164)
-                    }.getOrElse { error ->
-                        // Do not block OTP delivery on pre-check failures (network/AppCheck/transient).
-                        Log.w(
-                            TAG,
-                            "Phone availability pre-check failed; continuing with OTP flow",
-                            error
-                        )
-                        false
-                    }
-                } ?: run {
-                    Log.w(
-                        TAG,
-                        "Phone availability pre-check timed out; continuing with OTP flow"
+                    } ?: throw IllegalStateException(
+                        "Unable to verify phone availability right now. Please retry."
                     )
-                    false
+                }.getOrElse { error ->
+                    Log.w(TAG, "Phone availability pre-check failed", error)
+                    onError(error)
+                    return@launch
                 }
                 if (exists) {
                     onPhoneAlreadyRegistered()
                     return@launch
                 }
 
-                phoneVerifier.setCallbacks(
-                    onCodeSent = {
-                        onSuccess()
-                    },
-                    onAutoVerified = {
-                        onSuccess()
-                    },
-                    onError = { error ->
-                        // Detect if this came from duplicate phone checks in auth hooks.
-                        if (error.message?.contains("already-exists", ignoreCase = true) == true) {
-                            onPhoneAlreadyRegistered()
-                        } else {
-                            onError(error)
-                        }
-                    }
-                )
+                phoneVerifier.cancel()
                 phoneVerifier.start(e164, activity)
+                onVerificationStarted()
 
             } catch (e: Exception) {
                 onError(e)

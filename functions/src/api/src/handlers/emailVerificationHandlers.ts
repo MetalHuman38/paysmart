@@ -18,9 +18,34 @@ export async function generateEmailVerificationHandler(
     const { generateEmailVerification } = apiContainer();
     const result = await generateEmailVerification.execute({ uid, email });
 
-    if ("retryAfter" in result && result.retryAfter) {
-      res.setHeader("Retry-After", String(result.retryAfter));
-      return res.status(429).json({ error: "Cooldown active" });
+    if (!result.sent) {
+      if (result.retryAfter) {
+        res.setHeader("Retry-After", String(result.retryAfter));
+      }
+
+      if (result.reason === "already_verified") {
+        return res.status(409).json({
+          error: "Email is already verified",
+          code: "email_already_verified",
+          sent: false,
+        });
+      }
+
+      if (result.reason === "daily_limit") {
+        return res.status(429).json({
+          error: "Daily email verification limit reached",
+          code: "email_verification_daily_limit",
+          retryAfter: result.retryAfter ?? null,
+          sent: false,
+        });
+      }
+
+      return res.status(429).json({
+        error: "Email verification cooldown active",
+        code: "email_verification_cooldown",
+        retryAfter: result.retryAfter ?? null,
+        sent: false,
+      });
     }
 
     return res.json({ sent: true });

@@ -8,19 +8,21 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
 import net.metalbrain.paysmart.room.EncryptedAppDatabase
-import net.metalbrain.paysmart.room.doa.AuthSessionLogDao
-import net.metalbrain.paysmart.room.doa.CountryCapabilityDao
-import net.metalbrain.paysmart.room.doa.FundingAccountDao
-import net.metalbrain.paysmart.room.doa.FxQuoteCacheDao
-import net.metalbrain.paysmart.room.doa.InvoiceProfileDraftDao
-import net.metalbrain.paysmart.room.doa.InvoiceVenueDao
-import net.metalbrain.paysmart.room.doa.InvoiceWeeklyDraftDao
-import net.metalbrain.paysmart.room.doa.SecuritySettingsDao
-import net.metalbrain.paysmart.room.doa.SecureTokenDao
-import net.metalbrain.paysmart.room.doa.SendMoneyRecipientDraftDao
-import net.metalbrain.paysmart.room.doa.TransactionDao
-import net.metalbrain.paysmart.room.doa.UserProfileCacheDao
-import net.metalbrain.paysmart.room.doa.WalletBalanceDao
+import net.metalbrain.paysmart.room.dao.AuthSessionLogDao
+import net.metalbrain.paysmart.room.dao.CountryAccountLimitDao
+import net.metalbrain.paysmart.room.dao.CountryCapabilityDao
+import net.metalbrain.paysmart.room.dao.FundingAccountDao
+import net.metalbrain.paysmart.room.dao.FxQuoteCacheDao
+import net.metalbrain.paysmart.room.dao.InvoiceProfileDraftDao
+import net.metalbrain.paysmart.room.dao.InvoiceVenueDao
+import net.metalbrain.paysmart.room.dao.InvoiceWeeklyDraftDao
+import net.metalbrain.paysmart.room.dao.ManagedCardDao
+import net.metalbrain.paysmart.room.dao.SecuritySettingsDao
+import net.metalbrain.paysmart.room.dao.SecureTokenDao
+import net.metalbrain.paysmart.room.dao.SendMoneyRecipientDraftDao
+import net.metalbrain.paysmart.room.dao.TransactionDao
+import net.metalbrain.paysmart.room.dao.UserProfileCacheDao
+import net.metalbrain.paysmart.room.dao.WalletBalanceDao
 import net.metalbrain.paysmart.room.di.RoomProvidesModule
 import net.metalbrain.paysmart.utils.RoomKeyProvider
 import javax.inject.Singleton
@@ -95,6 +97,11 @@ object TestRoomModule {
     ): FundingAccountDao = db.fundingAccountDao()
 
     @Provides
+    fun provideManagedCardDao(
+        db: EncryptedAppDatabase
+    ): ManagedCardDao = db.managedCardDao()
+
+    @Provides
     fun provideSendMoneyRecipientDraftDao(
         db: EncryptedAppDatabase
     ): SendMoneyRecipientDraftDao = db.sendMoneyRecipientDraftDao()
@@ -118,4 +125,9 @@ object TestRoomModule {
     fun provideTransactionDao(
         db: EncryptedAppDatabase
     ): TransactionDao = db.transactionDao()
+
+    @Provides
+    fun provideCountryAccountLimitDao(
+        db: EncryptedAppDatabase
+    ): CountryAccountLimitDao = db.countAccountLimitDao()
 }

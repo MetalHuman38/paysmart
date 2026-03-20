@@ -20,8 +20,6 @@ interface UserProfileRepository {
 
     suspend fun getOnce(uid: String): AuthUserModel?
 
-    suspend fun updatePhoneNumber(uid: String, phoneNumber: String)
-
     suspend fun updatePhotoUrl(uid: String, photoUrl: String?)
 
     /**

@@ -12,6 +12,7 @@ import { allowFederatedLinkingHandler } from "../handlers/allowFederatedLinking.
 import { checkEmailVerificationStatusHandler, generateEmailVerificationHandler } from "../handlers/emailVerificationHandlers.js";
 import { checkPhoneAvailabilityHandler } from "../handlers/checkPhoneAvailabilityHandler.js";
 import { confirmPhoneChangedHandler } from "../handlers/confirmPhoneChanged.js";
+import { finalizePhoneSignupHandler } from "../handlers/finalizePhoneSignup.js";
 import { lookupAddressHandler } from "../handlers/lookupAddress.js";
 import { setHomeAddressVerifiedHandler } from "../handlers/setHomeAddressVerified.js";
 import { setMfaEnrollmentPromptStateHandler } from "../handlers/setMfaEnrollmentPromptState.js";
@@ -68,6 +69,12 @@ export function mountAuthPolicyRoutes(app: Express) {
 
   app.post("/auth/confirmPhoneChanged", requireActiveSession, confirmPhoneChangedHandler);
   app.options("/auth/confirmPhoneChanged", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post("/auth/finalize-phone-signup", requireAppCheck, finalizePhoneSignupHandler);
+  app.options("/auth/finalize-phone-signup", (_, res) => {
     corsify(res);
     res.status(204).end();
   });

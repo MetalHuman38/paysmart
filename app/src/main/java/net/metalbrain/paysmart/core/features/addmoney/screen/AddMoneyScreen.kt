@@ -14,6 +14,7 @@ import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.CustomerConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.addmoney.util.resolvePreferredAddMoneyProvider
@@ -27,7 +28,7 @@ import java.util.Locale
 @Composable
 fun AddMoneyScreen(
     onBack: () -> Unit,
-    onOpenReceiveMoney: () -> Unit,
+    onOpenAccountDetails: (String) -> Unit,
     viewModel: AddMoneyViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -73,7 +74,13 @@ fun AddMoneyScreen(
             paymentSheet.presentWithPaymentIntent(
                 launch.paymentIntentClientSecret,
                 PaymentSheet.Configuration(
-                    merchantDisplayName = "PaySmart"
+                    merchantDisplayName = "PaySmart",
+                    customer = launch.customer?.let { customer ->
+                        CustomerConfiguration(
+                            id = customer.customerId,
+                            ephemeralKeySecret = customer.ephemeralKeySecret
+                        )
+                    }
                 )
             )
         }.onFailure { error ->
@@ -94,7 +101,10 @@ fun AddMoneyScreen(
         onRefreshQuote = viewModel::refreshQuote,
         onCreatePaymentSession = viewModel::createPaymentSession,
         onRefreshSessionStatus = viewModel::refreshSessionStatus,
-        onOpenReceiveMoney = onOpenReceiveMoney,
+        onOpenAccountDetails = {
+            val currencyCode = uiState.activeSessionCurrency ?: uiState.currency
+            onOpenAccountDetails(currencyCode)
+        },
         onOpenProviderCheckout = {
             uiState.providerActionUrl?.let { providerActionUrl ->
                 runCatching {

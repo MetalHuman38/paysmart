@@ -21,7 +21,7 @@ import net.metalbrain.paysmart.domain.auth.state.AuthState
 import net.metalbrain.paysmart.domain.model.Transaction
 import net.metalbrain.paysmart.domain.model.TransactionHistoryQuery
 import net.metalbrain.paysmart.domain.model.TransactionStatusUpdate
-import net.metalbrain.paysmart.room.doa.TransactionDao
+import net.metalbrain.paysmart.room.dao.TransactionDao
 import net.metalbrain.paysmart.room.entity.TransactionEntity
 import net.metalbrain.paysmart.room.query.TransactionPagingQueryFactory
 import java.util.Locale

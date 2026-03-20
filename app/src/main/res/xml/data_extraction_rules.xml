@@ -5,15 +5,13 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <exclude domain="sharedpref" path="paysmart_secure_keys.xml" />
+        <exclude domain="file" path="secure_password/" />
+        <exclude domain="file" path="datastore/security_prefs.preferences_pb" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="sharedpref" path="paysmart_secure_keys.xml" />
+        <exclude domain="file" path="secure_password/" />
+        <exclude domain="file" path="datastore/security_prefs.preferences_pb" />
     </device-transfer>
-    -->
 </data-extraction-rules>

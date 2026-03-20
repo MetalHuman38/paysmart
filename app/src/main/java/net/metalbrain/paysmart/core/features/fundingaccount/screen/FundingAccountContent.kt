@@ -47,8 +47,6 @@ internal fun FundingAccountContent(
         )
 
         state.account?.let { account ->
-            FundingAccountDetailsCard(account = account)
-
             FundingAccountActionRow(
                 isRefreshing = state.isRefreshing,
                 isProvisioning = state.isProvisioning,
@@ -56,6 +54,8 @@ internal fun FundingAccountContent(
                 onShareDetails = onShareDetails,
                 onRefresh = onRefresh
             )
+
+            FundingAccountDetailsCard(account = account)
         }
     }
 }

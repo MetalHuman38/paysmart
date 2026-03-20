@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.ui.screens.startup
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
@@ -25,11 +27,18 @@ internal fun StartupActionCard(
     onLoginClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+    val darkMode = colorScheme.background.luminance() < 0.2f
+
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.extraLarge,
         tonalElevation = 1.dp,
-        color = MaterialTheme.colorScheme.surface
+        color = colorScheme.surface.copy(alpha = if (darkMode) 0.88f else 0.96f),
+        border = BorderStroke(
+            width = 1.dp,
+            color = colorScheme.outline.copy(alpha = if (darkMode) 0.22f else 0.12f)
+        )
     ) {
         Column(
             modifier = Modifier.padding(Dimens.md),
@@ -42,7 +51,8 @@ internal fun StartupActionCard(
                     .height(Dimens.buttonHeight),
                 shape = MaterialTheme.shapes.large,
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurface
+                    containerColor = colorScheme.surfaceVariant.copy(alpha = if (darkMode) 0.42f else 0.65f),
+                    contentColor = colorScheme.onSurface
                 )
             ) {
                 Text(stringResource(id = R.string.create_account))
@@ -55,8 +65,8 @@ internal fun StartupActionCard(
                     .height(Dimens.buttonHeight),
                 shape = MaterialTheme.shapes.large,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = colorScheme.primary,
+                    contentColor = colorScheme.onPrimary
                 )
             ) {
                 Text(stringResource(id = R.string.log_in))

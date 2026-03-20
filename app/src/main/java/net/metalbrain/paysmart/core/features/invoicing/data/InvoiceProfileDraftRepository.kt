@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoicePaymentMethod
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceProfileDraft
-import net.metalbrain.paysmart.room.doa.InvoiceProfileDraftDao
+import net.metalbrain.paysmart.room.dao.InvoiceProfileDraftDao
 import net.metalbrain.paysmart.room.entity.InvoiceProfileDraftEntity
 
 /**

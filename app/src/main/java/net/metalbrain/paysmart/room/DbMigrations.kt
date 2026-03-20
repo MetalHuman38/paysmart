@@ -294,4 +294,54 @@ object DbMigrations {
             )
         }
     }
+
+    val MIGRATION_13_14: Migration = object : Migration(13, 14) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS managed_cards (
+                    userId TEXT NOT NULL,
+                    id TEXT NOT NULL,
+                    provider TEXT NOT NULL,
+                    brand TEXT NOT NULL,
+                    last4 TEXT NOT NULL,
+                    expMonth INTEGER NOT NULL,
+                    expYear INTEGER NOT NULL,
+                    funding TEXT,
+                    country TEXT,
+                    fingerprint TEXT,
+                    isDefault INTEGER NOT NULL,
+                    status TEXT NOT NULL,
+                    createdAtMs INTEGER NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    PRIMARY KEY(userId, id)
+                )
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                CREATE INDEX IF NOT EXISTS index_managed_cards_userId
+                ON managed_cards(userId)
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS account_limits_properties (
+                    iso2 TEXT NOT NULL,
+                    tabsJson TEXT NOT NULL,
+                    sectionsJson TEXT NOT NULL,
+                    catalogVersion TEXT NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    PRIMARY KEY(iso2)
+                )
+                """.trimIndent()
+            )
+        }
+    }
+
+    val MIGRATION_14_15: Migration = object : Migration(14, 15) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            // Version 15 keeps the same schema as version 14.
+        }
+    }
 }

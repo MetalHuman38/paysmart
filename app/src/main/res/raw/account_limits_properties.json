@@ -1,0 +1,138 @@
+{
+  "schemaVersion": "2026-03-17-v2",
+  "accountLimitSets": {
+    "default": {
+      "tabs": [
+        { "key": "send", "title": "Limit on send" },
+        { "key": "receive", "title": "Limit on receive" }
+      ],
+      "sections": [
+        {
+          "key": "single",
+          "title": "Send Limit (Single transaction)",
+          "type": "single"
+        },
+        {
+          "key": "daily",
+          "title": "Daily limit of {amount}",
+          "type": "period"
+        },
+        {
+          "key": "weekly",
+          "title": "Weekly limit of {amount}",
+          "type": "period"
+        },
+        {
+          "key": "monthly",
+          "title": "Monthly limit of {amount}",
+          "type": "period"
+        }
+      ]
+    },
+
+    "gb": {
+      "currency": "GBP",
+      "countryCode": "GB",
+      "tabs": [
+        { "key": "send", "title": "Limit on send" },
+        { "key": "receive", "title": "Limit on receive" }
+      ],
+      "sections": [
+        { "key": "single", "title": "Send Limit (Single transaction)", "type": "single" },
+        { "key": "daily", "title": "Daily limit of {amount}", "type": "period" },
+        { "key": "weekly", "title": "Weekly limit of {amount}", "type": "period" },
+        { "key": "monthly", "title": "Monthly limit of {amount}", "type": "period" }
+      ]
+    },
+
+    "de": {
+      "currency": "EUR",
+      "countryCode": "DE",
+      "tabs": [
+        { "key": "send", "title": "Sendelimit" },
+        { "key": "receive", "title": "Empfangslimit" }
+      ],
+      "sections": [
+        { "key": "single", "title": "Sendelimit (Einzeltransaktion)", "type": "single" },
+        { "key": "daily", "title": "Tageslimit von {amount}", "type": "period" },
+        { "key": "weekly", "title": "Wochenlimit von {amount}", "type": "period" },
+        { "key": "monthly", "title": "Monatslimit von {amount}", "type": "period" }
+      ]
+    },
+
+    "ng": {
+      "currency": "NGN",
+      "countryCode": "NG",
+      "tabs": [
+        { "key": "send", "title": "Send limit" },
+        { "key": "receive", "title": "Receive limit" }
+      ],
+      "sections": [
+        { "key": "single", "title": "Send Limit (Single transaction)", "type": "single" },
+        { "key": "daily", "title": "Daily limit of {amount}", "type": "period" },
+        { "key": "weekly", "title": "Weekly limit of {amount}", "type": "period" },
+        { "key": "monthly", "title": "Monthly limit of {amount}", "type": "period" }
+      ]
+    },
+
+    "es": {
+      "currency": "EUR",
+      "countryCode": "ES",
+      "tabs": [
+        { "key": "send", "title": "Límite de envío" },
+        { "key": "receive", "title": "Límite de recepción" }
+      ],
+      "sections": [
+        { "key": "single", "title": "Límite de envío (transacción única)", "type": "single" },
+        { "key": "daily", "title": "Límite diario de {amount}", "type": "period" },
+        { "key": "weekly", "title": "Límite semanal de {amount}", "type": "period" },
+        { "key": "monthly", "title": "Límite mensual de {amount}", "type": "period" }
+      ]
+    },
+
+    "jp": {
+      "currency": "JPY",
+      "countryCode": "JP",
+      "tabs": [
+        { "key": "send", "title": "送金上限" },
+        { "key": "receive", "title": "受取上限" }
+      ],
+      "sections": [
+        { "key": "single", "title": "送金上限（1回あたり）", "type": "single" },
+        { "key": "daily", "title": "1日の上限 {amount}", "type": "period" },
+        { "key": "weekly", "title": "週間上限 {amount}", "type": "period" },
+        { "key": "monthly", "title": "月間上限 {amount}", "type": "period" }
+      ]
+    },
+
+    "zh": {
+      "currency": "CNY",
+      "countryCode": "CN",
+      "tabs": [
+        { "key": "send", "title": "发送限额" },
+        { "key": "receive", "title": "接收限额" }
+      ],
+      "sections": [
+        { "key": "single", "title": "单笔发送限额", "type": "single" },
+        { "key": "daily", "title": "每日限额 {amount}", "type": "period" },
+        { "key": "weekly", "title": "每周限额 {amount}", "type": "period" },
+        { "key": "monthly", "title": "每月限额 {amount}", "type": "period" }
+      ]
+    },
+
+    "us": {
+      "currency": "USD",
+      "countryCode": "US",
+      "tabs": [
+        { "key": "send", "title": "Send limit" },
+        { "key": "receive", "title": "Receive limit" }
+      ],
+      "sections": [
+        { "key": "single", "title": "Send Limit (Single transaction)", "type": "single" },
+        { "key": "daily", "title": "Daily limit of {amount}", "type": "period" },
+        { "key": "weekly", "title": "Weekly limit of {amount}", "type": "period" },
+        { "key": "monthly", "title": "Monthly limit of {amount}", "type": "period" }
+      ]
+    }
+  }
+}

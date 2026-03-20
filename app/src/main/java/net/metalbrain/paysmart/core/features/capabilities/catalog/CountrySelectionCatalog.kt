@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.core.features.capabilities.catalog
 
 import android.content.Context
+import android.content.res.Resources
 import net.metalbrain.paysmart.R
 import org.json.JSONArray
 import org.json.JSONObject
@@ -28,20 +29,28 @@ object CountrySelectionCatalog {
     private var currenciesCache: List<CurrencySelectionItem>? = null
 
     fun countries(context: Context): List<CountrySelectionItem> {
+        return countries(context.resources)
+    }
+
+    fun countries(resources: Resources): List<CountrySelectionItem> {
         countriesCache?.let { return it }
         synchronized(this) {
             countriesCache?.let { return it }
-            val parsed = parseCountries(context)
+            val parsed = parseCountries(resources)
             countriesCache = parsed
             return parsed
         }
     }
 
     fun currencies(context: Context): List<CurrencySelectionItem> {
+        return currencies(context.resources)
+    }
+
+    fun currencies(resources: Resources): List<CurrencySelectionItem> {
         currenciesCache?.let { return it }
         synchronized(this) {
             currenciesCache?.let { return it }
-            val countries = countries(context)
+            val countries = countries(resources)
             val result = linkedMapOf<String, CurrencySelectionItem>()
             countries.forEach { country ->
                 val code = country.currencyCode.uppercase(Locale.US)
@@ -68,25 +77,37 @@ object CountrySelectionCatalog {
     }
 
     fun countryByIso2(context: Context, rawIso2: String): CountrySelectionItem? {
+        return countryByIso2(context.resources, rawIso2)
+    }
+
+    fun countryByIso2(resources: Resources, rawIso2: String): CountrySelectionItem? {
         val iso2 = rawIso2.trim().uppercase(Locale.US)
         if (iso2.length != 2) return null
-        return countries(context).firstOrNull { it.iso2 == iso2 }
+        return countries(resources).firstOrNull { it.iso2 == iso2 }
     }
 
     fun currencyByCode(context: Context, rawCurrencyCode: String): CurrencySelectionItem? {
+        return currencyByCode(context.resources, rawCurrencyCode)
+    }
+
+    fun currencyByCode(resources: Resources, rawCurrencyCode: String): CurrencySelectionItem? {
         val code = rawCurrencyCode.trim().uppercase(Locale.US)
         if (code.length != 3) return null
-        return currencies(context).firstOrNull { it.code == code }
+        return currencies(resources).firstOrNull { it.code == code }
     }
 
     fun flagForCountry(context: Context, rawIso2: String): String {
-        val iso2 = rawIso2.trim().uppercase(Locale.US)
-        if (iso2.length != 2) return "🌍"
-        return countryByIso2(context, iso2)?.flagEmoji ?: iso2ToFlagEmoji(iso2)
+        return flagForCountry(context.resources, rawIso2)
     }
 
-    private fun parseCountries(context: Context): List<CountrySelectionItem> {
-        val raw = context.resources
+    fun flagForCountry(resources: Resources, rawIso2: String): String {
+        val iso2 = rawIso2.trim().uppercase(Locale.US)
+        if (iso2.length != 2) return "🌍"
+        return countryByIso2(resources, iso2)?.flagEmoji ?: iso2ToFlagEmoji(iso2)
+    }
+
+    private fun parseCountries(resources: Resources): List<CountrySelectionItem> {
+        val raw = resources
             .openRawResource(R.raw.country_capabilities_catalog)
             .bufferedReader()
             .use { it.readText() }

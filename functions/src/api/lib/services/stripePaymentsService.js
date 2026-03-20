@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 const STRIPE_API_BASE = "https://api.stripe.com/v1";
 export class StripePaymentsService {
     options;
+    static EPHEMERAL_KEY_API_VERSION = "2020-03-02";
     constructor(options) {
         this.options = options;
     }
@@ -48,6 +49,12 @@ export class StripePaymentsService {
         payload.set("currency", input.currency.toLowerCase());
         payload.set("description", `PaySmart wallet top up (${input.currency})`);
         payload.set("automatic_payment_methods[enabled]", "true");
+        if (input.customerId?.trim()) {
+            payload.set("customer", input.customerId.trim());
+        }
+        if (input.setupFutureUsage) {
+            payload.set("setup_future_usage", input.setupFutureUsage);
+        }
         payload.set("metadata[uid]", input.uid);
         payload.set("metadata[purpose]", "wallet_topup");
         payload.set("metadata[currency]", input.currency);
@@ -68,8 +75,67 @@ export class StripePaymentsService {
     async retrievePaymentIntent(paymentIntentId) {
         this.ensureConfigured();
         const escaped = encodeURIComponent(paymentIntentId.trim());
-        const data = await this.stripeRequest(`/payment_intents/${escaped}`, "GET");
+        const data = await this.stripeRequest(`/payment_intents/${escaped}?expand%5B%5D=payment_method`, "GET");
         return this.mapPaymentIntent(data);
+    }
+    async ensureCustomer(input) {
+        this.ensureConfigured();
+        const existingCustomerId = input.existingCustomerId?.trim();
+        if (existingCustomerId) {
+            try {
+                return await this.retrieveCustomer(existingCustomerId);
+            }
+            catch (error) {
+                const message = error instanceof Error ? error.message : "";
+                if (!message.includes("No such customer")) {
+                    throw error;
+                }
+            }
+        }
+        const payload = new URLSearchParams();
+        payload.set("email", input.email.trim().toLowerCase());
+        if (input.name?.trim()) {
+            payload.set("name", input.name.trim());
+        }
+        payload.set("metadata[uid]", input.uid);
+        const data = await this.stripeRequest("/customers", "POST", payload);
+        return this.mapCustomer(data);
+    }
+    async retrieveCustomer(customerId) {
+        this.ensureConfigured();
+        const escaped = encodeURIComponent(customerId.trim());
+        const data = await this.stripeRequest(`/customers/${escaped}`, "GET");
+        return this.mapCustomer(data);
+    }
+    async createEphemeralKey(customerId) {
+        this.ensureConfigured();
+        const payload = new URLSearchParams();
+        payload.set("customer", customerId.trim());
+        const data = await this.stripeRequest("/ephemeral_keys", "POST", payload, { "Stripe-Version": StripePaymentsService.EPHEMERAL_KEY_API_VERSION });
+        const secret = asString(data.secret);
+        if (!secret) {
+            throw new Error("Stripe ephemeral key response is incomplete");
+        }
+        return { secret };
+    }
+    async listCustomerCardPaymentMethods(customerId) {
+        this.ensureConfigured();
+        const escaped = encodeURIComponent(customerId.trim());
+        const data = await this.stripeRequest(`/payment_methods?customer=${escaped}&type=card`, "GET");
+        const items = asArray(data.data);
+        return items.map((entry) => this.mapCustomerCardPaymentMethod(asRecord(entry)));
+    }
+    async detachPaymentMethod(paymentMethodId) {
+        this.ensureConfigured();
+        const escaped = encodeURIComponent(paymentMethodId.trim());
+        await this.stripeRequest(`/payment_methods/${escaped}/detach`, "POST", new URLSearchParams());
+    }
+    async setDefaultPaymentMethod(customerId, paymentMethodId) {
+        this.ensureConfigured();
+        const escaped = encodeURIComponent(customerId.trim());
+        const payload = new URLSearchParams();
+        payload.set("invoice_settings[default_payment_method]", paymentMethodId?.trim() || "");
+        await this.stripeRequest(`/customers/${escaped}`, "POST", payload);
     }
     parseWebhookEvent(rawPayload, signatureHeader) {
         this.ensureConfigured();
@@ -156,6 +222,8 @@ export class StripePaymentsService {
         const currency = asString(data.currency).toUpperCase();
         const metadata = toStringMap(data.metadata);
         const createdAtSeconds = asNumber(data.created);
+        const customerId = asString(data.customer) || undefined;
+        const paymentMethodId = resolveId(data.payment_method);
         if (!id || !status || !currency || amountMinor <= 0) {
             throw new Error("Stripe payment intent response is incomplete");
         }
@@ -167,10 +235,56 @@ export class StripePaymentsService {
             currency,
             metadata,
             createdAtMs: createdAtSeconds > 0 ? createdAtSeconds * 1000 : Date.now(),
+            customerId,
+            paymentMethodId,
+        };
+    }
+    mapCustomer(data) {
+        const id = asString(data.id);
+        if (!id) {
+            throw new Error("Stripe customer response is incomplete");
+        }
+        const invoiceSettings = asRecord(data.invoice_settings);
+        return {
+            id,
+            email: asString(data.email) || undefined,
+            name: asString(data.name) || undefined,
+            defaultPaymentMethodId: asString(invoiceSettings.default_payment_method) || undefined,
+        };
+    }
+    mapCustomerCardPaymentMethod(data) {
+        const card = asRecord(data.card);
+        const id = asString(data.id);
+        const last4 = asString(card.last4);
+        const expMonth = asNumber(card.exp_month);
+        const expYear = asNumber(card.exp_year);
+        if (!id || !last4 || expMonth <= 0 || expYear <= 0) {
+            throw new Error("Stripe payment method response is incomplete");
+        }
+        return {
+            id,
+            brand: asString(card.brand) || "card",
+            last4,
+            expMonth,
+            expYear,
+            funding: asString(card.funding) || undefined,
+            country: asString(card.country) || undefined,
+            fingerprint: asString(card.fingerprint) || undefined,
+            createdAtMs: asNumber(data.created) > 0 ? asNumber(data.created) * 1000 : Date.now(),
         };
     }
 }
 function resolvePaymentIntentId(raw) {
+    if (typeof raw === "string" && raw.trim().length > 0) {
+        return raw.trim();
+    }
+    if (raw && typeof raw === "object") {
+        const id = asString(raw.id);
+        return id || undefined;
+    }
+    return undefined;
+}
+function resolveId(raw) {
     if (typeof raw === "string" && raw.trim().length > 0) {
         return raw.trim();
     }
@@ -227,6 +341,9 @@ function safeJsonParse(raw) {
 }
 function asRecord(raw) {
     return raw && typeof raw === "object" ? raw : {};
+}
+function asArray(raw) {
+    return Array.isArray(raw) ? raw : [];
 }
 function asString(raw) {
     return typeof raw === "string" ? raw : "";

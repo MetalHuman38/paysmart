@@ -43,7 +43,8 @@ object PhoneModule {
         val legacyVerifier = PhoneAuthHandler(
             FirebaseAuth.getInstance(),
             scope,
-            state
+            state,
+            phoneDraftStore
         )
         val pnvVerifier = PnvPreviewPhoneVerifier(legacyVerifier)
         return PluggablePhoneVerifier(

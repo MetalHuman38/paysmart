@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceShiftDraft
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceWeeklyDraft
-import net.metalbrain.paysmart.room.doa.InvoiceWeeklyDraftDao
+import net.metalbrain.paysmart.room.dao.InvoiceWeeklyDraftDao
 import net.metalbrain.paysmart.room.entity.InvoiceWeeklyDraftEntity
 
 /**

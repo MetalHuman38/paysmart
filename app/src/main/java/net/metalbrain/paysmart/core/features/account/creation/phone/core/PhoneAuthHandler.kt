@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import net.metalbrain.paysmart.core.features.account.creation.phone.data.PhoneDraft
+import net.metalbrain.paysmart.core.features.account.creation.phone.data.PhoneDraftStore
 import net.metalbrain.paysmart.core.features.account.creation.phone.data.PhoneVerifier
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
@@ -21,7 +22,8 @@ import kotlin.coroutines.resume
 class PhoneAuthHandler(
     private val auth: FirebaseAuth,
     private val coroutineScope: CoroutineScope,
-    private val phoneDraftState: MutableStateFlow<PhoneDraft>
+    private val phoneDraftState: MutableStateFlow<PhoneDraft>,
+    private val phoneDraftStore: PhoneDraftStore
 ) : PhoneVerifier {
 
     private var storedVerificationId: String? = null
@@ -31,6 +33,14 @@ class PhoneAuthHandler(
     private var onError: ((Throwable) -> Unit)? = null
 
     override suspend fun start(e164: String, activity: Activity) {
+        updateDraft(
+            phoneDraftState.value.copy(
+                e164 = e164,
+                verificationId = null,
+                verified = false,
+                errorMessage = null
+            )
+        )
         withContext(Dispatchers.Main) {
             val options = PhoneAuthOptions.newBuilder(auth)
                 .setPhoneNumber(e164)
@@ -53,7 +63,12 @@ class PhoneAuthHandler(
         return suspendCancellableCoroutine { cont ->
             auth.signInWithCredential(credential)
                 .addOnSuccessListener {
-                    phoneDraftState.value = phoneDraftState.value.copy(verified = true)
+                    updateDraft(
+                        phoneDraftState.value.copy(
+                            verified = true,
+                            errorMessage = null
+                        )
+                    )
                     cont.resume(Result.success(Unit))
                 }
                 .addOnFailureListener { exception ->
@@ -67,6 +82,12 @@ class PhoneAuthHandler(
             ?: return Result.failure(IllegalStateException("E.164 phone number not available for resend"))
 
         val token = resendingToken ?: return Result.failure(IllegalStateException("No resending token"))
+        updateDraft(
+            phoneDraftState.value.copy(
+                e164 = e164,
+                errorMessage = null
+            )
+        )
 
         withContext(Dispatchers.Main) {
             val options = PhoneAuthOptions.newBuilder(auth)
@@ -87,6 +108,12 @@ class PhoneAuthHandler(
     override fun cancel() {
         storedVerificationId = null
         resendingToken = null
+        updateDraft(
+            phoneDraftState.value.copy(
+                verificationId = null,
+                errorMessage = null
+            )
+        )
     }
 
     override fun setCallbacks(
@@ -106,6 +133,15 @@ class PhoneAuthHandler(
             }
 
             override fun onVerificationFailed(e: FirebaseException) {
+                updateDraft(
+                    phoneDraftState.value.copy(
+                        e164 = e164,
+                        verificationId = null,
+                        verified = false,
+                        errorMessage = e.localizedMessage
+                            ?: "Unable to verify this phone number right now."
+                    )
+                )
                 onError?.invoke(e)
             }
 
@@ -114,14 +150,15 @@ class PhoneAuthHandler(
                 token: PhoneAuthProvider.ForceResendingToken
             ) {
                 storedVerificationId = verificationId
-                phoneDraftState.value = phoneDraftState.value.copy(verificationId = verificationId)
                 resendingToken = token
-                if (isResend) {
-                    phoneDraftState.value = phoneDraftState.value.copy(verificationId = verificationId)
-                } else {
-                    phoneDraftState.value =
-                        phoneDraftState.value.copy(e164 = e164, verificationId = verificationId)
-                }
+                updateDraft(
+                    phoneDraftState.value.copy(
+                        e164 = e164,
+                        verificationId = verificationId,
+                        verified = false,
+                        errorMessage = null
+                    )
+                )
                 codeSentCallback?.invoke()
             }
         }
@@ -130,12 +167,32 @@ class PhoneAuthHandler(
         coroutineScope.launch {
             auth.signInWithCredential(cred)
                 .addOnSuccessListener {
-                    phoneDraftState.value = phoneDraftState.value.copy(verified = true)
+                    updateDraft(
+                        phoneDraftState.value.copy(
+                            verified = true,
+                            errorMessage = null
+                        )
+                    )
                     if (autoVerified) {
                         onAutoVerified?.invoke()
                     }
                 }
-                .addOnFailureListener { onError?.invoke(it) }
+                .addOnFailureListener {
+                    updateDraft(
+                        phoneDraftState.value.copy(
+                            verified = false,
+                            errorMessage = it.localizedMessage ?: "Unable to complete phone verification."
+                        )
+                    )
+                    onError?.invoke(it)
+                }
+        }
+    }
+
+    private fun updateDraft(next: PhoneDraft) {
+        phoneDraftState.value = next
+        coroutineScope.launch {
+            phoneDraftStore.saveDraft(next)
         }
     }
 }

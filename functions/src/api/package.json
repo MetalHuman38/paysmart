@@ -12,8 +12,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@google-cloud/recaptcha-enterprise": "^6.4.0",
-    "@google-cloud/vision": "^5.3.4",
+    "@google-cloud/recaptcha-enterprise": "^5.13.0",
+    "@google-cloud/vision": "^4.3.3",
     "@simplewebauthn/server": "^13.3.0",
     "body-parser": "^2.2.1",
     "compression": "^1.8.1",
@@ -21,11 +21,16 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.3.1",
     "firebase-admin": "^13.7.0",
-    "firebase-functions": "^7.1.1",
+    "firebase-functions": "^7.2.2",
     "helmet": "^8.1.0",
     "resend": "^6.9.3"
   },
   "devDependencies": {
+    "typescript": "^5.9.3",
     "vitest": "^4.1.0"
+  },
+  "overrides": {
+    "@tootallnate/once": "3.0.1",
+    "fast-xml-parser": "5.5.7"
   }
 }

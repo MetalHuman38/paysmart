@@ -80,7 +80,7 @@ fun BiometricSessionUnlock(
 
             Text(
                 text = stringResource(R.string.welcome_back) + ", " + resolvedName,
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 maxLines = 2

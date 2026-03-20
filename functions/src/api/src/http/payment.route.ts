@@ -9,6 +9,9 @@ import { getFlutterwaveAddMoneySessionStatusHandler } from "../handlers/getFlutt
 import { flutterwaveWebhookHandler } from "../handlers/flutterwaveWebhook.js";
 import { getFlutterwaveFundingAccountHandler } from "../handlers/getFlutterwaveFundingAccount.js";
 import { provisionFlutterwaveFundingAccountHandler } from "../handlers/provisionFlutterwaveFundingAccount.js";
+import { listManagedCardsHandler } from "../handlers/listManagedCards.js";
+import { detachManagedCardHandler } from "../handlers/detachManagedCard.js";
+import { setDefaultManagedCardHandler } from "../handlers/setDefaultManagedCard.js";
 
 export function mountPaymentsWebhookRoute(app: Express) {
   app.post(
@@ -89,6 +92,36 @@ export function mountPaymentsRoutes(app: Express) {
     provisionFlutterwaveFundingAccountHandler
   );
   app.options("/payments/flutterwave/funding-account/provision", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.get(
+    "/payments/stripe/managed-cards",
+    requireActiveSession,
+    listManagedCardsHandler
+  );
+  app.options("/payments/stripe/managed-cards", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.delete(
+    "/payments/stripe/managed-cards/:paymentMethodId",
+    requireActiveSession,
+    detachManagedCardHandler
+  );
+  app.options("/payments/stripe/managed-cards/:paymentMethodId", (_, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post(
+    "/payments/stripe/managed-cards/:paymentMethodId/default",
+    requireActiveSession,
+    setDefaultManagedCardHandler
+  );
+  app.options("/payments/stripe/managed-cards/:paymentMethodId/default", (_, res) => {
     corsify(res);
     res.status(204).end();
   });

@@ -1,5 +1,9 @@
 package net.metalbrain.paysmart.ui.home.screen
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,10 +41,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.getSystemService
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CurrencyFlagResolver
 import net.metalbrain.paysmart.domain.model.Transaction
+import net.metalbrain.paysmart.ui.Screen
 import net.metalbrain.paysmart.ui.home.state.BalanceDetailsUiState
 import net.metalbrain.paysmart.ui.theme.Dimens
 import java.time.Instant
@@ -52,8 +58,9 @@ import java.util.Locale
 @Composable
 fun BalanceDetailsScreen(
     state: BalanceDetailsUiState,
+    initialTab: Screen.BalanceDetails.Tab = Screen.BalanceDetails.Tab.TRANSACTIONS,
     onBack: () -> Unit,
-    onViewAccountLimitsClick: () -> Unit = {},
+    onViewAccountLimitsClick: (String) -> Unit = {},
     onSendClick: () -> Unit = {},
     onAddClick: () -> Unit = {},
     onWithdrawClick: () -> Unit = {},
@@ -65,7 +72,11 @@ fun BalanceDetailsScreen(
         CountryCapabilityCatalog.defaultProfile().currencyCode
     }
     val flag = CurrencyFlagResolver.resolve(context, normalizedCurrency)
-    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+    var selectedTabIndex by rememberSaveable(initialTab.routeValue) {
+        mutableIntStateOf(
+            if (initialTab == Screen.BalanceDetails.Tab.ACCOUNT_DETAILS) 1 else 0
+        )
+    }
     val orderedBalances = state.balancesByCurrency.entries
         .sortedWith(
             compareByDescending<Map.Entry<String, Double>> { entry ->
@@ -138,7 +149,7 @@ fun BalanceDetailsScreen(
                 shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClick = onViewAccountLimitsClick
+                onClick = { onViewAccountLimitsClick(normalizedCurrency) }
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = Dimens.md, vertical = Dimens.sm),
@@ -234,33 +245,108 @@ fun BalanceDetailsScreen(
                     text = stringResource(id = R.string.home_segment_account_details)
                 )
 
-                HomeDetailSectionCard {
-                    if (orderedBalances.isEmpty()) {
-                        HomeDetailEmptyText(
-                            text = stringResource(id = R.string.home_balance_no_account_data)
-                        )
-                    } else {
-                        orderedBalances.forEachIndexed { index, entry ->
-                            BalanceDetailLine(
-                                label = entry.key.uppercase(Locale.US),
-                                value = formatCurrencyAmount(entry.value, entry.key)
+                val activeTopup = state.activeFlutterwaveTopup
+                if (state.accountDetailsLoading && activeTopup == null) {
+                    BalanceTransferAccountLoadingCard()
+                } else if (activeTopup?.virtualAccount != null) {
+                    BalanceTransferAccountDetailsSection(
+                        session = activeTopup,
+                        isLoading = state.accountDetailsLoading,
+                        onCopyField = { label, value ->
+                            copyBalanceTransferField(
+                                context = context,
+                                label = label,
+                                value = value
                             )
-                            if (index < orderedBalances.lastIndex || state.walletUpdatedAtMs != null) {
-                                HorizontalDivider()
-                            }
+                        },
+                        onShareDetails = {
+                            shareBalanceTransferDetails(
+                                context = context,
+                                session = activeTopup
+                            )
                         }
-
-                        state.walletUpdatedAtMs?.let { updatedAtMs ->
-                            BalanceDetailLine(
-                                label = stringResource(id = R.string.home_balance_last_synced),
-                                value = updatedAtMs.toBalanceDateTimeLabel()
+                    )
+                } else {
+                    HomeDetailSectionCard {
+                        if (orderedBalances.isEmpty()) {
+                            HomeDetailEmptyText(
+                                text = stringResource(id = R.string.home_balance_no_account_data)
                             )
+                        } else {
+                            orderedBalances.forEachIndexed { index, entry ->
+                                BalanceDetailLine(
+                                    label = entry.key.uppercase(Locale.US),
+                                    value = formatCurrencyAmount(entry.value, entry.key)
+                                )
+                                if (index < orderedBalances.lastIndex || state.walletUpdatedAtMs != null) {
+                                    HorizontalDivider()
+                                }
+                            }
+
+                            state.walletUpdatedAtMs?.let { updatedAtMs ->
+                                BalanceDetailLine(
+                                    label = stringResource(id = R.string.home_balance_last_synced),
+                                    value = updatedAtMs.toBalanceDateTimeLabel()
+                                )
+                            }
                         }
                     }
                 }
             }
         }
     }
+}
+
+private fun copyBalanceTransferField(
+    context: android.content.Context,
+    label: String,
+    value: String
+) {
+    if (value.isBlank()) return
+
+    context.getSystemService<ClipboardManager>()
+        ?.setPrimaryClip(ClipData.newPlainText(label, value))
+    Toast.makeText(
+        context,
+        context.getString(R.string.home_balance_transfer_copy_success_format, label),
+        Toast.LENGTH_SHORT
+    ).show()
+}
+
+private fun shareBalanceTransferDetails(
+    context: android.content.Context,
+    session: net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData
+) {
+    val virtualAccount = session.virtualAccount ?: return
+    val shareText = buildString {
+        appendLine(context.getString(R.string.home_balance_transfer_share_title))
+        virtualAccount.accountName?.takeIf { it.isNotBlank() }?.let { accountName ->
+            appendLine("${context.getString(R.string.home_balance_transfer_account_holder_label)}: $accountName")
+        }
+        appendLine("${context.getString(R.string.funding_account_details_bank_name)}: ${virtualAccount.bankName}")
+        appendLine("${context.getString(R.string.funding_account_details_account_number)}: ${virtualAccount.accountNumber}")
+        appendLine("${context.getString(R.string.home_balance_transfer_exact_amount_label)}: ${formatMinorAmountForShare(session.amountMinor, session.currency)}")
+        appendLine("${context.getString(R.string.funding_account_details_reference)}: ${virtualAccount.reference}")
+        appendLine("${context.getString(R.string.home_balance_transfer_expires_label)}: ${session.expiresAtMs.toBalanceDateTimeLabel()}")
+    }
+
+    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.home_balance_transfer_share_title))
+        putExtra(Intent.EXTRA_TEXT, shareText)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
+    context.startActivity(
+        Intent.createChooser(
+            shareIntent,
+            context.getString(R.string.funding_account_action_share_details)
+        )
+    )
+}
+
+private fun formatMinorAmountForShare(amountMinor: Int, currencyCode: String): String {
+    return String.format(Locale.US, "%.2f %s", amountMinor.toDouble() / 100.0, currencyCode.uppercase(Locale.US))
 }
 
 private fun formatAmount(amount: Double): String {

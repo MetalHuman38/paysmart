@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "2026-03-18-v1",
+  "limitValueSets": {
+    "default": {
+      "send": {
+        "single": 10000,
+        "daily": 10000,
+        "weekly": 20000,
+        "monthly": 40000
+      },
+      "receive": {
+        "single": 10000,
+        "daily": 10000,
+        "weekly": 20000,
+        "monthly": 40000
+      }
+    },
+    "GB": {
+      "send": {
+        "single": 10000,
+        "daily": 10000,
+        "weekly": 20000,
+        "monthly": 40000
+      },
+      "receive": {
+        "single": 10000,
+        "daily": 10000,
+        "weekly": 20000,
+        "monthly": 40000
+      }
+    },
+    "US": {
+      "send": {
+        "single": 12000,
+        "daily": 12000,
+        "weekly": 25000,
+        "monthly": 50000
+      },
+      "receive": {
+        "single": 12000,
+        "daily": 12000,
+        "weekly": 25000,
+        "monthly": 50000
+      }
+    },
+    "NG": {
+      "send": {
+        "single": 5000000,
+        "daily": 5000000,
+        "weekly": 10000000,
+        "monthly": 20000000
+      },
+      "receive": {
+        "single": 5000000,
+        "daily": 5000000,
+        "weekly": 10000000,
+        "monthly": 20000000
+      }
+    },
+    "DE": {
+      "send": {
+        "single": 10000,
+        "daily": 10000,
+        "weekly": 20000,
+        "monthly": 40000
+      },
+      "receive": {
+        "single": 10000,
+        "daily": 10000,
+        "weekly": 20000,
+        "monthly": 40000
+      }
+    },
+    "KE": {
+      "send": {
+        "single": 1000000,
+        "daily": 1000000,
+        "weekly": 2000000,
+        "monthly": 4000000
+      },
+      "receive": {
+        "single": 1000000,
+        "daily": 1000000,
+        "weekly": 2000000,
+        "monthly": 4000000
+      }
+    },
+    "JP": {
+      "send": {
+        "single": 1500000,
+        "daily": 1500000,
+        "weekly": 3000000,
+        "monthly": 6000000
+      },
+      "receive": {
+        "single": 1500000,
+        "daily": 1500000,
+        "weekly": 3000000,
+        "monthly": 6000000
+      }
+    }
+  }
+}

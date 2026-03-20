@@ -200,7 +200,13 @@ describe("FlutterwavePaymentsService provider requests", () => {
         jsonResponse({
           data: {
             id: "session-123",
+            amount: 1500,
+            account_number: "4032866864",
+            account_bank_name: "WEMA BANK",
+            reference: "reference-123",
             status: "pending",
+            account_expiration_datetime: "2026-03-10T13:00:00.000Z",
+            note: "Please make a bank transfer to Ada Lovelace",
             created_datetime: "2026-03-10T12:00:00.000Z",
           },
         })
@@ -255,7 +261,13 @@ describe("FlutterwavePaymentsService provider requests", () => {
         jsonResponse({
           data: {
             id: "session-123",
+            amount: 1500,
+            account_number: "4032866864",
+            account_bank_name: "WEMA BANK",
+            reference: "reference-123",
             status: "pending",
+            account_expiration_datetime: "2026-03-10T13:00:00.000Z",
+            note: "Please make a bank transfer to Ada Lovelace",
             created_datetime: "2026-03-10T12:00:00.000Z",
           },
         })
@@ -340,7 +352,13 @@ describe("FlutterwavePaymentsService provider requests", () => {
         jsonResponse({
           data: {
             id: "session-123",
+            amount: 1500,
+            account_number: "4032866864",
+            account_bank_name: "WEMA BANK",
+            reference: "reference-123",
             status: "pending",
+            account_expiration_datetime: "2026-03-10T13:00:00.000Z",
+            note: "Please make a bank transfer to Ada Lovelace",
             created_datetime: "2026-03-10T12:00:00.000Z",
           },
         })

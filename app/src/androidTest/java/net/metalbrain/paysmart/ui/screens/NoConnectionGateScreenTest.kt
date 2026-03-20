@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.ui.screens.NoConnectionGateScreen
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 import org.junit.Rule
 import org.junit.Test

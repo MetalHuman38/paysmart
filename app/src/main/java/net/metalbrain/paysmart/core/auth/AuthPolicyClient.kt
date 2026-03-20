@@ -62,4 +62,42 @@ class AuthPolicyClient(
             throw Exception("Unexpected response: $responseBody")
         }
     }
+
+    suspend fun finalizePhoneSignup(idToken: String): Boolean = withContext(Dispatchers.IO) {
+        val body = "{}".toRequestBody("application/json".toMediaTypeOrNull())
+        val requestBuilder = Request.Builder()
+            .url(config.finalizePhoneSignupUrl)
+            .header("Authorization", "Bearer $idToken")
+            .post(body)
+
+        if (requireAppCheckToken) {
+            requestBuilder.attachRequiredAppCheckToken(
+                appCheckTokenProvider = appCheckTokenProvider,
+                endpointName = "/auth/finalize-phone-signup"
+            )
+        } else {
+            requestBuilder.attachOptionalAppCheckToken(appCheckTokenProvider)
+        }
+
+        httpClient.newCall(requestBuilder.build()).execute().use { response ->
+            if (response.isSuccessful) {
+                return@withContext true
+            }
+
+            val responseBody = response.body?.string()
+            val message = responseBody?.let(::extractErrorMessage)
+            throw Exception(message ?: "Unable to finish account setup. Please retry.")
+        }
+    }
+
+    private fun extractErrorMessage(responseBody: String): String? {
+        return runCatching {
+            val json = JSONObject(responseBody)
+            when (val error = json.opt("error")) {
+                is JSONObject -> error.optString("message").takeIf { it.isNotBlank() }
+                is String -> error.takeIf { it.isNotBlank() }
+                else -> null
+            }
+        }.getOrNull()
+    }
 }

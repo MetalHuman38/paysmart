@@ -15,8 +15,13 @@ export class FirebaseAuthService {
         return {
             uid: user.uid,
             email: user.email ?? undefined,
+            phoneNumber: user.phoneNumber ?? undefined,
             emailVerified: user.emailVerified,
+            isAnonymous: user.providerData.length === 0,
+            providerIds: user.providerData.map((provider) => provider.providerId),
             tenantId: user.tenantId ?? null,
+            photoURL: user.photoURL ?? undefined,
+            displayName: user.displayName ?? undefined,
         };
     }
     async updateUserEmail(uid, email) {

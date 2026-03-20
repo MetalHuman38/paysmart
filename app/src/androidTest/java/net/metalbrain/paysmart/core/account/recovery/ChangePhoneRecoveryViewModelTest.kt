@@ -4,10 +4,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
-import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -16,7 +14,6 @@ import net.metalbrain.paysmart.core.auth.PhoneChangePolicyHandler
 import net.metalbrain.paysmart.core.features.account.recovery.auth.ChangePhoneRecoveryAuthGateway
 import net.metalbrain.paysmart.core.features.account.recovery.auth.data.PhoneRecoverySession
 import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePhoneRecoveryViewModel
-import net.metalbrain.paysmart.data.repository.UserProfileRepository
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,8 +32,7 @@ import org.junit.runner.RunWith
 class ChangePhoneRecoveryViewModelTest {
 
     @Test
-    fun confirmCode_success_setsSuccessAndUpdatesProfile() = runBlocking {
-        val userRepo = mockk<UserProfileRepository>()
+    fun confirmCode_success_setsSuccess() = runBlocking {
         val policyHandler = mockk<PhoneChangePolicyHandler>()
         val gateway = FakeGateway(
             session = PhoneRecoverySession(
@@ -48,9 +44,8 @@ class ChangePhoneRecoveryViewModelTest {
         val activity = mockk<FragmentActivity>(relaxed = true)
 
         coEvery { policyHandler.confirmPhoneChanged(any(), any()) } returns true
-        coEvery { userRepo.updatePhoneNumber(any(), any()) } just Runs
 
-        val viewModel = ChangePhoneRecoveryViewModel(userRepo, policyHandler, gateway)
+        val viewModel = ChangePhoneRecoveryViewModel(policyHandler, gateway)
         viewModel.onPhoneNumberChanged("+447988777954")
         viewModel.sendCode(activity)
         viewModel.onOtpChanged("123456")
@@ -67,14 +62,10 @@ class ChangePhoneRecoveryViewModelTest {
         coVerify(exactly = 1) {
             policyHandler.confirmPhoneChanged("token-success", "+447988777954")
         }
-        coVerify(exactly = 1) {
-            userRepo.updatePhoneNumber("uid-success", "+447988777954")
-        }
     }
 
     @Test
-    fun confirmCode_failure_whenServerRejects_setsErrorAndSkipsLocalProfileUpdate() = runBlocking {
-        val userRepo = mockk<UserProfileRepository>()
+    fun confirmCode_failure_whenServerRejects_setsError() = runBlocking {
         val policyHandler = mockk<PhoneChangePolicyHandler>()
         val gateway = FakeGateway(
             session = PhoneRecoverySession(
@@ -86,9 +77,8 @@ class ChangePhoneRecoveryViewModelTest {
         val activity = mockk<FragmentActivity>(relaxed = true)
 
         coEvery { policyHandler.confirmPhoneChanged(any(), any()) } returns false
-        coEvery { userRepo.updatePhoneNumber(any(), any()) } just Runs
 
-        val viewModel = ChangePhoneRecoveryViewModel(userRepo, policyHandler, gateway)
+        val viewModel = ChangePhoneRecoveryViewModel(policyHandler, gateway)
         viewModel.onPhoneNumberChanged("+447911111111")
         viewModel.sendCode(activity)
         viewModel.onOtpChanged("123456")
@@ -109,9 +99,6 @@ class ChangePhoneRecoveryViewModelTest {
         )
         coVerify(exactly = 1) {
             policyHandler.confirmPhoneChanged("token-failure", "+447911111111")
-        }
-        coVerify(exactly = 0) {
-            userRepo.updatePhoneNumber(any(), any())
         }
     }
 

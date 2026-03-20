@@ -35,6 +35,16 @@ object TransactionPagingQueryFactory {
             args.addAll(currencies)
         }
 
+        query.fromCreatedAtMs?.let { fromCreatedAtMs ->
+            clauses += "createdAtMs >= ?"
+            args += fromCreatedAtMs
+        }
+
+        query.toCreatedAtMs?.let { toCreatedAtMs ->
+            clauses += "createdAtMs <= ?"
+            args += toCreatedAtMs
+        }
+
         val sql = buildString {
             append("SELECT * FROM transactions")
             append(" WHERE ")

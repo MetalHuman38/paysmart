@@ -11,12 +11,14 @@ const PAYMENT_INTENT_SESSION_TTL_MS = 30 * 60 * 1000;
 export class FirestoreAddMoneyRepository {
     firestore;
     stripe;
+    managedCards;
     stripePublishableKey;
     allowedCurrencies;
     minimumAmountMinor;
-    constructor(firestore, stripe, stripePublishableKey, allowedCurrencies, minimumAmountMinor) {
+    constructor(firestore, stripe, managedCards, stripePublishableKey, allowedCurrencies, minimumAmountMinor) {
         this.firestore = firestore;
         this.stripe = stripe;
+        this.managedCards = managedCards;
         this.stripePublishableKey = stripePublishableKey;
         this.allowedCurrencies = allowedCurrencies;
         this.minimumAmountMinor = minimumAmountMinor;
@@ -54,11 +56,14 @@ export class FirestoreAddMoneyRepository {
         }
         const currency = this.normalizeCurrency(input.currency);
         const amountMinor = this.normalizeAmount(input.amountMinor);
+        const paymentSheetCustomer = await this.managedCards.preparePaymentSheetCustomer(uid);
         const stripeIntent = await this.stripe.createTopupPaymentIntent({
             uid,
             amountMinor,
             currency,
             idempotencyKey: input.idempotencyKey,
+            customerId: paymentSheetCustomer.customerId,
+            setupFutureUsage: "off_session",
         });
         const status = this.derivePaymentIntentStatus(stripeIntent.status);
         const expiresAtMs = stripeIntent.createdAtMs + PAYMENT_INTENT_SESSION_TTL_MS;
@@ -72,6 +77,7 @@ export class FirestoreAddMoneyRepository {
             stripeStatus: stripeIntent.status,
             stripePaymentStatus: stripeIntent.status,
             stripePaymentIntentId: stripeIntent.id,
+            stripeCustomerId: paymentSheetCustomer.customerId,
             status,
         };
         await this.sessionRef(uid, stripeIntent.id).set({
@@ -91,6 +97,9 @@ export class FirestoreAddMoneyRepository {
             paymentIntentId: stripeIntent.id,
             paymentIntentClientSecret: stripeIntent.clientSecret,
             publishableKey,
+            customerId: paymentSheetCustomer.customerId,
+            customerEphemeralKeySecret: paymentSheetCustomer.ephemeralKeySecret,
+            defaultPaymentMethodId: paymentSheetCustomer.defaultPaymentMethodId,
         };
     }
     async getSessionStatus(uid, sessionId) {
@@ -127,6 +136,7 @@ export class FirestoreAddMoneyRepository {
         }, { merge: true });
         if (status === "succeeded") {
             await this.applySettlementIfNeeded(uid, cleanSessionId, current.amountMinor, current.currency, paymentIntentId);
+            await this.managedCards.syncFromProvider(uid);
         }
         return {
             sessionId: cleanSessionId,
@@ -172,6 +182,7 @@ export class FirestoreAddMoneyRepository {
                 stripeStatus: stripeIntent.status,
                 stripePaymentStatus: stripeIntent.status,
                 stripePaymentIntentId: stripeIntent.id,
+                stripeCustomerId: stripeIntent.customerId ?? null,
                 status,
                 failureCode: asString(paymentError.code) || null,
                 failureMessage: asString(paymentError.message) || null,
@@ -180,6 +191,7 @@ export class FirestoreAddMoneyRepository {
             }, { merge: true });
             if (status === "succeeded") {
                 await this.applySettlementIfNeeded(uid, stripeIntent.id, stripeIntent.amountMinor, stripeIntent.currency, stripeIntent.id);
+                await this.managedCards.syncFromProvider(uid);
             }
             return {
                 handled: true,
@@ -211,6 +223,7 @@ export class FirestoreAddMoneyRepository {
         }, { merge: true });
         if (status === "succeeded") {
             await this.applySettlementIfNeeded(uid, stripeSession.id, stripeSession.amountTotalMinor, stripeSession.currency, stripeSession.paymentIntentId);
+            await this.managedCards.syncFromProvider(uid);
         }
         return {
             handled: true,

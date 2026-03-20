@@ -57,6 +57,7 @@ __pycache__/
 # Android / Gradle
 ###############################
 .gradle/
+.gradle-*/
 .gradle-user-home/
 .kotlin/
 build/

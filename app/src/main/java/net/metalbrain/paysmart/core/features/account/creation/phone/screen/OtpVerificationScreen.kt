@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,11 +37,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.OTPViewModel
-import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.components.OtpTextFieldRow
+import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.screens.loader.LoadingState
 import net.metalbrain.paysmart.ui.screens.loader.rememberStabilizedLoading
 import net.metalbrain.paysmart.ui.theme.Dimens
@@ -61,27 +59,23 @@ fun OtpVerificationScreen(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val activity = LocalActivity.current
-    var submitting by remember { mutableStateOf(false) }
-    var resending by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
     val scrollState = rememberScrollState()
 
     val uiState by viewModel.uiState.collectAsState()
     val showLoading = rememberStabilizedLoading(uiState.loading)
-    val otpFinishSetupErrorText = stringResource(R.string.otp_finish_setup_error)
-    val otpInvalidCodeText = stringResource(R.string.otp_invalid_code_error)
+    val waitingForCodeMessage = stringResource(R.string.otp_waiting_for_code_message)
 
     if (showLoading) {
         LoadingState(message = stringResource(R.string.otp_loading_message))
         return
     }
 
-    var timeLeft by remember { mutableIntStateOf(60) }
-
-    LaunchedEffect(Unit) {
-        while (timeLeft > 0) {
-            delay(1000)
-            timeLeft--
+    LaunchedEffect(uiState.verified) {
+        if (uiState.verified) {
+            viewModel.finalizeVerifiedUser(
+                onSuccess = onContinue,
+                onError = {}
+            )
         }
     }
 
@@ -119,12 +113,23 @@ fun OtpVerificationScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
+        if (uiState.awaitingCode) {
+            Spacer(modifier = Modifier.height(Dimens.smallSpacing))
+            Text(
+                text = waitingForCodeMessage,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
         Spacer(modifier = Modifier.height(Dimens.largeSpacing))
 
         OtpTextFieldRow(
             otpDigits = otpDigits,
             modifier = Modifier.fillMaxWidth(),
+            enabled = uiState.verificationReady && !uiState.verified,
             onDigitChanged = { index, value ->
+                viewModel.clearActionError()
                 val digits = value.filter { it.isDigit() }
                 if (digits.isEmpty() && value.isNotEmpty()) {
                     return@OtpTextFieldRow
@@ -159,36 +164,28 @@ fun OtpVerificationScreen(
 
         Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
 
-        if (timeLeft > 0) {
+        if (uiState.verificationReady && !uiState.isResendAvailable) {
             Text(
-                text = stringResource(R.string.otp_resend_in_seconds, timeLeft),
+                text = stringResource(R.string.otp_resend_in_seconds, uiState.remainingSeconds),
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp)
             )
-        } else {
+        } else if (uiState.verificationReady) {
             TextButton(
                 onClick = {
-                    resending = true
                     if (activity != null) {
-                        viewModel.startTimer(backoff = false)
                         focusManager.clearFocus()
                         keyboardController?.hide()
                         viewModel.resendOtp(
                             phoneNumber = phoneNumber,
                             activity = activity,
-                            onSuccess = {
-                                timeLeft = 60
-                                resending = false
-                            },
-                            onError = {
-                                resending = false
-                            }
+                            onError = {}
                         )
                     }
                 },
-                enabled = !resending
+                enabled = !uiState.isResending
             ) {
                 Text(
-                    if (resending) {
+                    if (uiState.isResending) {
                         stringResource(R.string.otp_resending_action)
                     } else {
                         stringResource(R.string.otp_resend_action)
@@ -201,44 +198,40 @@ fun OtpVerificationScreen(
 
         PrimaryButton(
             onClick = {
-                val code = otpDigits.joinToString("")
-                submitting = true
-                errorMessage = null
-
-                viewModel.verifyOtp(
-                    code = code,
-                    onSuccess = {
-                        viewModel.upsertUserAfterOtp(
-                            onDone = {
-                                submitting = false
-                                onContinue()
-                            },
-                            onError = { error ->
-                                submitting = false
-                                errorMessage = error.message
-                                    ?: otpFinishSetupErrorText
-                            }
-                        )
-                    },
-                    onError = { e ->
-                        submitting = false
-                        errorMessage = e.message ?: otpInvalidCodeText
-                    }
-                )
+                if (uiState.verified) {
+                    viewModel.finalizeVerifiedUser(
+                        onSuccess = onContinue,
+                        onError = {}
+                    )
+                } else {
+                    viewModel.verifyOtp(
+                        code = otpDigits.joinToString(""),
+                        onSuccess = { },
+                        onError = { }
+                    )
+                }
             },
-            enabled = isOtpComplete,
-            isLoading = submitting,
+            enabled = if (uiState.verified) {
+                true
+            } else {
+                uiState.verificationReady && isOtpComplete
+            },
+            isLoading = uiState.loading,
             loadingText = stringResource(R.string.otp_verifying_action),
-            text = stringResource(R.string.otp_continue_action),
+            text = if (uiState.verified) {
+                stringResource(R.string.otp_continue_action)
+            } else {
+                stringResource(R.string.otp_continue_action)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(Dimens.buttonHeight)
         )
 
-        if (errorMessage != null) {
+        uiState.displayErrorMessage?.let { message ->
             Spacer(modifier = Modifier.height(Dimens.smallSpacing))
             Text(
-                text = errorMessage!!,
+                text = message,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall
             )

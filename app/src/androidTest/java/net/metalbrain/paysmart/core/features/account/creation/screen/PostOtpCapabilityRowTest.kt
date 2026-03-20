@@ -26,7 +26,8 @@ class PostOtpCapabilityRowTest {
                         title = "Earn a return",
                         subtitle = "Earn working-day returns on supported balances.",
                         footnote = "Rates for selected currencies."
-                    )
+                    ),
+                    onClick = {}
                 )
             }
         }

@@ -14,12 +14,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.core.auth.PhoneChangePolicyHandler
 import net.metalbrain.paysmart.core.features.account.recovery.auth.ChangePhoneRecoveryAuthGateway
-import net.metalbrain.paysmart.data.repository.UserProfileRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class ChangePhoneRecoveryViewModel @Inject constructor(
-    private val userProfileRepository: UserProfileRepository,
     private val phoneChangePolicyHandler: PhoneChangePolicyHandler,
     private val authGateway: ChangePhoneRecoveryAuthGateway,
 ) : ViewModel() {
@@ -134,7 +132,6 @@ class ChangePhoneRecoveryViewModel @Inject constructor(
                 throw IllegalStateException("Server failed to confirm phone number change")
             }
 
-            userProfileRepository.updatePhoneNumber(session.uid, session.phoneNumber)
             _uiState.update {
                 it.copy(
                     isLoading = false,

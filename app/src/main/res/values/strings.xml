@@ -57,6 +57,7 @@
     <string name="get_help">Get help</string>
     <string name="phone_place_holder">7xxxxxxxxx</string>
     <string name="enter_phone_to_signup">Enter your phone number to set up your account</string>
+    <string name="create_account_phone_verification_error" translatable="false">Unable to start phone verification. Please retry.</string>
     <string name="welcome_back">Welcome back</string>
     <string name="enter_phone_to_associated_to_account">Enter the phone number associated with your PaySmart account</string>
     <string name="select_country">Select country of residence</string>
@@ -146,6 +147,15 @@
     <string name="profile_connected_accounts_cards_supporting">Cards saved during Stripe checkout will be managed here.</string>
     <string name="profile_connected_accounts_cards_empty_title">No saved cards yet</string>
     <string name="profile_connected_accounts_cards_empty_supporting">When you save a card during a Stripe payment, you will be able to review, update, or remove it here.</string>
+    <string name="profile_connected_accounts_cards_loading_title">Loading saved cards</string>
+    <string name="profile_connected_accounts_cards_loading_supporting">Checking Stripe for the latest cards saved to your wallet.</string>
+    <string name="profile_connected_accounts_cards_error_title">Saved cards are unavailable</string>
+    <string name="profile_connected_accounts_cards_error_supporting">We could not load your saved cards right now. Try refreshing again.</string>
+    <string name="profile_connected_accounts_cards_refresh_action">Refresh cards</string>
+    <string name="profile_connected_accounts_cards_make_default_action">Make default</string>
+    <string name="profile_connected_accounts_cards_remove_action">Remove</string>
+    <string name="profile_connected_accounts_cards_default_label">Default</string>
+    <string name="profile_connected_accounts_cards_expiry_format">Expires %1$02d/%2$d</string>
     <string name="profile_connected_accounts_cards_future_title">Card controls will live here</string>
     <string name="profile_connected_accounts_cards_future_supporting">This screen is ready for masked card details, default card status, and remove or update actions as soon as the Stripe payment-method pipeline is exposed in the app.</string>
     <string name="profile_about_description">App information, version details, and legal references.</string>
@@ -168,6 +178,40 @@
     <string name="profile_about_social_instagram_url" translatable="false">https://www.instagram.com/</string>
     <string name="profile_about_social_linkedin_url" translatable="false">https://www.linkedin.com/in/babatunde-kalejaiye-729248125</string>
     <string name="profile_about_social_facebook_url" translatable="false">https://www.facebook.com/</string>
+    <string name="help_center_url" translatable="false">https://pay-smart.net/help</string>
+    <string name="help_call_center_phone_number" translatable="false">07988777954</string>
+    <string name="help_submit_open_failed" translatable="false">Unable to open your email app right now.</string>
+    <string name="help_email_subject_format" translatable="false">PaySmart support: %1$s</string>
+    <string name="help_home_greeting_format" translatable="false">Hi %1$s,
+how can we help?</string>
+    <string name="help_home_greeting_fallback" translatable="false">Hi there,
+how can we help?</string>
+    <string name="help_home_help_center_title" translatable="false">Help center</string>
+    <string name="help_home_help_center_subtitle" translatable="false">Fast answers to all of the most common questions.</string>
+    <string name="help_home_contact_support_title" translatable="false">Contact support</string>
+    <string name="help_home_contact_support_subtitle" translatable="false">Chat with our team of experts</string>
+    <string name="help_home_call_center_title" translatable="false">Call center</string>
+    <string name="help_home_call_center_subtitle" translatable="false">Call us to speak to a support agent</string>
+    <string name="help_home_socials_title" translatable="false">Follow us on social media</string>
+    <string name="help_home_socials_subtitle" translatable="false">Join our social media to view latest information</string>
+    <string name="help_contact_support_title" translatable="false">Contact support</string>
+    <string name="help_contact_support_heading" translatable="false">Hey, how can we help?</string>
+    <string name="help_topic_recent_transaction" translatable="false">A recent transaction</string>
+    <string name="help_topic_recent_wallet_funding" translatable="false">A recent wallet funding</string>
+    <string name="help_topic_id_verification" translatable="false">I.D. Verification</string>
+    <string name="help_topic_other" translatable="false">Others</string>
+    <string name="help_recent_transfer_title" translatable="false">A recent transfer</string>
+    <string name="help_recent_funding_title" translatable="false">A recent funding</string>
+    <string name="help_recent_empty_title" translatable="false">Nothing recent to review</string>
+    <string name="help_recent_empty_body" translatable="false">Continue without selecting a transaction and tell us what happened.</string>
+    <string name="help_recent_continue_action" translatable="false">Continue without selecting a transaction</string>
+    <string name="help_compose_title" translatable="false">Let\'s sort this out</string>
+    <string name="help_compose_category_label_format" translatable="false">Topic: %1$s</string>
+    <string name="help_compose_prompt" translatable="false">Tell us as much as you can about the problem and we\'ll be in touch soon</string>
+    <string name="help_compose_message_placeholder" translatable="false">Enter your message</string>
+    <string name="help_compose_attach_image" translatable="false">Attach image</string>
+    <string name="help_compose_attachment_selected_format" translatable="false">Attached: %1$s</string>
+    <string name="help_compose_submit" translatable="false">Submit</string>
 
     <string name="profile_account_information_title">Account information</string>
     <string name="profile_account_info_profile_subtitle">Personal details and profile preferences</string>
@@ -224,6 +268,13 @@
     <string name="mfa_prompt_code_placeholder">Enter 6-digit code</string>
     <string name="mfa_prompt_resend_action">Resend code</string>
     <string name="mfa_prompt_code_help">Enter the SMS code sent to your phone.</string>
+    <string name="mfa_sign_in_title">Confirm sign-in</string>
+    <string name="mfa_sign_in_description">Enter the verification code for your enrolled second factor to finish signing in.</string>
+    <string name="mfa_sign_in_card_title">2-step verification required</string>
+    <string name="mfa_sign_in_factor_title">Choose where to send your code</string>
+    <string name="mfa_sign_in_send_action">Send verification code</string>
+    <string name="mfa_sign_in_verify_action">Verify and sign in</string>
+    <string name="mfa_sign_in_back_to_login">Back to sign in</string>
 
     <string name="account_limits_title">Account limits</string>
     <string name="account_limits_current_tier">Current tier</string>
@@ -235,12 +286,28 @@
     <string name="account_limits_email_status">Email verification</string>
     <string name="account_limits_last_synced">Last synced: %1$s</string>
     <string name="account_limits_info_note">Limits are derived from current verification status and update after successful sync.</string>
+    <string name="select_account_limits_to_see_or_receive">Select an account to see send and receive limit.</string>
+    <string name="account_limits_empty_accounts">No wallet accounts available yet.</string>
+    <string name="account_limits_account_descriptor_bank_transfer">Bank transfer</string>
+    <string name="account_limits_currency_title_format">%1$s limits</string>
+    <string name="account_limits_details_subtitle_format">How much can you send and receive with your %1$s PaySmart account</string>
+    <string name="account_limits_spent_of_limit_format">%1$s spent / %2$s</string>
+    <string name="account_limits_left_format">%1$s left</string>
 
     <string name="account_statement_title">Account statement</string>
     <string name="account_statement_empty">No statement entries yet.</string>
     <string name="account_statement_amount_format">%1$s %2$s %3$.2f</string>
     <string name="account_statement_datetime_format">%1$s at %2$s</string>
     <string name="account_statement_status_format">Status: %1$s</string>
+    <string name="account_statement_supporting">Choose a timeframe for your statement and select the format you want it in.</string>
+    <string name="account_statement_currency_label">Select currency</string>
+    <string name="account_statement_start_date_label">Start date</string>
+    <string name="account_statement_end_date_label">End date</string>
+    <string name="account_statement_date_placeholder">DD/MM/YYYY</string>
+    <string name="account_statement_format_label">Format</string>
+    <string name="account_statement_format_pdf">PDF Format</string>
+    <string name="account_statement_get_action">Get Statement</string>
+    <string name="account_statement_export_pending">Statement export is not connected yet. This form is ready for the statement pipeline.</string>
 
     <string name="address_resolver_title">Resolve home address</string>
     <string name="address_resolver_map_title">Confirm address</string>
@@ -337,6 +404,19 @@
     <string name="home_balance_no_transactions">No transactions yet for this currency.</string>
     <string name="home_balance_no_account_data">No wallet balance data is available yet.</string>
     <string name="home_balance_last_synced">Last synced</string>
+    <string name="common_copy">Copy</string>
+    <string name="add_money_view_account_details_action">View account details</string>
+    <string name="home_balance_transfer_account_supporting">Use these details to complete your one-time bank transfer top up.</string>
+    <string name="home_balance_transfer_account_holder_label">Account holder</string>
+    <string name="home_balance_transfer_exact_amount_label">Exact amount</string>
+    <string name="home_balance_transfer_expires_label">Expires</string>
+    <string name="home_balance_transfer_instruction_title">Before you send money</string>
+    <string name="home_balance_transfer_instruction_exact_amount">Transfer the exact amount shown above.</string>
+    <string name="home_balance_transfer_instruction_one_time">This virtual account is for this top up only and cannot be reused.</string>
+    <string name="home_balance_transfer_instruction_expiry_format">Send the transfer before %1$s.</string>
+    <string name="home_balance_transfer_instruction_confirmation">Your wallet updates after Flutterwave confirms the transfer.</string>
+    <string name="home_balance_transfer_copy_success_format">%1$s copied</string>
+    <string name="home_balance_transfer_share_title">Share transfer details</string>
     <string name="home_balance_activity_transfer_out">To recipient</string>
     <string name="home_balance_activity_topup">Topup via bank transfer</string>
     <string name="home_balance_amount_negative">-%1$s %2$s</string>
@@ -436,7 +516,9 @@
     <string name="loading_signing_in">Signing in…</string>
     <string name="otp_loading_message">Creating your account…</string>
     <string name="otp_verify_phone_title">Verify phone number</string>
-    <string name="otp_verify_phone_subtitle">Enter the 6-digit code sent to %1$s</string>    <string name="otp_resend_in_seconds">Did not receive it? Retry in %1$d seconds</string>
+    <string name="otp_verify_phone_subtitle">Enter the 6-digit code sent to %1$s</string>
+    <string name="otp_waiting_for_code_message" translatable="false">We are sending your verification code now. Delivery can take longer on slower networks.</string>
+    <string name="otp_resend_in_seconds">Did not receive it? Retry in %1$d seconds</string>
     <string name="otp_resend_action">Resend OTP</string>
     <string name="otp_resending_action">Resending…</string>
     <string name="otp_continue_action">Continue</string>
@@ -687,6 +769,10 @@
     <string name="home_exchange_rate_value">1 %1$s = %2$s %3$s</string>
     <string name="home_exchange_rate_unavailable">%1$s → %2$s unavailable</string>
     <string name="home_daily_limits_title">Daily limits</string>
+    <string name="exchange_rates_title">Exchange rates</string>
+    <string name="exchange_rates_supporting">Live FX quotes for popular destinations, powered by the current PaySmart rate feed.</string>
+    <string name="exchange_rates_empty_title">Rates are unavailable</string>
+    <string name="exchange_rates_empty_supporting">We could not load live FX quotes right now. Use refresh or try again shortly.</string>
     <string name="home_daily_limits_hint_verified">Identity verified. Full limits are active.</string>
     <string name="home_daily_limits_hint_identity_required">Verify identity to unlock higher limits.</string>
     <string name="home_daily_limits_hint_address_required">Add and verify home address to continue.</string>
@@ -780,5 +866,6 @@
     <string name="profile_change_photo_save">Save</string>
     <string name="profile_change_photo_saving">Saving…</string>
     <string name="profile_change_photo_error">Unable to update photo right now.</string>
+    <string name="profile_change_photo_camera_permission_error">Camera permission is required to take a profile photo. You can still choose one from your gallery.</string>
     <string name="profile_change_photo_contact_fallback">Add an email or phone number</string>
 </resources>

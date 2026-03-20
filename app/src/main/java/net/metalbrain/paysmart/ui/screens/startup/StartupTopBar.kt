@@ -19,7 +19,7 @@ internal fun StartupTopBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = Dimens.mediumSpacing),
+            .padding(top = Dimens.mediumSpacing, bottom = Dimens.largeSpacing + Dimens.md),
         horizontalArrangement = Arrangement.End
     ) {
         LanguageSelector(

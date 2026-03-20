@@ -4,6 +4,7 @@ import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyErrorCode
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionStatus
+import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyVirtualAccountData
 import org.json.JSONObject
 
 internal fun parseAddMoneySession(
@@ -27,9 +28,13 @@ internal fun parseAddMoneySession(
             ?: fallbackProvider,
         checkoutUrl = json.optNullableString("checkoutUrl"),
         flutterwaveTransactionId = json.optNullableString("flutterwaveTransactionId"),
+        virtualAccount = json.optJSONObject("virtualAccount")?.toVirtualAccountData(),
         paymentIntentId = json.optNullableString("paymentIntentId"),
         paymentIntentClientSecret = json.optNullableString("paymentIntentClientSecret"),
-        publishableKey = json.optNullableString("publishableKey")
+        publishableKey = json.optNullableString("publishableKey"),
+        customerId = json.optNullableString("customerId"),
+        customerEphemeralKeySecret = json.optNullableString("customerEphemeralKeySecret"),
+        defaultPaymentMethodId = json.optNullableString("defaultPaymentMethodId")
     )
 }
 
@@ -69,4 +74,18 @@ private fun JSONObject.optNullableString(key: String): String? {
     return optString(key)
         .trim()
         .takeIf { it.isNotEmpty() && !it.equals("null", ignoreCase = true) }
+}
+
+private fun JSONObject.toVirtualAccountData(): AddMoneyVirtualAccountData? {
+    val accountNumber = optNullableString("accountNumber") ?: return null
+    val bankName = optNullableString("bankName") ?: return null
+    val reference = optNullableString("reference") ?: return null
+
+    return AddMoneyVirtualAccountData(
+        accountNumber = accountNumber,
+        bankName = bankName,
+        accountName = optNullableString("accountName"),
+        reference = reference,
+        note = optNullableString("note")
+    )
 }

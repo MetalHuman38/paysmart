@@ -18,7 +18,10 @@ class PhoneChangePolicyHandler @Inject constructor() {
             client.confirmPhoneChanged(idToken, phoneNumber)
         } catch (e: Exception) {
             Log.e("PhoneChangePolicyHandler", "Failed to confirm phone change", e)
-            false
+            throw IllegalStateException(
+                e.message ?: "Unable to confirm phone number change. Please retry.",
+                e
+            )
         }
     }
 }

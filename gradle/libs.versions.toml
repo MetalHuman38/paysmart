@@ -47,6 +47,7 @@ playIntegrity = "1.6.0"
 playAppUpdate = "2.1.0"
 paging = "3.4.0"
 pagingCompose = "3.4.1"
+runtimeVersion = "1.10.5"
 
 [libraries]
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -154,6 +155,7 @@ google-play-app-update = { group = "com.google.android.play", name = "app-update
 google-play-app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "playAppUpdate" }
 firebase-performance = { group = "com.google.firebase", name = "firebase-perf" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "pagingCompose" }
+androidx-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtimeVersion" }
 
 [plugins]
 dotenv = { id = "co.uzzu.dotenv.gradle", version = "4.0.0" }

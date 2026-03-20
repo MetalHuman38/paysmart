@@ -2,7 +2,7 @@ package net.metalbrain.paysmart.data.repository
 
 import jakarta.inject.Inject
 import net.metalbrain.paysmart.room.converters.EncryptedStringConverter
-import net.metalbrain.paysmart.room.doa.SecureTokenDao
+import net.metalbrain.paysmart.room.dao.SecureTokenDao
 import net.metalbrain.paysmart.room.entity.SecureTokenEntity
 import java.util.UUID
 

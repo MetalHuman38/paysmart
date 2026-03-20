@@ -161,7 +161,8 @@ fun ChangePhoneRecoveryScreen(
                         selectedCountry = country
                         viewModel.onPhoneNumberChanged("${country.dialCode}$nationalPhoneInput")
                         showCountryPicker = false
-                    }
+                    },
+                    selectedCountryIso2 = selectedCountry.isoCode
                 )
             }
         }

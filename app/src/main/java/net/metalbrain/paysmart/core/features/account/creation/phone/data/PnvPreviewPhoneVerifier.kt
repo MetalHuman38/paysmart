@@ -8,6 +8,8 @@ import android.util.Log
  *
  * Current behavior delegates to legacy OTP flow until Firebase's preview API
  * and server verification contract are declared stable for production use.
+ * Once the real PNV SDK is enabled, the post-verification user finalization
+ * should still terminate in the same server-owned verified-phone upsert flow.
  */
 class PnvPreviewPhoneVerifier(
     private val legacyVerifier: PhoneVerifier
@@ -20,7 +22,7 @@ class PnvPreviewPhoneVerifier(
     fun isRuntimeAvailable(): Boolean {
         // Keep this as a lightweight runtime probe so we can toggle without compile-time coupling.
         return runCatching {
-            Class.forName("com.google.firebase.auth.PhoneAuthProvider")
+            Class.forName("com.google.firebase.pnv.FirebasePhoneNumberVerification")
         }.isSuccess
     }
 

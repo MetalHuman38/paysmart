@@ -12,6 +12,7 @@ import { FirestoreAddMoneyFlutterwaveRepository } from "../firestore/FirestoreAd
 import { FirestoreFlutterwaveFundingAccountRepository } from "../firestore/FirestoreFlutterwaveFundingAccountRepository.js";
 import { FirestoreInvoiceRepository } from "../firestore/FirestoreInvoiceRepository.js";
 import { FirestorePasskeyRepository } from "../firestore/FirestorePasskeyRepository.js";
+import { FirestoreManagedCardRepository } from "../firestore/FirestoreManagedCardRepository.js";
 import { GoogleCloudAccessTokenProvider } from "../../services/googleCloudAccessTokenProvider.js";
 import { PlayIntegrityVerifier } from "../../services/playIntegrityVerifier.js";
 import { KmsEnvelopeService } from "../../services/kmsEnvelopeService.js";
@@ -66,9 +67,14 @@ export function authContainer() {
   );
   const identityProviderRepo = new FirestoreIdentityProviderRepository(firestore);
   const passkeyRepo = new FirestorePasskeyRepository(firestore);
+  const managedCardRepo = new FirestoreManagedCardRepository(
+    firestore,
+    stripePaymentsService
+  );
   const addMoneyRepo = new FirestoreAddMoneyRepository(
     firestore,
     stripePaymentsService,
+    managedCardRepo,
     config.stripePublishableKey,
     config.stripeAllowedTopupCurrencies,
     config.stripeMinimumTopupAmountMinor
@@ -107,6 +113,7 @@ export function authContainer() {
     identityProvider: identityProviderRepo,
     identityTextExtraction: identityTextExtractionService,
     passkeys: passkeyService,
+    managedCards: managedCardRepo,
     addMoney: addMoneyRepo,
     addMoneyFlutterwave: addMoneyFlutterwaveRepo,
     flutterwaveFundingAccounts: flutterwaveFundingAccountRepo,

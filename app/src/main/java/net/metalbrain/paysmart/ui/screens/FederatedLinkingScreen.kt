@@ -192,6 +192,7 @@ fun FederatedLinkingScreen(
                                     viewModel.handleFacebookLogin(
                                         activity = activity,
                                         onSuccess = onFacebookLinkSuccess,
+                                        onMfaRequired = {},
                                         onError = { backendError.value = extractSimpleBackendError(it) }
                                     )
                                 }

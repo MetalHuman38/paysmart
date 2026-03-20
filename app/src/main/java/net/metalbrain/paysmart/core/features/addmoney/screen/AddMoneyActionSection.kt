@@ -8,7 +8,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.addmoney.card.AddMoneyAvailabilityCard
 import net.metalbrain.paysmart.core.features.addmoney.card.AddMoneyErrorCard
@@ -21,12 +20,12 @@ import net.metalbrain.paysmart.ui.components.OutlinedButton as AppOutlinedButton
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 
 @Composable
-internal fun AddMoneyActionSection(
+fun AddMoneyActionSection(
     uiState: AddMoneyUiState,
     activeProvider: AddMoneyProvider?,
     onCreatePaymentSession: () -> Unit,
     onOpenProviderCheckout: () -> Unit,
-    onOpenReceiveMoney: () -> Unit,
+    onOpenAccountDetails: () -> Unit,
     onRefreshSessionStatus: () -> Unit
 ) {
     Column(
@@ -59,8 +58,8 @@ internal fun AddMoneyActionSection(
 
         if (uiState.canOpenReceiveMoney) {
             AppOutlinedButton(
-                text = stringResource(R.string.funding_account_title),
-                onClick = onOpenReceiveMoney,
+                text = stringResource(R.string.add_money_view_account_details_action),
+                onClick = onOpenAccountDetails,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isSubmitting && !uiState.isCheckingStatus
             )

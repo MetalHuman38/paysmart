@@ -3,7 +3,7 @@ package net.metalbrain.paysmart.data.repository
 import android.util.Base64
 import android.util.Log
 import jakarta.inject.Inject
-import net.metalbrain.paysmart.room.doa.AuthSessionLogDao
+import net.metalbrain.paysmart.room.dao.AuthSessionLogDao
 import net.metalbrain.paysmart.room.entity.AuthSessionLogEntity
 import org.json.JSONObject
 

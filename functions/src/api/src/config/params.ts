@@ -8,7 +8,7 @@ export const EXCHANGE_RATE_API_KEY = defineSecret("EXCHANGE_RATE_API_KEY");
 
 // 🟢 Non-secret parameters
 export const MAIL_FROM = defineString("MAIL_FROM", {
-  default: "PaySmart <no-reply@metalbrain.net>",
+  default: "PaySmart <no-reply@pay-smart.net>",
 });
 
 export const VERIFY_URL = defineString("VERIFY_URL", {

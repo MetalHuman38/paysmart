@@ -1,31 +1,22 @@
 package net.metalbrain.paysmart.core.features.account.authentication.login.screen
 
-
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,34 +24,36 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.navigation.NavController
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.account.authentication.login.card.LoginSectionCard
+import net.metalbrain.paysmart.core.features.account.authentication.login.utils.LoginDivider
+import net.metalbrain.paysmart.core.features.account.authentication.login.utils.LoginHeaderRow
+import net.metalbrain.paysmart.core.features.account.authentication.login.utils.LoginRecoveryRow
+import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.GoogleAuthIntent
+import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.LoginViewModel
+import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.ReauthOtpViewModel
+import net.metalbrain.paysmart.core.features.language.viewmodel.LanguageViewModel
 import net.metalbrain.paysmart.ui.Screen
 import net.metalbrain.paysmart.ui.components.AccountSwitchPrompt
 import net.metalbrain.paysmart.ui.components.AccountSwitchVariant
+import net.metalbrain.paysmart.ui.components.AuthScreenSubtitle
+import net.metalbrain.paysmart.ui.components.AuthScreenTitle
 import net.metalbrain.paysmart.ui.components.BackendErrorModal
 import net.metalbrain.paysmart.ui.components.EmailSignInBtn
 import net.metalbrain.paysmart.ui.components.FacebookSignInButton
 import net.metalbrain.paysmart.ui.components.GoogleSignInBtn
-import net.metalbrain.paysmart.ui.components.LanguageSelector
 import net.metalbrain.paysmart.ui.components.PasskeySignBtn
 import net.metalbrain.paysmart.ui.components.PhoneNumberInput
 import net.metalbrain.paysmart.ui.components.PrimaryButton
-import net.metalbrain.paysmart.ui.theme.Dimens
-import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.GoogleAuthIntent
-import net.metalbrain.paysmart.core.features.language.viewmodel.LanguageViewModel
 import net.metalbrain.paysmart.ui.screens.CountryPickerBottomSheet
-import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.LoginViewModel
-import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.ReauthOtpViewModel
+import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.utils.detectDeviceCountryIso2
 import net.metalbrain.paysmart.utils.extractSimpleBackendError
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +63,7 @@ fun LoginScreen(
     reauthOtpViewModel: ReauthOtpViewModel,
     languageViewModel: LanguageViewModel,
     onContinue: () -> Unit,
+    onMfaRequired: () -> Unit,
     onBackClicked: () -> Unit,
     onForgotPassword: () -> Unit,
     onSignUp: () -> Unit
@@ -83,12 +77,14 @@ fun LoginScreen(
     val backendError = remember { mutableStateOf<String?>(null) }
     val activity = LocalActivity.current
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(activity?.intent?.dataString) {
         val currentIntent = activity?.intent ?: return@LaunchedEffect
         viewModel.handleEmailLoginFromIntent(
             intent = currentIntent,
             onSuccess = onContinue,
+            onMfaRequired = onMfaRequired,
             onError = { error ->
                 backendError.value = extractSimpleBackendError(error)
             }
@@ -99,263 +95,196 @@ fun LoginScreen(
         viewModel.autoSelectCountry(detectDeviceCountryIso2(context))
     }
 
-
     val googleLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-
+        // Google credential retrieval is handled by the provider callback.
     }
-    val scrollState = rememberScrollState()
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(WindowInsets.systemBars.asPaddingValues())
-            .padding(horizontal = Dimens.screenPadding)
-            .verticalScroll(scrollState)
-
-    ) {
-        // 🔹 Language Selector (Top-right)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = Dimens.mediumSpacing),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 🔙 Back arrow (left-aligned)
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(R.string.common_back),
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .clickable { onBackClicked() }
-                    .padding(start = Dimens.smallSpacing)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.18f),
+                        MaterialTheme.colorScheme.background
+                    )
+                )
             )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // 🌐 Language selector (right-aligned)
-            LanguageSelector(
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(WindowInsets.systemBars.asPaddingValues())
+                .verticalScroll(scrollState)
+                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.lg),
+            verticalArrangement = Arrangement.spacedBy(Dimens.lg)
+        ) {
+            LoginHeaderRow(
                 currentLanguage = currentLang,
-                onClick = {
+                onBackClicked = onBackClicked,
+                onLanguageClick = {
                     navController.navigate(Screen.Language.routeWithOrigin(Screen.Origin.LOGIN))
                 }
             )
-        }
 
-        Spacer(Modifier.height(Dimens.largeSpacing))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(Dimens.sm)
+            ) {
+                AuthScreenTitle(text = stringResource(R.string.welcome_back))
+                AuthScreenSubtitle(text = stringResource(R.string.enter_phone_to_associated_to_account))
+            }
 
-        // 🔹 Title
-        Text(
-            text = stringResource(R.string.welcome_back),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+            LoginSectionCard {
+                Column(
+                    modifier = Modifier.padding(Dimens.md),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.md)
+                ) {
+                    PhoneNumberInput(
+                        selectedCountry = selectedCountry,
+                        phoneNumber = phoneNumber,
+                        onPhoneNumberChange = viewModel::onPhoneNumberChanged,
+                        onFlagClick = { showCountryPicker = true }
+                    )
 
-        Spacer(Modifier.height(Dimens.smallSpacing))
+                    PrimaryButton(
+                        onClick = {
+                            if (activity != null) {
+                                if (viewModel.phoneNumber.isNotBlank()) {
+                                    reauthOtpViewModel.startReauthFlow(activity)
+                                    navController.navigate(Screen.Reauthenticate.baseRoute)
+                                } else {
+                                    reauthOtpViewModel.errorHandled()
+                                }
+                            } else {
+                                reauthOtpViewModel.errorHandled()
+                            }
+                        },
+                        text = stringResource(R.string.continue_text),
+                        enabled = phoneNumber.isNotBlank(),
+                        isLoading = isAuthLoading,
+                        loadingText = stringResource(R.string.common_processing)
+                    )
 
-        Text(
-            text = stringResource(R.string.enter_phone_to_associated_to_account),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = Dimens.mediumSpacing),
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.95f)
-        )
-
-        // 🔹 Phone Field
-        PhoneNumberInput(
-            selectedCountry = selectedCountry,
-            phoneNumber = phoneNumber,
-            onPhoneNumberChange = viewModel::onPhoneNumberChanged,
-            onFlagClick = { showCountryPicker = true }
-        )
-
-        Spacer(Modifier.height(Dimens.mediumSpacing))
-
-        backendError.value?.let { message ->
-            BackendErrorModal(
-                message = message,
-                onDismiss = { backendError.value = null }
-            )
-        }
-
-        PrimaryButton(
-            onClick = {
-                val activity = activity
-                if (activity != null) {
-                    val phone = viewModel.phoneNumber
-                    if (phone.isNotBlank()) {
-                        reauthOtpViewModel.startReauthFlow(activity)
-                        navController.navigate(Screen.Reauthenticate.baseRoute)
-                    } else {
-                        reauthOtpViewModel.errorHandled()
-                    }
-                } else {
-                    reauthOtpViewModel.errorHandled()
+                    LoginRecoveryRow(onForgotPassword = onForgotPassword)
                 }
-            },
-            text = stringResource(R.string.continue_text),
-            modifier = Modifier.fillMaxWidth(),
-            enabled = phoneNumber.isNotBlank(),
-            isLoading = isAuthLoading,
-            loadingText = stringResource(R.string.common_processing)
-        )
+            }
 
-        Spacer(Modifier.height(Dimens.space6))
+            backendError.value?.let { message ->
+                BackendErrorModal(
+                    message = message,
+                    onDismiss = { backendError.value = null }
+                )
+            }
 
-        // 🔹 Forgot Password
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = Dimens.smallSpacing),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = stringResource(R.string.trouble_loggin_in),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.width(Dimens.space2))
-            Text(
-                text = stringResource(R.string.recover_your_account),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.primary,
-                    textDecoration = TextDecoration.Underline
-                ),
+            LoginSectionCard {
+                Column(
+                    modifier = Modifier.padding(Dimens.md),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.md)
+                ) {
+                    LoginDivider()
+
+                    EmailSignInBtn(
+                        email = viewModel.email.value,
+                        onLinkSent = {
+                            viewModel.sendMagicLink(
+                                context = context,
+                                email = viewModel.email.value,
+                                onSuccess = {
+                                    navController.navigate(
+                                        Screen.EmailSent.routeWithEmail(viewModel.email.value)
+                                    )
+                                },
+                                onError = { error ->
+                                    backendError.value = extractSimpleBackendError(error)
+                                }
+                            )
+                        },
+                        onError = { error ->
+                            backendError.value = extractSimpleBackendError(error)
+                        },
+                        enabled = !isAuthLoading,
+                        isLoading = isAuthLoading
+                    )
+
+                    GoogleSignInBtn(
+                        launcher = googleLauncher,
+                        enabled = !isAuthLoading,
+                        isLoading = isAuthLoading,
+                        loadingText = stringResource(R.string.common_processing),
+                        onCredentialReceived = {
+                            viewModel.handleGoogleSignIn(
+                                it,
+                                GoogleAuthIntent.SIGN_IN,
+                                onSuccess = onContinue,
+                                onMfaRequired = onMfaRequired
+                            ) { error ->
+                                backendError.value = extractSimpleBackendError(error)
+                            }
+                        },
+                        onError = {
+                            backendError.value = extractSimpleBackendError(it)
+                        }
+                    )
+
+                    activity?.let { currentActivity ->
+                        FacebookSignInButton(
+                            activity = currentActivity,
+                            enabled = !isAuthLoading,
+                            isLoading = isAuthLoading,
+                            loadingText = stringResource(R.string.common_processing),
+                            onClick = {
+                                viewModel.handleFacebookLogin(
+                                    activity = currentActivity,
+                                    onSuccess = onContinue,
+                                    onMfaRequired = onMfaRequired,
+                                    onError = { error ->
+                                        backendError.value = extractSimpleBackendError(error)
+                                    }
+                                )
+                            }
+                        )
+                    }
+
+                    PasskeySignBtn(
+                        enabled = !isAuthLoading && !isPasskeyLoading,
+                        isLoading = isPasskeyLoading,
+                        loadingText = stringResource(R.string.common_processing),
+                        onClick = {
+                            activity?.let { currentActivity ->
+                                viewModel.signInWithPasskey(
+                                    activity = currentActivity,
+                                    autoAttempt = false,
+                                    onSuccess = onContinue,
+                                    onError = { error ->
+                                        backendError.value = extractSimpleBackendError(error)
+                                    }
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+
+            AccountSwitchPrompt(
+                variant = AccountSwitchVariant.DONT_HAVE_ACCOUNT,
                 modifier = Modifier
-                    .clickable(onClick = onForgotPassword)
+                    .fillMaxWidth()
+                    .padding(top = Dimens.xs),
+                onActionClick = onSignUp
             )
         }
 
-        Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = Dimens.smallSpacing),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            HorizontalDivider(
-                modifier = Modifier.weight(1f),
-                thickness = Dimens.space2 / 2,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-            )
-
-            Spacer(modifier = Modifier.width(Dimens.smallSpacing))
-
-            Text(
-                text = stringResource(R.string.or),
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Spacer(modifier = Modifier.width(Dimens.smallSpacing))
-
-            HorizontalDivider(
-                modifier = Modifier.weight(1f),
-                thickness = Dimens.space2 / 2,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
-
-        EmailSignInBtn(
-            email = viewModel.email.value,
-            onLinkSent = {
-                viewModel.sendMagicLink(
-                    context = context,
-                    email = viewModel.email.value,
-                    onSuccess = {
-                        navController.navigate(Screen.EmailSent.routeWithEmail(viewModel.email.value))
-                    },
-                    onError = { e ->
-                        backendError.value = extractSimpleBackendError(e)
-                    }
-                )
-            },
-            onError = { /* optional: fallback error handler */ },
-            enabled = !isAuthLoading,
-            isLoading = isAuthLoading
-        )
-
-        Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
-
-        GoogleSignInBtn(
-            launcher = googleLauncher,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isAuthLoading,
-            isLoading = isAuthLoading,
-            onCredentialReceived = {
-                viewModel.handleGoogleSignIn(
-                    it,
-                    GoogleAuthIntent.SIGN_IN,
-                    {
-                    onContinue()
-                }) { e ->
-                    backendError.value = extractSimpleBackendError(e)
-                }
-            },
-            onError = {
-                backendError.value = extractSimpleBackendError(it)
-            }
-        )
-
-
-        Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
-
-        FacebookSignInButton(
-            activity = activity ?: return,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isAuthLoading,
-            isLoading = isAuthLoading,
-            onClick = {
-                viewModel.handleFacebookLogin(
-                    activity = activity,
-                    onSuccess = onContinue,
-                    onError = { backendError.value = extractSimpleBackendError(it) }
-                )
-            }
-        )
-
-        Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
-
-        PasskeySignBtn(
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isAuthLoading && !isPasskeyLoading,
-            isLoading = isPasskeyLoading,
-            loadingText = stringResource(R.string.common_processing),
-            onClick = {
-                viewModel.signInWithPasskey(
-                    activity = activity,
-                    autoAttempt = false,
-                    onSuccess = onContinue,
-                    onError = { error ->
-                        backendError.value = extractSimpleBackendError(error)
-                    }
-                )
-            }
-        )
-
-        Spacer(modifier = Modifier.height(Dimens.mediumSpacing))
-
-        // Dont have an account?
-        AccountSwitchPrompt(
-            variant = AccountSwitchVariant.DONT_HAVE_ACCOUNT,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = Dimens.smallSpacing),
-            onActionClick = onSignUp,
-        )
-
-
-        // 🔹 Country Picker Dialog
         if (showCountryPicker) {
             CountryPickerBottomSheet(
                 onDismiss = { showCountryPicker = false },
                 onCountrySelected = {
                     viewModel.onCountrySelected(it)
                     showCountryPicker = false
-                }
+                },
+                selectedCountryIso2 = selectedCountry.isoCode
             )
         }
     }

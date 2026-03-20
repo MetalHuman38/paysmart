@@ -3,7 +3,6 @@ package net.metalbrain.paysmart.ui.components
 import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import net.metalbrain.paysmart.R
 
@@ -25,9 +24,6 @@ fun FacebookSignInButton(
         modifier = modifier,
         enabled = enabled,
         isLoading = isLoading,
-        loadingText = loadingText,
-        containerColorOverride = Color(0x1A1877F2),
-        contentColorOverride = Color(0xFF1877F2),
-        borderColorOverride = Color(0xFF1877F2)
+        loadingText = loadingText
     )
 }

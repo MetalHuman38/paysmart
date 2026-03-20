@@ -1,7 +1,8 @@
 package net.metalbrain.paysmart.core.features.account.profile.screen
 
 import androidx.compose.runtime.Composable
-import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import net.metalbrain.paysmart.core.features.account.profile.viewmodel.AccountStatementViewModel
 
 @Composable
@@ -9,10 +10,14 @@ fun AccountStatementRoute(
     viewModel: AccountStatementViewModel,
     onBack: () -> Unit
 ) {
-    val transactions = viewModel.transactions.collectAsLazyPagingItems()
+    val state by viewModel.uiState.collectAsState()
 
     AccountStatementScreen(
-        transactions = transactions,
-        onBack = onBack
+        state = state,
+        onBack = onBack,
+        onCurrencySelected = viewModel::onCurrencySelected,
+        onStartDateSelected = viewModel::onStartDateSelected,
+        onEndDateSelected = viewModel::onEndDateSelected,
+        onFormatSelected = viewModel::onFormatSelected
     )
 }

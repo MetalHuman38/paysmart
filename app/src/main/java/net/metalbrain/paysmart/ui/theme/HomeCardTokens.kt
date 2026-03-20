@@ -11,7 +11,7 @@ object HomeCardTokens {
     const val SURFACE_OVERLAY_ALPHA = 0.82f
     val summaryCardHeight = 186.dp
     val accountInfoCardWidth = 312.dp
-    val accountInfoCardHeight = 218.dp
+    val accountInfoCardHeight = 192.dp
     val serviceCardWidth = 116.dp
     val serviceCardHeight = 132.dp
     val serviceCardIconPadding = Dimens.md

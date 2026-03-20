@@ -1,5 +1,9 @@
 import { Firestore, FieldValue } from "firebase-admin/firestore";
-import { UserProfile, UserRepository } from "../../domain/repository/UserRepository.js";
+import {
+  FinalizePhoneSignupInput,
+  UserProfile,
+  UserRepository,
+} from "../../domain/repository/UserRepository.js";
 
 export class FirestoreUserRepository implements UserRepository {
   constructor(private readonly firestore: Firestore) {}
@@ -22,13 +26,33 @@ export class FirestoreUserRepository implements UserRepository {
     });
   }
 
-  async updatePhoneNumber(uid: string, phoneNumber: string): Promise<void> {
-    await this.firestore.collection("users").doc(uid).set(
-      {
-        phoneNumber,
+  async upsertVerifiedPhoneSignup(input: FinalizePhoneSignupInput): Promise<void> {
+    const docRef = this.firestore.collection("users").doc(input.uid);
+    const sanitizedDisplayName = input.displayName?.trim();
+    const sanitizedPhotoUrl =
+      typeof input.photoURL === "string" && input.photoURL.startsWith("http")
+        ? input.photoURL
+        : null;
+
+    await this.firestore.runTransaction(async (tx) => {
+      const snap = await tx.get(docRef);
+      const payload: Record<string, unknown> = {
+        authProvider: "phone",
+        email: input.email ?? FieldValue.delete(),
+        isAnonymous: input.isAnonymous,
+        providerIds: input.providerIds,
         lastSignedIn: FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    );
+        displayName: sanitizedDisplayName || FieldValue.delete(),
+        photoURL: sanitizedPhotoUrl ?? FieldValue.delete(),
+        phoneNumber: input.phoneNumber,
+        tenantId: input.tenantId ?? FieldValue.delete(),
+      };
+
+      if (!snap.exists) {
+        payload.createdAt = FieldValue.serverTimestamp();
+      }
+
+      tx.set(docRef, payload, { merge: true });
+    });
   }
 }

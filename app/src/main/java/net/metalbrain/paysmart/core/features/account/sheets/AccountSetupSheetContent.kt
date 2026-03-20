@@ -10,9 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.hasCompletedAddress
 import net.metalbrain.paysmart.domain.model.hasCompletedEmailVerification
@@ -20,10 +20,8 @@ import net.metalbrain.paysmart.domain.model.hasCompletedIdentity
 import net.metalbrain.paysmart.ui.components.CircularProgressWithText
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.components.SetupStep
-import net.metalbrain.paysmart.R
-
-
-
+import net.metalbrain.paysmart.ui.theme.Dimens
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun AccountSetupSheetContent(
@@ -31,6 +29,7 @@ fun AccountSetupSheetContent(
     onAddAddressClick: () -> Unit,
     onVerifyIdentityClick: () -> Unit
 ) {
+    LocalContext.current
     val totalSteps = 4
     val completedSteps = listOf(
         true, // Always completed: "Open a PaySmart account"
@@ -41,54 +40,67 @@ fun AccountSetupSheetContent(
 
     val progress = completedSteps.toFloat() / totalSteps
     val label = "$completedSteps/$totalSteps"
-    val allDone = stringResource(id = R.string.all_done)
-    val completed = stringResource(id = R.string.completed)
+    val allDone = stringResource(R.string.all_done)
+    val completed = stringResource(R.string.completed)
     val subLabel = if (completedSteps == totalSteps) allDone else completed
+    val title = stringResource(R.string.complete_your_account_setup)
+    val supporting = stringResource(R.string.secure_your_account_and_do_even_more)
+    val openAccount = stringResource(R.string.open_a_paySmart_account)
+    val verifyEmail = stringResource(R.string.verify_email)
+    val addAddress = stringResource(R.string.add_address)
+    val verifyIdentity = stringResource(R.string.verify_identity)
+    val continueText = stringResource(R.string.continue_text)
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .padding(horizontal = Dimens.lg, vertical = Dimens.md),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Progress circle — center-aligned
         CircularProgressWithText(
             progress = progress,
             label = label,
             subLabel = subLabel
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimens.lg))
 
         Text(
-            text = stringResource(id = R.string.complete_your_account_setup),
+            text = title,
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,
         )
 
         Text(
-            text = stringResource(id = R.string.secure_your_account_and_do_even_more),
+            text = supporting,
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimens.lg))
 
-        // Steps list
-        SetupStep(label = stringResource(id = R.string.open_a_paySmart_account), done = true)
-        SetupStep(label = stringResource(id = R.string.verify_email), done = security.hasCompletedEmailVerification)
-        SetupStep(label = stringResource(id = R.string.add_address), done = security.hasCompletedAddress, onClick = onAddAddressClick)
-        SetupStep(label = stringResource(id = R.string.verify_identity), done = security.hasCompletedIdentity, onClick = onVerifyIdentityClick)
+        SetupStep(label = openAccount, done = true)
+        SetupStep(label = verifyEmail, done = security.hasCompletedEmailVerification)
+        SetupStep(
+            label = addAddress,
+            done = security.hasCompletedAddress,
+            onClick = onAddAddressClick
+        )
+        SetupStep(
+            label = verifyIdentity,
+            done = security.hasCompletedIdentity,
+            onClick = onVerifyIdentityClick
+        )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(Dimens.xl))
 
-        // CTA — change based on status
         val buttonLabel = when {
-            !security.hasCompletedAddress -> stringResource(id = R.string.add_address)
-            !security.hasCompletedIdentity -> stringResource(id = R.string.verify_identity)
-            else -> "Continue"
+            !security.hasCompletedAddress -> addAddress
+            !security.hasCompletedIdentity -> verifyIdentity
+            else -> continueText
         }
 
         PrimaryButton(

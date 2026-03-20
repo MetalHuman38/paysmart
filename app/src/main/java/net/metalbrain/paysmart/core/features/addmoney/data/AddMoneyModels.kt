@@ -45,6 +45,14 @@ enum class AddMoneySessionStatus {
     }
 }
 
+data class AddMoneyVirtualAccountData(
+    val accountNumber: String,
+    val bankName: String,
+    val accountName: String? = null,
+    val reference: String,
+    val note: String? = null
+)
+
 data class AddMoneySessionData(
     val sessionId: String,
     val amountMinor: Int,
@@ -54,14 +62,25 @@ data class AddMoneySessionData(
     val provider: AddMoneyProvider = AddMoneyProvider.STRIPE,
     val checkoutUrl: String? = null,
     val flutterwaveTransactionId: String? = null,
+    val virtualAccount: AddMoneyVirtualAccountData? = null,
     val paymentIntentId: String? = null,
     val paymentIntentClientSecret: String? = null,
-    val publishableKey: String? = null
+    val publishableKey: String? = null,
+    val customerId: String? = null,
+    val customerEphemeralKeySecret: String? = null,
+    val defaultPaymentMethodId: String? = null
+)
+
+data class AddMoneyPaymentSheetCustomer(
+    val customerId: String,
+    val ephemeralKeySecret: String,
+    val defaultPaymentMethodId: String? = null
 )
 
 data class AddMoneyPaymentSheetLaunch(
     val publishableKey: String,
-    val paymentIntentClientSecret: String
+    val paymentIntentClientSecret: String,
+    val customer: AddMoneyPaymentSheetCustomer? = null
 )
 
 data class AddMoneyUiState(
@@ -86,6 +105,7 @@ data class AddMoneyUiState(
     val sessionId: String? = null,
     val activeSessionProvider: AddMoneyProvider? = null,
     val activeSessionMethod: FxPaymentMethod? = null,
+    val activeSessionCurrency: String? = null,
     val sessionStatus: AddMoneySessionStatus? = null,
     val providerActionUrl: String? = null,
     val paymentSheetLaunch: AddMoneyPaymentSheetLaunch? = null,

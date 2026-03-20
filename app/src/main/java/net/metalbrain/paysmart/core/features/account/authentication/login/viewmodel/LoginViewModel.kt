@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthMultiFactorException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.core.features.account.passkey.repository.PasskeyApiRepository
 import net.metalbrain.paysmart.core.features.account.passkey.repository.PasskeyCredentialManager
 import net.metalbrain.paysmart.core.features.account.security.repository.SecurityRepository
+import net.metalbrain.paysmart.core.features.account.security.mfa.provider.MfaSignInProvider
 import net.metalbrain.paysmart.domain.auth.SocialAuthUseCase
 import net.metalbrain.paysmart.core.features.account.authentication.email.data.EmailDraft
 import net.metalbrain.paysmart.core.features.account.authentication.email.data.EmailDraftStore
@@ -43,6 +45,7 @@ class LoginViewModel @Inject constructor(
     private val passkeyApiRepository: PasskeyApiRepository,
     private val passkeyCredentialManager: PasskeyCredentialManager,
     private val security: SecurityRepository,
+    private val mfaSignInProvider: MfaSignInProvider,
     private val socialAuth: SocialAuthUseCase,
     private val emailLinkUseCase: EmailLinkUseCase,
     private val emailDraftStore: EmailDraftStore,
@@ -76,6 +79,7 @@ class LoginViewModel @Inject constructor(
         credential: AuthCredential,
         intent: GoogleAuthIntent,
         onSuccess: () -> Unit,
+        onMfaRequired: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
         Log.d("LoginViewModel", "handleGoogleSignIn: intent=$intent")
@@ -88,6 +92,9 @@ class LoginViewModel @Inject constructor(
                 Log.d("LoginViewModel", "Google auth successful (intent=$intent)")
                 onSuccess()
             } catch (e: Exception) {
+                if (handleMfaChallenge(e, onMfaRequired, onError)) {
+                    return@launch
+                }
                 Log.e("LoginViewModel", "Google auth failed (intent=$intent)", e)
                 loginError = if (e.message?.contains("Federated login requires verified phone number") == true) {
                     "Please create an account with a phone number before signing in with Google."
@@ -200,6 +207,7 @@ class LoginViewModel @Inject constructor(
     fun handleFacebookLogin(
         activity: Activity,
         onSuccess: () -> Unit,
+        onMfaRequired: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
         viewModelScope.launch {
@@ -228,6 +236,10 @@ class LoginViewModel @Inject constructor(
                 }
                 onSuccess()
             }.onFailure {
+                if (handleMfaChallenge(it, onMfaRequired, onError)) {
+                    loading = false
+                    return@launch
+                }
                 loginError = "Facebook Sign-In failed: ${it.localizedMessage ?: "Unknown error"}"
                 onError(it)
             }
@@ -264,6 +276,7 @@ class LoginViewModel @Inject constructor(
     fun handleEmailLoginFromIntent(
         intent: Intent,
         onSuccess: () -> Unit,
+        onMfaRequired: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
         val emailLink = intent.data?.toString()?.trim().orEmpty()
@@ -288,6 +301,10 @@ class LoginViewModel @Inject constructor(
                 Log.d("LoginViewModel", "Magic link sign-in success")
                 onSuccess()
             } catch (e: Exception) {
+                if (handleMfaChallenge(e, onMfaRequired, onError)) {
+                    loading = false
+                    return@launch
+                }
                 handledEmailLink = null
                 Log.e("LoginViewModel", "Magic link sign-in failed", e)
                 loginError = "Magic link sign-in failed"
@@ -326,6 +343,25 @@ class LoginViewModel @Inject constructor(
                 selectedCountry.value.isoCode == DEFAULT_COUNTRY_ISO2
         if (shouldReplaceSelection) {
             _selectedCountry.value = match
+        }
+    }
+
+    private fun handleMfaChallenge(
+        error: Throwable,
+        onMfaRequired: () -> Unit,
+        onError: (Throwable) -> Unit
+    ): Boolean {
+        val mfaException = error as? FirebaseAuthMultiFactorException ?: return false
+        val startResult = mfaSignInProvider.beginChallenge(mfaException)
+        return if (startResult.isSuccess) {
+            loginError = null
+            onMfaRequired()
+            true
+        } else {
+            val cause = startResult.exceptionOrNull() ?: error
+            loginError = cause.localizedMessage
+            onError(cause)
+            false
         }
     }
 }

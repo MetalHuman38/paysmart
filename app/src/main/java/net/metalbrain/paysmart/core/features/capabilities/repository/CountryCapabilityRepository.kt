@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.metalbrain.paysmart.R
@@ -16,7 +17,7 @@ import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityKey
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityProfile
 import net.metalbrain.paysmart.core.features.fx.data.FxPaymentMethod
-import net.metalbrain.paysmart.room.doa.CountryCapabilityDao
+import net.metalbrain.paysmart.room.dao.CountryCapabilityDao
 import net.metalbrain.paysmart.room.entity.CountryCapabilityEntity
 import org.json.JSONArray
 import org.json.JSONObject
@@ -48,6 +49,15 @@ class CountryCapabilityRepository @Inject constructor(
                 dao.observeByIso2(CountryCapabilityCatalog.DEFAULT_ISO2)
             ) { selected, fallback ->
                 selected?.toDomain() ?: fallback?.toDomain() ?: CountryCapabilityCatalog.defaultProfile()
+            }
+        )
+    }
+
+    fun observeAllProfiles(): Flow<List<CountryCapabilityProfile>> = flow {
+        ensureSeeded()
+        emitAll(
+            dao.observeAll().map { entities ->
+                entities.map { it.toDomain() }
             }
         )
     }
@@ -111,7 +121,6 @@ class CountryCapabilityRepository @Inject constructor(
             "AUSTRALIA" to "AU",
             "NEW ZEALAND" to "NZ",
             "SWITZERLAND" to "CH",
-            "SWISS" to "CH",
             "SWISS" to "CH",
             "SWISSLAND" to "CH",
         )

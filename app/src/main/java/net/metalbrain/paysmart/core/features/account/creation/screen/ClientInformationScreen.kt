@@ -1,23 +1,24 @@
 package net.metalbrain.paysmart.core.features.account.creation.screen
 
-import android.app.DatePickerDialog
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.creation.components.AccountCreationScaffold
 import net.metalbrain.paysmart.core.features.account.creation.components.ClientInformationContent
+import net.metalbrain.paysmart.core.features.account.creation.components.ClientInformationDatePickerDialog
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.ClientInformationViewModel
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountrySelectionCatalog
 import net.metalbrain.paysmart.ui.theme.Dimens
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeParseException
 
 @Composable
@@ -33,34 +34,12 @@ fun ClientInformationScreen(
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val market = CountrySelectionCatalog.countryByIso2(context, countryIso2)
+    var showDatePicker by remember { mutableStateOf(false) }
 
+    val latestDob = LocalDate.now().minusYears(18)
+    val earliestDob = LocalDate.now().minusYears(120)
     val initialDob = rememberDateOrDefault(state.dateOfBirth)
-
-    fun showDatePicker() {
-        val zone = ZoneId.systemDefault()
-        val latestDob = LocalDate.now().minusYears(18)
-        val earliestDob = LocalDate.now().minusYears(120)
-        val dialog = DatePickerDialog(
-            context,
-            R.style.SpinnerDatePickerDialog,
-            { _, year, month, dayOfMonth ->
-                val picked = LocalDate.of(year, month + 1, dayOfMonth)
-                viewModel.onDateOfBirthChanged(picked.toString())
-            },
-            initialDob.year,
-            initialDob.monthValue - 1,
-            initialDob.dayOfMonth
-        )
-        dialog.datePicker.maxDate = latestDob
-            .atStartOfDay(zone)
-            .toInstant()
-            .toEpochMilli()
-        dialog.datePicker.minDate = earliestDob
-            .atStartOfDay(zone)
-            .toInstant()
-            .toEpochMilli()
-        dialog.show()
-    }
+        .coerceInDateRange(earliestDob, latestDob)
 
     AccountCreationScaffold(onBack = onBack) { innerPadding ->
         ClientInformationContent(
@@ -72,7 +51,7 @@ fun ClientInformationScreen(
             onMiddleNameChanged = viewModel::onMiddleNameChanged,
             onLastNameChanged = viewModel::onLastNameChanged,
             onEmailChanged = viewModel::onEmailChanged,
-            onShowDatePicker = ::showDatePicker,
+            onShowDatePicker = { showDatePicker = true },
             onContinue = {
                 viewModel.clearError()
                 viewModel.submit(onSuccess = onContinue)
@@ -83,6 +62,19 @@ fun ClientInformationScreen(
                 .padding(horizontal = Dimens.screenPadding, vertical = Dimens.space6)
         )
     }
+
+    if (showDatePicker) {
+        ClientInformationDatePickerDialog(
+            initialDate = initialDob,
+            earliestDate = earliestDob,
+            latestDate = latestDob,
+            onDismiss = { showDatePicker = false },
+            onDateSelected = { picked ->
+                viewModel.onDateOfBirthChanged(picked.toString())
+                showDatePicker = false
+            }
+        )
+    }
 }
 
 private fun rememberDateOrDefault(raw: String): LocalDate {
@@ -90,5 +82,13 @@ private fun rememberDateOrDefault(raw: String): LocalDate {
         LocalDate.parse(raw.trim())
     } catch (_: DateTimeParseException) {
         LocalDate.now().minusYears(30)
+    }
+}
+
+private fun LocalDate.coerceInDateRange(min: LocalDate, max: LocalDate): LocalDate {
+    return when {
+        isBefore(min) -> min
+        isAfter(max) -> max
+        else -> this
     }
 }

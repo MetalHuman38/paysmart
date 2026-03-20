@@ -34,7 +34,24 @@ class PhoneChangePolicyClient(
             .build()
 
         httpClient.newCall(request).execute().use { response ->
-            response.isSuccessful
+            if (response.isSuccessful) {
+                return@withContext true
+            }
+
+            val responseBody = response.body?.string()
+            val message = responseBody?.let(::extractErrorMessage)
+            throw Exception(message ?: "Unable to confirm phone number change. Please retry.")
         }
+    }
+
+    private fun extractErrorMessage(responseBody: String): String? {
+        return runCatching {
+            val json = JSONObject(responseBody)
+            when (val error = json.opt("error")) {
+                is JSONObject -> error.optString("message").takeIf { it.isNotBlank() }
+                is String -> error.takeIf { it.isNotBlank() }
+                else -> null
+            }
+        }.getOrNull()
     }
 }

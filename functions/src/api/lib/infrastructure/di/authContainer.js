@@ -12,6 +12,7 @@ import { FirestoreAddMoneyFlutterwaveRepository } from "../firestore/FirestoreAd
 import { FirestoreFlutterwaveFundingAccountRepository } from "../firestore/FirestoreFlutterwaveFundingAccountRepository.js";
 import { FirestoreInvoiceRepository } from "../firestore/FirestoreInvoiceRepository.js";
 import { FirestorePasskeyRepository } from "../firestore/FirestorePasskeyRepository.js";
+import { FirestoreManagedCardRepository } from "../firestore/FirestoreManagedCardRepository.js";
 import { GoogleCloudAccessTokenProvider } from "../../services/googleCloudAccessTokenProvider.js";
 import { PlayIntegrityVerifier } from "../../services/playIntegrityVerifier.js";
 import { KmsEnvelopeService } from "../../services/kmsEnvelopeService.js";
@@ -54,7 +55,8 @@ export function authContainer() {
     const identityUploadRepo = new FirestoreIdentityUploadRepository(firestore, storageBucket, attestationVerifier, kmsEnvelopeService, config.identityMaxPayloadBytes);
     const identityProviderRepo = new FirestoreIdentityProviderRepository(firestore);
     const passkeyRepo = new FirestorePasskeyRepository(firestore);
-    const addMoneyRepo = new FirestoreAddMoneyRepository(firestore, stripePaymentsService, config.stripePublishableKey, config.stripeAllowedTopupCurrencies, config.stripeMinimumTopupAmountMinor);
+    const managedCardRepo = new FirestoreManagedCardRepository(firestore, stripePaymentsService);
+    const addMoneyRepo = new FirestoreAddMoneyRepository(firestore, stripePaymentsService, managedCardRepo, config.stripePublishableKey, config.stripeAllowedTopupCurrencies, config.stripeMinimumTopupAmountMinor);
     const addMoneyFlutterwaveRepo = new FirestoreAddMoneyFlutterwaveRepository(firestore, flutterwavePaymentsService, config.flutterwavePublicKey, config.flutterwaveAllowedTopupCurrencies, config.flutterwaveMinimumTopupAmountMinor);
     const flutterwaveFundingAccountRepo = new FirestoreFlutterwaveFundingAccountRepository(firestore, flutterwavePaymentsService);
     const invoiceRepo = new FirestoreInvoiceRepository(firestore, storageBucket);
@@ -76,6 +78,7 @@ export function authContainer() {
         identityProvider: identityProviderRepo,
         identityTextExtraction: identityTextExtractionService,
         passkeys: passkeyService,
+        managedCards: managedCardRepo,
         addMoney: addMoneyRepo,
         addMoneyFlutterwave: addMoneyFlutterwaveRepo,
         flutterwaveFundingAccounts: flutterwaveFundingAccountRepo,

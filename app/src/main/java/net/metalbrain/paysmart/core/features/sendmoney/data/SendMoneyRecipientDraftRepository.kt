@@ -5,7 +5,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import net.metalbrain.paysmart.room.doa.SendMoneyRecipientDraftDao
+import net.metalbrain.paysmart.room.dao.SendMoneyRecipientDraftDao
 import net.metalbrain.paysmart.room.entity.SendMoneyRecipientDraftEntity
 import net.metalbrain.paysmart.core.features.fx.data.FxFeeLine
 import net.metalbrain.paysmart.core.features.fx.data.FxPaymentMethod

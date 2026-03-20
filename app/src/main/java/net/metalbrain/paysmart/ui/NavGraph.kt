@@ -48,6 +48,8 @@ import net.metalbrain.paysmart.core.features.featuregate.FeatureAccessPolicy
 import net.metalbrain.paysmart.core.features.featuregate.FeatureGateScreen
 import net.metalbrain.paysmart.core.features.featuregate.FeatureKey
 import net.metalbrain.paysmart.core.features.featuregate.FeatureRequirement
+import net.metalbrain.paysmart.core.features.fx.screen.ExchangeRatesScreen
+import net.metalbrain.paysmart.core.features.fx.viewmodel.ExchangeRatesViewModel
 import net.metalbrain.paysmart.core.features.transactions.screen.TransactionDetailRoute
 import net.metalbrain.paysmart.core.features.transactions.screen.TransactionsScreen
 import net.metalbrain.paysmart.core.features.transactions.viewmodel.TransactionDetailViewModel
@@ -94,7 +96,8 @@ import net.metalbrain.paysmart.core.features.account.creation.phone.screen.Reaut
 import net.metalbrain.paysmart.core.features.account.profile.components.ProfileScreen
 import net.metalbrain.paysmart.core.features.account.creation.screen.PostOtpCapabilitiesScreen
 import net.metalbrain.paysmart.core.features.account.profile.screen.AccountInformationScreen
-import net.metalbrain.paysmart.core.features.account.profile.screen.AccountLimitsScreen
+import net.metalbrain.paysmart.core.features.account.profile.screen.AccountLimitDetailsRoute
+import net.metalbrain.paysmart.core.features.account.profile.screen.AccountLimitsRoute
 import net.metalbrain.paysmart.core.features.account.profile.screen.AccountStatementRoute
 import net.metalbrain.paysmart.core.features.account.profile.screen.ProfileAboutScreen
 import net.metalbrain.paysmart.core.features.account.profile.screen.ProfileAboutSocialsScreen
@@ -115,7 +118,10 @@ import net.metalbrain.paysmart.core.features.help.viewmodel.HelpViewModel
 import net.metalbrain.paysmart.core.features.referral.viewmodel.ReferralViewModel
 import net.metalbrain.paysmart.core.features.account.security.viewmodel.SecurityViewModel
 import net.metalbrain.paysmart.core.features.account.security.mfa.screen.MfaNudgeScreen
+import net.metalbrain.paysmart.core.features.account.security.mfa.screen.MfaSignInChallengeScreen
 import net.metalbrain.paysmart.core.features.account.security.mfa.viewmodel.MfaNudgeViewModel
+import net.metalbrain.paysmart.core.features.account.security.mfa.viewmodel.MfaSignInViewModel
+import net.metalbrain.paysmart.core.features.cards.viewmodel.ManagedCardsViewModel
 import net.metalbrain.paysmart.core.features.fundingaccount.screen.FundingAccountRoute
 import net.metalbrain.paysmart.core.features.fundingaccount.viewmodel.FundingAccountViewModel
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.PostOtpCapabilitiesViewModel
@@ -149,7 +155,7 @@ sealed class Screen(val route: String) {
         LOGIN("login"),
         CREATE_ACCOUNT("create_account"),
         PROFILE_ACCOUNT_INFORMATION("profile_account_information");
-
+        
         companion object {
             fun fromRouteValue(raw: String?): Origin {
                 return entries.firstOrNull { it.routeValue == raw } ?: STARTUP
@@ -194,6 +200,7 @@ sealed class Screen(val route: String) {
     object EmailVerified : Screen("email_verified")
 
     object Login : Screen("login")
+    object LoginMfaChallenge : Screen("login/mfa_challenge")
 
     object Reauthenticate: Screen("reauthenticate?target={target}") {
         const val BASEROUTE = "reauthenticate"
@@ -224,6 +231,17 @@ sealed class Screen(val route: String) {
     object OnboardingProfile : Screen("onboarding/profile_identity")
 
     object ProfileAccountLimits : Screen("profile/account_information/account_limits")
+
+    object ProfileAccountLimitsDetails :
+        Screen("profile/account_information/account_limits/account_limit_details?currencyCode={currencyCode}") {
+        const val BASEROUTE = "profile/account_information/account_limits/account_limit_details"
+        const val CURRENCYARG = "currencyCode"
+
+        fun routeWithCurrency(currencyCode: String): String {
+            return "$BASEROUTE?$CURRENCYARG=${Uri.encode(currencyCode.trim())}"
+        }
+    }
+
 
     object ProfileAccountStatement : Screen("profile/account_information/account_statement")
 
@@ -279,12 +297,36 @@ sealed class Screen(val route: String) {
         }
     }
 
-    object BalanceDetails : Screen("wallet_balance?currencyCode={currencyCode}") {
+    object BalanceDetails : Screen("wallet_balance?currencyCode={currencyCode}&tab={tab}") {
         const val BASEROUTE = "wallet_balance"
         const val CURRENCYARG = "currencyCode"
+        const val TAB_ARG = "tab"
 
-        fun routeWithCurrency(currencyCode: String): String {
-            return "$BASEROUTE?$CURRENCYARG=${Uri.encode(currencyCode.trim())}"
+        enum class Tab(val routeValue: String) {
+            TRANSACTIONS("transactions"),
+            ACCOUNT_DETAILS("account_details");
+
+            companion object {
+                fun fromRouteValue(raw: String?): Tab {
+                    return entries.firstOrNull { it.routeValue == raw } ?: TRANSACTIONS
+                }
+            }
+        }
+
+        fun routeWithCurrency(
+            currencyCode: String,
+            tab: Tab = Tab.TRANSACTIONS
+        ): String {
+            return "$BASEROUTE?$CURRENCYARG=${Uri.encode(currencyCode.trim())}&$TAB_ARG=${Uri.encode(tab.routeValue)}"
+        }
+    }
+
+    object ExchangeRates : Screen("fx/exchange_rates?countryIso2={countryIso2}") {
+        const val BASEROUTE = "fx/exchange_rates"
+        const val COUNTRY_ISO2_ARG = "countryIso2"
+
+        fun routeWithCountry(countryIso2: String): String {
+            return "$BASEROUTE?$COUNTRY_ISO2_ARG=${Uri.encode(countryIso2.trim())}"
         }
     }
 
@@ -715,8 +757,6 @@ fun AppNavGraph(
                 onBack = { navController.popBackStack() },
                 viewModel = otpViewModel,
             )
-
-            otpViewModel.startTimer()
         }
 
         composable(
@@ -791,7 +831,9 @@ fun AppNavGraph(
                 viewModel = clientInfoViewModel,
                 onBack = { navController.popBackStack() },
                 onContinue = {
-                    navController.navigateInGraph(Screen.PostOtpMfaNudge.routeWithCountry(countryIso2)) {
+                    navController.navigateInGraph(
+                        Screen.LinkFederatedAccount.routeWithReturn(Screen.ProtectAccount.route)
+                    ) {
                         popUpTo(currentDestinationId) { inclusive = true }
                     }
                 }
@@ -939,6 +981,11 @@ fun AppNavGraph(
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
+                onMfaRequired = {
+                    navController.navigateInGraph(Screen.LoginMfaChallenge.route) {
+                        launchSingleTop = true
+                    }
+                },
                 onForgotPassword = {
                     navController.navigateInGraph(Screen.RecoverAccount.routeWithOrigin("login"))
                 },
@@ -947,6 +994,19 @@ fun AppNavGraph(
                 },
                 onBackClicked = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.LoginMfaChallenge.route) {
+            val viewModel: MfaSignInViewModel = hiltViewModel()
+            MfaSignInChallengeScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onSuccess = {
+                    navController.navigateInGraph(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -1291,11 +1351,11 @@ fun AppNavGraph(
         composable(Screen.AddMoney.route) {
             AddMoneyScreen(
                 onBack = { navController.popBackStack() },
-                onOpenReceiveMoney = {
+                onOpenAccountDetails = { currencyCode ->
                     navController.navigateInGraph(
-                        Screen.FeatureGate.routeWithArgs(
-                            feature = FeatureKey.RECEIVE_MONEY.id,
-                            resumeRoute = Screen.FundingAccount.route
+                        Screen.BalanceDetails.routeWithCurrency(
+                            currencyCode = currencyCode,
+                            tab = Screen.BalanceDetails.Tab.ACCOUNT_DETAILS
                         )
                     )
                 }
@@ -1411,15 +1471,25 @@ fun AppNavGraph(
                 navArgument(Screen.BalanceDetails.CURRENCYARG) {
                     type = NavType.StringType
                     defaultValue = ""
+                },
+                navArgument(Screen.BalanceDetails.TAB_ARG) {
+                    type = NavType.StringType
+                    defaultValue = Screen.BalanceDetails.Tab.TRANSACTIONS.routeValue
                 }
             )
-        ) {
+        ) { backStackEntry ->
             val viewModel: BalanceDetailsViewModel = hiltViewModel()
+            val initialTab = Screen.BalanceDetails.Tab.fromRouteValue(
+                backStackEntry.arguments?.getString(Screen.BalanceDetails.TAB_ARG)
+            )
             BalanceDetailsRoute(
                 viewModel = viewModel,
+                initialTab = initialTab,
                 onBack = { navController.popBackStack() },
-                onViewAccountLimitsClick = {
-                    navController.navigateInGraph(Screen.ProfileAccountLimits.route) {
+                onViewAccountLimitsClick = { currencyCode ->
+                    navController.navigateInGraph(
+                        Screen.ProfileAccountLimitsDetails.routeWithCurrency(currencyCode)
+                    ) {
                         launchSingleTop = true
                     }
                 },
@@ -1451,6 +1521,32 @@ fun AppNavGraph(
                 },
                 onTransactionClick = { transaction ->
                     navController.navigateInGraph(Screen.TransactionDetail.routeWithTransactionId(transaction.id))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.ExchangeRates.route,
+            arguments = listOf(
+                navArgument(Screen.ExchangeRates.COUNTRY_ISO2_ARG) {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
+        ) {
+            val viewModel: ExchangeRatesViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsState()
+            ExchangeRatesScreen(
+                state = state,
+                onBack = { navController.popBackStack() },
+                onRefresh = viewModel::refresh,
+                onSendClick = {
+                    navController.navigateInGraph(
+                        Screen.FeatureGate.routeWithArgs(
+                            feature = FeatureKey.SEND_MONEY.id,
+                            resumeRoute = Screen.SendMoney.route
+                        )
+                    )
                 }
             )
         }
@@ -1704,8 +1800,10 @@ fun AppNavGraph(
 
         composable(Screen.ProfileConnectedAccounts.route) {
             val viewModel: FundingAccountViewModel = hiltViewModel()
+            val managedCardsViewModel: ManagedCardsViewModel = hiltViewModel()
             ProfileConnectedAccountsRoute(
                 viewModel = viewModel,
+                managedCardsViewModel = managedCardsViewModel,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -1989,9 +2087,35 @@ fun AppNavGraph(
             val localSecurityState by securityViewModel.localSecurityState.collectAsState()
             val settings = (localSecurityState as? LocalSecurityState.Ready)?.settings
 
-            AccountLimitsScreen(
+            AccountLimitsRoute(
                 settings = settings,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onAccountClick = { currencyCode ->
+                    navController.navigateInGraph(
+                        Screen.ProfileAccountLimitsDetails.routeWithCurrency(currencyCode)
+                    ) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Screen.ProfileAccountLimitsDetails.route,
+            arguments = listOf(
+                navArgument(Screen.ProfileAccountLimitsDetails.CURRENCYARG) {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
+        ) {
+            AccountLimitDetailsRoute(
+                onBack = { navController.popBackStack() },
+                onHelp = {
+                    navController.navigateInGraph(Screen.Help.route) {
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 

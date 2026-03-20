@@ -14,9 +14,12 @@ import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityItem
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityKey
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
+import net.metalbrain.paysmart.domain.model.Transaction
+import net.metalbrain.paysmart.ui.home.components.HomeContent
 import net.metalbrain.paysmart.ui.home.state.HomeBalanceSnapshot
 import net.metalbrain.paysmart.ui.home.state.HomeExchangeRateSnapshot
 import net.metalbrain.paysmart.ui.home.state.HomeNotificationUiState
+import net.metalbrain.paysmart.ui.home.state.HomeTransactionProviderFilter
 import net.metalbrain.paysmart.ui.home.state.RewardEarnedSnapshot
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 import org.junit.Assert.assertEquals
@@ -40,7 +43,7 @@ class HomeContentTest {
                     onProfileClick = {},
                     onReferralClick = {},
                     onTransactionsClick = {},
-                    onTransactionClick = {},
+                    onTransactionClick = { _: Transaction -> },
                     onCreateInvoiceClick = {},
                     onSendMoneyClick = {},
                     onReceiveMoneyClick = {},
@@ -54,11 +57,11 @@ class HomeContentTest {
                     onViewAllLimitsClick = {},
                     localSettings = null,
                     displayName = "Test User",
-                    transactions = emptyList(),
+                    transactions = emptyList<Transaction>(),
                     transactionSearchQuery = "",
                     isTransactionSearchActive = false,
-                    availableTransactionProviders = emptyList(),
-                    selectedTransactionProviders = emptySet(),
+                    availableTransactionProviders = emptyList<HomeTransactionProviderFilter>(),
+                    selectedTransactionProviders = emptySet<HomeTransactionProviderFilter>(),
                     notification = HomeNotificationUiState(),
                     balanceSnapshot = HomeBalanceSnapshot(
                         balancesByCurrency = mapOf("GBP" to 1250.0),
@@ -68,7 +71,7 @@ class HomeContentTest {
                     countryIso2 = "GB",
                     countryFlagEmoji = "🇬🇧",
                     countryCurrencyCode = "GBP",
-                    capabilities = emptyList(),
+                    capabilities = emptyList<CapabilityItem>(),
                     exchangeRateSnapshot = HomeExchangeRateSnapshot(
                         baseCurrencyCode = "GBP",
                         targetCurrencyCode = "USD",
@@ -76,7 +79,7 @@ class HomeContentTest {
                     ),
                     isBalanceVisible = true,
                     onTransactionSearchQueryChange = {},
-                    onTransactionProviderToggle = {},
+                    onTransactionProviderToggle = { _: HomeTransactionProviderFilter -> },
                     onNotificationPrimaryAction = {},
                     onToggleBalanceVisibility = {}
                 )
@@ -101,7 +104,7 @@ class HomeContentTest {
                     onProfileClick = {},
                     onReferralClick = {},
                     onTransactionsClick = {},
-                    onTransactionClick = {},
+                    onTransactionClick = { _: Transaction -> },
                     onCreateInvoiceClick = {},
                     onSendMoneyClick = {},
                     onReceiveMoneyClick = { receiveMoneyClicks += 1 },
@@ -118,11 +121,11 @@ class HomeContentTest {
                         hasAddedHomeAddress = true
                     ),
                     displayName = "Test User",
-                    transactions = emptyList(),
+                    transactions = emptyList<Transaction>(),
                     transactionSearchQuery = "",
                     isTransactionSearchActive = false,
-                    availableTransactionProviders = emptyList(),
-                    selectedTransactionProviders = emptySet(),
+                    availableTransactionProviders = emptyList<HomeTransactionProviderFilter>(),
+                    selectedTransactionProviders = emptySet<HomeTransactionProviderFilter>(),
                     notification = HomeNotificationUiState(),
                     balanceSnapshot = HomeBalanceSnapshot(),
                     rewardEarned = RewardEarnedSnapshot(),
@@ -139,7 +142,7 @@ class HomeContentTest {
                     exchangeRateSnapshot = HomeExchangeRateSnapshot(),
                     isBalanceVisible = true,
                     onTransactionSearchQueryChange = {},
-                    onTransactionProviderToggle = {},
+                    onTransactionProviderToggle = { _: HomeTransactionProviderFilter -> },
                     onNotificationPrimaryAction = {},
                     onToggleBalanceVisibility = {}
                 )

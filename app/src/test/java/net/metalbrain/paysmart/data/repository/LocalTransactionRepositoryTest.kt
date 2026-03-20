@@ -13,7 +13,7 @@ import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionStatus
 import net.metalbrain.paysmart.domain.auth.UserManager
 import net.metalbrain.paysmart.domain.auth.state.AuthState
-import net.metalbrain.paysmart.room.doa.TransactionDao
+import net.metalbrain.paysmart.room.dao.TransactionDao
 import net.metalbrain.paysmart.room.entity.TransactionEntity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

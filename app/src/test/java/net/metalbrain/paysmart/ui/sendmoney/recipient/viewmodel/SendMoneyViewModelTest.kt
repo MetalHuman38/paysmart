@@ -14,7 +14,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import net.metalbrain.paysmart.data.repository.AuthRepository
-import net.metalbrain.paysmart.room.doa.SendMoneyRecipientDraftDao
+import net.metalbrain.paysmart.room.dao.SendMoneyRecipientDraftDao
 import net.metalbrain.paysmart.room.entity.SendMoneyRecipientDraftEntity
 import net.metalbrain.paysmart.testing.MainDispatcherRule
 import net.metalbrain.paysmart.core.features.fx.data.FxPaymentMethod

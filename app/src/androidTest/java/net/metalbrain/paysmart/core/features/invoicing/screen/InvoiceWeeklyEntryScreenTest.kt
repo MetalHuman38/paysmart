@@ -18,6 +18,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceVenueDraft
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceWeeklyDraft
+import net.metalbrain.paysmart.core.features.invoicing.screen.INVOICE_FINALIZE_BUTTON_TAG
+import net.metalbrain.paysmart.core.features.invoicing.screen.INVOICE_SUBTOTAL_TAG
+import net.metalbrain.paysmart.core.features.invoicing.screen.INVOICE_TOTAL_HOURS_TAG
+import net.metalbrain.paysmart.core.features.invoicing.screen.INVOICE_WEEKLY_LIST_TAG
+import net.metalbrain.paysmart.core.features.invoicing.screen.InvoiceWeeklyEntryScreen
+import net.metalbrain.paysmart.core.features.invoicing.screen.invoiceHoursFieldTag
 import net.metalbrain.paysmart.core.features.invoicing.viewmodel.InvoiceSetupUiState
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 import org.junit.Rule
@@ -62,23 +68,23 @@ class InvoiceWeeklyEntryScreenTest {
                             weeklyDraft = state.weeklyDraft.copy(selectedVenueId = venueId).withFullWeek()
                         )
                     },
-                    onInvoiceDateChanged = {
-                        state = state.copy(weeklyDraft = state.weeklyDraft.copy(invoiceDate = it).withFullWeek())
+                    onInvoiceDateChanged = { value: String ->
+                        state = state.copy(weeklyDraft = state.weeklyDraft.copy(invoiceDate = value).withFullWeek())
                     },
-                    onWeekEndingDateChanged = {
-                        state = state.copy(weeklyDraft = state.weeklyDraft.copy(weekEndingDate = it).withFullWeek())
+                    onWeekEndingDateChanged = { value: String ->
+                        state = state.copy(weeklyDraft = state.weeklyDraft.copy(weekEndingDate = value).withFullWeek())
                     },
-                    onHourlyRateChanged = {
-                        state = state.copy(weeklyDraft = state.weeklyDraft.copy(hourlyRateInput = it).withFullWeek())
+                    onHourlyRateChanged = { value: String ->
+                        state = state.copy(weeklyDraft = state.weeklyDraft.copy(hourlyRateInput = value).withFullWeek())
                     },
-                    onShiftDateChanged = { index, value ->
+                    onShiftDateChanged = { index: Int, value: String ->
                         state = state.withRowDate(index, value)
                     },
-                    onShiftHoursChanged = { index, value ->
+                    onShiftHoursChanged = { index: Int, value: String ->
                         state = state.withRowHours(index, value)
                     },
                     onFinalize = {},
-                    onOpenInvoice = {}
+                    onOpenInvoice = { _: String -> }
                 )
             }
         }
@@ -129,14 +135,14 @@ class InvoiceWeeklyEntryScreenTest {
                 InvoiceWeeklyEntryScreen(
                     state = state,
                     onBack = {},
-                    onVenueSelected = {},
-                    onInvoiceDateChanged = {},
-                    onWeekEndingDateChanged = {},
-                    onHourlyRateChanged = {},
-                    onShiftDateChanged = { _, _ -> },
-                    onShiftHoursChanged = { _, _ -> },
+                    onVenueSelected = { _: String -> },
+                    onInvoiceDateChanged = { _: String -> },
+                    onWeekEndingDateChanged = { _: String -> },
+                    onHourlyRateChanged = { _: String -> },
+                    onShiftDateChanged = { _: Int, _: String -> },
+                    onShiftHoursChanged = { _: Int, _: String -> },
                     onFinalize = {},
-                    onOpenInvoice = {}
+                    onOpenInvoice = { _: String -> }
                 )
             }
         }
@@ -166,14 +172,14 @@ class InvoiceWeeklyEntryScreenTest {
                 InvoiceWeeklyEntryScreen(
                     state = state,
                     onBack = {},
-                    onVenueSelected = {},
-                    onInvoiceDateChanged = {},
-                    onWeekEndingDateChanged = {},
-                    onHourlyRateChanged = {},
-                    onShiftDateChanged = { _, _ -> },
-                    onShiftHoursChanged = { _, _ -> },
+                    onVenueSelected = { _: String -> },
+                    onInvoiceDateChanged = { _: String -> },
+                    onWeekEndingDateChanged = { _: String -> },
+                    onHourlyRateChanged = { _: String -> },
+                    onShiftDateChanged = { _: Int, _: String -> },
+                    onShiftHoursChanged = { _: Int, _: String -> },
                     onFinalize = {},
-                    onOpenInvoice = {}
+                    onOpenInvoice = { _: String -> }
                 )
             }
         }

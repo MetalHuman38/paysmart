@@ -16,7 +16,7 @@ import net.metalbrain.paysmart.core.features.fundingaccount.data.FundingAccountP
 import net.metalbrain.paysmart.core.features.fundingaccount.data.FundingAccountStatus
 import net.metalbrain.paysmart.core.service.performance.AppPerformanceMonitor
 import net.metalbrain.paysmart.data.repository.AuthRepository
-import net.metalbrain.paysmart.room.doa.FundingAccountDao
+import net.metalbrain.paysmart.room.dao.FundingAccountDao
 import net.metalbrain.paysmart.room.entity.FundingAccountEntity
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient

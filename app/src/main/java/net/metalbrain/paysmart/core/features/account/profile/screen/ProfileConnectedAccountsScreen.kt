@@ -29,6 +29,7 @@ import net.metalbrain.paysmart.core.features.account.profile.components.BankAcco
 import net.metalbrain.paysmart.core.features.account.profile.components.CardsTabContent
 import net.metalbrain.paysmart.core.features.account.profile.components.ConnectedAccountsTab
 import net.metalbrain.paysmart.core.features.account.profile.components.ConnectedAccountsTabSwitcher
+import net.metalbrain.paysmart.core.features.cards.state.ManagedCardsUiState
 import net.metalbrain.paysmart.core.features.fundingaccount.state.FundingAccountUiState
 import net.metalbrain.paysmart.ui.theme.Dimens
 
@@ -36,11 +37,15 @@ import net.metalbrain.paysmart.ui.theme.Dimens
 @OptIn(ExperimentalMaterial3Api::class)
 fun ProfileConnectedAccountsScreen(
     fundingAccountState: FundingAccountUiState,
+    managedCardsState: ManagedCardsUiState,
     onBack: () -> Unit,
     onRefreshBankAccounts: () -> Unit,
     onProvisionBankAccount: () -> Unit,
     onCopyBankAccountNumber: () -> Unit,
-    onShareBankAccount: () -> Unit
+    onShareBankAccount: () -> Unit,
+    onRefreshCards: () -> Unit,
+    onSetDefaultCard: (String) -> Unit,
+    onRemoveCard: (String) -> Unit
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(ConnectedAccountsTab.BANK_ACCOUNTS) }
 
@@ -105,7 +110,12 @@ fun ProfileConnectedAccountsScreen(
                             onShareDetails = onShareBankAccount
                         )
 
-                        ConnectedAccountsTab.CARDS -> CardsTabContent()
+                        ConnectedAccountsTab.CARDS -> CardsTabContent(
+                            state = managedCardsState,
+                            onRefresh = onRefreshCards,
+                            onSetDefaultCard = onSetDefaultCard,
+                            onRemoveCard = onRemoveCard
+                        )
                     }
                 }
             }

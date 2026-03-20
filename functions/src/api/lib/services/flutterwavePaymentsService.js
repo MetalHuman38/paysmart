@@ -51,6 +51,9 @@ export class FlutterwavePaymentsService {
         const checkoutUrl = asString(response.checkout_url) || asString(response.payment_url) || undefined;
         const status = asString(response.status) || "pending";
         const createdAtMs = parseDateToMs(asString(response.created_datetime)) ?? Date.now();
+        const expiresAtMs = parseDateToMs(asString(response.account_expiration_datetime)) ??
+            createdAtMs + this.options.virtualAccountExpirySeconds * 1000;
+        const virtualAccount = this.mapVirtualAccountDetails(response, input.reference, buildVirtualAccountNarration(input.customer));
         if (!id) {
             throw new Error("Flutterwave virtual account response is incomplete");
         }
@@ -62,7 +65,9 @@ export class FlutterwavePaymentsService {
             amountMinor: input.amountMinor,
             currency: input.currency,
             createdAtMs,
+            expiresAtMs,
             customerId,
+            virtualAccount,
         };
     }
     async createPermanentFundingAccount(input) {
@@ -215,7 +220,8 @@ export class FlutterwavePaymentsService {
         const bank = asRecord(response.bank);
         const accountId = asString(response.id) || asString(response.account_id);
         const accountNumber = asString(response.account_number) || asString(response.accountNumber);
-        const bankName = asString(response.bank_name) ||
+        const bankName = asString(response.account_bank_name) ||
+            asString(response.bank_name) ||
             asString(bank.name) ||
             asString(bank.bank_name);
         const accountName = asString(response.account_name) ||
@@ -259,6 +265,35 @@ export class FlutterwavePaymentsService {
             note,
             createdAtMs,
             updatedAtMs,
+        };
+    }
+    mapVirtualAccountDetails(response, fallbackReference, fallbackAccountName) {
+        const bank = asRecord(response.bank);
+        const accountNumber = asString(response.account_number) || asString(response.accountNumber);
+        const bankName = asString(response.account_bank_name) ||
+            asString(response.bank_name) ||
+            asString(bank.name) ||
+            asString(bank.bank_name);
+        const accountName = asString(response.account_name) ||
+            asString(response.accountName) ||
+            asString(response.name) ||
+            fallbackAccountName;
+        const reference = asString(response.reference) ||
+            asString(response.tx_ref) ||
+            fallbackReference;
+        const note = asString(response.note) ||
+            asString(response.narration) ||
+            asString(response.description) ||
+            undefined;
+        if (!accountNumber || !bankName || !reference) {
+            throw new Error("Flutterwave virtual account response is incomplete");
+        }
+        return {
+            accountNumber,
+            bankName,
+            accountName,
+            reference,
+            note,
         };
     }
     isExistingCustomerConflict(error) {

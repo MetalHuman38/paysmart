@@ -20,12 +20,13 @@ data class PostOtpCapabilitiesUiState(
 )
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class PostOtpCapabilitiesViewModel @Inject constructor(
     private val countryCapabilityRepository: CountryCapabilityRepository
 ) : ViewModel() {
     private val countryIso2 = MutableStateFlow(CountryCapabilityCatalog.DEFAULT_ISO2)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+
     val uiState = countryIso2
         .flatMapLatest { iso2 ->
             countryCapabilityRepository.observeProfile(iso2)

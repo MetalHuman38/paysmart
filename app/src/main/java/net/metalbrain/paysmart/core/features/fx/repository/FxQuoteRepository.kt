@@ -12,7 +12,7 @@ import net.metalbrain.paysmart.core.features.fx.data.FxQuoteDataSource
 import net.metalbrain.paysmart.core.features.fx.data.FxQuoteQuery
 import net.metalbrain.paysmart.core.features.fx.data.FxQuoteResult
 import net.metalbrain.paysmart.data.repository.AuthRepository
-import net.metalbrain.paysmart.room.doa.FxQuoteCacheDao
+import net.metalbrain.paysmart.room.dao.FxQuoteCacheDao
 import net.metalbrain.paysmart.room.entity.FxQuoteCacheEntity
 import okhttp3.OkHttpClient
 import okhttp3.Request

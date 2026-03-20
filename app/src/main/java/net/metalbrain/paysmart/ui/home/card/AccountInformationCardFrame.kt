@@ -19,9 +19,11 @@ import net.metalbrain.paysmart.ui.theme.HomeCardTokens
 fun AccountInformationCardFrame(
     modifier: Modifier = Modifier,
     gradient: Brush,
+    onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
     Card(
+        onClick = onClick,
         modifier = modifier.height(HomeCardTokens.accountInfoCardHeight),
         shape = HomeCardTokens.cardShape,
         border = BorderStroke(

@@ -4,6 +4,7 @@ enum class CapabilityKey {
     SEND_INTERNATIONAL,
     CARD_SPEND_ABROAD,
     HOLD_AND_CONVERT,
+
     RECEIVE_MONEY,
     EARN_RETURN;
 

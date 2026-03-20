@@ -8,11 +8,12 @@ export class ResendMailer {
         if (!apiKey) {
             throw new Error("ResendMailer: API key is required");
         }
-        if (!from || !from.includes("<") || !from.includes(">")) {
+        const normalizedFrom = normalizeLegacySender(from);
+        if (!normalizedFrom || !normalizedFrom.includes("<") || !normalizedFrom.includes(">")) {
             throw new Error("ResendMailer: 'from' must be in the format 'Name <email@domain>'");
         }
         this.resend = new Resend(apiKey);
-        this.from = from;
+        this.from = normalizedFrom;
     }
     async sendVerificationEmail({ to, link, }) {
         if (!to)
@@ -33,5 +34,8 @@ export class ResendMailer {
             throw new Error(`ResendMailer failed: ${error.message}`);
         }
     }
+}
+function normalizeLegacySender(from) {
+    return from.replace(/<([^<>@\s]+)@metalbrain\.net>/i, "<$1@pay-smart.net>");
 }
 //# sourceMappingURL=resendMailer.js.map

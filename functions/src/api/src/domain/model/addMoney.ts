@@ -21,6 +21,9 @@ export interface AddMoneySession {
   paymentIntentId?: string;
   paymentIntentClientSecret?: string;
   publishableKey?: string;
+  customerId?: string;
+  customerEphemeralKeySecret?: string;
+  defaultPaymentMethodId?: string;
 }
 
 export interface AddMoneySessionStatusResult extends AddMoneySession {

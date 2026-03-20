@@ -20,7 +20,7 @@ val trackedVersionProperties = Properties().apply {
 fun Project.stringPropertyOrEnv(name: String, defaultValue: String = ""): String =
     providers.gradleProperty(name).orNull?.trim().takeUnless { it.isNullOrEmpty() }
         ?: providers.environmentVariable(name).orNull?.trim().takeUnless { it.isNullOrEmpty() }
-        ?: trackedVersionProperties.getProperty(name)?.trim()?.takeUnless { it.isNullOrEmpty() }
+        ?: trackedVersionProperties.getProperty(name)?.trim()?.takeUnless { it.isEmpty() }
         ?: defaultValue
 
 fun Project.intPropertyOrEnv(name: String, defaultValue: Int): Int =
@@ -217,6 +217,7 @@ dependencies {
     implementation(libs.google.play.app.update)
     implementation(libs.google.play.app.update.ktx)
     implementation(libs.paging.compose)
+    implementation(libs.androidx.runtime)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.lifecycle.viewmodel.compose)
 

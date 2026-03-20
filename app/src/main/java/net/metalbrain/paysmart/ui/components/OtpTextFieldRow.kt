@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 fun OtpTextFieldRow(
     otpDigits: List<String>,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     onDigitChanged: (index: Int, value: String) -> Unit
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
@@ -44,6 +45,7 @@ fun OtpTextFieldRow(
                 OutlinedTextField(
                     value = digit,
                     onValueChange = { value -> onDigitChanged(index, value) },
+                    enabled = enabled,
                     singleLine = true,
                     modifier = Modifier
                         .width(fieldWidth)

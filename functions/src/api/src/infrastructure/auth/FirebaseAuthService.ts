@@ -7,8 +7,13 @@ export interface AuthService {
   ): Promise<{
     uid: string;
     email?: string;
+    phoneNumber?: string;
     emailVerified?: boolean;
+    isAnonymous?: boolean;
+    providerIds?: string[];
     tenantId?: string | null;
+    photoURL?: string;
+    displayName?: string;
   }>;
   getUserByPhone(phone: string): Promise<{ uid: string } | null>;
   updateUserEmail(uid: string, email: string): Promise<void>;
@@ -34,8 +39,13 @@ export class FirebaseAuthService implements AuthService {
     return {
       uid: user.uid,
       email: user.email ?? undefined,
+      phoneNumber: user.phoneNumber ?? undefined,
       emailVerified: user.emailVerified,
+      isAnonymous: user.providerData.length === 0,
+      providerIds: user.providerData.map((provider) => provider.providerId),
       tenantId: user.tenantId ?? null,
+      photoURL: user.photoURL ?? undefined,
+      displayName: user.displayName ?? undefined,
     };
   }
 

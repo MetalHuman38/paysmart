@@ -109,10 +109,7 @@ fun HomeScreen(
                 },
                 onViewRatesClick = {
                     navController.navigate(
-                        Screen.FeatureGate.routeWithArgs(
-                            feature = FeatureKey.SEND_MONEY.id,
-                            resumeRoute = Screen.SendMoney.route
-                        )
+                        Screen.ExchangeRates.routeWithCountry(uiState.countryIso2)
                     )
                 },
                 onViewAllLimitsClick = {

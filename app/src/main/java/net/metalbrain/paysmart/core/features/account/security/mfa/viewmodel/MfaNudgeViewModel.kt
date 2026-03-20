@@ -207,6 +207,9 @@ class MfaNudgeViewModel @Inject constructor(
                 .onSuccess {
                     runtime.value = runtime.value.copy(
                         isVerifyingCode = false,
+                        hasSentCode = false,
+                        destinationHint = null,
+                        verificationCode = "",
                         infoMessage = "2-step verification enabled."
                     )
                     refreshStatus()

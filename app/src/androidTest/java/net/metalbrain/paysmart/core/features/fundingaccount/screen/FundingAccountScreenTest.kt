@@ -11,6 +11,7 @@ import net.metalbrain.paysmart.core.features.fundingaccount.data.FundingAccountD
 import net.metalbrain.paysmart.core.features.fundingaccount.data.FundingAccountStatus
 import net.metalbrain.paysmart.core.features.fundingaccount.state.FundingAccountScreenPhase
 import net.metalbrain.paysmart.core.features.fundingaccount.state.FundingAccountUiState
+import net.metalbrain.paysmart.core.features.fundingaccount.screen.FundingAccountScreen
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 import org.junit.Rule
 import org.junit.Test

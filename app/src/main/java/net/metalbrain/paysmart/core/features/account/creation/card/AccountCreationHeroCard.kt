@@ -9,6 +9,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import net.metalbrain.paysmart.ui.theme.Dimens
 
@@ -26,8 +27,10 @@ internal fun AccountCreationHeroCard(
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
         )
     ) {
+
         Column(
             modifier = Modifier.padding(Dimens.md),
+            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Dimens.sm)
         ) {
             Text(
@@ -36,7 +39,8 @@ internal fun AccountCreationHeroCard(
             )
             Text(
                 text = title,
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
             )
             Text(
                 text = subtitle,

@@ -213,6 +213,7 @@
     <string name="account_limits_address_status">Vérification d’adresse</string>
     <string name="account_limits_email_status">Vérification d’e-mail</string>
     <string name="account_limits_last_synced">Dernière synchronisation : %1$s</string>
+    <string name="select_account_limits_to_see_or_receive">Sélectionnez un compte pour consulter les limites d\'envoi et de réception.</string>
     <string name="account_limits_info_note">Les limites sont dérivées du statut de vérification actuel et mises à jour après une synchronisation réussie.</string>
     <string name="account_statement_title">Relevé de compte</string>
     <string name="account_statement_empty">Aucune entrée de relevé pour le moment.</string>
@@ -313,6 +314,19 @@
     <string name="home_balance_no_transactions">Aucune transaction pour cette devise pour le moment.</string>
     <string name="home_balance_no_account_data">Aucune donnée de solde de portefeuille disponible pour le moment.</string>
     <string name="home_balance_last_synced">Dernière synchronisation</string>
+    <string name="common_copy">Copy</string>
+    <string name="add_money_view_account_details_action">View account details</string>
+    <string name="home_balance_transfer_account_supporting">Use these details to complete your one-time bank transfer top up.</string>
+    <string name="home_balance_transfer_account_holder_label">Account holder</string>
+    <string name="home_balance_transfer_exact_amount_label">Exact amount</string>
+    <string name="home_balance_transfer_expires_label">Expires</string>
+    <string name="home_balance_transfer_instruction_title">Before you send money</string>
+    <string name="home_balance_transfer_instruction_exact_amount">Transfer the exact amount shown above.</string>
+    <string name="home_balance_transfer_instruction_one_time">This virtual account is for this top up only and cannot be reused.</string>
+    <string name="home_balance_transfer_instruction_expiry_format">Send the transfer before %1$s.</string>
+    <string name="home_balance_transfer_instruction_confirmation">Your wallet updates after Flutterwave confirms the transfer.</string>
+    <string name="home_balance_transfer_copy_success_format">%1$s copied</string>
+    <string name="home_balance_transfer_share_title">Share transfer details</string>
     <string name="home_balance_activity_transfer_out">Au bénéficiaire</string>
     <string name="home_balance_activity_topup">Rechargement par virement</string>
     <string name="home_balance_amount_negative">-%1$s %2$s</string>
@@ -715,6 +729,39 @@
     <string name="profile_change_photo_saving">Enregistrement…</string>
     <string name="profile_change_photo_error">Impossible de mettre à jour la photo pour le moment.</string>
     <string name="profile_change_photo_contact_fallback">Ajoutez un e-mail ou un numéro de téléphone</string>
+    <string name="profile_connected_accounts_cards_loading_title">Chargement des cartes enregistrées</string>
+    <string name="profile_connected_accounts_cards_loading_supporting">Vérifiez sur Stripe les dernières cartes enregistrées dans votre portefeuille.</string>
+    <string name="profile_connected_accounts_cards_error_title">Les cartes enregistrées ne sont pas disponibles.</string>
+    <string name="profile_connected_accounts_cards_error_supporting">Impossible de charger vos cartes enregistrées pour le moment. Veuillez réessayer.</string>
+    <string name="profile_connected_accounts_cards_refresh_action">Actualiser les cartes</string>
+    <string name="profile_connected_accounts_cards_make_default_action">Par défaut</string>
+    <string name="profile_connected_accounts_cards_remove_action">Retirer</string>
+    <string name="profile_connected_accounts_cards_default_label">Défaut</string>
+    <string name="profile_connected_accounts_cards_expiry_format">Expire %1$02d/%2$d</string>
+
+    <string name="account_statement_supporting">Choisissez une période pour votre relevé et sélectionnez le format souhaité.</string>
+    <string name="account_statement_currency_label">Sélectionner la devise</string>
+    <string name="account_statement_start_date_label">Date de début</string>
+    <string name="account_statement_end_date_label">Date de fin</string>
+    <string name="account_statement_date_placeholder">JJ/MM/AAAA</string>
+    <string name="account_statement_format_label">Format</string>
+    <string name="exchange_rates_title">Taux de change</string>
+    <string name="account_statement_format_pdf">Format PDF</string>
+    <string name="account_statement_get_action">Obtenir le relevé</string>
+    <string name="account_statement_export_pending">L’exportation du relevé n’est pas encore connectée. Ce formulaire est prêt pour le pipeline des relevés.</string>
+
+    <string name="mfa_sign_in_title">Confirmer la connexion</string>
+    <string name="mfa_sign_in_description">Saisissez le code de vérification de votre second facteur enregistré pour terminer la connexion.</string>
+    <string name="mfa_sign_in_card_title">Vérification en deux étapes requise</string>
+    <string name="mfa_sign_in_factor_title">Choisissez où envoyer votre code</string>
+    <string name="mfa_sign_in_send_action">Envoyer le code de vérification</string>
+    <string name="mfa_sign_in_verify_action">Vérifier et se connecter</string>
+    <string name="mfa_sign_in_back_to_login">Retour à la connexion</string>
+    <string name="exchange_rates_supporting">Cotations FX en direct pour les destinations populaires, fournies par le flux de taux PaySmart actuel.</string>
+    <string name="exchange_rates_empty_title">Les taux ne sont pas disponibles</string>
+    <string name="exchange_rates_empty_supporting">Nous n’avons pas pu charger les cotations FX en direct pour le moment. Actualisez ou réessayez bientôt.</string>
+
+    <string name="profile_change_photo_camera_permission_error">L’autorisation de la caméra est requise pour prendre une photo de profil. Vous pouvez également en choisir une depuis votre galerie.</string>
     <string name="common_clear">Effacer</string>
     <string name="home_top_bar_search_content_description">Rechercher des transactions</string>
     <string name="home_top_bar_notifications_content_description">Voir les notifications</string>
@@ -744,4 +791,11 @@
     <string name="profile_security_mfa_title">2-step verification</string>
     <string name="profile_security_mfa_subtitle_enabled">2-step verification is enabled</string>
     <string name="profile_security_mfa_subtitle_disabled">Add an extra sign-in check</string>
+
+    <string name="account_limits_empty_accounts">Aucun compte portefeuille disponible pour le moment.</string>
+    <string name="account_limits_account_descriptor_bank_transfer">Virement bancaire</string>
+    <string name="account_limits_currency_title_format">%1$s limites</string>
+    <string name="account_limits_details_subtitle_format">Combien pouvez-vous envoyer et recevoir avec votre compte PaySmart %1$s ?</string>
+    <string name="account_limits_spent_of_limit_format">%1$s dépensés / %2$s</string>
+    <string name="account_limits_left_format">%1$s restants</string>
 </resources>

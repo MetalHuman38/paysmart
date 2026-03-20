@@ -6,6 +6,7 @@ data class AuthApiConfig (
     val baseUrl: String,
     val checkPhoneOrEmail: String = "/auth/check-email-or-phone",
     val checkIfPhoneAlreadyExist: String = "/auth/check-phone",
+    val finalizePhoneSignup: String = "/auth/finalize-phone-signup",
     val allowFederatedLinking: String = "/auth/allowFederatedLinking",
     val setBiometricEnabled: String = "/auth/setBiometricEnabled",
     val getBiometricEnabled: String = "/auth/getBiometricEnabled",
@@ -38,6 +39,7 @@ data class AuthApiConfig (
     val invoiceQueuePdf: String = "/invoices/{invoiceId}/pdf",
     val invoiceDownloadPdf: String = "/invoices/{invoiceId}/pdf/download",
     val addMoneySession: String = "/payments/add-money/session",
+    val managedCards: String = "/payments/stripe/managed-cards",
     val addMoneyFlutterwaveSession: String = "/payments/flutterwave/add-money/session",
     val flutterwaveFundingAccount: String = "/payments/flutterwave/funding-account",
     val flutterwaveFundingAccountProvision: String = "/payments/flutterwave/funding-account/provision",
@@ -58,6 +60,8 @@ data class AuthApiConfig (
     val checkPhoneOrEmailUrl get() = "$apiBase$checkPhoneOrEmail"
     
     val checkIfPhoneAlreadyExistUrl get() = "$apiBase$checkIfPhoneAlreadyExist"
+
+    val finalizePhoneSignupUrl get() = "$apiBase$finalizePhoneSignup"
 
     val allowFederatedLinkingUrl get() = "$apiBase$allowFederatedLinking"
     
@@ -136,12 +140,21 @@ data class AuthApiConfig (
     }
 
     val addMoneySessionUrl get() = "$apiBase$addMoneySession"
+    val managedCardsUrl get() = "$apiBase$managedCards"
     val addMoneyFlutterwaveSessionUrl get() = "$apiBase$addMoneyFlutterwaveSession"
     val flutterwaveFundingAccountUrl get() = "$apiBase$flutterwaveFundingAccount"
     val flutterwaveFundingAccountProvisionUrl get() = "$apiBase$flutterwaveFundingAccountProvision"
 
     fun addMoneySessionStatusUrl(sessionId: String): String {
         return "$apiBase$addMoneySession/${sessionId.trim()}"
+    }
+
+    fun managedCardDeleteUrl(paymentMethodId: String): String {
+        return "$apiBase$managedCards/${Uri.encode(paymentMethodId.trim())}"
+    }
+
+    fun managedCardDefaultUrl(paymentMethodId: String): String {
+        return "${managedCardDeleteUrl(paymentMethodId)}/default"
     }
 
     fun addMoneyFlutterwaveSessionStatusUrl(sessionId: String): String {

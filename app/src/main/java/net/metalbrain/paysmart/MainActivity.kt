@@ -188,6 +188,7 @@ class MainActivity : FragmentActivity() {
                         currentRoute == Screen.Splash.route ||
                         currentRoute == Screen.Startup.route ||
                         currentRoute == Screen.Login.route ||
+                        currentRoute == Screen.LoginMfaChallenge.route ||
                         currentRoute.startsWith("language")
 
             LaunchedEffect(sessionLocked, postAuthState, sessionState, currentRoute) {
@@ -457,6 +458,7 @@ private fun resolveUpdateAppState(
 private fun isCriticalUpdateRoute(route: String): Boolean {
     return route.startsWith("otp_verification/") ||
         route.startsWith(Screen.Reauthenticate.baseRoute) ||
+        route.startsWith(Screen.LoginMfaChallenge.route) ||
         route.startsWith(Screen.SetUpPassCode.route) ||
         route.startsWith(Screen.ProfileChangePasscodeGate.route) ||
         route.startsWith(Screen.ProfileChangePasscode.route) ||

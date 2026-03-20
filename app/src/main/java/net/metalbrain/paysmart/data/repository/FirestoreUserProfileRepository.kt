@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import net.metalbrain.paysmart.BuildConfig
 import net.metalbrain.paysmart.domain.model.AuthUserModel
-import net.metalbrain.paysmart.utils.normalizeProvider
 
 class FirestoreUserProfileRepository @Inject constructor(
     firestore: FirebaseFirestore,
@@ -34,16 +33,6 @@ class FirestoreUserProfileRepository @Inject constructor(
         return snap.toAuthUserModel()
     }
 
-    override suspend fun updatePhoneNumber(uid: String, phoneNumber: String) {
-        users.document(uid).set(
-            mapOf(
-                "phoneNumber" to phoneNumber,
-                "lastSignedIn" to FieldValue.serverTimestamp()
-            ),
-            SetOptions.merge()
-        ).await()
-    }
-
     override suspend fun updatePhotoUrl(uid: String, photoUrl: String?) {
         val payload = if (photoUrl.isNullOrBlank()) {
             mapOf(
@@ -63,7 +52,13 @@ class FirestoreUserProfileRepository @Inject constructor(
     override suspend fun upsertNewUser(user: AuthUserModel, providerId: String) {
         val docRef = users.document(user.uid)
 
-        val normalizedProvider = normalizeProvider(providerId)
+        val normalizedProvider = when (providerId) {
+            "google.com" -> "google"
+            "facebook.com" -> "facebook"
+            "password" -> "password"
+            "phone" -> "phone"
+            else -> "unknown"
+        }
 
         val data = buildMap {
             put("authProvider", normalizedProvider)

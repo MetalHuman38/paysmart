@@ -46,7 +46,7 @@ internal fun AddMoneyContent(
     onRefreshQuote: () -> Unit,
     onCreatePaymentSession: () -> Unit,
     onOpenProviderCheckout: () -> Unit,
-    onOpenReceiveMoney: () -> Unit,
+    onOpenAccountDetails: () -> Unit,
     onRefreshSessionStatus: () -> Unit
 ) {
     Scaffold(
@@ -142,7 +142,7 @@ internal fun AddMoneyContent(
                 activeProvider = activeProvider,
                 onCreatePaymentSession = onCreatePaymentSession,
                 onOpenProviderCheckout = onOpenProviderCheckout,
-                onOpenReceiveMoney = onOpenReceiveMoney,
+                onOpenAccountDetails = onOpenAccountDetails,
                 onRefreshSessionStatus = onRefreshSessionStatus
             )
         }

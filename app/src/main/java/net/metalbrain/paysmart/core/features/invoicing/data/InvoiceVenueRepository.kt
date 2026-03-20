@@ -5,7 +5,7 @@ import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceVenueDraft
-import net.metalbrain.paysmart.room.doa.InvoiceVenueDao
+import net.metalbrain.paysmart.room.dao.InvoiceVenueDao
 import net.metalbrain.paysmart.room.entity.InvoiceVenueEntity
 
 

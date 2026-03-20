@@ -43,9 +43,13 @@ fun CreateAccountScreen(
     val selectedCountry by viewModel.selectedCountry
     var showAlreadyRegisteredSheet by remember { mutableStateOf(false) }
     var isSubmitting by remember { mutableStateOf(false) }
+    var submissionError by remember { mutableStateOf<String?>(null) }
     val activity = LocalActivity.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val phoneVerificationStartError = stringResource(
+        R.string.create_account_phone_verification_error
+    )
 
     LaunchedEffect(Unit) {
         viewModel.autoSelectCountry(detectDeviceCountryIso2(context))
@@ -77,17 +81,22 @@ fun CreateAccountScreen(
             acceptedMarketing = viewModel.acceptedMarketing,
             acceptedTerms = viewModel.acceptedTerms,
             isSubmitting = isSubmitting,
+            errorMessage = submissionError,
             isContinueEnabled = viewModel.acceptedTerms && viewModel.isPhoneValid(),
             onFlagClick = { showCountryPicker = true },
-            onPhoneNumberChange = viewModel::onPhoneNumberChanged,
+            onPhoneNumberChange = { value ->
+                submissionError = null
+                viewModel.onPhoneNumberChanged(value)
+            },
             onToggleMarketing = viewModel::onToggleMarketing,
             onToggleTerms = viewModel::onToggleTerms,
             onContinue = {
                 isSubmitting = true
+                submissionError = null
                 scope.launch {
                     viewModel.startPhoneVerification(
                         activity = activity,
-                        onSuccess = {
+                        onVerificationStarted = {
                             isSubmitting = false
                             onVerificationContinue(normalizeCountryIso2(selectedCountry.isoCode))
                         },
@@ -97,6 +106,9 @@ fun CreateAccountScreen(
                         },
                         onError = { error ->
                             isSubmitting = false
+                            submissionError = error.message
+                                ?.takeIf { it.isNotBlank() }
+                                ?: phoneVerificationStartError
                             Log.e("PhoneAuth", error.message ?: "Unknown error")
                         }
                     )
@@ -114,9 +126,11 @@ fun CreateAccountScreen(
         CountryPickerBottomSheet(
             onDismiss = { showCountryPicker = false },
             onCountrySelected = { selected ->
+                submissionError = null
                 viewModel.onCountrySelected(selected)
                 showCountryPicker = false
-            }
+            },
+            selectedCountryIso2 = selectedCountry.isoCode
         )
     }
 

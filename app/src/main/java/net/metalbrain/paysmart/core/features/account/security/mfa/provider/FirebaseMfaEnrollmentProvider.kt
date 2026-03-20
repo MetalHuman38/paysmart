@@ -188,21 +188,39 @@ class FirebaseMfaEnrollmentProvider @Inject constructor(
         }
     }
 
-    override suspend fun verifyCodeAndEnroll(code: String, displayName: String?): Result<Unit> = runCatching {
-        val user = requireCurrentUser()
-        val credential = autoResolvedCredential ?: run {
-            val verification = verificationId
-                ?: throw IllegalStateException("No active MFA verification challenge")
-            val normalizedCode = code.trim()
-            if (normalizedCode.length < 6) {
-                throw IllegalStateException("Enter the 6-digit verification code")
+    override suspend fun verifyCodeAndEnroll(code: String, displayName: String?): Result<Unit> {
+        return try {
+            val user = requireCurrentUser()
+
+            if (autoResolvedCredential == null && verificationId == null) {
+                user.reload().await()
+                if (user.multiFactor.enrolledFactors.isNotEmpty()) {
+                    clearPendingSession()
+                    return Result.success(Unit)
+                }
+                return Result.failure(IllegalStateException("No active MFA verification challenge"))
             }
-            PhoneAuthProvider.getCredential(verification, normalizedCode)
+
+            val credential = autoResolvedCredential ?: run {
+                val verification = verificationId
+                    ?: throw IllegalStateException("No active MFA verification challenge")
+                val normalizedCode = code.trim()
+                if (normalizedCode.length < 6) {
+                    throw IllegalStateException("Enter the 6-digit verification code")
+                }
+                PhoneAuthProvider.getCredential(verification, normalizedCode)
+            }
+
+            val assertion = PhoneMultiFactorGenerator.getAssertion(credential)
+            user.multiFactor
+                .enroll(assertion, displayName?.takeIf { it.isNotBlank() } ?: "PaySmart phone")
+                .await()
+            user.reload().await()
+            clearPendingSession()
+            Result.success(Unit)
+        } catch (exception: Exception) {
+            Result.failure(mapEnrollmentException(exception))
         }
-        val assertion = PhoneMultiFactorGenerator.getAssertion(credential)
-        user.multiFactor.enroll(assertion, displayName?.takeIf { it.isNotBlank() } ?: "PaySmart phone")
-        user.reload().await()
-        clearPendingSession()
     }
 
     override fun clearPendingSession() {
@@ -210,6 +228,7 @@ class FirebaseMfaEnrollmentProvider @Inject constructor(
         verificationId = null
         forceResendingToken = null
         autoResolvedCredential = null
+        destinationHint = null
     }
 
     private fun requireCurrentUser(): FirebaseUser {

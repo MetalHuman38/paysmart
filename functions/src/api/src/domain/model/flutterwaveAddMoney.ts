@@ -11,6 +11,14 @@ export interface CreateFlutterwaveAddMoneySessionInput {
   idempotencyKey?: string;
 }
 
+export interface FlutterwaveVirtualAccountDetails {
+  accountNumber: string;
+  bankName: string;
+  accountName?: string;
+  reference: string;
+  note?: string;
+}
+
 export interface FlutterwaveAddMoneySession {
   sessionId: string;
   provider: "flutterwave";
@@ -20,6 +28,7 @@ export interface FlutterwaveAddMoneySession {
   status: FlutterwaveAddMoneySessionStatus;
   expiresAtMs: number;
   flutterwaveTransactionId?: string;
+  virtualAccount?: FlutterwaveVirtualAccountDetails;
   publicKey?: string;
 }
 

@@ -41,7 +41,7 @@ internal fun PostOtpCapabilitiesContent(
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(Dimens.space10),
-                verticalArrangement = Arrangement.spacedBy(Dimens.space8)
+                verticalArrangement = Arrangement.spacedBy(Dimens.md)
             ) {
                 Text(
                     text = profile.currencyCode,
@@ -49,7 +49,11 @@ internal fun PostOtpCapabilitiesContent(
                     color = MaterialTheme.colorScheme.primary
                 )
                 profile.capabilities.forEach { capability ->
-                    PostOtpCapabilityRow(item = capability)
+                    PostOtpCapabilityRow(
+                        item = capability,
+                        onClick = {}
+                    )
+
                 }
             }
         }

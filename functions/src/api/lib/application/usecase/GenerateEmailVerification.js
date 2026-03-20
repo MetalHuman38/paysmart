@@ -1,5 +1,5 @@
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { evaluateEmailVerificationPolicy } from "../../domain/service/EmailVerificationPolicy.js";
+import { evaluateEmailVerificationPolicy, getEmailVerificationAttemptCountForCurrentDay, } from "../../domain/service/EmailVerificationPolicy.js";
 export class GenerateEmailVerification {
     securityRepo;
     userRepo;
@@ -31,15 +31,20 @@ export class GenerateEmailVerification {
         const now = Timestamp.now();
         const decision = evaluateEmailVerificationPolicy(sec, now);
         if (!decision.allowed) {
-            return { retryAfter: decision.retryAfter ?? 0 };
+            return {
+                sent: false,
+                reason: decision.reason,
+                retryAfter: decision.retryAfter,
+            };
         }
+        const attemptsToday = getEmailVerificationAttemptCountForCurrentDay(sec, now);
         /* ---------- Bind email to current auth owner ---------- */
         await this.authService.updateUserEmail(uid, email);
         /* ---------- Persist attempt ---------- */
         await this.securityRepo.update(uid, {
             emailToVerify: email,
             emailVerificationSentAt: now,
-            emailVerificationAttemptsToday: FieldValue.increment(1),
+            emailVerificationAttemptsToday: attemptsToday + 1,
             updatedAt: FieldValue.serverTimestamp(),
         });
         /* ---------- Generate link ---------- */

@@ -7,4 +7,5 @@ object PhonePrefsKeys {
     val e164 = stringPreferencesKey("e164")
     val verificationId = stringPreferencesKey("verification_id")
     val verified = booleanPreferencesKey("verified")
+    val errorMessage = stringPreferencesKey("error_message")
 }

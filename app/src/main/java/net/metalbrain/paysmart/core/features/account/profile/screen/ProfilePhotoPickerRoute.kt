@@ -1,5 +1,7 @@
 package net.metalbrain.paysmart.core.features.account.profile.screen
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,6 +12,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.profile.components.ProfileAvatarCatalog
 import net.metalbrain.paysmart.core.features.account.profile.viewmodel.ProfilePhotoUiState
 import net.metalbrain.paysmart.core.features.account.profile.viewmodel.ProfilePhotoViewModel
@@ -31,12 +36,24 @@ fun ProfilePhotoPickerRoute(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val cameraPermissionError = stringResource(
+        R.string.profile_change_photo_camera_permission_error
+    )
     var selectedPresetToken by remember {
         mutableStateOf(ProfileAvatarCatalog.presetForPhotoUrl(user.photoURL)?.token)
     }
     var removePhotoSelected by remember { mutableStateOf(false) }
     var pendingUpload by remember { mutableStateOf<PendingPhotoUpload?>(null) }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    var pendingCameraLaunch by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.completedAt) {
         if (uiState.completedAt != null) {
@@ -81,6 +98,24 @@ fun ProfilePhotoPickerRoute(
                 viewModel.setError(error.localizedMessage ?: "Unable to update photo right now.")
             }
     }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasCameraPermission = granted
+        if (granted && pendingCameraLaunch) {
+            pendingCameraLaunch = false
+            val nextUri = createProfilePhotoCaptureUri(context)
+            cameraUri = nextUri
+            runCatching { cameraLauncher.launch(nextUri) }
+                .onFailure {
+                    cameraUri = null
+                    viewModel.setError(cameraPermissionError)
+                }
+        } else if (!granted) {
+            pendingCameraLaunch = false
+            viewModel.setError(cameraPermissionError)
+        }
+    }
 
     val selectedPhotoModel: Any? = when {
         removePhotoSelected -> null
@@ -107,9 +142,23 @@ fun ProfilePhotoPickerRoute(
             viewModel.clearError()
         },
         onTakePhoto = {
-            val nextUri = createProfilePhotoCaptureUri(context)
-            cameraUri = nextUri
-            cameraLauncher.launch(nextUri)
+            val granted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+            hasCameraPermission = granted
+            if (granted) {
+                val nextUri = createProfilePhotoCaptureUri(context)
+                cameraUri = nextUri
+                runCatching { cameraLauncher.launch(nextUri) }
+                    .onFailure {
+                        cameraUri = null
+                        viewModel.setError(cameraPermissionError)
+                    }
+            } else {
+                pendingCameraLaunch = true
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
         },
         onPickFromGallery = { galleryLauncher.launch("image/*") },
         onRemovePhoto = {

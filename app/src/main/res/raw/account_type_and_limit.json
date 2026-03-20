@@ -1,0 +1,246 @@
+[ { "iso2": "GB", "iso3": "GBR", "name": "United Kingdom", "flag": "🇬🇧",
+  "dialCode": "+44", "region": "Europe",
+  "currency": { "code": "GBP", "name": "Pound sterling", "symbol": "£" },
+  "phone": { "example": "7400123456", "minLen": 7, "maxLen": 11 },
+  "payoutRules": { "bankTransfer": { "supportsIban": true,
+    "iban": { "length": 22, "countryCode": "GB" },
+    "local": { "accountNumber": { "lengths": [8] },
+      "routing": { "label": "Sort code", "lengths": [6], "formatHint": "12-34-56" }}}}
+},
+  { "iso2": "US", "iso3": "USA", "name": "United States", "flag": "🇺🇸",
+    "dialCode": "+1", "region": "North America",
+    "currency": { "code": "USD", "name": "US Dollar", "symbol": "$" },
+    "phone": { "example": "4155552671", "minLen": 10, "maxLen": 10 },
+    "payoutRules": { "bankTransfer": { "supportsIban": false,
+      "local": { "accountNumber": { "minLen": 6, "maxLen": 17 },
+        "routing": { "label": "ABA routing", "lengths": [9] }}}
+    }
+  },
+  { "iso2": "NG", "iso3": "NGA", "name": "Nigeria", "flag": "🇳🇬",
+    "dialCode": "+234", "region": "Africa",
+    "currency": { "code": "NGN", "name": "Naira", "symbol": "₦" },
+    "phone": { "example": "8031234567", "minLen": 8, "maxLen": 11 },
+    "payoutRules": { "bankTransfer": { "supportsIban": false,
+      "local": { "accountNumber": { "lengths": [10], "label": "NUBAN" },
+        "routing": { "label": "Bank code", "lengths": [3] }}}}
+  },
+  { "iso2": "DE", "iso3": "DEU", "name": "Germany", "flag": "🇩🇪",
+    "dialCode": "+49", "region": "Europe",
+    "currency": { "code": "EUR", "name": "Euro", "symbol": "€" },
+    "phone": { "example": "15123456789", "minLen": 7, "maxLen": 13 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 22, "countryCode": "DE" }}}
+  },
+  { "iso2": "ES", "iso3": "ESP", "name": "Spain", "flag": "🇪🇸",
+    "dialCode": "+34", "region": "Europe",
+    "currency": { "code": "EUR", "name": "Euro", "symbol": "€" },
+    "phone": { "example": "612345678", "minLen": 9, "maxLen": 10 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 22, "countryCode": "ES" }}}
+  },
+  { "iso2": "FR", "iso3": "FRA", "name": "France", "flag": "🇫🇷",
+    "dialCode": "+33", "region": "Europe",
+    "currency": { "code": "EUR", "name": "Euro", "symbol": "€" },
+    "phone": { "example": "612345678", "minLen": 9, "maxLen": 10 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 22, "countryCode": "FR" }}}
+  },
+  { "iso2": "IT", "iso3": "ITA", "name": "Italy", "flag": "🇮🇹",
+    "dialCode": "+39", "region": "Europe",
+    "currency": { "code": "EUR", "name": "Euro", "symbol": "€" },
+    "phone": { "example": "3334567890", "minLen": 9, "maxLen": 10 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 22, "countryCode": "IT" }}}
+  },
+  { "iso2": "JP", "iso3": "JPN", "name": "Japan", "flag": "🇯🇵",
+    "dialCode": "+81", "region": "Asia",
+    "currency": { "code": "JPY", "name": "Japanese yen", "symbol": "¥" },
+    "phone": { "example": "9012345678", "minLen": 10, "maxLen": 11 },
+    "payoutRules": { "bankTransfer": { "supportsIban": false,
+      "local": { "accountNumber": { "lengths": [9] },
+        "routing": { "label": "Bank code", "lengths": [4] }}}}
+  },
+  { "iso2": "IE", "iso3": "IRL", "name": "Ireland", "flag": "🇮🇪",
+    "dialCode": "+353", "region": "Europe",
+    "currency": { "code": "EUR", "name": "Euro", "symbol": "€" },
+    "phone": { "example": "851234567", "minLen": 7, "maxLen": 12 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 22, "countryCode": "IE" }}}
+  },
+
+  { "iso2": "NL", "iso3": "NLD", "name": "Netherlands", "flag": "🇳🇱",
+    "dialCode": "+31", "region": "Europe",
+    "currency": { "code": "EUR", "name": "Euro", "symbol": "€" },
+    "phone": { "example": "612345678", "minLen": 9, "maxLen": 12 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 18, "countryCode": "NL" }}}
+  },
+
+  { "iso2": "BE", "iso3": "BEL", "name": "Belgium", "flag": "🇧🇪",
+    "dialCode": "+32", "region": "Europe",
+    "currency": { "code": "EUR", "name": "Euro", "symbol": "€" },
+    "phone": { "example": "470123456", "minLen": 8, "maxLen": 12 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 16, "countryCode": "BE" }}}
+  },
+
+  { "iso2": "PT", "iso3": "PRT", "name": "Portugal", "flag": "🇵🇹",
+    "dialCode": "+351", "region": "Europe",
+    "currency": { "code": "EUR", "name": "Euro", "symbol": "€" },
+    "phone": { "example": "912345678", "minLen": 9, "maxLen": 12 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 25, "countryCode": "PT" }}}
+  },
+
+  { "iso2": "SE", "iso3": "SWE", "name": "Sweden", "flag": "🇸🇪",
+    "dialCode": "+46", "region": "Europe",
+    "currency": { "code": "SEK", "name": "Swedish krona", "symbol": "kr" },
+    "phone": { "example": "701234567", "minLen": 7, "maxLen": 12 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 24, "countryCode": "SE" }}}
+  },
+
+  { "iso2": "NO", "iso3": "NOR", "name": "Norway", "flag": "🇳🇴",
+    "dialCode": "+47", "region": "Europe",
+    "currency": { "code": "NOK", "name": "Norwegian krone", "symbol": "kr" },
+    "phone": { "example": "41234567", "minLen": 8, "maxLen": 8 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 15, "countryCode": "NO" }}}
+  },
+
+  { "iso2": "DK", "iso3": "DNK", "name": "Denmark", "flag": "🇩🇰",
+    "dialCode": "+45", "region": "Europe",
+    "currency": { "code": "DKK", "name": "Danish krone", "symbol": "kr" },
+    "phone": { "example": "20123456", "minLen": 8, "maxLen": 8 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 18, "countryCode": "DK" }}}
+  },
+
+  { "iso2": "FI", "iso3": "FIN", "name": "Finland", "flag": "🇫🇮",
+    "dialCode": "+358", "region": "Europe",
+    "currency": { "code": "EUR", "name": "Euro", "symbol": "€" },
+    "phone": { "example": "401234567", "minLen": 7, "maxLen": 12 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 18, "countryCode": "FI" }}}
+  },
+
+  { "iso2": "AT", "iso3": "AUT", "name": "Austria", "flag": "🇦🇹",
+    "dialCode": "+43", "region": "Europe",
+    "currency": { "code": "EUR", "name": "Euro", "symbol": "€" },
+    "phone": { "example": "664123456", "minLen": 7, "maxLen": 12 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 20, "countryCode": "AT" }}}
+  },
+
+  { "iso2": "CH", "iso3": "CHE", "name": "Switzerland", "flag": "🇨🇭",
+    "dialCode": "+41", "region": "Europe",
+    "currency": { "code": "CHF", "name": "Swiss franc", "symbol": "Fr" },
+    "phone": { "example": "781234567", "minLen": 7, "maxLen": 12 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 21, "countryCode": "CH" }}}
+  },
+
+  { "iso2": "TR", "iso3": "TUR", "name": "Turkey", "flag": "🇹🇷",
+    "dialCode": "+90", "region": "Asia",
+    "currency": { "code": "TRY", "name": "Turkish lira", "symbol": "₺" },
+    "phone": { "example": "5012345678", "minLen": 10, "maxLen": 10 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 26, "countryCode": "TR" }}}
+  },
+
+  { "iso2": "AE", "iso3": "ARE", "name": "United Arab Emirates", "flag": "🇦🇪",
+    "dialCode": "+971", "region": "Middle East",
+    "currency": { "code": "AED", "name": "UAE dirham", "symbol": "د.إ" },
+    "phone": { "example": "501234567", "minLen": 7, "maxLen": 12 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 23, "countryCode": "AE" }}}
+  },
+
+  { "iso2": "SA", "iso3": "SAU", "name": "Saudi Arabia", "flag": "🇸🇦",
+    "dialCode": "+966", "region": "Middle East",
+    "currency": { "code": "SAR", "name": "Saudi riyal", "symbol": "﷼" },
+    "phone": { "example": "512345678", "minLen": 9, "maxLen": 9 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 24, "countryCode": "SA" }}}
+  },
+
+  { "iso2": "CA", "iso3": "CAN", "name": "Canada", "flag": "🇨🇦",
+    "dialCode": "+1", "region": "North America",
+    "currency": { "code": "CAD", "name": "Canadian dollar", "symbol": "$" },
+    "phone": { "example": "4165551234", "minLen": 10, "maxLen": 10 },
+    "payoutRules": { "bankTransfer": { "supportsIban": false,
+      "local": { "accountNumber": { "minLen": 7, "maxLen": 12 },
+        "routing": { "label": "Routing (transit+institution)", "lengths": [9], "formatHint": "0TTT-III" }}}}
+  },
+
+  { "iso2": "AU", "iso3": "AUS", "name": "Australia", "flag": "🇦🇺",
+    "dialCode": "+61", "region": "Oceania",
+    "currency": { "code": "AUD", "name": "Australian dollar", "symbol": "$" },
+    "phone": { "example": "412345678", "minLen": 9, "maxLen": 10 },
+    "payoutRules": { "bankTransfer": { "supportsIban": false,
+      "local": { "accountNumber": { "minLen": 6, "maxLen": 10 },
+        "routing": { "label": "BSB", "lengths": [6], "formatHint": "123-456" }}}}
+  },
+
+  { "iso2": "IN", "iso3": "IND", "name": "India", "flag": "🇮🇳",
+    "dialCode": "+91", "region": "Asia",
+    "currency": { "code": "INR", "name": "Indian rupee", "symbol": "₹" },
+    "phone": { "example": "9123456789", "minLen": 10, "maxLen": 10 },
+    "payoutRules": { "bankTransfer": { "supportsIban": false,
+      "local": { "accountNumber": { "minLen": 9, "maxLen": 18 },
+        "routing": { "label": "IFSC", "lengths": [11], "formatHint": "ABCD0XXXXXX" }}}}
+  },
+
+  { "iso2": "KE", "iso3": "KEN", "name": "Kenya", "flag": "🇰🇪",
+    "dialCode": "+254", "region": "Africa",
+    "currency": { "code": "KES", "name": "Kenyan shilling", "symbol": "KSh" },
+    "phone": { "example": "712345678", "minLen": 9, "maxLen": 12 },
+    "payoutRules": { "bankTransfer": { "supportsIban": false,
+      "local": { "accountNumber": { "minLen": 6, "maxLen": 13 },
+        "routing": { "label": "Bank/Branch code", "lengths": [6] }}}}
+  },
+
+  { "iso2": "ZA", "iso3": "ZAF", "name": "South Africa", "flag": "🇿🇦",
+    "dialCode": "+27", "region": "Africa",
+    "currency": { "code": "ZAR", "name": "South African rand", "symbol": "R" },
+    "phone": { "example": "821234567", "minLen": 9, "maxLen": 9 },
+    "payoutRules": { "bankTransfer": { "supportsIban": false,
+      "local": { "accountNumber": { "minLen": 6, "maxLen": 11 },
+        "routing": { "label": "Branch code", "lengths": [6] }}}}
+  },
+
+  { "iso2": "GH", "iso3": "GHA", "name": "Ghana", "flag": "🇬🇭",
+    "dialCode": "+233", "region": "Africa",
+    "currency": { "code": "GHS", "name": "Ghanaian cedi", "symbol": "₵" },
+    "phone": { "example": "241234567", "minLen": 9, "maxLen": 9 },
+    "payoutRules": { "bankTransfer": { "supportsIban": false,
+      "local": { "accountNumber": { "minLen": 8, "maxLen": 12 },
+        "routing": { "label": "Bank/Branch code", "lengths": [6] }}}}
+  },
+
+  { "iso2": "PL", "iso3": "POL", "name": "Poland", "flag": "🇵🇱",
+    "dialCode": "+48", "region": "Europe",
+    "currency": { "code": "PLN", "name": "Polish złoty", "symbol": "zł" },
+    "phone": { "example": "512345678", "minLen": 9, "maxLen": 9 },
+    "payoutRules": { "bankTransfer": { "supportsIban": true,
+      "iban": { "length": 28, "countryCode": "PL" }}}
+  },
+
+  { "iso2": "BR", "iso3": "BRA", "name": "Brazil", "flag": "🇧🇷",
+    "dialCode": "+55", "region": "South America",
+    "currency": { "code": "BRL", "name": "Brazilian real", "symbol": "R$" },
+    "phone": { "example": "11912345678", "minLen": 10, "maxLen": 11 },
+    "payoutRules": { "bankTransfer": { "supportsIban": false,
+      "local": { "accountNumber": { "minLen": 5, "maxLen": 12 },
+        "routing": { "label": "Bank/Branch code", "minLen": 7, "maxLen": 8 }}}}
+  },
+
+  { "iso2": "MX", "iso3": "MEX", "name": "Mexico", "flag": "🇲🇽",
+    "dialCode": "+52", "region": "North America",
+    "currency": { "code": "MXN", "name": "Mexican peso", "symbol": "$" },
+    "phone": { "example": "5512345678", "minLen": 10, "maxLen": 10 },
+    "payoutRules": { "bankTransfer": { "supportsIban": false,
+      "local": { "accountNumber": { "lengths": [16, 18] },
+        "routing": { "label": "CLABE", "lengths": [18] }}}}
+  }
+]

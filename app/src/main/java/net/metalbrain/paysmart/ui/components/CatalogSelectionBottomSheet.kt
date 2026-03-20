@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -31,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.ui.theme.Dimens
@@ -107,45 +110,70 @@ fun CatalogSelectionBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(Dimens.sm)
             ) {
                 items(filtered, key = { it.key }) { option ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 56.dp)
-                            .clickable {
-                                onSelect(option)
-                                onDismiss()
+                    val isSelected = option.key.equals(selectedKey, ignoreCase = true)
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.large,
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.surface
+                        },
+                        tonalElevation = if (isSelected) Dimens.xs else 0.dp,
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.24f)
+                            } else {
+                                MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
                             }
-                            .padding(horizontal = Dimens.sm, vertical = Dimens.sm),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        option.leadingEmoji?.takeIf { it.isNotBlank() }?.let { emoji ->
-                            Text(
-                                text = emoji,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Spacer(modifier = Modifier.width(Dimens.sm))
+                        ),
+                        onClick = {
+                            onSelect(option)
+                            onDismiss()
                         }
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = option.title,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            option.subtitle?.takeIf { it.isNotBlank() }?.let { subtitle ->
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 64.dp)
+                                .padding(horizontal = Dimens.md, vertical = Dimens.md),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            option.leadingEmoji?.takeIf { it.isNotBlank() }?.let { emoji ->
                                 Text(
-                                    text = subtitle,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    text = emoji,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Spacer(modifier = Modifier.width(Dimens.sm))
+                            }
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = option.title,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                option.subtitle?.takeIf { it.isNotBlank() }?.let { subtitle ->
+                                    Text(
+                                        text = subtitle,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
-                        }
-
-                        if (option.key.equals(selectedKey, ignoreCase = true)) {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
                         }
                     }
                 }

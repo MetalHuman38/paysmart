@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import net.metalbrain.paysmart.domain.model.AuthUserModel
 import net.metalbrain.paysmart.domain.model.ProfileDetailsDraft
-import net.metalbrain.paysmart.room.doa.UserProfileCacheDao
+import net.metalbrain.paysmart.room.dao.UserProfileCacheDao
 import net.metalbrain.paysmart.room.entity.UserProfileCacheEntity
 
 class UserProfileCacheRepository @Inject constructor(
@@ -153,4 +153,3 @@ private fun UserProfileCacheEntity.toDomain(): AuthUserModel {
         postalCode = postalCode
     )
 }
-

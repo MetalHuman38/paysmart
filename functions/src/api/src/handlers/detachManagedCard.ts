@@ -1,0 +1,30 @@
+import { Request, Response } from "express";
+import { initDeps } from "../dependencies.js";
+import { authContainer } from "../infrastructure/di/authContainer.js";
+import { DetachManagedCard } from "../application/usecase/DetachManagedCard.js";
+import { handleManagedCardError } from "./listManagedCards.js";
+
+export async function detachManagedCardHandler(req: Request, res: Response) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Missing token" });
+    }
+
+    const paymentMethodId = String(req.params?.paymentMethodId || "").trim();
+    if (!paymentMethodId) {
+      return res.status(400).json({ error: "Missing paymentMethodId" });
+    }
+
+    const idToken = authHeader.split("Bearer ")[1];
+    const { auth } = initDeps();
+    const decoded = await auth.verifyIdToken(idToken);
+
+    const { managedCards } = authContainer();
+    const useCase = new DetachManagedCard(managedCards);
+    const result = await useCase.execute(decoded.uid, paymentMethodId);
+    return res.status(200).json(result);
+  } catch (error) {
+    return handleManagedCardError(error, res, "detachManagedCardHandler failed");
+  }
+}

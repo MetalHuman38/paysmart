@@ -9,8 +9,9 @@ import net.metalbrain.paysmart.ui.home.viewmodel.BalanceDetailsViewModel
 @Composable
 fun BalanceDetailsRoute(
     viewModel: BalanceDetailsViewModel,
+    initialTab: net.metalbrain.paysmart.ui.Screen.BalanceDetails.Tab,
     onBack: () -> Unit,
-    onViewAccountLimitsClick: () -> Unit,
+    onViewAccountLimitsClick: (String) -> Unit,
     onSendClick: () -> Unit,
     onAddClick: () -> Unit,
     onWithdrawClick: () -> Unit,
@@ -21,6 +22,7 @@ fun BalanceDetailsRoute(
 
     BalanceDetailsScreen(
         state = state,
+        initialTab = initialTab,
         onBack = onBack,
         onViewAccountLimitsClick = onViewAccountLimitsClick,
         onSendClick = onSendClick,

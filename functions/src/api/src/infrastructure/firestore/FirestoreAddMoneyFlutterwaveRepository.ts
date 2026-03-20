@@ -22,6 +22,13 @@ type FlutterwaveAddMoneySessionDoc = {
   status: FlutterwaveAddMoneySessionStatus;
   expiresAtMs: number;
   checkoutUrl?: string;
+  virtualAccount?: {
+    accountNumber: string;
+    bankName: string;
+    accountName?: string | null;
+    reference: string;
+    note?: string | null;
+  } | null;
   flutterwaveStatus?: string;
   flutterwaveReference: string;
   flutterwaveVirtualAccountId?: string;
@@ -45,7 +52,6 @@ type FlutterwaveReferenceLookupDoc = {
   updatedAt?: unknown;
 };
 
-const DEFAULT_SESSION_TTL_MS = 30 * 60 * 1000;
 const SUPPORTED_WEBHOOK_EVENTS = new Set(["charge.completed", "charge.successful"]);
 
 export class FirestoreAddMoneyFlutterwaveRepository
@@ -120,7 +126,7 @@ export class FirestoreAddMoneyFlutterwaveRepository
       customer,
     });
     const status = this.deriveProviderStatus(providerSession.status);
-    const expiresAtMs = providerSession.createdAtMs + DEFAULT_SESSION_TTL_MS;
+    const expiresAtMs = providerSession.expiresAtMs;
 
     await this.sessionRef(uid, providerSession.sessionId).set({
       sessionId: providerSession.sessionId,
@@ -131,6 +137,13 @@ export class FirestoreAddMoneyFlutterwaveRepository
       status,
       expiresAtMs,
       checkoutUrl: providerSession.checkoutUrl ?? null,
+      virtualAccount: {
+        accountNumber: providerSession.virtualAccount.accountNumber,
+        bankName: providerSession.virtualAccount.bankName,
+        accountName: providerSession.virtualAccount.accountName,
+        reference: providerSession.virtualAccount.reference,
+        note: providerSession.virtualAccount.note ?? null,
+      },
       flutterwaveStatus: providerSession.status,
       flutterwaveReference: providerSession.txRef,
       flutterwaveVirtualAccountId: providerSession.sessionId,
@@ -173,6 +186,7 @@ export class FirestoreAddMoneyFlutterwaveRepository
       expiresAtMs,
       checkoutUrl: providerSession.checkoutUrl,
       flutterwaveTransactionId: providerSession.sessionId,
+      virtualAccount: providerSession.virtualAccount,
       publicKey,
     };
   }
@@ -255,6 +269,15 @@ export class FirestoreAddMoneyFlutterwaveRepository
       expiresAtMs: current.expiresAtMs,
       checkoutUrl: current.checkoutUrl,
       flutterwaveTransactionId: chargeId ?? current.flutterwaveVirtualAccountId,
+      virtualAccount: current.virtualAccount
+        ? {
+            accountNumber: current.virtualAccount.accountNumber,
+            bankName: current.virtualAccount.bankName,
+            accountName: current.virtualAccount.accountName ?? undefined,
+            reference: current.virtualAccount.reference,
+            note: current.virtualAccount.note ?? undefined,
+          }
+        : undefined,
       failureCode,
       failureMessage,
       updatedAtMs: Date.now(),

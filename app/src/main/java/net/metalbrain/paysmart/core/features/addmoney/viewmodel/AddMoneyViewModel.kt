@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.Env
+import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyPaymentSheetCustomer
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyPaymentSheetLaunch
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionStatus
@@ -26,6 +27,7 @@ import net.metalbrain.paysmart.core.features.addmoney.util.addMoneyUnavailableMe
 import net.metalbrain.paysmart.core.features.addmoney.util.addMoneyUnavailableSupportingText
 import net.metalbrain.paysmart.core.features.addmoney.util.resolvePreferredAddMoneyProvider
 import net.metalbrain.paysmart.core.features.addmoney.util.resolveAddMoneyUiError
+import net.metalbrain.paysmart.core.features.cards.repository.ManagedCardsGateway
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.TransactionRepository
 import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
@@ -48,7 +50,8 @@ class AddMoneyViewModel @Inject constructor(
     private val userProfileCacheRepository: UserProfileCacheRepository,
     private val countryCapabilityRepository: CountryCapabilityRepository,
     private val walletBalanceRepository: WalletBalanceRepository,
-    private val fxQuoteRepository: FxQuoteRepository
+    private val fxQuoteRepository: FxQuoteRepository,
+    private val managedCardsGateway: ManagedCardsGateway
 ) : ViewModel() {
 
     
@@ -219,7 +222,8 @@ class AddMoneyViewModel @Inject constructor(
                     isSubmitting = true,
                     error = null,
                     infoMessage = null,
-                    providerActionUrl = null
+                    providerActionUrl = null,
+                    activeSessionCurrency = null
                 )
             }
 
@@ -242,6 +246,7 @@ class AddMoneyViewModel @Inject constructor(
                                 isSubmitting = false,
                                 sessionId = session.sessionId,
                                 activeSessionProvider = resolvedProvider,
+                                activeSessionCurrency = session.currency,
                                 sessionStatus = session.status,
                                 error = AddMoneyUiError(
                                     title = "Payment configuration missing",
@@ -252,35 +257,56 @@ class AddMoneyViewModel @Inject constructor(
                         return@onSuccess
                     }
 
-                        _uiState.update {
-                            it.copy(
-                                isSubmitting = false,
-                                sessionId = session.sessionId,
-                                activeSessionProvider = resolvedProvider,
-                                activeSessionMethod = it.quoteMethod,
-                                sessionStatus = session.status,
-                                paymentSheetLaunch = if (resolvedProvider == AddMoneyProvider.STRIPE) {
-                                    AddMoneyPaymentSheetLaunch(
-                                        publishableKey = publishableKey!!,
-                                    paymentIntentClientSecret = paymentIntentClientSecret!!
+                    val paymentSheetCustomer = if (resolvedProvider == AddMoneyProvider.STRIPE) {
+                        val customerId = session.customerId?.takeIf { it.isNotBlank() }
+                        val ephemeralKeySecret = session.customerEphemeralKeySecret
+                            ?.takeIf { it.isNotBlank() }
+                        if (customerId != null && ephemeralKeySecret != null) {
+                            AddMoneyPaymentSheetCustomer(
+                                customerId = customerId,
+                                ephemeralKeySecret = ephemeralKeySecret,
+                                defaultPaymentMethodId = session.defaultPaymentMethodId
+                            )
+                        } else {
+                            null
+                        }
+                    } else {
+                        null
+                    }
+
+                    val infoMessage = when (session.status) {
+                        AddMoneySessionStatus.SUCCEEDED -> "Payment completed. Refresh to sync wallet."
+                        AddMoneySessionStatus.EXPIRED -> "Session expired. Create a new top up session."
+                        else -> when (resolvedProvider) {
+                            AddMoneyProvider.STRIPE -> "Payment sheet ready."
+                            AddMoneyProvider.FLUTTERWAVE ->
+                                if (!session.checkoutUrl.isNullOrBlank()) {
+                                    "Flutterwave session ready. Continue to secure checkout."
+                                } else {
+                                    "Flutterwave session created. Make transfer and refresh status."
+                                }
+                        }
+                    }
+
+                    _uiState.update { state ->
+                        state.copy(
+                            isSubmitting = false,
+                            sessionId = session.sessionId,
+                            activeSessionProvider = resolvedProvider,
+                            activeSessionMethod = state.quoteMethod,
+                            activeSessionCurrency = session.currency,
+                            sessionStatus = session.status,
+                            paymentSheetLaunch = if (resolvedProvider == AddMoneyProvider.STRIPE) {
+                                AddMoneyPaymentSheetLaunch(
+                                    publishableKey = publishableKey!!,
+                                    paymentIntentClientSecret = paymentIntentClientSecret!!,
+                                    customer = paymentSheetCustomer
                                 )
                             } else {
                                 null
                             },
                             providerActionUrl = session.checkoutUrl,
-                            infoMessage = when (session.status) {
-                                AddMoneySessionStatus.SUCCEEDED -> "Payment completed. Refresh to sync wallet."
-                                AddMoneySessionStatus.EXPIRED -> "Session expired. Create a new top up session."
-                                else -> when (resolvedProvider) {
-                                    AddMoneyProvider.STRIPE -> "Payment sheet ready."
-                                    AddMoneyProvider.FLUTTERWAVE ->
-                                        if (!session.checkoutUrl.isNullOrBlank()) {
-                                            "Flutterwave session ready. Continue to secure checkout."
-                                        } else {
-                                            "Flutterwave session created. Make transfer and refresh status."
-                                        }
-                                }
-                            }
+                            infoMessage = infoMessage
                         )
                     }
                     mirrorSessionStatusToTransactions(session)
@@ -371,6 +397,7 @@ class AddMoneyViewModel @Inject constructor(
                         it.copy(
                             isCheckingStatus = false,
                             activeSessionProvider = session.provider,
+                            activeSessionCurrency = session.currency,
                             sessionStatus = session.status,
                             providerActionUrl = session.checkoutUrl ?: it.providerActionUrl,
                             infoMessage = when (session.status) {
@@ -387,6 +414,7 @@ class AddMoneyViewModel @Inject constructor(
                     if (session.status == AddMoneySessionStatus.SUCCEEDED) {
                         stopSessionStatusPolling()
                         syncWalletSnapshot()
+                        syncManagedCards()
                     } else if (session.status == AddMoneySessionStatus.FAILED ||
                         session.status == AddMoneySessionStatus.EXPIRED
                     ) {
@@ -415,6 +443,12 @@ class AddMoneyViewModel @Inject constructor(
     private suspend fun syncWalletSnapshot() {
         val uid = authRepository.currentUser?.uid ?: return
         walletBalanceRepository.syncFromServer(uid)
+    }
+
+    private fun syncManagedCards() {
+        viewModelScope.launch {
+            managedCardsGateway.syncFromServer()
+        }
     }
 
     private fun parseAmountToMinor(raw: String): Int? {

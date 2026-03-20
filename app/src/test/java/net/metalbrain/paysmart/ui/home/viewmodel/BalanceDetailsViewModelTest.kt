@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.ui.home.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -10,6 +11,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
+import net.metalbrain.paysmart.core.features.addmoney.repository.AddMoneyRepository
 import net.metalbrain.paysmart.domain.auth.UserManager
 import net.metalbrain.paysmart.domain.auth.state.AuthState
 import net.metalbrain.paysmart.domain.model.Transaction
@@ -30,11 +33,15 @@ class BalanceDetailsViewModelTest {
 
     @Test
     fun `uiState prefers requested currency when it exists in wallet balances`() = runTest {
+        val addMoneyRepository = mockk<AddMoneyRepository>()
         val walletBalanceRepository = mockk<WalletBalanceRepository>()
         val transactionRepository = mockk<TransactionRepository>()
         val userManager = mockk<UserManager>()
 
         every { userManager.authState } returns flowOf(AuthState.Authenticated("uid-1"))
+        coEvery {
+            addMoneyRepository.getSessionStatus(any(), AddMoneyProvider.FLUTTERWAVE)
+        } returns Result.failure(IllegalStateException("No Flutterwave session expected in this test"))
         every { walletBalanceRepository.observeByUserId("uid-1") } returns flowOf(
             WalletBalanceModel(
                 userId = "uid-1",
@@ -52,6 +59,7 @@ class BalanceDetailsViewModelTest {
         )
 
         val viewModel = BalanceDetailsViewModel(
+            addMoneyRepository = addMoneyRepository,
             walletBalanceRepository = walletBalanceRepository,
             transactionRepository = transactionRepository,
             userManager = userManager,

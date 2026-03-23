@@ -12,6 +12,11 @@ export class FirestoreUserRepository {
         return {
             uid,
             tenantId: data.tenantId,
+            email: typeof data.email === "string" ? data.email : undefined,
+            displayName: typeof data.displayName === "string" ? data.displayName : undefined,
+            launchInterest: data.launchInterest === "invoice" || data.launchInterest === "top_up"
+                ? data.launchInterest
+                : undefined,
         };
     }
     async logAuditEvent(data) {

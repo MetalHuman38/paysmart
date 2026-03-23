@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_foreground_color">#2C9C6A</color>
+    <color name="ic_launcher_background_color">#05080B</color>
+    <color name="ic_launcher_glow_outer">#1433FFE2</color>
+    <color name="ic_launcher_glow_inner">#3344F1D0</color>
+    <color name="ic_launcher_ring_outer">#39CD8E</color>
+    <color name="ic_launcher_ring_inner">#56E2C2</color>
+    <color name="ic_launcher_core">#123B34</color>
+    <color name="ic_launcher_dot">#8EF5DC</color>
+    <color name="ic_launcher_foreground_color">#FFFFFF</color>
 </resources>

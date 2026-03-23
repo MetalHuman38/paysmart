@@ -34,6 +34,7 @@ fun SecureApp(
             PostAuthState.Unauthenticated -> SecureNavIntent.ToStartup
             PostAuthState.RequireAccountProtection -> SecureNavIntent.ToAccountProtection
             PostAuthState.RequirePasswordSetup -> SecureNavIntent.ToCreatePassword
+            PostAuthState.RequirePasswordRecovery -> SecureNavIntent.ToPasswordRecovery
             PostAuthState.RequireEmailVerification -> SecureNavIntent.ToEmailVerification
             PostAuthState.Locked -> SecureNavIntent.RequireSessionUnlock
             PostAuthState.Ready -> SecureNavIntent.None

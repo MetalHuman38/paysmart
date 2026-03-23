@@ -8,7 +8,9 @@ import {
 } from "../utils/passkeyOrigin.js";
 import {
   RESEND_API_KEY,
+  EMAIL_UNSUBSCRIBE_SECRET,
   MAIL_FROM,
+  PRODUCT_UPDATES_URL,
   VERIFY_URL,
   SEND_REAL_EMAILS,
 } from "./params.js";
@@ -62,6 +64,9 @@ export type Config = {
 
   getMailer(): Mailer;
   getVerifyUrl(): string;
+  getProductUpdatesUrl(): string;
+  getPublicSiteOrigin(): string;
+  getEmailUnsubscribeSecret(): string;
   shouldSendRealEmails(): boolean;
 
   allowedEmailDomains: Set<string>;
@@ -343,6 +348,18 @@ export function loadConfig(): Config {
       return VERIFY_URL.value();
     },
 
+    getProductUpdatesUrl() {
+      return PRODUCT_UPDATES_URL.value();
+    },
+
+    getPublicSiteOrigin() {
+      return safeOrigin(this.getVerifyUrl(), "https://pay-smart.net");
+    },
+
+    getEmailUnsubscribeSecret() {
+      return EMAIL_UNSUBSCRIBE_SECRET.value().trim();
+    },
+
     getMailer() {
       if (cachedMailer) return cachedMailer;
 
@@ -367,5 +384,13 @@ export function loadConfig(): Config {
     disposablePatterns: compileRegexList("DISPOSABLE_PATTERNS"),
     port: Number(process.env.PORT || "8080"),
   };
+}
+
+function safeOrigin(value: string, fallback: string): string {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return fallback;
+  }
 }
 

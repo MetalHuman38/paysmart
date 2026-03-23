@@ -37,7 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import net.metalbrain.paysmart.AppVersionLabel
 import net.metalbrain.paysmart.BuildConfig
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.room.manager.RoomKeyManager
@@ -177,16 +177,9 @@ fun ProfileScreen(
                 }
 
                 item {
-                    Text(
-                        text = stringResource(
-                            R.string.profile_version_format,
-                            BuildConfig.VERSION_NAME,
-                            BuildConfig.VERSION_CODE
-                        ),
-                        style = MaterialTheme.typography.labelSmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    if (BuildConfig.DEBUG) {
+                        AppVersionLabel()
+                    }
                 }
             }
         }

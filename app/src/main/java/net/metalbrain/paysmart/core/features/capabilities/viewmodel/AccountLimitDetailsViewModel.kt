@@ -30,7 +30,7 @@ import net.metalbrain.paysmart.core.features.capabilities.state.AccountLimitDeta
 import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
 import net.metalbrain.paysmart.domain.auth.UserManager
 import net.metalbrain.paysmart.domain.auth.state.AuthState
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)

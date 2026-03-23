@@ -14,27 +14,20 @@ fun PaySmartAppBackground(
     content: @Composable () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
+    val themePack = LocalAppThemePack.current
     val darkMode = colors.background.luminance() < 0.2f
+    val palette = if (darkMode) themePack.darkBackground else themePack.lightBackground
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colorStops = if (darkMode) {
-                        arrayOf(
-                            0f to colors.background,
-                            0.45f to DeepBlueOcean.copy(alpha = 0.18f),
-                            0.75f to colors.surfaceVariant.copy(alpha = 0.45f),
-                            1f to colors.background
-                        )
-                    } else {
-                        arrayOf(
-                            0f to colors.background,
-                            0.40f to FreshGreen.copy(alpha = 0.10f),
-                            0.70f to DeepBlueOcean.copy(alpha = 0.06f),
-                            1f to colors.background
-                        )
-                    }
+                    colorStops = arrayOf(
+                        0f to palette.start,
+                        0.40f to palette.accentOne,
+                        0.72f to palette.accentTwo,
+                        1f to palette.end
+                    )
                 )
             )
     ) {

@@ -58,12 +58,12 @@ function drawHeader(canvas, invoice, topY) {
     const logoX = PAGE_MARGIN + 16;
     const logoY = bottomY + 20;
     drawPaySmartLogo(canvas, logoX, logoY, logoSize);
-    canvas.drawText(PAGE_MARGIN + 64, topY - 26, "PaySmart Invoice", {
+    canvas.drawText(PAGE_MARGIN + 64, topY - 26, "PaySmart Weekly Invoice", {
         font: "F2",
         size: HEADER_TITLE_SIZE,
         color: WHITE,
     });
-    canvas.drawText(PAGE_MARGIN + 64, topY - 46, "Professional weekly self-employed invoice", {
+    canvas.drawText(PAGE_MARGIN + 64, topY - 46, "Clean weekly invoicing for UK self-employed work", {
         size: BODY_FONT_SIZE,
         color: WHITE,
     });
@@ -231,7 +231,7 @@ function drawFooter(canvas, invoice, pageNumber, totalPages) {
         size: SMALL_FONT_SIZE,
         color: BRAND,
     });
-    canvas.drawText(PAGE_MARGIN, marketingLineY, "Employers and agencies can discuss PaySmart invoicing rollout for their security teams.", {
+    canvas.drawText(PAGE_MARGIN, marketingLineY, "Invoice template prepared for weekly contractor and shift-work billing.", {
         size: SMALL_FONT_SIZE,
         color: TEXT,
     });

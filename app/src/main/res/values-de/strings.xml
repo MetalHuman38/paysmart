@@ -295,6 +295,10 @@
     <string name="theme_mode_system">System</string>
     <string name="theme_mode_light">Hell</string>
     <string name="theme_mode_dark">Dunkel</string>
+    <string name="profile_theme_variant_title">Themenpaket</string>
+    <string name="profile_account_info_theme_variant_subtitle">Zwischen visuellen Stilen für Karten und Flächen wechseln</string>
+    <string name="theme_variant_paysmart">PaySmart</string>
+    <string name="theme_variant_obsidian">Obsidian</string>
     <string name="home_total_balance_label">Gesamtguthaben</string>
     <string name="home_wallet_no_data">Noch keine Wallet-Daten</string>
     <string name="home_wallet_label">Wallet</string>
@@ -408,6 +412,8 @@
     <string name="email_sent_open_app">E-Mail-App öffnen</string>
     <string name="email_sent_resend">E-Mail erneut senden</string>
     <string name="email_sent_resending">Wird erneut gesendet…</string>
+    <string name="email_invalid">Ungültige E-Mail</string>
+    <string name="email_enter_prompt">E-Mail eingeben</string>
     <string name="client_info_legal_name_hint">Geben Sie Ihren vollständigen gesetzlichen Namen genau so ein, wie er auf Ihrem amtlichen Ausweis steht.</string>
     <string name="client_info_first_name">Vorname</string>
     <string name="client_info_middle_name_optional">Zweitname (optional)</string>
@@ -640,6 +646,10 @@
     <string name="funding_account_status_loading_content_description">Finanzierungskonto wird geladen</string>
     <string name="funding_account_status_error_content_description">Finanzierungskonto nicht verfügbar</string>
     <string name="funding_account_share_title">Finanzierungskonto teilen</string>
+    <string name="uk_account_details_domestic_title">For domestic transfers within the UK only</string>
+    <string name="uk_account_details_status_title">UK local account details are coming here</string>
+    <string name="uk_account_details_status_body">This dedicated GBP account route is ready for a licensed UK banking partner. When PaySmart enables that flow, this screen will show your account holder name, sort code, account number, bank name, and share actions.</string>
+    <string name="uk_account_details_notice">Your money will be held with a licensed UK banking partner when this route goes live.</string>
     <string name="home_no_transaction_activity_title">Keine Transaktionsaktivität</string>
     <string name="home_no_transaction_activity_subtitle">Ihre Aktivitäten werden hier angezeigt, wenn Sie Geld senden, empfangen oder einzahlen.</string>
     <string name="home_account_information_title">Kontoinformationen</string>
@@ -676,8 +686,6 @@
     <string name="password_recovery_local_note">Dieses Passwort wird lokal gespeichert. Geben Sie es niemals weiter. PaySmart wird niemals danach fragen.</string>
     <string name="help_title">Hilfe</string>
     <string name="help_support_format">Support: %1$s</string>
-    <string name="email_invalid">Ungültige E-Mail</string>
-    <string name="email_enter_prompt">E-Mail eingeben</string>
     <string name="referral_title">Empfehlung</string>
     <string name="referral_earn_format">%1$s verdienen</string>
     <string name="referral_code_format">Ihr Code: %1$s</string>
@@ -796,7 +804,62 @@
     <string name="change_passcode_biometric_action">Mit Biometrie verifizieren</string>
     <string name="change_passcode_biometric_retry">Erneut versuchen</string>
     <string name="change_passcode_biometric_error">Die biometrische Verifizierung wurde nicht abgeschlossen.</string>
-    <string name="profile_security_mfa_title">2-step verification</string>
-    <string name="profile_security_mfa_subtitle_enabled">2-step verification is enabled</string>
-    <string name="profile_security_mfa_subtitle_disabled">Add an extra sign-in check</string>
+    <string name="profile_security_mfa_title">2-stufige Verifizierung</string>
+    <string name="profile_security_mfa_subtitle_enabled">Die zweistufige Verifizierung ist aktiviert</string>
+    <string name="profile_security_mfa_subtitle_disabled">Fügen Sie eine zusätzliche Anmeldeprüfung hinzu.</string>
+
+    <string name="identity_intro_title">Bestätigen Sie Ihre Identität</string>
+    <string name="identity_intro_subtitle">Zur Einhaltung finanzieller Vorschriften und zur Verhinderung von Betrug können wir ein Foto Ihres Ausweises und ein Selfie verlangen, um zu bestätigen, dass Sie es wirklich sind.</string>
+    <string name="identity_intro_eta">Dies dauert in der Regel etwa 2 Minuten.</string>
+    <string name="identity_intro_photo_tips_title">Tipps für den Lichtbildausweis</string>
+    <string name="identity_intro_photo_tip_readable">Stellen Sie sicher, dass der gesamte Text auf Ihrem Ausweis gut lesbar ist.</string>
+    <string name="identity_intro_photo_tip_visible">Achten Sie darauf, dass der gesamte Ausweis sichtbar ist und keine Blendung oder Spiegelung vorhanden ist.</string>
+    <string name="identity_intro_selfie_tips_title">Tipps für das Selfie</string>
+    <string name="identity_intro_selfie_tip_lighting">Sorgen Sie für gutes Licht und dafür, dass Ihr Gesicht klar sichtbar ist.</string>
+    <string name="identity_intro_selfie_tip_clear">Entfernen Sie alles, was Ihr Gesicht verdeckt, z. B. Hüte oder Brillen.</string>
+    <string name="identity_intro_consent">Mit dem Fortfahren stimmen Sie Identitätsprüfungen und der Verarbeitung Ihrer Daten zur Betrugsprävention und Compliance zu.</string>
+    <string name="identity_selection_title">Bestätigen Sie Ihren Lichtbildausweis</string>
+    <string name="identity_selection_subtitle">Wählen Sie einen Ausweis aus. Dokumente aus Ihrem Ausstellungsland können wir in der Regel am schnellsten prüfen.</string>
+
+    <string name="identity_resolver_review_time_title">Geschätzte Prüfungsdauer</string>
+    <string name="identity_resolver_review_window_exact_hours">%1$d Stunden</string>
+    <string name="identity_resolver_review_window_range_hours">%1$d - %2$d Stunden</string>
+
+    <string name="identity_pending_title">Verifizierung eingereicht</string>
+    <string name="identity_pending_subtitle">Wir prüfen jetzt Ihre Identität.</string>
+    <string name="identity_pending_waiting_body">Die meisten Prüfungen für in %1$s ausgestellte Dokumente dauern %2$s.</string>
+    <string name="identity_pending_status_format">Status: %1$s</string>
+    <string name="identity_pending_reference_format">Referenz: %1$s</string>
+    <string name="identity_pending_next_title">Was als Nächstes passiert</string>
+    <string name="identity_pending_next_step_1">Wir prüfen Ihr Dokument und Ihre Identitätsdaten.</string>
+    <string name="identity_pending_next_step_2">Möglicherweise bitten wir um eine deutlichere Aufnahme, wenn etwas erneut geprüft werden muss.</string>
+    <string name="identity_pending_next_step_3">Sie können die derzeit für Ihr Konto verfügbaren Funktionen weiterhin nutzen.</string>
+
+    <string name="verify_passcode">Passcode überprüfen</string>
+    <string name="notification_center_title">Benachrichtigungen</string>
+    <string name="notification_center_empty_title">Noch nichts Neues</string>
+    <string name="notification_center_empty_body">Kontoupdates, Produkteinführungen und Hinweise zur App-Installation erscheinen hier.</string>
+    <string name="notification_center_unread_label">Ungelesen</string>
+    <string name="notification_center_all_caught_up">Alles auf dem neuesten Stand</string>
+    <string name="notification_channel_account_updates_name">Kontoupdates</string>
+    <string name="notification_channel_account_updates_description">Warnungen zu Identität, Sicherheit und Kontoaktivitäten.</string>
+    <string name="notification_channel_product_updates_name">Produktupdates</string>
+    <string name="notification_channel_product_updates_description">Neue Funktionen, Starts und PaySmart-Ankündigungen.</string>
+    <string name="notification_channel_app_updates_name">App-Updates</string>
+    <string name="notification_channel_app_updates_description">Heruntergeladene App-Updates, die zur Installation bereit sind.</string>
+    <string name="reauth_alternative_factor_message">Die Telefonverifizierung ist auf diesem Gerät nicht verfügbar. Verwenden Sie eine andere verknüpfte Anmeldemethode, um fortzufahren.</string>
+    <string name="reauth_recovery_email_hint">Bestätigungs-E-Mail: %1$s</string>
+    <string name="reauth_no_alternative_factor_message">Für dieses Konto ist noch keine alternative Wiederherstellungsmethode verknüpft.</string>
+    <string name="post_otp_capabilities_currency_label">Ihre wichtigste Arbeitswährung</string>
+    <string name="post_otp_capabilities_supporting_note">Sie können später weitere Funktionen freischalten. Beginnen Sie mit dem Weg, der Ihnen am schnellsten einen Mehrwert bringt.</string>
+    <string name="post_otp_interest_invoice_title">Rechnung erstellen</string>
+    <string name="post_otp_interest_invoice_subtitle">Richten Sie Ihren wöchentlichen Rechnungsablauf für Schichten, Freiberuflichkeit, Gastronomie, Pflege oder Agenturjobs ein.</string>
+    <string name="post_otp_interest_invoice_footnote">Am besten für Arbeitnehmer im Vereinigten Königreich, die jede Woche Rechnungen stellen und schneller zu ihrem ersten fertigen PDF kommen möchten.</string>
+    <string name="post_otp_interest_top_up_title">Guthaben aufladen</string>
+    <string name="post_otp_interest_top_up_subtitle">Bereiten Sie Ihr Wallet auf Aufladungen, Salden und spätere Zahlungen vor, sobald die erforderlichen Prüfungen abgeschlossen sind.</string>
+
+    <string name="credit">Kredit</string>
+    <string name="i_am_happy_paysmart_share_my_data">Ich stimme zu, dass PaySmart meine Daten (Name, Adresse und Geburtsdatum) sicher mit Kreditauskunfteien teilt, um meine Kreditwürdigkeit zu prüfen und geeignete Kreditprodukte anzubieten.</string>
+    <string name="social_media_advertisement_platform">Ich bin damit einverstanden, dass PaySmart meinen Namen, meine E-Mail-Adresse und App-Aktivitäten mit Social-Media-Plattformen teilt.</string>
+    <string name="terms_of_use">https://pay-smart.net/terms/</string>
 </resources>

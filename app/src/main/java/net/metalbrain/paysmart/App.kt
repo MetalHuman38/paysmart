@@ -15,6 +15,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.HiltAndroidApp
+import net.metalbrain.paysmart.core.notifications.NotificationChannelRegistrar
 import net.metalbrain.paysmart.core.service.update.FirebaseRemoteConfigUpdatePolicyConfigProvider
 
 @HiltAndroidApp
@@ -23,6 +24,7 @@ class App : BaseApp() {
         super.onCreate()
 
         FirebaseApp.initializeApp(this)
+        NotificationChannelRegistrar.register(this)
         val firebaseAppCheck = FirebaseAppCheck.getInstance()
         val crashlytics = FirebaseCrashlytics.getInstance()
         val firebasePerformance = FirebasePerformance.getInstance()

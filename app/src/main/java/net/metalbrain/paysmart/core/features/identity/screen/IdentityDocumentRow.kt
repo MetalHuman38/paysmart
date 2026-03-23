@@ -1,6 +1,8 @@
 package net.metalbrain.paysmart.core.features.identity.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,18 +11,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.profile.data.type.KycDocumentType
 import net.metalbrain.paysmart.core.features.identity.provider.formattedLabel
+import net.metalbrain.paysmart.ui.theme.Dimens
 
 @Composable
 fun IdentityDocumentRow(
@@ -29,33 +38,88 @@ fun IdentityDocumentRow(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = document.formattedLabel,
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (enabled) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            if (!enabled) {
-                Text(
-                    text = stringResource(R.string.sheet_not_accepted_inline),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            .clickable(enabled = enabled, onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = if (selected && enabled) {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.48f)
+            } else {
+                MaterialTheme.colorScheme.surface
             }
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (selected && enabled) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+            } else {
+                MaterialTheme.colorScheme.outline.copy(alpha = 0.14f)
+            }
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Dimens.md, vertical = Dimens.lg),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = document.leadingIcon(),
+                contentDescription = null,
+                tint = if (enabled) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.outline
+                }
+            )
+
+            Spacer(modifier = Modifier.width(Dimens.md))
+
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.xs)) {
+                Text(
+                    text = document.formattedLabel,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = if (enabled) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+                if (!enabled) {
+                    Text(
+                        text = stringResource(R.string.sheet_not_accepted_inline),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(Dimens.md))
+
+            Icon(
+                imageVector = if (selected) {
+                    Icons.Default.CheckCircle
+                } else {
+                    Icons.Outlined.RadioButtonUnchecked
+                },
+                contentDescription = null,
+                tint = when {
+                    selected && enabled -> MaterialTheme.colorScheme.primary
+                    selected -> MaterialTheme.colorScheme.outline
+                    enabled -> MaterialTheme.colorScheme.outline
+                    else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.72f)
+                }
+            )
         }
-        Spacer(modifier = Modifier.width(10.dp))
-        val icon = if (selected && enabled) Icons.Default.CheckCircle else Icons.Outlined.RadioButtonUnchecked
-        val tint = if (selected && enabled) MaterialTheme.colorScheme.primary else {
-            if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outline
-        }
-        Icon(imageVector = icon, contentDescription = null, tint = tint)
+    }
+}
+
+private fun KycDocumentType.leadingIcon(): ImageVector {
+    return when (id.lowercase()) {
+        "passport" -> Icons.Default.Description
+        "drivers_license" -> Icons.Default.CreditCard
+        else -> Icons.Default.CreditCard
     }
 }

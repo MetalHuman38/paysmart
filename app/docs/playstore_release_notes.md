@@ -1,16 +1,15 @@
 # Play Store Release Notes
 
-_Last updated: 2026-03-05_
+_Last updated: 2026-03-23_
 
 ## Production Draft
 
 ```xml
 <en-US>
-Improved identity verification reliability and security across upload, encryption, and commit steps.
-Fixed an issue where document verification could fail at final submission.
-Added a new Add Money provider flow (Flutterwave) for testing in supported regions, alongside Stripe.
-Improved Add Money stability with clearer payment and webhook error handling.
-General bug fixes, UI polish, and performance improvements.
+New: Create professional PDF invoices for free in just a few steps.
+Improved identity verification reliability and the final submission flow.
+Added Flutterwave for Add Money testing in supported regions alongside Stripe.
+Improved payment stability, error handling, and overall app polish.
+Verification is still required for regulated payment features.
 </en-US>
 ```
-

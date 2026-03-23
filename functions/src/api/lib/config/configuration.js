@@ -1,7 +1,7 @@
 import { ConsoleMailer } from "../services/consoleMailer.js";
 import { ResendMailer } from "../services/resendMailer.js";
 import { normalizeAndroidPasskeyOrigin, normalizePasskeyOrigin, } from "../utils/passkeyOrigin.js";
-import { RESEND_API_KEY, MAIL_FROM, VERIFY_URL, SEND_REAL_EMAILS, } from "./params.js";
+import { RESEND_API_KEY, EMAIL_UNSUBSCRIBE_SECRET, MAIL_FROM, PRODUCT_UPDATES_URL, VERIFY_URL, SEND_REAL_EMAILS, } from "./params.js";
 import { ensureLocalEnvLoaded } from "./localEnv.js";
 function parseFirebaseConfig() {
     const raw = (process.env.FIREBASE_CONFIG || "").trim();
@@ -177,6 +177,15 @@ export function loadConfig() {
         getVerifyUrl() {
             return VERIFY_URL.value();
         },
+        getProductUpdatesUrl() {
+            return PRODUCT_UPDATES_URL.value();
+        },
+        getPublicSiteOrigin() {
+            return safeOrigin(this.getVerifyUrl(), "https://pay-smart.net");
+        },
+        getEmailUnsubscribeSecret() {
+            return EMAIL_UNSUBSCRIBE_SECRET.value().trim();
+        },
         getMailer() {
             if (cachedMailer)
                 return cachedMailer;
@@ -196,5 +205,13 @@ export function loadConfig() {
         disposablePatterns: compileRegexList("DISPOSABLE_PATTERNS"),
         port: Number(process.env.PORT || "8080"),
     };
+}
+function safeOrigin(value, fallback) {
+    try {
+        return new URL(value).origin;
+    }
+    catch {
+        return fallback;
+    }
 }
 //# sourceMappingURL=configuration.js.map

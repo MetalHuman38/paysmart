@@ -13,7 +13,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityKey
+import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityProfile
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.capabilities.repository.CountryCapabilityRepository
 import net.metalbrain.paysmart.core.features.fundingaccount.data.FundingAccountData
@@ -64,11 +66,7 @@ class FundingAccountViewModel @Inject constructor(
         )
 
     val uiState = combine(currentAccount, capabilityProfile, syncState) { account, profile, sync ->
-        val supportsReceiveMoney = profile.capabilities.any { item ->
-            item.key == CapabilityKey.RECEIVE_MONEY
-        }
-        val supportsAccountTransfer = profile.addMoneyMethods.contains(FxPaymentMethod.ACCOUNT_TRANSFER)
-        val marketSupported = supportsReceiveMoney && supportsAccountTransfer
+        val marketSupported = isFundingAccountMarketSupported(profile)
 
         FundingAccountUiState(
             account = account,
@@ -85,7 +83,7 @@ class FundingAccountViewModel @Inject constructor(
             countryName = profile.countryName,
             countryFlagEmoji = profile.flagEmoji,
             currencyCode = profile.currencyCode,
-            provider = account?.provider ?: "flutterwave",
+            provider = resolveFundingAccountProvider(account = account, profile = profile),
             lastErrorCode = sync.lastErrorCode
         )
     }.stateIn(
@@ -220,6 +218,29 @@ private fun derivePhase(
 private fun Throwable.toFundingAccountErrorCode(): FundingAccountErrorCode {
     return (this as? FundingAccountApiException)?.code
         ?: FundingAccountErrorCode.FLUTTERWAVE_PROVIDER_REJECTED
+}
+
+internal fun isFundingAccountMarketSupported(profile: CountryCapabilityProfile): Boolean {
+    val supportsReceiveMoney = profile.capabilities.any { item ->
+        item.key == CapabilityKey.RECEIVE_MONEY
+    }
+    val supportsAccountTransfer = profile.addMoneyMethods.contains(FxPaymentMethod.ACCOUNT_TRANSFER)
+    val hasFundingAccountProvider = profile.addMoneyProviders.contains(AddMoneyProvider.FLUTTERWAVE)
+
+    // The current funding-account flow is backed only by Flutterwave endpoints.
+    return supportsReceiveMoney && supportsAccountTransfer && hasFundingAccountProvider
+}
+
+internal fun resolveFundingAccountProvider(
+    account: FundingAccountData?,
+    profile: CountryCapabilityProfile
+): String? {
+    if (!account?.provider.isNullOrBlank()) return account?.provider
+
+    return profile.addMoney.preferredProvider
+        ?.takeIf { provider -> provider == AddMoneyProvider.FLUTTERWAVE }
+        ?.name
+        ?.lowercase()
 }
 
 private data class FundingAccountSyncState(

@@ -3,6 +3,7 @@ import { defineSecret, defineString } from "firebase-functions/params";
 // Secret — must be stored in Secret Manager
 // 🔐 Secrets (Secret Manager)
 export const RESEND_API_KEY = defineSecret("RESEND_API_KEY");
+export const EMAIL_UNSUBSCRIBE_SECRET = defineSecret("EMAIL_UNSUBSCRIBE_SECRET");
 export const ADDRESS_VALIDATION_API_KEY = defineSecret("ADDRESS_VALIDATION_API_KEY");
 export const EXCHANGE_RATE_API_KEY = defineSecret("EXCHANGE_RATE_API_KEY");
 
@@ -13,6 +14,10 @@ export const MAIL_FROM = defineString("MAIL_FROM", {
 
 export const VERIFY_URL = defineString("VERIFY_URL", {
   default: "https://pay-smart.net/verify",
+});
+
+export const PRODUCT_UPDATES_URL = defineString("PRODUCT_UPDATES_URL", {
+  default: "https://pay-smart.net/updates/",
 });
 
 export const SEND_REAL_EMAILS = defineString("SEND_REAL_EMAILS", {

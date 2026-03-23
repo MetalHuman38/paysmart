@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import net.metalbrain.paysmart.BuildConfig
 import net.metalbrain.paysmart.domain.model.AuthUserModel
+import net.metalbrain.paysmart.domain.model.LaunchInterest
 
 class FirestoreUserProfileRepository @Inject constructor(
     firestore: FirebaseFirestore,
@@ -48,6 +49,16 @@ class FirestoreUserProfileRepository @Inject constructor(
         users.document(uid).set(payload, SetOptions.merge()).await()
     }
 
+    override suspend fun updateLaunchInterest(uid: String, launchInterest: LaunchInterest) {
+        users.document(uid).set(
+            mapOf(
+                "launchInterest" to launchInterest.rawValue,
+                "lastSignedIn" to FieldValue.serverTimestamp()
+            ),
+            SetOptions.merge()
+        ).await()
+    }
+
 
     override suspend fun upsertNewUser(user: AuthUserModel, providerId: String) {
         val docRef = users.document(user.uid)
@@ -70,6 +81,7 @@ class FirestoreUserProfileRepository @Inject constructor(
             put("displayName", user.displayName ?: FieldValue.delete())
             put("photoURL", user.photoURL?.takeIf { it.startsWith("http") } ?: FieldValue.delete())
             put("phoneNumber", user.phoneNumber ?: FieldValue.delete())
+            put("launchInterest", user.launchInterest?.rawValue ?: FieldValue.delete())
             put("tenantId", user.tenantId ?: FieldValue.delete())
         }
 

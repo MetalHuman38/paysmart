@@ -18,12 +18,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceVenueDraft
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceWeeklyDraft
-import net.metalbrain.paysmart.core.features.invoicing.screen.INVOICE_FINALIZE_BUTTON_TAG
-import net.metalbrain.paysmart.core.features.invoicing.screen.INVOICE_SUBTOTAL_TAG
-import net.metalbrain.paysmart.core.features.invoicing.screen.INVOICE_TOTAL_HOURS_TAG
-import net.metalbrain.paysmart.core.features.invoicing.screen.INVOICE_WEEKLY_LIST_TAG
-import net.metalbrain.paysmart.core.features.invoicing.screen.InvoiceWeeklyEntryScreen
-import net.metalbrain.paysmart.core.features.invoicing.screen.invoiceHoursFieldTag
 import net.metalbrain.paysmart.core.features.invoicing.viewmodel.InvoiceSetupUiState
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 import org.junit.Rule
@@ -102,11 +96,13 @@ class InvoiceWeeklyEntryScreenTest {
             .performScrollTo()
             .performTextInput("4")
 
+        composeRule.onNodeWithTag(INVOICE_WEEKLY_LIST_TAG)
+            .performScrollToNode(hasTestTag(INVOICE_TOTAL_HOURS_TAG))
         composeRule.onNodeWithTag(INVOICE_TOTAL_HOURS_TAG)
-            .performScrollTo()
             .assertTextEquals(totalHoursLabel)
+        composeRule.onNodeWithTag(INVOICE_WEEKLY_LIST_TAG)
+            .performScrollToNode(hasTestTag(INVOICE_SUBTOTAL_TAG))
         composeRule.onNodeWithTag(INVOICE_SUBTOTAL_TAG)
-            .performScrollTo()
             .assertTextEquals(subtotalLabel)
     }
 

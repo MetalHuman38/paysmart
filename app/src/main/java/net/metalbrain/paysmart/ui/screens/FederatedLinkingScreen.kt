@@ -45,7 +45,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import net.metalbrain.paysmart.R
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 import net.metalbrain.paysmart.ui.components.BackendErrorModal
 import net.metalbrain.paysmart.ui.components.EmailVerificationBtn
 import net.metalbrain.paysmart.ui.components.FacebookSignInButton

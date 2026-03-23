@@ -4,26 +4,23 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.text.KeyboardOptions
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceShiftDraft
+import net.metalbrain.paysmart.ui.theme.Dimens
 import java.time.LocalDate
 
 /**
  * A composable that renders a list of input rows for weekly shifts within an invoice.
- * Each row is displayed inside a [Card] and includes fields for editing the shift date and hours.
+ * Each row is displayed inside a shared invoice surface and includes fields for editing the shift
+ * date and hours.
  *
  * @param rows The list of [InvoiceShiftDraft] objects representing the shifts to be displayed.
  * @param onShiftDateChanged A callback triggered when the date text field of a shift is updated.
@@ -37,12 +34,12 @@ fun InvoiceWeeklyShiftRows(
     onShiftDateChanged: (index: Int, value: String) -> Unit,
     onShiftHoursChanged: (index: Int, value: String) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Dimens.md)) {
         rows.forEachIndexed { index, row ->
-            Card(modifier = Modifier.fillMaxWidth()) {
+            InvoiceSurfaceCard {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(Dimens.sm)
                 ) {
                     Text(
                         text = row.dayLabel,
@@ -51,7 +48,7 @@ fun InvoiceWeeklyShiftRows(
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.sm)
                     ) {
                         InvoiceDateField(
                             value = row.workDate,
@@ -61,12 +58,12 @@ fun InvoiceWeeklyShiftRows(
                             testTag = invoiceDateFieldTag(index),
                             fallbackDate = LocalDate.now()
                         )
-                        OutlinedTextField(
+                        InvoiceInputField(
                             value = row.hoursInput,
                             onValueChange = { onShiftHoursChanged(index, it) },
-                            label = { Text(stringResource(R.string.invoice_weekly_shift_hours_label)) },
-                            modifier = Modifier.width(120.dp).testTag(invoiceHoursFieldTag(index)),
-                            singleLine = true,
+                            label = stringResource(R.string.invoice_weekly_shift_hours_label),
+                            modifier = Modifier.weight(0.55f),
+                            testTag = invoiceHoursFieldTag(index),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                         )
                     }

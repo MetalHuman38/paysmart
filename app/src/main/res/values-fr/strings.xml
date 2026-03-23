@@ -296,6 +296,10 @@
     <string name="theme_mode_system">Système</string>
     <string name="theme_mode_light">Clair</string>
     <string name="theme_mode_dark">Sombre</string>
+    <string name="profile_theme_variant_title">Pack de thème</string>
+    <string name="profile_account_info_theme_variant_subtitle">Changer la tonalité visuelle utilisée sur les cartes et les surfaces</string>
+    <string name="theme_variant_paysmart">PaySmart</string>
+    <string name="theme_variant_obsidian">Obsidian</string>
     <string name="home_total_balance_label">Solde total</string>
     <string name="home_wallet_no_data">Aucune donnée de portefeuille</string>
     <string name="home_wallet_label">portefeuille</string>
@@ -633,6 +637,10 @@
     <string name="funding_account_status_loading_content_description">Chargement du compte de financement</string>
     <string name="funding_account_status_error_content_description">Compte de financement indisponible</string>
     <string name="funding_account_share_title">Partager le compte de financement</string>
+    <string name="uk_account_details_domestic_title">For domestic transfers within the UK only</string>
+    <string name="uk_account_details_status_title">UK local account details are coming here</string>
+    <string name="uk_account_details_status_body">This dedicated GBP account route is ready for a licensed UK banking partner. When PaySmart enables that flow, this screen will show your account holder name, sort code, account number, bank name, and share actions.</string>
+    <string name="uk_account_details_notice">Your money will be held with a licensed UK banking partner when this route goes live.</string>
 
 
     <string name="home_no_transaction_activity_title">Aucune activité de transaction</string>
@@ -798,4 +806,56 @@
     <string name="account_limits_details_subtitle_format">Combien pouvez-vous envoyer et recevoir avec votre compte PaySmart %1$s ?</string>
     <string name="account_limits_spent_of_limit_format">%1$s dépensés / %2$s</string>
     <string name="account_limits_left_format">%1$s restants</string>
+    <string name="identity_intro_title">Vérifiez votre identité</string>
+    <string name="identity_intro_subtitle">Pour respecter la réglementation financière et aider à prévenir la fraude, nous pouvons vous demander une photo de votre pièce d’identité et un selfie afin de confirmer qu’il s’agit bien de vous.</string>
+    <string name="identity_intro_eta">Cela prend généralement environ 2 minutes.</string>
+    <string name="identity_intro_photo_tips_title">Conseils pour la pièce d’identité</string>
+    <string name="identity_intro_photo_tip_readable">Assurez-vous que tout le texte de votre pièce d’identité est lisible.</string>
+    <string name="identity_intro_photo_tip_visible">Assurez-vous que la pièce entière est visible et qu’il n’y a ni reflets ni éblouissement.</string>
+    <string name="identity_intro_selfie_tips_title">Conseils pour le selfie</string>
+    <string name="identity_intro_selfie_tip_lighting">Utilisez un bon éclairage et gardez votre visage bien visible.</string>
+    <string name="identity_intro_selfie_tip_clear">Retirez tout ce qui cache votre visage, comme un chapeau ou des lunettes.</string>
+    <string name="identity_intro_consent">En continuant, vous acceptez les vérifications d’identité ainsi que le traitement de vos données à des fins de prévention de la fraude et de conformité.</string>
+    <string name="identity_selection_title">Vérifiez votre pièce d’identité</string>
+    <string name="identity_selection_subtitle">Choisissez la pièce à utiliser. Les documents émis dans votre pays sont généralement les plus rapides à examiner.</string>
+    <string name="identity_resolver_review_time_title">Délai d’examen estimé</string>
+    <string name="identity_resolver_review_window_exact_hours">%1$d heures</string>
+    <string name="identity_resolver_review_window_range_hours">%1$d - %2$d heures</string>
+    <string name="identity_pending_title">Vérification envoyée</string>
+    <string name="identity_pending_subtitle">Nous examinons maintenant votre identité.</string>
+    <string name="identity_pending_waiting_body">La plupart des contrôles pour les documents délivrés en %1$s prennent %2$s.</string>
+    <string name="identity_pending_status_format">Statut : %1$s</string>
+    <string name="identity_pending_reference_format">Référence : %1$s</string>
+    <string name="identity_pending_next_title">Et ensuite</string>
+    <string name="identity_pending_next_step_1">Nous examinerons votre document et les informations de votre identité.</string>
+    <string name="identity_pending_next_step_2">Nous pourrons vous demander une capture plus nette si une vérification supplémentaire est nécessaire.</string>
+    <string name="identity_pending_next_step_3">Vous pouvez continuer à utiliser les fonctionnalités actuellement disponibles sur votre compte.</string>
+
+    <string name="verify_passcode">Vérifier le code d\'accès</string>
+    <string name="notification_center_title">Notifications</string>
+    <string name="notification_center_empty_title">Rien de nouveau pour l’instant</string>
+    <string name="notification_center_empty_body">Les mises à jour du compte, lancements de produits et invites d’installation de l’application apparaîtront ici.</string>
+    <string name="notification_center_unread_label">Non lues</string>
+    <string name="notification_center_all_caught_up">Vous êtes à jour</string>
+    <string name="notification_channel_account_updates_name">Mises à jour du compte</string>
+    <string name="notification_channel_account_updates_description">Alertes liées à l’identité, la sécurité et l’activité du compte.</string>
+    <string name="notification_channel_product_updates_name">Mises à jour produit</string>
+    <string name="notification_channel_product_updates_description">Nouvelles fonctionnalités, lancements et annonces PaySmart.</string>
+    <string name="notification_channel_app_updates_name">Mises à jour de l’application</string>
+    <string name="notification_channel_app_updates_description">Mises à jour de l’application téléchargées prêtes à être installées.</string>
+    <string name="reauth_alternative_factor_message">La vérification par téléphone n’est pas disponible sur cet appareil. Utilisez une autre méthode de connexion liée pour continuer.</string>
+    <string name="reauth_recovery_email_hint">E-mail de vérification : %1$s</string>
+    <string name="reauth_no_alternative_factor_message">Aucune autre méthode de récupération n’est encore liée à ce compte.</string>
+    <string name="post_otp_capabilities_currency_label">Votre principale devise de travail</string>
+    <string name="post_otp_capabilities_supporting_note">Vous pourrez débloquer plus de fonctionnalités plus tard. Commencez par le parcours qui vous apporte de la valeur le plus vite.</string>
+    <string name="post_otp_interest_invoice_title">Créer une facture</string>
+    <string name="post_otp_interest_invoice_subtitle">Configurez votre flux de facturation hebdomadaire pour des shifts, du freelance, l’hôtellerie, les soins ou le travail en agence.</string>
+    <string name="post_otp_interest_invoice_footnote">Idéal pour les travailleurs au Royaume-Uni qui facturent chaque semaine et veulent obtenir plus vite leur premier PDF finalisé.</string>
+    <string name="post_otp_interest_top_up_title">Recharger</string>
+    <string name="post_otp_interest_top_up_subtitle">Préparez votre portefeuille pour l’alimentation, les soldes et les paiements futurs une fois les vérifications requises terminées.</string>
+
+    <string name="credit">Crédit</string>
+    <string name="i_am_happy_paysmart_share_my_data">J\'accepte que PaySmart partage en toute sécurité mes informations (nom, adresse et date de naissance) avec les agences d\'évaluation du crédit afin d\'évaluer mon admissibilité et de me proposer des produits de crédit adaptés.</string>
+    <string name="social_media_advertisement_platform">J\'autorise PaySmart à partager mon nom, mon adresse e-mail et les événements liés à l\'application avec les plateformes de médias sociaux.</string>
+    <string name="terms_of_use">https://pay-smart.net/terms/</string>
 </resources>

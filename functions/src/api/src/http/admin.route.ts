@@ -1,4 +1,10 @@
 import type { Express } from "express";
+import {
+  adminCreateProductUpdateCampaignHandler,
+} from "../handlers/adminCreateProductUpdateCampaign.js";
+import {
+  adminDispatchProductUpdateCampaignHandler,
+} from "../handlers/adminDispatchProductUpdateCampaign.js";
 import { adminUserActivityFeedHandler, adminUserSessionSnapshotHandler } from "../handlers/adminMonitoring.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { corsify } from "../utils.js";
@@ -32,6 +38,26 @@ export function mountAdminRoutes(app: Express) {
     adminUserActivityFeedHandler
   );
   app.options("/admin/monitor/users/:uid/activity", (_req, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post(
+    "/admin/campaigns/product-updates",
+    requireAdmin,
+    adminCreateProductUpdateCampaignHandler
+  );
+  app.options("/admin/campaigns/product-updates", (_req, res) => {
+    corsify(res);
+    res.status(204).end();
+  });
+
+  app.post(
+    "/admin/campaigns/product-updates/:campaignId/dispatch",
+    requireAdmin,
+    adminDispatchProductUpdateCampaignHandler
+  );
+  app.options("/admin/campaigns/product-updates/:campaignId/dispatch", (_req, res) => {
     corsify(res);
     res.status(204).end();
   });

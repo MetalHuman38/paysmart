@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.ui.theme.ButtonTokens
+import net.metalbrain.paysmart.ui.theme.LocalAppThemePack
 
 @Composable
 fun OutlinedButton(
@@ -47,6 +48,22 @@ fun OutlinedButton(
     } else {
         contentColor
     }
+    val buttonStyle = LocalAppThemePack.current.buttonStyle
+    val resolvedShape = if (buttonStyle.useFullPillButtons) {
+        RoundedCornerShape(percent = 50)
+    } else {
+        shape
+    }
+    val resolvedContainerColor = if (buttonStyle.useFullPillButtons) {
+        Color.Transparent
+    } else {
+        containerColor
+    }
+    val resolvedBorderColor = if (buttonStyle.useFullPillButtons) {
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = buttonStyle.ghostBorderAlpha)
+    } else {
+        borderColor
+    }
 
     OutlinedButton(
         onClick = onClick,
@@ -54,15 +71,25 @@ fun OutlinedButton(
         modifier = modifier
             .fillMaxWidth()
             .height(height),
-        shape = shape,
+        shape = resolvedShape,
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = containerColor,
+            containerColor = resolvedContainerColor,
             contentColor = resolvedContentColor,
             disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
             disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         ),
-        border = BorderStroke(borderWidth, borderColor),
-        elevation = elevation,
+        border = BorderStroke(borderWidth, resolvedBorderColor),
+        elevation = if (buttonStyle.useFullPillButtons) {
+            ButtonDefaults.buttonElevation(
+                defaultElevation = 0.dp,
+                pressedElevation = 0.dp,
+                focusedElevation = 0.dp,
+                hoveredElevation = 0.dp,
+                disabledElevation = 0.dp
+            )
+        } else {
+            elevation
+        },
         contentPadding = contentPadding
 
     ) {

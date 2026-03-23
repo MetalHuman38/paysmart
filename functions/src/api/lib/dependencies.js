@@ -2,6 +2,7 @@
 import { initializeApp, getApps } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
+import { getMessaging } from "firebase-admin/messaging";
 import { loadConfig } from "./config/configuration.js";
 let singleton = null;
 export function initDeps() {
@@ -18,6 +19,7 @@ export function initDeps() {
     }
     const auth = getAuth(app);
     const firestore = getFirestore(app);
+    const messaging = getMessaging(app);
     if (process.env.FIRESTORE_EMULATOR_HOST) {
         firestore.settings({
             host: process.env.FIRESTORE_EMULATOR_HOST,
@@ -41,6 +43,7 @@ export function initDeps() {
         app,
         auth,
         firestore,
+        messaging,
     };
     return singleton;
 }

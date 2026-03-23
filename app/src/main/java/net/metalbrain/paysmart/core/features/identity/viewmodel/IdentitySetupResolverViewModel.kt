@@ -61,6 +61,7 @@ class IdentitySetupResolverViewModel @Inject constructor(
     fun onCountryChanged(iso2: String) {
         val country = KycDocumentCatalog.resolveCountry(iso2)
         val documents = KycDocumentCatalog.documentsForCountry(country)
+        val reviewWindow = KycDocumentCatalog.reviewWindowForCountry(country)
         val selectedId = defaultDocumentId(documents)
 
         capturedBytes = null
@@ -68,6 +69,7 @@ class IdentitySetupResolverViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 selectedCountryIso2 = country,
+                selectedCountryReviewWindow = reviewWindow,
                 availableDocuments = documents,
                 selectedDocumentId = selectedId,
                 selectedDocumentName = null,
@@ -409,6 +411,7 @@ private fun createInitialState(): IdentitySetupResolverUiState {
     val documents = KycDocumentCatalog.documentsForCountry(initialCountry)
     return IdentitySetupResolverUiState(
         selectedCountryIso2 = initialCountry,
+        selectedCountryReviewWindow = KycDocumentCatalog.reviewWindowForCountry(initialCountry),
         availableCountriesIso2 = KycDocumentCatalog.supportedCountriesIso2,
         availableDocuments = documents,
         selectedDocumentId = defaultDocumentId(documents)

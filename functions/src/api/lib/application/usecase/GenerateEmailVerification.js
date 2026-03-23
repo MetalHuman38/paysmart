@@ -48,9 +48,12 @@ export class GenerateEmailVerification {
             updatedAt: FieldValue.serverTimestamp(),
         });
         /* ---------- Generate link ---------- */
-        const link = await this.authService.generateEmailVerificationLink(email, this.config.getVerifyUrl());
+        const link = await this.authService.generateEmailVerificationLink(email, buildEmailVerificationContinueUrl(this.config.getVerifyUrl(), input.returnRoute));
         if (this.config.shouldSendRealEmails()) {
-            await this.mailer.sendVerificationEmail({ to: email, link });
+            await this.mailer.sendVerificationEmail({
+                to: email,
+                verificationLink: link,
+            });
         }
         else {
             const emailDomain = email.includes("@") ? email.split("@").pop() : "unknown";
@@ -67,5 +70,26 @@ function safeHost(url) {
     catch {
         return "invalid-url";
     }
+}
+function buildEmailVerificationContinueUrl(baseUrl, returnRoute) {
+    const url = new URL(baseUrl);
+    const normalizedRoute = normalizeReturnRoute(returnRoute);
+    if (normalizedRoute) {
+        url.searchParams.set("returnRoute", normalizedRoute);
+    }
+    return url.toString();
+}
+function normalizeReturnRoute(value) {
+    if (typeof value !== "string") {
+        return null;
+    }
+    const normalized = value.trim();
+    if (!normalized) {
+        return null;
+    }
+    if (normalized.includes("://") || normalized.startsWith("//")) {
+        return null;
+    }
+    return normalized.slice(0, 512);
 }
 //# sourceMappingURL=GenerateEmailVerification.js.map

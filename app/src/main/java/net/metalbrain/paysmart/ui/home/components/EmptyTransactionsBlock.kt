@@ -13,11 +13,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.domain.model.LaunchInterest
 import net.metalbrain.paysmart.ui.components.OutlinedButton
 
 
 @Composable
-fun EmptyTransactionsBlock(onAddMoneyClick: () -> Unit) {
+fun EmptyTransactionsBlock(
+    launchInterest: LaunchInterest,
+    onAddMoneyClick: () -> Unit,
+    onCreateInvoiceClick: () -> Unit
+) {
+    val isInvoiceFirst = launchInterest == LaunchInterest.INVOICE
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -37,8 +43,12 @@ fun EmptyTransactionsBlock(onAddMoneyClick: () -> Unit) {
             textAlign = TextAlign.Center
         )
         OutlinedButton(
-            text = stringResource(R.string.add_money),
-            onClick = onAddMoneyClick,
+            text = if (isInvoiceFirst) {
+                stringResource(R.string.home_service_create_invoice)
+            } else {
+                stringResource(R.string.add_money)
+            },
+            onClick = if (isInvoiceFirst) onCreateInvoiceClick else onAddMoneyClick,
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
             borderColor = MaterialTheme.colorScheme.primary

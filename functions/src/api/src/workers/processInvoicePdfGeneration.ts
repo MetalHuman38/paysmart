@@ -38,7 +38,7 @@ export async function processInvoicePdfGenerationJob(uid: string, invoiceId: str
     if (pdf.status === "ready") {
       return {
         fileName: asString(pdf.fileName) || `${asString(data.invoiceNumber) || cleanInvoiceId}.pdf`,
-        templateVersion: asString(pdf.templateVersion) || "pay-smart-invoice-v1",
+        templateVersion: asString(pdf.templateVersion) || "pay-smart-invoice-v2",
       };
     }
 
@@ -49,7 +49,7 @@ export async function processInvoicePdfGenerationJob(uid: string, invoiceId: str
           status: "processing",
           fileName: asString(pdf.fileName) || `${asString(data.invoiceNumber) || cleanInvoiceId}.pdf`,
           contentType: "application/pdf",
-          templateVersion: asString(pdf.templateVersion) || "pay-smart-invoice-v1",
+          templateVersion: asString(pdf.templateVersion) || "pay-smart-invoice-v2",
           updatedAt: FieldValue.serverTimestamp(),
           error: null,
         },
@@ -60,7 +60,7 @@ export async function processInvoicePdfGenerationJob(uid: string, invoiceId: str
 
     return {
       fileName: asString(pdf.fileName) || `${asString(data.invoiceNumber) || cleanInvoiceId}.pdf`,
-      templateVersion: asString(pdf.templateVersion) || "pay-smart-invoice-v1",
+      templateVersion: asString(pdf.templateVersion) || "pay-smart-invoice-v2",
     };
   });
 

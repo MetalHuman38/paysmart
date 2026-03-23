@@ -14,9 +14,13 @@ class EmailVerificationHandler @Inject constructor() {
         )
     )
 
-    suspend fun sendVerification(idToken: String, email: String): Boolean =
+    suspend fun sendVerification(
+        idToken: String,
+        email: String,
+        returnRoute: String? = null
+    ): Boolean =
         runCatching {
-            client.generateVerification(idToken, email)
+            client.generateVerification(idToken, email, returnRoute)
         }.onFailure {
             Log.e("EmailVerification", "generate failed", it)
         }.getOrDefault(false)

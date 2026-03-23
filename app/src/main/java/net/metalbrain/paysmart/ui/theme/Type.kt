@@ -11,7 +11,7 @@ import net.metalbrain.paysmart.R
 private val DisplayFamily = FontFamily(Font(R.font.paysmart_display))
 private val BodyFamily = FontFamily(Font(R.font.paysmart_body))
 
-val Typography = Typography(
+val PaySmartTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = DisplayFamily,
         fontWeight = FontWeight.SemiBold,
@@ -114,3 +114,36 @@ val Typography = Typography(
         letterSpacing = 0.2.sp
     )
 )
+
+val ObsidianTypography = PaySmartTypography.copy(
+    displayLarge = PaySmartTypography.displayLarge.copy(
+        fontSize = 56.sp,
+        lineHeight = 62.sp,
+        letterSpacing = (-1.1).sp
+    ),
+    displayMedium = PaySmartTypography.displayMedium.copy(
+        fontSize = 46.sp,
+        lineHeight = 52.sp,
+        letterSpacing = (-0.9).sp
+    ),
+    displaySmall = PaySmartTypography.displaySmall.copy(
+        fontSize = 38.sp,
+        lineHeight = 44.sp,
+        letterSpacing = (-0.7).sp
+    ),
+    headlineLarge = PaySmartTypography.headlineLarge.copy(
+        fontSize = 34.sp,
+        lineHeight = 40.sp,
+        letterSpacing = (-0.6).sp
+    ),
+    headlineMedium = PaySmartTypography.headlineMedium.copy(
+        fontSize = 29.sp,
+        lineHeight = 36.sp,
+        letterSpacing = (-0.4).sp
+    ),
+    labelSmall = PaySmartTypography.labelSmall.copy(
+        letterSpacing = 0.8.sp
+    )
+)
+
+val Typography = PaySmartTypography

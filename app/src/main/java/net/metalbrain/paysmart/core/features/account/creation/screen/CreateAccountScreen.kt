@@ -118,7 +118,7 @@ fun CreateAccountScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.space6)
+                .padding(horizontal = Dimens.md, vertical = Dimens.md)
         )
     }
 

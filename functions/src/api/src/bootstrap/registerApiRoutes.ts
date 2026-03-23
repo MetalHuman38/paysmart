@@ -10,6 +10,8 @@ import {
 } from "../http/payment.route.js";
 import { mountInvoiceRoutes } from "../http/invoice.route.js";
 import { mountAdminRoutes } from "../http/admin.route.js";
+import { mountNotificationRoutes } from "../http/notification.route.js";
+import { mountPublicRoutes } from "../http/public.route.js";
 import { facebookDataDeletionHandler } from "../facebookDataDeletion.js";
 import { requireAppCheck } from "../config/appcheck.js";
 import { checkEmailOrPhone } from "../checkEmailOrPhone.js";
@@ -19,6 +21,7 @@ export function registerPreMiddlewareRoutes(app: Express) {
 }
 
 export function registerApiRoutes(app: Express) {
+  mountPublicRoutes(app);
   mountAuthPolicyRoutes(app);
   mountHealthRoutes(app);
   mountRecaptchaRoutes(app);
@@ -27,6 +30,7 @@ export function registerApiRoutes(app: Express) {
   mountPaymentsRoutes(app);
   mountInvoiceRoutes(app);
   mountAdminRoutes(app);
+  mountNotificationRoutes(app);
 }
 
 export function registerPostBodyParserRoutes(app: Express) {

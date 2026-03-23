@@ -38,7 +38,7 @@ import net.metalbrain.paysmart.core.features.account.authentication.login.viewmo
 import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.LoginViewModel
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.ReauthOtpViewModel
 import net.metalbrain.paysmart.core.features.language.viewmodel.LanguageViewModel
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 import net.metalbrain.paysmart.ui.components.AccountSwitchPrompt
 import net.metalbrain.paysmart.ui.components.AccountSwitchVariant
 import net.metalbrain.paysmart.ui.components.AuthScreenSubtitle

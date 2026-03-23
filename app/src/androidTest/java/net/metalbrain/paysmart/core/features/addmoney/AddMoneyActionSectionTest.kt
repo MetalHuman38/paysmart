@@ -27,70 +27,43 @@ class AddMoneyActionSectionTest {
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun flutterwaveAccountTransferSessionsUseReceiveMoneyCallback() {
+    fun flutterwaveAccountTransferSessionsUseAccountDetailsCallback() {
         val activity = composeRule.activity
         var providerCheckoutClicks = 0
-        var receiveMoneyClicks = 0
+        var accountDetailsClicks = 0
 
-        composeRule.setContent {
-            PaysmartTheme {
-                AddMoneyActionSection(
-                    uiState = eligibleUiState(),
-                    activeProvider = AddMoneyProvider.FLUTTERWAVE,
-                    onCreatePaymentSession = {},
-                    onOpenProviderCheckout = { providerCheckoutClicks += 1 },
-                    onOpenReceiveMoney = { receiveMoneyClicks += 1 },
-                    onRefreshSessionStatus = {}
-                )
-            }
-        }
+        renderActionSection(
+            uiState = eligibleUiState(),
+            onOpenProviderCheckout = { providerCheckoutClicks += 1 },
+            onOpenAccountDetails = { accountDetailsClicks += 1 }
+        )
 
-        composeRule.onNodeWithText(activity.getString(R.string.funding_account_title))
+        composeRule.onNodeWithText(activity.getString(R.string.add_money_view_account_details_action))
             .assertIsDisplayed()
             .performClick()
 
         assertEquals(0, providerCheckoutClicks)
-        assertEquals(1, receiveMoneyClicks)
+        assertEquals(1, accountDetailsClicks)
     }
 
     @Test
-    fun receiveMoneyActionStaysHiddenForNonTransferSessions() {
-        val receiveMoneyLabel = composeRule.activity.getString(R.string.funding_account_title)
+    fun accountDetailsActionStaysHiddenForNonTransferSessions() {
+        val accountDetailsLabel =
+            composeRule.activity.getString(R.string.add_money_view_account_details_action)
 
-        composeRule.setContent {
-            PaysmartTheme {
-                AddMoneyActionSection(
-                    uiState = eligibleUiState(activeSessionMethod = FxPaymentMethod.WIRE),
-                    activeProvider = AddMoneyProvider.FLUTTERWAVE,
-                    onCreatePaymentSession = {},
-                    onOpenProviderCheckout = {},
-                    onOpenReceiveMoney = {},
-                    onRefreshSessionStatus = {}
-                )
-            }
-        }
+        renderActionSection(uiState = eligibleUiState(activeSessionMethod = FxPaymentMethod.WIRE))
 
-        composeRule.onAllNodesWithText(receiveMoneyLabel).assertCountEquals(0)
+        composeRule.onAllNodesWithText(accountDetailsLabel).assertCountEquals(0)
     }
 
     @Test
-    fun receiveMoneyActionStaysHiddenForSettledTransferSessions() {
-        val receiveMoneyLabel = composeRule.activity.getString(R.string.funding_account_title)
+    fun accountDetailsActionStaysHiddenForSettledTransferSessions() {
+        val accountDetailsLabel =
+            composeRule.activity.getString(R.string.add_money_view_account_details_action)
 
-        composeRule.setContent {
-            PaysmartTheme {
-                AddMoneyActionSection(
-                    uiState = eligibleUiState(sessionStatus = AddMoneySessionStatus.SUCCEEDED),
-                    activeProvider = AddMoneyProvider.FLUTTERWAVE,
-                    onCreatePaymentSession = {},
-                    onOpenProviderCheckout = {},
-                    onOpenReceiveMoney = {},
-                    onRefreshSessionStatus = {}
-                )
-            }
-        }
+        renderActionSection(uiState = eligibleUiState(sessionStatus = AddMoneySessionStatus.SUCCEEDED))
 
-        composeRule.onAllNodesWithText(receiveMoneyLabel).assertCountEquals(0)
+        composeRule.onAllNodesWithText(accountDetailsLabel).assertCountEquals(0)
     }
 
     private fun eligibleUiState(
@@ -103,5 +76,27 @@ class AddMoneyActionSectionTest {
             activeSessionMethod = activeSessionMethod,
             sessionStatus = sessionStatus
         )
+    }
+
+    private fun renderActionSection(
+        uiState: AddMoneyUiState,
+        activeProvider: AddMoneyProvider? = AddMoneyProvider.FLUTTERWAVE,
+        onCreatePaymentSession: () -> Unit = {},
+        onOpenProviderCheckout: () -> Unit = {},
+        onOpenAccountDetails: () -> Unit = {},
+        onRefreshSessionStatus: () -> Unit = {}
+    ) {
+        composeRule.setContent {
+            PaysmartTheme {
+                AddMoneyActionSection(
+                    uiState = uiState,
+                    activeProvider = activeProvider,
+                    onCreatePaymentSession = onCreatePaymentSession,
+                    onOpenProviderCheckout = onOpenProviderCheckout,
+                    onOpenAccountDetails = onOpenAccountDetails,
+                    onRefreshSessionStatus = onRefreshSessionStatus
+                )
+            }
+        }
     }
 }

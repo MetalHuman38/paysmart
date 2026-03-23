@@ -47,16 +47,16 @@ fun RewardEarnedSummaryCard(
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                            MaterialTheme.colorScheme.secondaryContainer,
-                            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.68f)
+                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.06f),
+                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.84f),
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.56f)
                         )
                     )
                 )
                 .padding(HomeCardTokens.contentPadding),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(Dimens.md)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Dimens.sm)) {
                 Icon(
                     imageVector = Icons.Outlined.WorkspacePremium,
                     contentDescription = null,
@@ -68,7 +68,7 @@ fun RewardEarnedSummaryCard(
                         isBalanceVisible,
                         "${formatAmount(snapshot.points)} pts"
                     ),
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis

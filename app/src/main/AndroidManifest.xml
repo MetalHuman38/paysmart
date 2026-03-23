@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
 
     <queries>
@@ -52,6 +53,17 @@
         <meta-data
             android:name="firebase_performance_collection_enabled"
             android:value="${firebasePerformanceCollectionEnabled}" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="paysmart.account_updates" />
+
+        <service
+            android:name=".core.notifications.PaySmartFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <activity
             android:name="net.metalbrain.paysmart.MainActivity"

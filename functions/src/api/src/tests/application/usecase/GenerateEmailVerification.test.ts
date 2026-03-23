@@ -78,6 +78,10 @@ describe("GenerateEmailVerification", () => {
       "uid-1",
       "tester@example.com"
     );
+    expect(authService.generateEmailVerificationLink).toHaveBeenCalledWith(
+      "tester@example.com",
+      "https://pay-smart.net/verify"
+    );
     expect(securityRepo.update).toHaveBeenCalledWith(
       "uid-1",
       expect.objectContaining({
@@ -86,6 +90,32 @@ describe("GenerateEmailVerification", () => {
       })
     );
     expect(mailer.sendVerificationEmail).toHaveBeenCalled();
+  });
+
+  it("appends the return route to the continue url when provided", async () => {
+    const usecase = new GenerateEmailVerification(
+      securityRepo,
+      userRepo,
+      authService,
+      mailer,
+      {
+        allowedTenants: new Set(["production"]),
+        getVerifyUrl: () => "https://pay-smart.net/verify",
+        shouldSendRealEmails: () => true,
+      }
+    );
+
+    const result = await usecase.execute({
+      uid: "uid-1",
+      email: "tester@example.com",
+      returnRoute: "profile/mfa_nudge",
+    });
+
+    expect(result).toEqual({ sent: true });
+    expect(authService.generateEmailVerificationLink).toHaveBeenCalledWith(
+      "tester@example.com",
+      "https://pay-smart.net/verify?returnRoute=profile%2Fmfa_nudge"
+    );
   });
 
   it("does not fail when firestore user profile is missing and falls back to auth tenant", async () => {

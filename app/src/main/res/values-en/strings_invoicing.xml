@@ -1,6 +1,8 @@
 <resources>
-    <string name="invoice_weekly_title">Weekly shifts</string>
-    <string name="invoice_weekly_subtitle">Enter shifts for each day. Totals update automatically and sync to draft.</string>
+    <string name="invoice_weekly_title">Build this week\'s invoice</string>
+    <string name="invoice_weekly_subtitle">Add the shifts you worked, check the totals, and finalize a clean weekly invoice when you are ready.</string>
+    <string name="invoice_weekly_intro_title">Weekly invoice</string>
+    <string name="invoice_weekly_intro_body">Use this step to turn completed shifts into a branded PDF you can download or share straight away.</string>
     <string name="invoice_weekly_select_venue">Venue</string>
     <string name="invoice_weekly_no_venues">No venues yet. Add venues in profile setup first.</string>
     <string name="invoice_weekly_invoice_date_label">Invoice date (YYYY-MM-DD)</string>
@@ -11,8 +13,8 @@
     <string name="invoice_weekly_total_hours_value">Total hours: %1$s</string>
     <string name="invoice_weekly_subtotal_value">Subtotal: %1$s</string>
     <string name="invoice_weekly_saving">Saving draft…</string>
-    <string name="invoice_weekly_saved">Draft synced</string>
-    <string name="invoice_weekly_finalize_action">Finalize invoice</string>
+    <string name="invoice_weekly_saved">Draft saved locally</string>
+    <string name="invoice_weekly_finalize_action">Finalize weekly invoice</string>
     <string name="invoice_weekly_finalizing">Finalizing invoice…</string>
     <string name="invoice_weekly_finalize_success">Invoice %1$s finalized</string>
     <string name="invoice_weekly_recent_finalized_title">Recent finalized invoices</string>
@@ -20,7 +22,12 @@
     <string name="invoice_weekly_recent_finalized_empty">No finalized invoices yet.</string>
     <string name="invoice_weekly_recent_finalized_item_title">%1$s</string>
     <string name="invoice_weekly_recent_finalized_item_subtitle">%1$s · Week ending %2$s</string>
+    <string name="invoice_weekly_status_title">Draft status</string>
+    <string name="invoice_weekly_status_error">We could not save or finalize this invoice yet.</string>
+    <string name="invoice_weekly_status_info">Your latest invoice progress is saved on this device and synced when possible.</string>
     <string name="invoice_detail_title">Invoice detail</string>
+    <string name="invoice_detail_intro_title">Ready to share</string>
+    <string name="invoice_detail_intro_body">Review the final invoice, prepare the PDF, then download or share it with the client or agency.</string>
     <string name="invoice_detail_error_fallback">Unable to load invoice detail</string>
     <string name="invoice_detail_number">Invoice: %1$s</string>
     <string name="invoice_detail_status">Status: %1$s</string>
@@ -30,6 +37,8 @@
     <string name="invoice_detail_subtotal">Subtotal: %1$s</string>
     <string name="invoice_detail_profile_name">Worker: %1$s</string>
     <string name="invoice_detail_profile_email">Email: %1$s</string>
+    <string name="invoice_detail_pdf_title">PDF actions</string>
+    <string name="invoice_detail_pdf_supporting">Prepare the latest branded PDF before downloading or sharing it.</string>
     <string name="invoice_detail_pdf_status">PDF status: %1$s</string>
     <string name="invoice_detail_pdf_error">PDF error: %1$s</string>
     <string name="invoice_detail_pdf_prepare_action">Prepare PDF</string>
@@ -38,10 +47,12 @@
     <string name="invoice_detail_pdf_downloading">Starting download…</string>
     <string name="invoice_detail_pdf_share_action">Share PDF</string>
     <string name="invoice_detail_pdf_sharing">Preparing share…</string>
+    <string name="invoice_detail_worker_title">Worker details</string>
+    <string name="invoice_detail_totals_title">Invoice totals</string>
     <string name="invoice_setup_title">Invoice setup</string>
     <string name="invoice_setup_subtitle">Save your invoice profile and at least one venue before entering weekly shifts.</string>
     <string name="invoice_setup_profile_title">Worker profile</string>
-    <string name="invoice_setup_profile_hint">These details appear on generated invoices and can be reused every week.</string>
+    <string name="invoice_setup_profile_hint">These details appear on every generated invoice and help you create weekly invoices much faster.</string>
     <string name="invoice_setup_full_name_label">Full name</string>
     <string name="invoice_setup_address_label">Address</string>
     <string name="invoice_setup_badge_number_label">Badge number</string>
@@ -55,7 +66,7 @@
     <string name="invoice_setup_default_rate_label">Default hourly rate (optional)</string>
     <string name="invoice_setup_save_profile_action">Save invoice profile</string>
     <string name="invoice_setup_venue_title">Venue setup</string>
-    <string name="invoice_setup_venue_hint">Add at least one venue before creating weekly invoices.</string>
+    <string name="invoice_setup_venue_hint">Add at least one regular workplace so weekly invoicing starts with the right address and default rate.</string>
     <string name="invoice_setup_existing_venues_title">Saved venues</string>
     <string name="invoice_setup_venue_name_label">Venue name</string>
     <string name="invoice_setup_venue_address_label">Venue address</string>
@@ -65,10 +76,14 @@
     <string name="invoice_setup_apply_address_action">Use suggested address</string>
     <string name="invoice_setup_add_venue_action">Add venue</string>
     <string name="invoice_setup_continue_action">Continue to weekly shifts</string>
-    <string name="invoice_profile_setup_title">Worker profile</string>
-    <string name="invoice_profile_setup_subtitle">Save your worker details first. After that, you will continue to venue setup.</string>
+    <string name="invoice_profile_setup_title">Set up your invoice profile</string>
+    <string name="invoice_profile_setup_subtitle">Add the worker and payment details that should appear on every weekly invoice.</string>
     <string name="invoice_profile_setup_continue_action">Continue to venue setup</string>
-    <string name="invoice_venue_setup_title">Venue setup</string>
-    <string name="invoice_venue_setup_subtitle">Add or select a venue before entering weekly shifts.</string>
+    <string name="invoice_profile_setup_intro_title">Invoice profile</string>
+    <string name="invoice_profile_setup_intro_body">Save this once, then reuse it each week for faster invoice creation and cleaner PDFs.</string>
+    <string name="invoice_venue_setup_title">Save your venue details</string>
+    <string name="invoice_venue_setup_subtitle">Choose an existing venue or add a new one before you enter this week\'s shifts.</string>
     <string name="invoice_venue_setup_continue_action">Continue to weekly shifts</string>
+    <string name="invoice_venue_setup_intro_title">Venue details</string>
+    <string name="invoice_venue_setup_intro_body">Keep venue addresses and default rates ready so each weekly invoice starts from a saved workplace.</string>
 </resources>

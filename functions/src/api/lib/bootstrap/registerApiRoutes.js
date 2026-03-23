@@ -6,6 +6,8 @@ import { mountFxRoutes } from "../http/fx.route.js";
 import { mountPaymentsRoutes, mountPaymentsWebhookRoute, } from "../http/payment.route.js";
 import { mountInvoiceRoutes } from "../http/invoice.route.js";
 import { mountAdminRoutes } from "../http/admin.route.js";
+import { mountNotificationRoutes } from "../http/notification.route.js";
+import { mountPublicRoutes } from "../http/public.route.js";
 import { facebookDataDeletionHandler } from "../facebookDataDeletion.js";
 import { requireAppCheck } from "../config/appcheck.js";
 import { checkEmailOrPhone } from "../checkEmailOrPhone.js";
@@ -13,6 +15,7 @@ export function registerPreMiddlewareRoutes(app) {
     mountPaymentsWebhookRoute(app);
 }
 export function registerApiRoutes(app) {
+    mountPublicRoutes(app);
     mountAuthPolicyRoutes(app);
     mountHealthRoutes(app);
     mountRecaptchaRoutes(app);
@@ -21,6 +24,7 @@ export function registerApiRoutes(app) {
     mountPaymentsRoutes(app);
     mountInvoiceRoutes(app);
     mountAdminRoutes(app);
+    mountNotificationRoutes(app);
 }
 export function registerPostBodyParserRoutes(app) {
     app.post("/auth/check-email-or-phone", requireAppCheck, checkEmailOrPhone);

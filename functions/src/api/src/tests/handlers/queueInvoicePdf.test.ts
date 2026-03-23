@@ -62,7 +62,7 @@ describe("queueInvoicePdfHandler", () => {
       status: "queued",
       fileName: "PS-2026-000001.pdf",
       contentType: "application/pdf",
-      templateVersion: "pay-smart-invoice-v1",
+      templateVersion: "pay-smart-invoice-v2",
     });
 
     const req = {
@@ -85,7 +85,7 @@ describe("queueInvoicePdfHandler", () => {
       status: "ready",
       fileName: "PS-2026-000001.pdf",
       contentType: "application/pdf",
-      templateVersion: "pay-smart-invoice-v1",
+      templateVersion: "pay-smart-invoice-v2",
     });
 
     const req = {

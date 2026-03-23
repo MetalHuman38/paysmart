@@ -11,6 +11,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.ui.theme.ButtonTokens
+import net.metalbrain.paysmart.ui.theme.LocalAppThemePack
 
 
 @Composable
@@ -29,6 +30,11 @@ fun SecondaryButton(
     } else {
         contentColor
     }
+    val shape = if (LocalAppThemePack.current.buttonStyle.useFullPillButtons) {
+        RoundedCornerShape(percent = 50)
+    } else {
+        RoundedCornerShape(ButtonTokens.cornerRadius)
+    }
 
     Button(
         onClick = onClick,
@@ -36,13 +42,20 @@ fun SecondaryButton(
         modifier = modifier
             .fillMaxWidth()
             .height(ButtonTokens.height),
-        shape = RoundedCornerShape(ButtonTokens.cornerRadius),
+        shape = shape,
         contentPadding = ButtonTokens.contentPadding,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = resolvedContentColor,
             disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
             disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+        ),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp,
+            focusedElevation = 0.dp,
+            hoveredElevation = 0.dp,
+            disabledElevation = 0.dp
         )
     ) {
         Text(

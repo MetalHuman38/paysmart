@@ -2,11 +2,9 @@ package net.metalbrain.paysmart.core.features.fundingaccount.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import net.metalbrain.paysmart.core.features.fundingaccount.card.FundingAccountActionRow
@@ -19,7 +17,6 @@ import net.metalbrain.paysmart.ui.theme.Dimens
 @Composable
 internal fun FundingAccountContent(
     state: FundingAccountUiState,
-    contentPadding: PaddingValues,
     onRefresh: () -> Unit,
     onProvision: () -> Unit,
     onCopyAccountNumber: () -> Unit,
@@ -27,17 +24,16 @@ internal fun FundingAccountContent(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = Dimens.mediumScreenPadding, vertical = Dimens.md),
-        verticalArrangement = Arrangement.spacedBy(Dimens.md)
+            .fillMaxWidth()
+            .padding(bottom = Dimens.sm),
+        verticalArrangement = Arrangement.spacedBy(Dimens.lg)
     ) {
         FundingAccountHeroCard(
             flagEmoji = state.countryFlagEmoji,
             currencyCode = state.currencyCode,
             countryName = state.countryName,
-            provider = state.provider
+            provider = state.provider,
+            isMarketSupported = state.isMarketSupported
         )
 
         FundingAccountStateCard(
@@ -46,7 +42,8 @@ internal fun FundingAccountContent(
             onProvision = onProvision
         )
 
-        state.account?.let { account ->
+        if (state.showDetails) {
+            val account = state.account ?: return@Column
             FundingAccountActionRow(
                 isRefreshing = state.isRefreshing,
                 isProvisioning = state.isProvisioning,

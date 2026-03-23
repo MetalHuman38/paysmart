@@ -20,7 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import net.metalbrain.paysmart.R
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 
 
 @Composable

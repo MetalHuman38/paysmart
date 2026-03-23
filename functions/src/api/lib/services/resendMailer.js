@@ -1,6 +1,5 @@
-// src/services/resendMailer.ts
 import { Resend } from "resend";
-import { verificationEmailTemplate } from "../services/templates.js";
+import { renderEmailTemplate } from "./templates.js";
 export class ResendMailer {
     resend;
     from;
@@ -15,24 +14,36 @@ export class ResendMailer {
         this.resend = new Resend(apiKey);
         this.from = normalizedFrom;
     }
-    async sendVerificationEmail({ to, link, }) {
+    async send(message) {
+        const to = message.to?.trim();
         if (!to)
             throw new Error("ResendMailer: recipient email is required");
-        if (!link)
-            throw new Error("ResendMailer: verification link is required");
-        const { subject, html } = verificationEmailTemplate(link);
+        const { subject, html, text } = renderEmailTemplate(message);
+        const tags = [
+            { name: "type", value: message.kind },
+        ];
+        if (message.kind === "product_update") {
+            tags.push({ name: "campaign_id", value: message.campaignId });
+        }
         const { error } = await this.resend.emails.send({
             from: this.from,
             to,
             subject,
             html,
-            tags: [
-                { name: "type", value: "email_verification" },
-            ],
+            text,
+            tags,
         });
         if (error) {
             throw new Error(`ResendMailer failed: ${error.message}`);
         }
+    }
+    async sendVerificationEmail(input) {
+        await this.send({
+            kind: "email_verification",
+            to: input.to,
+            verificationLink: input.verificationLink,
+            locale: input.locale,
+        });
     }
 }
 function normalizeLegacySender(from) {

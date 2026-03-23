@@ -2,6 +2,7 @@ package net.metalbrain.paysmart.ui.home.state
 
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityItem
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
+import net.metalbrain.paysmart.domain.model.LaunchInterest
 import net.metalbrain.paysmart.domain.model.Transaction
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.fx.data.FxQuoteDataSource
@@ -12,12 +13,16 @@ enum class HomeTransactionProviderFilter {
 }
 
 enum class HomeNotificationKind {
-    PRODUCT,
+    PLACEHOLDER,
+    INBOX,
     APP_UPDATE_READY
 }
 
 data class HomeNotificationUiState(
-    val kind: HomeNotificationKind = HomeNotificationKind.PRODUCT,
+    val kind: HomeNotificationKind = HomeNotificationKind.PLACEHOLDER,
+    val title: String = "",
+    val body: String = "",
+    val unreadCount: Int = 0,
     val isUnread: Boolean = false
 )
 
@@ -53,6 +58,9 @@ data class HomeUiState(
     val countryIso2: String = CountryCapabilityCatalog.defaultProfile().iso2,
     val countryFlagEmoji: String = "🌍",
     val countryCurrencyCode: String = CountryCapabilityCatalog.defaultProfile().currencyCode,
+    val launchInterest: LaunchInterest = LaunchInterest.defaultForCountry(
+        CountryCapabilityCatalog.defaultProfile().iso2
+    ),
     val topUpPolicyHint: String? = null,
     val capabilities: List<CapabilityItem> = emptyList(),
     val exchangeRateSnapshot: HomeExchangeRateSnapshot = HomeExchangeRateSnapshot()

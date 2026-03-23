@@ -15,7 +15,7 @@ import androidx.navigation.NavHostController
 import net.metalbrain.paysmart.core.features.account.security.viewmodel.SecurityViewModel
 import net.metalbrain.paysmart.core.features.featuregate.FeatureKey
 import net.metalbrain.paysmart.domain.model.Transaction
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 import net.metalbrain.paysmart.ui.home.components.HomeContent
 import net.metalbrain.paysmart.ui.home.nav.HomeBottomNavigation
 import net.metalbrain.paysmart.ui.home.support.resolvePrimaryBalanceCurrency
@@ -69,10 +69,15 @@ fun HomeScreen(
                     )
                 },
                 onReceiveMoneyClick = {
+                    val receiveMoneyRoute = if (uiState.countryIso2.equals("GB", ignoreCase = true)) {
+                        Screen.UkAccount.routeWithCurrency(uiState.countryCurrencyCode)
+                    } else {
+                        Screen.FundingAccount.route
+                    }
                     navController.navigate(
                         Screen.FeatureGate.routeWithArgs(
                             feature = FeatureKey.RECEIVE_MONEY.id,
-                            resumeRoute = Screen.FundingAccount.route
+                            resumeRoute = receiveMoneyRoute
                         )
                     )
                 },
@@ -115,6 +120,9 @@ fun HomeScreen(
                 onViewAllLimitsClick = {
                     navController.navigate(Screen.ProfileAccountLimits.route)
                 },
+                onNotificationClick = {
+                    navController.navigate(Screen.NotificationCenter.route)
+                },
                 localSettings = uiState.security,
                 displayName = uiState.displayName,
                 transactions = uiState.recentTransactions,
@@ -128,12 +136,12 @@ fun HomeScreen(
                 countryIso2 = uiState.countryIso2,
                 countryFlagEmoji = uiState.countryFlagEmoji,
                 countryCurrencyCode = uiState.countryCurrencyCode,
+                launchInterest = uiState.launchInterest,
                 capabilities = uiState.capabilities,
                 exchangeRateSnapshot = uiState.exchangeRateSnapshot,
                 isBalanceVisible = !isBalanceHidden,
                 onTransactionSearchQueryChange = homeViewModel::onTransactionSearchQueryChanged,
                 onTransactionProviderToggle = homeViewModel::onTransactionProviderToggled,
-                onNotificationPrimaryAction = homeViewModel::onNotificationPrimaryAction,
                 onToggleBalanceVisibility = {
                     securityViewModel.setHideBalance(!isBalanceHidden)
                 }
@@ -141,5 +149,3 @@ fun HomeScreen(
         }
     }
 }
-
-

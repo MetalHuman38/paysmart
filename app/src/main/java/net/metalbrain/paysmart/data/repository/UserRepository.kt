@@ -2,6 +2,7 @@ package net.metalbrain.paysmart.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import net.metalbrain.paysmart.domain.model.AuthUserModel
+import net.metalbrain.paysmart.domain.model.LaunchInterest
 
 interface UserProfileRepository {
 
@@ -21,6 +22,8 @@ interface UserProfileRepository {
     suspend fun getOnce(uid: String): AuthUserModel?
 
     suspend fun updatePhotoUrl(uid: String, photoUrl: String?)
+
+    suspend fun updateLaunchInterest(uid: String, launchInterest: LaunchInterest)
 
     /**
      * Update the `lastSignedIn` timestamp for a user.

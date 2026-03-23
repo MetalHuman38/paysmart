@@ -84,6 +84,11 @@ export function createRequireActiveSession(deps) {
         if (currentState.activeSid !== sid || currentState.sessionVersion !== sv) {
             return res.status(401).json({ error: "Session replaced. Please sign in again." });
         }
+        req.authSession = {
+            uid,
+            sid,
+            sv,
+        };
         return next();
     };
 }

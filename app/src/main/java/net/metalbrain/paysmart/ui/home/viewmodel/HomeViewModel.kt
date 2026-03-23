@@ -27,7 +27,9 @@ import net.metalbrain.paysmart.core.features.capabilities.repository.CountryCapa
 import net.metalbrain.paysmart.core.features.fx.data.FxPaymentMethod
 import net.metalbrain.paysmart.core.features.fx.data.FxQuoteQuery
 import net.metalbrain.paysmart.core.features.fx.repository.FxQuoteRepository
-import net.metalbrain.paysmart.core.service.update.UpdateCoordinator
+import net.metalbrain.paysmart.core.notifications.NotificationInboxItem
+import net.metalbrain.paysmart.core.notifications.NotificationInboxRepository
+import net.metalbrain.paysmart.domain.model.LaunchInterest
 import net.metalbrain.paysmart.ui.home.state.HomeBalanceSnapshot
 import net.metalbrain.paysmart.ui.home.state.HomeExchangeRateSnapshot
 import net.metalbrain.paysmart.ui.home.state.HomeNotificationKind
@@ -47,7 +49,7 @@ class HomeViewModel @Inject constructor(
     private val countryCapabilityRepository: CountryCapabilityRepository,
     private val fxQuoteRepository: FxQuoteRepository,
     private val userManager: UserManager,
-    private val updateCoordinator: UpdateCoordinator,
+    private val notificationInboxRepository: NotificationInboxRepository,
 ) : ViewModel() {
     private val transactions = transactionRepository.observeTransactions()
         .stateIn(
@@ -126,12 +128,17 @@ class HomeViewModel @Inject constructor(
     private val headerState = combine(
         profile,
         transactionSearch,
-        updateCoordinator.uiState,
-    ) { profile, transactionSearch, updateUiState ->
+        notificationInboxRepository.observeLatestNotification(),
+        notificationInboxRepository.observeUnreadCount(),
+    ) { profile, transactionSearch, latestNotification, unreadCount ->
         HomeHeaderState(
             displayName = profile?.displayName.orEmpty(),
+            launchInterest = profile?.launchInterest,
             transactionSearch = transactionSearch,
-            notification = resolveNotification(updateUiState.showRestartPrompt),
+            notification = resolveNotification(
+                latestNotification = latestNotification,
+                unreadCount = unreadCount
+            ),
         )
     }.stateIn(
         scope = viewModelScope,
@@ -165,6 +172,8 @@ class HomeViewModel @Inject constructor(
             countryIso2 = capabilityProfile.iso2,
             countryFlagEmoji = capabilityProfile.flagEmoji,
             countryCurrencyCode = capabilityProfile.currencyCode,
+            launchInterest = headerState.launchInterest
+                ?: LaunchInterest.defaultForCountry(capabilityProfile.iso2),
             topUpPolicyHint = CountryCapabilityCatalog.topUpPolicyHint(capabilityProfile),
             capabilities = capabilityProfile.capabilities,
             exchangeRateSnapshot = exchangeRate
@@ -190,14 +199,6 @@ class HomeViewModel @Inject constructor(
         } else {
             current + provider
         }
-    }
-
-    fun onNotificationPrimaryAction() {
-        if (uiState.value.notification.kind != HomeNotificationKind.APP_UPDATE_READY) {
-            return
-        }
-        updateCoordinator.completeUpdate()
-        updateCoordinator.acknowledgeRestartPrompt()
     }
 
     private fun syncWalletOnAuth() {
@@ -271,19 +272,30 @@ class HomeViewModel @Inject constructor(
     }
 }
 
-private fun resolveNotification(hasPendingUpdate: Boolean): HomeNotificationUiState {
-    return if (hasPendingUpdate) {
+private fun resolveNotification(
+    latestNotification: NotificationInboxItem?,
+    unreadCount: Int,
+): HomeNotificationUiState {
+    return if (latestNotification != null) {
         HomeNotificationUiState(
-            kind = HomeNotificationKind.APP_UPDATE_READY,
-            isUnread = true,
+            kind = if (latestNotification.type == NotificationInboxRepository.TYPE_APP_UPDATE_READY) {
+                HomeNotificationKind.APP_UPDATE_READY
+            } else {
+                HomeNotificationKind.INBOX
+            },
+            title = latestNotification.title,
+            body = latestNotification.body,
+            unreadCount = unreadCount,
+            isUnread = unreadCount > 0 || latestNotification.isUnread,
         )
     } else {
-        HomeNotificationUiState(kind = HomeNotificationKind.PRODUCT)
+        HomeNotificationUiState(kind = HomeNotificationKind.PLACEHOLDER)
     }
 }
 
 private data class HomeHeaderState(
     val displayName: String = "",
+    val launchInterest: LaunchInterest? = null,
     val transactionSearch: HomeTransactionSearchSnapshot = HomeTransactionSearchSnapshot(),
     val notification: HomeNotificationUiState = HomeNotificationUiState(),
 )

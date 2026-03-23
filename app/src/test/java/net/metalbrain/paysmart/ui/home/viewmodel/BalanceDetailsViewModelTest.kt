@@ -20,7 +20,7 @@ import net.metalbrain.paysmart.domain.model.WalletBalanceModel
 import net.metalbrain.paysmart.data.repository.TransactionRepository
 import net.metalbrain.paysmart.data.repository.WalletBalanceRepository
 import net.metalbrain.paysmart.testing.MainDispatcherRule
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -99,7 +99,3 @@ class BalanceDetailsViewModelTest {
         )
     }
 }
-
-
-
-

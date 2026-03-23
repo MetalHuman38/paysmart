@@ -5,7 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import net.metalbrain.paysmart.core.features.language.viewmodel.LanguageViewModel
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 
 @Composable
 fun StartupScreen(

@@ -29,7 +29,11 @@ export class GenerateEmailVerification {
       ): Promise<string>;
     },
     private readonly mailer: {
-      sendVerificationEmail(input: { to: string; link: string }): Promise<void>;
+      sendVerificationEmail(input: {
+        to: string;
+        verificationLink: string;
+        locale?: string;
+      }): Promise<void>;
     },
     private readonly config: {
       allowedTenants: Set<string>;
@@ -41,6 +45,7 @@ export class GenerateEmailVerification {
   async execute(input: {
     uid: string;
     email: string;
+    returnRoute?: string | null;
     provider?: string | null;
     ip?: string;
   }): Promise<GenerateEmailVerificationResult> {
@@ -90,11 +95,17 @@ export class GenerateEmailVerification {
     /* ---------- Generate link ---------- */
     const link = await this.authService.generateEmailVerificationLink(
       email,
-      this.config.getVerifyUrl()
+      buildEmailVerificationContinueUrl(
+        this.config.getVerifyUrl(),
+        input.returnRoute
+      )
     );
 
     if (this.config.shouldSendRealEmails()) {
-      await this.mailer.sendVerificationEmail({ to: email, link });
+      await this.mailer.sendVerificationEmail({
+        to: email,
+        verificationLink: link,
+      });
     } else {
       const emailDomain = email.includes("@") ? email.split("@").pop() : "unknown";
       const linkHost = safeHost(link);
@@ -113,4 +124,33 @@ function safeHost(url: string): string {
   } catch {
     return "invalid-url";
   }
+}
+
+function buildEmailVerificationContinueUrl(
+  baseUrl: string,
+  returnRoute?: string | null
+): string {
+  const url = new URL(baseUrl);
+  const normalizedRoute = normalizeReturnRoute(returnRoute);
+  if (normalizedRoute) {
+    url.searchParams.set("returnRoute", normalizedRoute);
+  }
+  return url.toString();
+}
+
+function normalizeReturnRoute(value?: string | null): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  if (!normalized) {
+    return null;
+  }
+
+  if (normalized.includes("://") || normalized.startsWith("//")) {
+    return null;
+  }
+
+  return normalized.slice(0, 512);
 }

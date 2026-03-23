@@ -4,11 +4,16 @@ export async function generateEmailVerificationHandler(req, res) {
         const { getUIDFromAuthHeader } = apiContainer();
         const uid = await getUIDFromAuthHeader.execute(req.headers.authorization);
         const email = String(req.body?.email || "").trim().toLowerCase();
+        const returnRoute = asOptionalReturnRoute(req.body?.returnRoute);
         if (!email) {
             return res.status(400).json({ error: "Email is required" });
         }
         const { generateEmailVerification } = apiContainer();
-        const result = await generateEmailVerification.execute({ uid, email });
+        const result = await generateEmailVerification.execute({
+            uid,
+            email,
+            returnRoute,
+        });
         if (!result.sent) {
             if (result.retryAfter) {
                 res.setHeader("Retry-After", String(result.retryAfter));
@@ -53,5 +58,12 @@ export async function checkEmailVerificationStatusHandler(req, res) {
         console.error("checkEmailVerificationStatus error:", err);
         return res.status(500).json({ error: err.message });
     }
+}
+function asOptionalReturnRoute(value) {
+    if (typeof value !== "string") {
+        return undefined;
+    }
+    const normalized = value.trim();
+    return normalized || undefined;
 }
 //# sourceMappingURL=emailVerificationHandlers.js.map

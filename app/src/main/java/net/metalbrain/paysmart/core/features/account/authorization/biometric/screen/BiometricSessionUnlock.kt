@@ -1,9 +1,11 @@
 package net.metalbrain.paysmart.core.features.account.authorization.biometric.screen
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -12,6 +14,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.outlined.Fingerprint
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -28,11 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.features.account.authorization.biometric.utils.SessionLogout
 import net.metalbrain.paysmart.core.features.account.authorization.biometric.viewmodel.BiometricOptInViewModel
 import net.metalbrain.paysmart.core.features.account.profile.components.ProfileAvatarImage
 import net.metalbrain.paysmart.domain.state.UserUiState
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.LocalAppThemePack
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 
 @Composable
@@ -56,42 +69,96 @@ fun BiometricSessionUnlock(
         ?.takeIf { it.isNotBlank() }
         ?: stringResource(R.string.profile_default_name)
     val photoModel = profile?.photoURL
+    val securityStyle = LocalAppThemePack.current.securityStyle
+    val editorialLayout = securityStyle.useEditorialLayout
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(WindowInsets.systemBars.asPaddingValues())
-            .padding(horizontal = Dimens.screenPadding)
+            .padding(horizontal = securityStyle.outerHorizontalPadding)
             .padding(bottom = Dimens.largeScreenPadding)
     ) {
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
                 .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = if (editorialLayout) Alignment.Start else Alignment.CenterHorizontally
         ) {
-            ProfileAvatarImage(
-                displayName = resolvedName,
-                photoModel = photoModel,
-                size = 164.dp
-            )
+            if (editorialLayout) {
+                Card(
+                    shape = RoundedCornerShape(32.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(
+                            alpha = securityStyle.glassPanelAlpha
+                        )
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Dimens.xl),
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.lg),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.92f),
+                                    shape = CircleShape
+                                )
+                                .padding(18.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Fingerprint,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(Dimens.xs)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.welcome_back),
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 2
+                            )
+                            Text(
+                                text = resolvedName,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                }
+            } else {
+                ProfileAvatarImage(
+                    displayName = resolvedName,
+                    photoModel = photoModel,
+                    size = 164.dp
+                )
 
-            Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
-            Text(
-                text = stringResource(R.string.welcome_back) + ", " + resolvedName,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                maxLines = 2
-            )
+                Text(
+                    text = stringResource(R.string.welcome_back) + ", " + resolvedName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2
+                )
+            }
         }
 
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = if (editorialLayout) Alignment.Start else Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Dimens.smallSpacing)
         ) {
             errorMessage?.let {
@@ -99,7 +166,7 @@ fun BiometricSessionUnlock(
                     text = it,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center
+                    textAlign = if (editorialLayout) TextAlign.Start else TextAlign.Center
                 )
             }
 
@@ -117,14 +184,34 @@ fun BiometricSessionUnlock(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            TextButton(onClick = onLogout) {
-                Text(
-                    text = stringResource(R.string.profile_logout),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            SessionLogout(
+                onClick = onLogout,
+                alignment = if (editorialLayout) Alignment.Start else Alignment.CenterHorizontally
+            )
+
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth(),
+//                horizontalArrangement = if (editorialLayout) Arrangement.Start else Arrangement.Center,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                IconButton(
+//                    onClick = onLogout
+//                ) {
+//                    Icon(
+//                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+//                        contentDescription = stringResource(R.string.profile_logout),
+//                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                }
+//
+//                Text(
+//                    text = stringResource(R.string.profile_logout),
+//                    style = MaterialTheme.typography.bodyMedium,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant
+//                )
+//            }
+
         }
     }
 }

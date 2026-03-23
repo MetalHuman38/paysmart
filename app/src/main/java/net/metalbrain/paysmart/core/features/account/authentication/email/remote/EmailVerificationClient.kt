@@ -26,13 +26,19 @@ class EmailVerificationClient(
      * Generate email verification link for user.
      */
 
-    suspend fun generateVerification(idToken: String, email: String): Boolean =
+    suspend fun generateVerification(
+        idToken: String,
+        email: String,
+        returnRoute: String? = null
+    ): Boolean =
         withContext(Dispatchers.IO) {
 
-            val body = JSONObject()
+            val payload = JSONObject()
                 .put("email", email.trim().lowercase())
-                .toString()
-                .toRequestBody(JSON)
+            if (!returnRoute.isNullOrBlank()) {
+                payload.put("returnRoute", returnRoute.trim())
+            }
+            val body = payload.toString().toRequestBody(JSON)
 
             val request = Request.Builder()
                 .url(config.generateEmailVerificationHandlerUrl)

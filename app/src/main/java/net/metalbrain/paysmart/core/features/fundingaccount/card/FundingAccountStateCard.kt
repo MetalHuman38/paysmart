@@ -6,14 +6,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Verified
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.fundingaccount.state.FundingAccountScreenPhase
 import net.metalbrain.paysmart.core.features.fundingaccount.state.FundingAccountUiState
@@ -39,72 +40,72 @@ internal fun FundingAccountStateCard(
 ) {
     val visual = resolveFundingAccountVisual(state)
 
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = visual.containerColor,
-            contentColor = visual.contentColor
+    FundingAccountSurfaceCard(
+        modifier = modifier,
+        accentColor = visual.accentColor,
+        highlighted = state.phase in setOf(
+            FundingAccountScreenPhase.READY,
+            FundingAccountScreenPhase.PENDING
         )
     ) {
-        Column(
-            modifier = Modifier.padding(Dimens.md),
-            verticalArrangement = Arrangement.spacedBy(Dimens.md)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Dimens.md),
+            verticalAlignment = Alignment.Top
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(Dimens.md),
-                verticalAlignment = Alignment.Top
+            Surface(
+                modifier = Modifier.size(56.dp),
+                shape = CircleShape,
+                color = visual.accentColor.copy(alpha = 0.14f)
             ) {
-                Surface(
-                    modifier = Modifier.size(Dimens.minimumTouchTarget),
-                    shape = MaterialTheme.shapes.medium,
-                    color = visual.iconContainerColor
+                androidx.compose.foundation.layout.Box(
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = visual.icon,
                         contentDescription = visual.contentDescription,
-                        modifier = Modifier
-                            .padding(Dimens.sm)
-                            .size(Dimens.lg),
-                        tint = visual.iconTint
-                    )
-                }
-
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(Dimens.xs)
-                ) {
-                    Text(
-                        text = visual.title,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = visual.supporting,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = visual.contentColor.copy(alpha = 0.88f)
+                        tint = visual.accentColor
                     )
                 }
             }
 
-            when {
-                state.canProvision -> {
-                    PrimaryButton(
-                        text = if (state.account == null) {
-                            stringResource(R.string.funding_account_action_provision)
-                        } else {
-                            stringResource(R.string.funding_account_action_retry)
-                        },
-                        onClick = onProvision,
-                        isLoading = state.isProvisioning
-                    )
-                }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(Dimens.xs)
+            ) {
+                Text(
+                    text = visual.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = visual.supporting,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
 
-                state.phase == FundingAccountScreenPhase.ERROR && state.account == null -> {
-                    PrimaryButton(
-                        text = stringResource(R.string.funding_account_action_refresh),
-                        onClick = onRefresh,
-                        isLoading = state.isRefreshing
-                    )
-                }
+        when {
+            state.canProvision -> {
+                PrimaryButton(
+                    text = if (state.account == null) {
+                        stringResource(R.string.funding_account_action_provision)
+                    } else {
+                        stringResource(R.string.funding_account_action_retry)
+                    },
+                    onClick = onProvision,
+                    isLoading = state.isProvisioning
+                )
+            }
+
+            state.phase == FundingAccountScreenPhase.ERROR && state.account == null -> {
+                PrimaryButton(
+                    text = stringResource(R.string.funding_account_action_refresh),
+                    onClick = onRefresh,
+                    isLoading = state.isRefreshing
+                )
             }
         }
     }
@@ -119,10 +120,7 @@ private fun resolveFundingAccountVisual(state: FundingAccountUiState): FundingAc
             title = stringResource(R.string.funding_account_state_ready_title),
             supporting = stringResource(R.string.funding_account_state_ready_supporting),
             contentDescription = stringResource(R.string.funding_account_status_ready_content_description),
-            containerColor = colorScheme.tertiaryContainer,
-            contentColor = colorScheme.onTertiaryContainer,
-            iconContainerColor = colorScheme.onTertiaryContainer.copy(alpha = 0.12f),
-            iconTint = colorScheme.onTertiaryContainer
+            accentColor = colorScheme.tertiary
         )
 
         FundingAccountScreenPhase.PENDING -> FundingAccountStateVisual(
@@ -130,10 +128,7 @@ private fun resolveFundingAccountVisual(state: FundingAccountUiState): FundingAc
             title = stringResource(R.string.funding_account_state_pending_title),
             supporting = stringResource(R.string.funding_account_state_pending_supporting),
             contentDescription = stringResource(R.string.funding_account_status_pending_content_description),
-            containerColor = colorScheme.secondaryContainer,
-            contentColor = colorScheme.onSecondaryContainer,
-            iconContainerColor = colorScheme.onSecondaryContainer.copy(alpha = 0.12f),
-            iconTint = colorScheme.onSecondaryContainer
+            accentColor = colorScheme.primary
         )
 
         FundingAccountScreenPhase.EMPTY -> FundingAccountStateVisual(
@@ -141,10 +136,7 @@ private fun resolveFundingAccountVisual(state: FundingAccountUiState): FundingAc
             title = stringResource(R.string.funding_account_state_empty_title),
             supporting = stringResource(R.string.funding_account_state_empty_supporting),
             contentDescription = stringResource(R.string.funding_account_status_loading_content_description),
-            containerColor = colorScheme.surfaceVariant,
-            contentColor = colorScheme.onSurfaceVariant,
-            iconContainerColor = colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
-            iconTint = colorScheme.onSurfaceVariant
+            accentColor = colorScheme.primary
         )
 
         FundingAccountScreenPhase.KYC_REQUIRED -> FundingAccountStateVisual(
@@ -152,10 +144,7 @@ private fun resolveFundingAccountVisual(state: FundingAccountUiState): FundingAc
             title = stringResource(R.string.funding_account_state_kyc_required_title),
             supporting = stringResource(R.string.funding_account_state_kyc_required_supporting),
             contentDescription = stringResource(R.string.funding_account_status_error_content_description),
-            containerColor = colorScheme.surfaceVariant,
-            contentColor = colorScheme.onSurfaceVariant,
-            iconContainerColor = colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
-            iconTint = colorScheme.onSurfaceVariant
+            accentColor = colorScheme.secondary
         )
 
         FundingAccountScreenPhase.UNSUPPORTED_MARKET -> FundingAccountStateVisual(
@@ -166,10 +155,7 @@ private fun resolveFundingAccountVisual(state: FundingAccountUiState): FundingAc
                 state.countryName
             ),
             contentDescription = stringResource(R.string.funding_account_status_error_content_description),
-            containerColor = colorScheme.errorContainer,
-            contentColor = colorScheme.onErrorContainer,
-            iconContainerColor = colorScheme.onErrorContainer.copy(alpha = 0.12f),
-            iconTint = colorScheme.onErrorContainer
+            accentColor = colorScheme.secondary
         )
 
         FundingAccountScreenPhase.ERROR -> FundingAccountStateVisual(
@@ -177,10 +163,7 @@ private fun resolveFundingAccountVisual(state: FundingAccountUiState): FundingAc
             title = stringResource(R.string.funding_account_state_error_title),
             supporting = stringResource(R.string.funding_account_state_error_supporting),
             contentDescription = stringResource(R.string.funding_account_status_error_content_description),
-            containerColor = colorScheme.errorContainer,
-            contentColor = colorScheme.onErrorContainer,
-            iconContainerColor = colorScheme.onErrorContainer.copy(alpha = 0.12f),
-            iconTint = colorScheme.onErrorContainer
+            accentColor = colorScheme.error
         )
 
         FundingAccountScreenPhase.LOADING -> FundingAccountStateVisual(
@@ -188,10 +171,7 @@ private fun resolveFundingAccountVisual(state: FundingAccountUiState): FundingAc
             title = stringResource(R.string.funding_account_state_loading_title),
             supporting = stringResource(R.string.funding_account_state_loading_supporting),
             contentDescription = stringResource(R.string.funding_account_status_loading_content_description),
-            containerColor = colorScheme.surfaceVariant,
-            contentColor = colorScheme.onSurfaceVariant,
-            iconContainerColor = colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
-            iconTint = colorScheme.onSurfaceVariant
+            accentColor = colorScheme.primary
         )
     }
 }
@@ -201,8 +181,5 @@ private data class FundingAccountStateVisual(
     val title: String,
     val supporting: String,
     val contentDescription: String,
-    val containerColor: Color,
-    val contentColor: Color,
-    val iconContainerColor: Color,
-    val iconTint: Color
+    val accentColor: Color
 )

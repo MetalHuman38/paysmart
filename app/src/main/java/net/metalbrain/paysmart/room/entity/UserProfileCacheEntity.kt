@@ -16,5 +16,6 @@ data class UserProfileCacheEntity(
     val city: String? = null,
     val country: String? = null,
     val postalCode: String? = null,
+    val launchInterest: String? = null,
     val updatedAt: Long = System.currentTimeMillis()
 )

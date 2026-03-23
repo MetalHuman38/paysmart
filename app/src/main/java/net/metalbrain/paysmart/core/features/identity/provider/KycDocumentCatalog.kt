@@ -2,6 +2,7 @@ package net.metalbrain.paysmart.core.features.identity.provider
 
 import net.metalbrain.paysmart.core.features.account.profile.data.type.KycCountryDocuments
 import net.metalbrain.paysmart.core.features.account.profile.data.type.KycDocumentType
+import net.metalbrain.paysmart.core.features.account.profile.data.type.KycReviewWindow
 import java.util.Locale
 
 enum class CameraFrameShape {
@@ -314,21 +315,30 @@ private val kycDocumentDatabase: List<KycCountryDocuments> = listOf(
 )
 
 object KycDocumentCatalog {
-    private val countryToDocuments: Map<String, List<KycDocumentType>> =
-        kycDocumentDatabase.associate { it.iso2.uppercase(Locale.US) to it.documents }
+    private val countriesByIso2: Map<String, KycCountryDocuments> =
+        kycDocumentDatabase.associateBy { it.iso2.uppercase(Locale.US) }
 
-    val supportedCountriesIso2: List<String> = countryToDocuments.keys.sorted()
+    val supportedCountriesIso2: List<String> = countriesByIso2.keys.sorted()
 
     fun resolveCountry(preferredIso2: String?): String {
         val normalized = preferredIso2
             ?.trim()
             ?.uppercase(Locale.US)
             .orEmpty()
-        return if (countryToDocuments.containsKey(normalized)) normalized else "GB"
+        return if (countriesByIso2.containsKey(normalized)) normalized else "GB"
+    }
+
+    fun countryConfigFor(iso2: String): KycCountryDocuments {
+        return countriesByIso2[resolveCountry(iso2)]
+            ?: countriesByIso2.getValue("GB")
     }
 
     fun documentsForCountry(iso2: String): List<KycDocumentType> {
-        return countryToDocuments[resolveCountry(iso2)].orEmpty()
+        return countryConfigFor(iso2).documents
+    }
+
+    fun reviewWindowForCountry(iso2: String): KycReviewWindow {
+        return countryConfigFor(iso2).reviewWindow
     }
 }
 

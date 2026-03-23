@@ -1,7 +1,6 @@
-// src/services/resendMailer.ts
 import { Resend } from "resend";
-import { Mailer, VerificationEmailInput } from "./mailer.js";
-import { verificationEmailTemplate } from "../services/templates.js";
+import { Mailer, MailMessage } from "./mailer.js";
+import { renderEmailTemplate } from "./templates.js";
 
 export class ResendMailer implements Mailer {
   private readonly resend: Resend;
@@ -22,28 +21,43 @@ export class ResendMailer implements Mailer {
     this.from = normalizedFrom;
   }
 
-  async sendVerificationEmail({
-    to,
-    link,
-  }: VerificationEmailInput): Promise<void> {
+  async send(message: MailMessage): Promise<void> {
+    const to = message.to?.trim();
     if (!to) throw new Error("ResendMailer: recipient email is required");
-    if (!link) throw new Error("ResendMailer: verification link is required");
 
-    const { subject, html } = verificationEmailTemplate(link);
+    const { subject, html, text } = renderEmailTemplate(message);
+    const tags: Array<{ name: string; value: string }> = [
+      { name: "type", value: message.kind },
+    ];
+    if (message.kind === "product_update") {
+      tags.push({ name: "campaign_id", value: message.campaignId });
+    }
 
     const { error } = await this.resend.emails.send({
       from: this.from,
       to,
       subject,
       html,
-      tags: [
-        { name: "type", value: "email_verification" },
-      ],
+      text,
+      tags,
     });
 
     if (error) {
       throw new Error(`ResendMailer failed: ${error.message}`);
     }
+  }
+
+  async sendVerificationEmail(input: {
+    to: string;
+    verificationLink: string;
+    locale?: string;
+  }): Promise<void> {
+    await this.send({
+      kind: "email_verification",
+      to: input.to,
+      verificationLink: input.verificationLink,
+      locale: input.locale,
+    });
   }
 }
 

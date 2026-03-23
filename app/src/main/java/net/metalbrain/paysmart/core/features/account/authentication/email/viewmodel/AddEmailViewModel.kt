@@ -39,6 +39,7 @@ class AddEmailViewModel @Inject constructor(
     }
 
     fun sendVerificationEmail(
+        returnRoute: String,
         onSuccess: () -> Unit
     ) {
         val state = _uiState.value
@@ -55,7 +56,8 @@ class AddEmailViewModel @Inject constructor(
 
                 val ok = emailVerificationHandler.sendVerification(
                     idToken = token,
-                    email = state.email
+                    email = state.email,
+                    returnRoute = returnRoute
                 )
 
                 if (!ok) error("Failed to send verification email")

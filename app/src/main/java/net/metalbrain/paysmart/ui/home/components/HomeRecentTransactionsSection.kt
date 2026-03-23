@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.transactions.components.TransactionItem
+import net.metalbrain.paysmart.domain.model.LaunchInterest
 import net.metalbrain.paysmart.domain.model.Transaction
 import net.metalbrain.paysmart.ui.theme.Dimens
 
@@ -23,6 +24,8 @@ fun LazyListScope.homeRecentTransactionsSection(
     transactions: List<Transaction>,
     isSearchActive: Boolean,
     onSeeAllClick: () -> Unit,
+    launchInterest: LaunchInterest,
+    onCreateInvoiceClick: () -> Unit,
     onAddMoneyClick: () -> Unit,
     onTransactionClick: (Transaction) -> Unit
 ) {
@@ -40,7 +43,11 @@ fun LazyListScope.homeRecentTransactionsSection(
         }
     } else if (transactions.isEmpty()) {
         item {
-            EmptyTransactionsBlock(onAddMoneyClick = onAddMoneyClick)
+            EmptyTransactionsBlock(
+                launchInterest = launchInterest,
+                onAddMoneyClick = onAddMoneyClick,
+                onCreateInvoiceClick = onCreateInvoiceClick
+            )
         }
     } else {
         items(transactions, key = { it.id }) { transaction ->

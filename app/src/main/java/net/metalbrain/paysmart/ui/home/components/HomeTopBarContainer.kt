@@ -41,22 +41,15 @@ fun HomeTopBarContainer(
     notification: HomeNotificationUiState,
     onTransactionSearchQueryChange: (String) -> Unit,
     onTransactionProviderToggle: (HomeTransactionProviderFilter) -> Unit,
-    onNotificationPrimaryAction: () -> Unit,
+    onNotificationClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isSearchExpanded by rememberSaveable { mutableStateOf(false) }
-    var isNotificationExpanded by rememberSaveable { mutableStateOf(false) }
     val actionGroupWidth = (Dimens.minimumTouchTarget * 2) + Dimens.xs
 
     LaunchedEffect(transactionSearchQuery, selectedTransactionProviders) {
         if (transactionSearchQuery.isNotBlank() || selectedTransactionProviders.isNotEmpty()) {
             isSearchExpanded = true
-        }
-    }
-
-    LaunchedEffect(notification.isUnread) {
-        if (notification.isUnread) {
-            isNotificationExpanded = true
         }
     }
 
@@ -102,21 +95,14 @@ fun HomeTopBarContainer(
                     contentDescription = stringResource(R.string.home_top_bar_search_content_description),
                     onClick = {
                         isSearchExpanded = !isSearchExpanded
-                        if (isSearchExpanded) {
-                            isNotificationExpanded = false
-                        }
                     }
                 )
                 HomeHeaderIconButton(
                     icon = Icons.Default.NotificationsNone,
                     contentDescription = stringResource(R.string.home_top_bar_notifications_content_description),
+                    badgeCount = notification.unreadCount,
                     showIndicator = notification.isUnread,
-                    onClick = {
-                        isNotificationExpanded = !isNotificationExpanded
-                        if (isNotificationExpanded) {
-                            isSearchExpanded = false
-                        }
-                    }
+                    onClick = onNotificationClick
                 )
             }
         }
@@ -128,13 +114,6 @@ fun HomeTopBarContainer(
                 selectedProviders = selectedTransactionProviders,
                 onSearchQueryChange = onTransactionSearchQueryChange,
                 onProviderToggle = onTransactionProviderToggle
-            )
-        }
-
-        if (isNotificationExpanded) {
-            HomeNotificationPanel(
-                notification = notification,
-                onPrimaryAction = onNotificationPrimaryAction
             )
         }
 

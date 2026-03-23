@@ -25,7 +25,7 @@ data class FundingAccountUiState(
     val countryName: String = CountryCapabilityCatalog.defaultProfile().countryName,
     val countryFlagEmoji: String = CountryCapabilityCatalog.defaultProfile().flagEmoji,
     val currencyCode: String = CountryCapabilityCatalog.defaultProfile().currencyCode,
-    val provider: String = "flutterwave",
+    val provider: String? = null,
     val lastErrorCode: FundingAccountErrorCode? = null
 ) {
     val canProvision: Boolean
@@ -37,5 +37,9 @@ data class FundingAccountUiState(
             )
 
     val showDetails: Boolean
-        get() = account != null
+        get() = account != null &&
+            phase in setOf(
+                FundingAccountScreenPhase.READY,
+                FundingAccountScreenPhase.PENDING
+            )
 }

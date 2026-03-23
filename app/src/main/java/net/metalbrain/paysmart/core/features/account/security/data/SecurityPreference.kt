@@ -47,6 +47,8 @@ class SecurityPreference @Inject constructor(
         private val HAS_SKIPPED_PASSKEY_ENROLLMENT_PROMPT =
             booleanPreferencesKey("has_skipped_passkey_enrollment_prompt")
         private val HIDE_BALANCE = booleanPreferencesKey("hide_balance")
+        private val PRIVACY_CREDIT_ENABLED = booleanPreferencesKey("privacy_credit_enabled")
+        private val PRIVACY_SOCIAL_MEDIA_ENABLED = booleanPreferencesKey("privacy_social_media_enabled")
 
         private val ALLOW_FEDERATED_LINKING = booleanPreferencesKey("allow_federated_linking")
 
@@ -161,9 +163,31 @@ class SecurityPreference @Inject constructor(
             prefs[HIDE_BALANCE] ?: false
         }
 
+    val privacyCreditEnabledFlow: Flow<Boolean> =
+        store.data.map { prefs ->
+            prefs[PRIVACY_CREDIT_ENABLED] ?: false
+        }
+
+    val privacySocialMediaEnabledFlow: Flow<Boolean> =
+        store.data.map { prefs ->
+            prefs[PRIVACY_SOCIAL_MEDIA_ENABLED] ?: false
+        }
+
     suspend fun setHideBalance(hidden: Boolean) {
         store.edit { prefs ->
             prefs[HIDE_BALANCE] = hidden
+        }
+    }
+
+    suspend fun setPrivacyCreditEnabled(enabled: Boolean) {
+        store.edit { prefs ->
+            prefs[PRIVACY_CREDIT_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setPrivacySocialMediaEnabled(enabled: Boolean) {
+        store.edit { prefs ->
+            prefs[PRIVACY_SOCIAL_MEDIA_ENABLED] = enabled
         }
     }
 

@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +27,7 @@ import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityItem
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityKey
 import net.metalbrain.paysmart.core.features.featuregate.FeatureAccessPolicy
 import net.metalbrain.paysmart.core.features.featuregate.FeatureKey
+import net.metalbrain.paysmart.domain.model.LaunchInterest
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.Transaction
 import net.metalbrain.paysmart.domain.model.hasCompletedAddress
@@ -75,17 +75,19 @@ fun HomeContent(
     countryIso2: String,
     countryFlagEmoji: String,
     countryCurrencyCode: String,
+    launchInterest: LaunchInterest,
     capabilities: List<CapabilityItem>,
     exchangeRateSnapshot: HomeExchangeRateSnapshot,
     isBalanceVisible: Boolean,
     onTransactionSearchQueryChange: (String) -> Unit,
     onTransactionProviderToggle: (HomeTransactionProviderFilter) -> Unit,
-    onNotificationPrimaryAction: () -> Unit,
+    onNotificationClick: () -> Unit,
     onToggleBalanceVisibility: () -> Unit
 ) {
     val availableServices = resolveAvailableServices(
         capabilities = capabilities,
         localSettings = localSettings,
+        launchInterest = launchInterest,
         createInvoiceTitle = stringResource(R.string.home_service_create_invoice),
         onCreateInvoiceClick = onCreateInvoiceClick,
         onSendMoneyClick = onSendMoneyClick,
@@ -97,6 +99,7 @@ fun HomeContent(
             !settings.hasCompletedAddress ||
             !settings.hasCompletedIdentity
     }
+    val isInvoiceFirst = launchInterest == LaunchInterest.INVOICE
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -120,7 +123,7 @@ fun HomeContent(
                 notification = notification,
                 onTransactionSearchQueryChange = onTransactionSearchQueryChange,
                 onTransactionProviderToggle = onTransactionProviderToggle,
-                onNotificationPrimaryAction = onNotificationPrimaryAction
+                onNotificationClick = onNotificationClick
             )
         }
 
@@ -159,17 +162,25 @@ fun HomeContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedButton(
-                    onClick = onSendMoneyClick,
+                    onClick = if (isInvoiceFirst) onAddMoneyClick else onCreateInvoiceClick,
                     modifier = Modifier.weight(1f),
-                    text = stringResource(id = R.string.send_money),
+                    text = if (isInvoiceFirst) {
+                        stringResource(id = R.string.add_money)
+                    } else {
+                        stringResource(id = R.string.home_service_create_invoice)
+                    },
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface,
                     borderColor = MaterialTheme.colorScheme.primary
                 )
 
                 PrimaryButton(
-                    text = stringResource(id = R.string.add_money),
-                    onClick = onAddMoneyClick,
+                    text = if (isInvoiceFirst) {
+                        stringResource(id = R.string.home_service_create_invoice)
+                    } else {
+                        stringResource(id = R.string.add_money)
+                    },
+                    onClick = if (isInvoiceFirst) onCreateInvoiceClick else onAddMoneyClick,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -210,6 +221,8 @@ fun HomeContent(
             transactions = transactions,
             isSearchActive = isTransactionSearchActive,
             onSeeAllClick = onTransactionsClick,
+            launchInterest = launchInterest,
+            onCreateInvoiceClick = onCreateInvoiceClick,
             onAddMoneyClick = onAddMoneyClick,
             onTransactionClick = onTransactionClick
         )
@@ -236,6 +249,7 @@ fun HomeContent(
 private fun resolveAvailableServices(
     capabilities: List<CapabilityItem>,
     localSettings: LocalSecuritySettingsModel?,
+    launchInterest: LaunchInterest,
     createInvoiceTitle: String,
     onCreateInvoiceClick: () -> Unit,
     onSendMoneyClick: () -> Unit,
@@ -255,14 +269,13 @@ private fun resolveAvailableServices(
         settings = localSettings
     ).isAllowed
 
-    val tiles = mutableListOf(
-        HomeServiceTile(
-            id = FeatureKey.CREATE_INVOICE.id,
-            title = createInvoiceTitle,
-            icon = Icons.Filled.Description,
-            onClick = onCreateInvoiceClick
-        )
+    val invoiceTile = HomeServiceTile(
+        id = FeatureKey.CREATE_INVOICE.id,
+        title = createInvoiceTitle,
+        icon = Icons.Filled.Description,
+        onClick = onCreateInvoiceClick
     )
+    val capabilityTiles = mutableListOf<HomeServiceTile>()
 
     capabilities.filter { item ->
         when (item.key) {
@@ -273,7 +286,7 @@ private fun resolveAvailableServices(
             CapabilityKey.EARN_RETURN -> addMoneyAllowed
         }
     }.forEach { item ->
-        tiles += item.toHomeServiceTile(
+        capabilityTiles += item.toHomeServiceTile(
             onClick = when (item.key) {
                 CapabilityKey.SEND_INTERNATIONAL -> onSendMoneyClick
                 CapabilityKey.RECEIVE_MONEY -> onReceiveMoneyClick
@@ -284,7 +297,11 @@ private fun resolveAvailableServices(
         )
     }
 
-    return tiles
+    return if (launchInterest == LaunchInterest.INVOICE) {
+        listOf(invoiceTile) + capabilityTiles
+    } else {
+        capabilityTiles + invoiceTile
+    }
 }
 
 private fun CapabilityItem.toHomeServiceTile(onClick: () -> Unit): HomeServiceTile {

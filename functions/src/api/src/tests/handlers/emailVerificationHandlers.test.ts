@@ -22,6 +22,7 @@ type TestReq = {
   };
   body?: {
     email?: string;
+    returnRoute?: string;
   };
 };
 
@@ -121,5 +122,30 @@ describe("generateEmailVerificationHandler", () => {
       code: "email_already_verified",
       sent: false,
     });
+  });
+
+  it("passes the optional return route to the use case", async () => {
+    generateEmailVerification.execute.mockResolvedValue({
+      sent: true,
+    });
+
+    const req = {
+      headers: { authorization: "Bearer test-token" },
+      body: {
+        email: "tester@example.com",
+        returnRoute: "profile/mfa_nudge",
+      },
+    } as TestReq;
+    const res = createResponseRecorder();
+
+    await generateEmailVerificationHandler(req as any, res as any);
+
+    expect(generateEmailVerification.execute).toHaveBeenCalledWith({
+      uid: "uid-1",
+      email: "tester@example.com",
+      returnRoute: "profile/mfa_nudge",
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.payload).toEqual({ sent: true });
   });
 });

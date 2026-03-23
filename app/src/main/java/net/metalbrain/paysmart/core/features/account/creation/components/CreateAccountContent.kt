@@ -7,16 +7,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.creation.card.AccountCreationHeroCard
 import net.metalbrain.paysmart.domain.model.Country
-import net.metalbrain.paysmart.domain.model.countryDisplayName
 import net.metalbrain.paysmart.ui.components.AccountSwitchPrompt
 import net.metalbrain.paysmart.ui.components.AccountSwitchVariant
 import net.metalbrain.paysmart.ui.components.PhoneNumberInput
@@ -43,28 +45,30 @@ internal fun CreateAccountContent(
 ) {
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(Dimens.space8)
+        verticalArrangement = Arrangement.spacedBy(Dimens.lg)
     ) {
         AccountCreationHeroCard(
-            emoji = selectedCountry.flagEmoji,
             title = stringResource(R.string.lets_get_started),
             subtitle = stringResource(R.string.enter_phone_to_signup)
         )
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
             Column(
-                modifier = Modifier.padding(Dimens.space10),
-                verticalArrangement = Arrangement.spacedBy(Dimens.space6)
+                modifier = Modifier.padding(Dimens.lg),
+                verticalArrangement = Arrangement.spacedBy(Dimens.md)
             ) {
-                Text(
-                    text = countryDisplayName(selectedCountry),
-                    style = MaterialTheme.typography.titleSmall
+
+                CountryHeaderRow(
+                    country = selectedCountry,
+                    onClick = onFlagClick
                 )
-                Text(
-                    text = selectedCountry.dialCode,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+
                 PhoneNumberInput(
                     selectedCountry = selectedCountry,
                     phoneNumber = phoneNumber,
@@ -74,10 +78,16 @@ internal fun CreateAccountContent(
             }
         }
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
             Column(
-                modifier = Modifier.padding(Dimens.space10),
-                verticalArrangement = Arrangement.spacedBy(Dimens.space8)
+                modifier = Modifier.padding(Dimens.lg),
+                verticalArrangement = Arrangement.spacedBy(Dimens.md)
             ) {
                 ConsentRow(
                     checked = acceptedMarketing,
@@ -111,11 +121,18 @@ internal fun CreateAccountContent(
         )
 
         if (!errorMessage.isNullOrBlank()) {
-            Text(
-                text = errorMessage,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error
-            )
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.68f)
+            ) {
+                Text(
+                    text = errorMessage,
+                    modifier = Modifier.padding(horizontal = Dimens.md, vertical = Dimens.sm),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
         }
 
         AccountSwitchPrompt(

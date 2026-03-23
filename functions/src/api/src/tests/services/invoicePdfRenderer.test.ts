@@ -20,7 +20,7 @@ describe("renderInvoicePdf", () => {
         status: "not_requested",
         fileName: "PS-2026-000001.pdf",
         contentType: "application/pdf",
-        templateVersion: "pay-smart-invoice-v1",
+        templateVersion: "pay-smart-invoice-v2",
       },
       profile: {
         fullName: "Jane Tester",
@@ -57,7 +57,7 @@ describe("renderInvoicePdf", () => {
 
     expect(pdf.byteLength).toBeGreaterThan(64);
     expect(pdf.subarray(0, 8).toString("utf8")).toContain("%PDF-1.4");
-    expect(raw).toContain("PaySmart Invoice");
+    expect(raw).toContain("PaySmart Weekly Invoice");
     expect(raw).toContain("Invoice summary");
     expect(raw).toContain("Worker and venue details");
     expect(raw).toContain("Worker details");
@@ -66,5 +66,6 @@ describe("renderInvoicePdf", () => {
     expect(raw).toContain("Grand total");
     expect(raw).toContain("VoltService Ltd");
     expect(raw).toContain("pay-smart.net");
+    expect(raw).toContain("pay-smart-invoice-v2");
   });
 });

@@ -186,6 +186,7 @@ room {
 
 
 dependencies {
+    implementation(project(":core:models"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -234,6 +235,7 @@ dependencies {
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.config)
+    implementation(libs.firebase.messaging)
     implementation(libs.firebase.store)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.performance)

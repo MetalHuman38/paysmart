@@ -22,7 +22,7 @@ import net.metalbrain.paysmart.core.features.referral.components.ReferralFormSec
 import net.metalbrain.paysmart.core.features.referral.components.ReferralHeroPlaceholder
 import net.metalbrain.paysmart.core.features.referral.components.ReferralTopBar
 import net.metalbrain.paysmart.core.features.referral.viewmodel.ReferralViewModel
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 import net.metalbrain.paysmart.ui.home.nav.HomeBottomNavigation
 
 @Composable

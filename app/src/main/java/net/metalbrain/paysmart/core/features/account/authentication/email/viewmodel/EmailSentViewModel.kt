@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.core.features.account.authentication.email.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -12,11 +13,14 @@ import kotlinx.coroutines.tasks.await
 import net.metalbrain.paysmart.core.features.account.authentication.email.data.EmailDraft
 import net.metalbrain.paysmart.core.features.account.authentication.email.data.EmailDraftStore
 import net.metalbrain.paysmart.core.features.account.authentication.email.remote.EmailVerificationHandler
+import net.metalbrain.paysmart.core.notifications.NotificationInboxRepository
 
 @HiltViewModel
 class EmailSentViewModel @Inject constructor(
     private val emailVerificationHandler: EmailVerificationHandler,
-    private val emailDraftStore: EmailDraftStore
+    private val emailDraftStore: EmailDraftStore,
+    private val firebaseAuth: FirebaseAuth,
+    private val notificationInboxRepository: NotificationInboxRepository,
 ) : ViewModel() {
 
     data class EmailSentUiState(
@@ -27,14 +31,15 @@ class EmailSentViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(EmailSentUiState())
     val uiState: StateFlow<EmailSentUiState> = _uiState
+    private var verificationCheckInFlight = false
 
-    fun resendVerificationEmail(email: String) {
+    fun resendVerificationEmail(email: String, returnRoute: String) {
         if (email.isBlank() || _uiState.value.isResending) return
 
         viewModelScope.launch {
             _uiState.value = EmailSentUiState(isResending = true)
             try {
-                val user = FirebaseAuth.getInstance().currentUser
+                val user = firebaseAuth.currentUser
                     ?: error("User not logged in")
 
                 val token = user.getIdToken(false).await().token
@@ -42,7 +47,8 @@ class EmailSentViewModel @Inject constructor(
 
                 val ok = emailVerificationHandler.sendVerification(
                     idToken = token,
-                    email = email
+                    email = email,
+                    returnRoute = returnRoute
                 )
                 if (!ok) error("Failed to resend verification email")
 
@@ -66,5 +72,49 @@ class EmailSentViewModel @Inject constructor(
             infoMessage = null,
             errorMessage = null
         )
+    }
+
+    fun refreshVerificationStatus(
+        email: String,
+        onVerified: () -> Unit,
+    ) {
+        if (verificationCheckInFlight) {
+            return
+        }
+
+        viewModelScope.launch {
+            verificationCheckInFlight = true
+            try {
+                val user = firebaseAuth.currentUser ?: return@launch
+                user.reload().await()
+
+                val resolvedEmail = user.email?.trim().takeUnless { it.isNullOrBlank() }
+                    ?: email.trim()
+                val token = user.getIdToken(true).await().token.orEmpty()
+                val remoteVerified = if (token.isNotBlank() && resolvedEmail.isNotBlank()) {
+                    emailVerificationHandler.isVerified(token, resolvedEmail)
+                } else {
+                    false
+                }
+
+                if (user.isEmailVerified || remoteVerified) {
+                    emailDraftStore.saveDraft(
+                        EmailDraft(
+                            email = resolvedEmail.ifBlank { email },
+                            verified = true
+                        )
+                    )
+                    notificationInboxRepository.syncEmailVerifiedNotification(
+                        uid = user.uid,
+                        email = resolvedEmail.ifBlank { email }
+                    )
+                    onVerified()
+                }
+            } catch (error: Exception) {
+                Log.w("EmailSentViewModel", "Verification refresh failed", error)
+            } finally {
+                verificationCheckInFlight = false
+            }
+        }
     }
 }

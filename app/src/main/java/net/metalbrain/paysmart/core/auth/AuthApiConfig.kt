@@ -48,6 +48,7 @@ data class AuthApiConfig (
     val generateEmailVerificationHandler: String = "/auth/generate",
     val checkEmailVerificationStatusHandler: String = "/auth/status",
     val getSecuritySettings: String = "/auth/getSecuritySettings",
+    val registerNotificationInstallation: String = "/notifications/installations/register",
     val usersEnsurePath: String = "/users/ensure",
     val attachApiPrefix: Boolean = false
 ) {
@@ -170,6 +171,8 @@ data class AuthApiConfig (
     val checkEmailVerificationStatusHandlerUrl get() = "$apiBase$checkEmailVerificationStatusHandler"
 
     val getSecuritySettingsUrl get() = "$apiBase$getSecuritySettings"
+
+    val registerNotificationInstallationUrl get() = "$apiBase$registerNotificationInstallation"
     
     val usersEnsureUrl get() = "$apiBase$usersEnsurePath"
 

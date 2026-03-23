@@ -1,7 +1,7 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { normalizeInvoiceFinalizeInput, } from "./invoiceFinalizeParsing.js";
-const INVOICE_PDF_TEMPLATE_VERSION = "pay-smart-invoice-v1";
+const INVOICE_PDF_TEMPLATE_VERSION = "pay-smart-invoice-v2";
 export class FirestoreInvoiceRepository {
     firestore;
     storageBucketName;

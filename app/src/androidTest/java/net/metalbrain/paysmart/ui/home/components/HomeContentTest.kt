@@ -13,6 +13,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityItem
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityKey
+import net.metalbrain.paysmart.domain.model.LaunchInterest
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
 import net.metalbrain.paysmart.domain.model.Transaction
 import net.metalbrain.paysmart.ui.home.components.HomeContent
@@ -71,6 +72,7 @@ class HomeContentTest {
                     countryIso2 = "GB",
                     countryFlagEmoji = "🇬🇧",
                     countryCurrencyCode = "GBP",
+                    launchInterest = LaunchInterest.INVOICE,
                     capabilities = emptyList<CapabilityItem>(),
                     exchangeRateSnapshot = HomeExchangeRateSnapshot(
                         baseCurrencyCode = "GBP",
@@ -80,7 +82,7 @@ class HomeContentTest {
                     isBalanceVisible = true,
                     onTransactionSearchQueryChange = {},
                     onTransactionProviderToggle = { _: HomeTransactionProviderFilter -> },
-                    onNotificationPrimaryAction = {},
+                    onNotificationClick = {},
                     onToggleBalanceVisibility = {}
                 )
             }
@@ -132,6 +134,7 @@ class HomeContentTest {
                     countryIso2 = "NG",
                     countryFlagEmoji = "🇳🇬",
                     countryCurrencyCode = "NGN",
+                    launchInterest = LaunchInterest.TOP_UP,
                     capabilities = listOf(
                         CapabilityItem(
                             key = CapabilityKey.RECEIVE_MONEY,
@@ -143,7 +146,7 @@ class HomeContentTest {
                     isBalanceVisible = true,
                     onTransactionSearchQueryChange = {},
                     onTransactionProviderToggle = { _: HomeTransactionProviderFilter -> },
-                    onNotificationPrimaryAction = {},
+                    onNotificationClick = {},
                     onToggleBalanceVisibility = {}
                 )
             }

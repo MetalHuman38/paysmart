@@ -1,6 +1,9 @@
 export interface UserProfile {
   uid: string;
   tenantId?: string;
+  email?: string;
+  displayName?: string;
+  launchInterest?: "invoice" | "top_up";
 }
 
 export interface FinalizePhoneSignupInput {

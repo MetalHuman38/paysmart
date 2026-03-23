@@ -53,19 +53,19 @@ fun HomeBalanceSummaryCard(
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                            MaterialTheme.colorScheme.primaryContainer,
-                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.07f),
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.74f),
+                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.52f)
                         )
                     )
                 )
                 .padding(HomeCardTokens.contentPadding),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(Dimens.sm)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Dimens.xs)) {
                 Text(
                     text = stringResource(id = R.string.home_total_balance_label),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
                 )
                 Text(
@@ -77,7 +77,7 @@ fun HomeBalanceSummaryCard(
                             formatAmount(primaryAmount)
                         )
                     ),
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -86,7 +86,7 @@ fun HomeBalanceSummaryCard(
 
             Text(
                 text = maskedValue(isBalanceVisible, walletBreakdown),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis

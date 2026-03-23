@@ -3,6 +3,7 @@ package net.metalbrain.paysmart.core.features.account.creation.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Checkbox
@@ -19,7 +20,10 @@ fun ConsentRow(
     onCheckedChange: (Boolean) -> Unit,
     content: @Composable () -> Unit
 ) {
-    Row(verticalAlignment = Alignment.Top) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top
+    ) {
         Checkbox(
             checked = checked,
             onCheckedChange = onCheckedChange,
@@ -30,7 +34,11 @@ fun ConsentRow(
             )
         )
         Spacer(modifier = Modifier.width(Dimens.space2))
-        Column(modifier = Modifier.padding(top = Dimens.space2)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(top = Dimens.space2)
+        ) {
             content()
         }
     }

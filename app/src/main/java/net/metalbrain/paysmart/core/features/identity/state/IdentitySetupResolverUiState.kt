@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.core.features.identity.state
 
 import net.metalbrain.paysmart.core.features.account.profile.data.type.KycDocumentType
+import net.metalbrain.paysmart.core.features.account.profile.data.type.KycReviewWindow
 import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityDocumentType
 import net.metalbrain.paysmart.core.features.identity.uploadhelpers.IdentityUploadReceipt
 import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentityResolverStep
@@ -8,6 +9,7 @@ import java.util.Locale
 
 data class IdentitySetupResolverUiState(
     val selectedCountryIso2: String = "GB",
+    val selectedCountryReviewWindow: KycReviewWindow = KycReviewWindow(),
     val availableCountriesIso2: List<String> = emptyList(),
     val availableDocuments: List<KycDocumentType> = emptyList(),
     val selectedDocumentId: String = "",
@@ -31,6 +33,9 @@ data class IdentitySetupResolverUiState(
 
     val isSelectedDocumentUploadSupported: Boolean
         get() = selectedDocument?.toUploadDocumentType() != null
+
+    val hasSubmittedForReview: Boolean
+        get() = receipt != null && currentStep == IdentityResolverStep.COMPLETE
 }
 
 private fun KycDocumentType.toUploadDocumentType(): IdentityDocumentType? {

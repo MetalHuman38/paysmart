@@ -22,6 +22,8 @@ fun TransactionStatusBadge(status: String) {
         Text(
             text = status,
             style = MaterialTheme.typography.labelLarge,
+            color = tone.contentColor,
+            maxLines = 1,
             modifier = Modifier.padding(horizontal = Dimens.sm, vertical = Dimens.xs)
         )
     }

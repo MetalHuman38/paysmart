@@ -24,7 +24,7 @@ import net.metalbrain.paysmart.core.features.fx.data.FxQuoteQuery
 import net.metalbrain.paysmart.core.features.fx.repository.FxQuoteRepository
 import net.metalbrain.paysmart.core.features.fx.state.ExchangeRateMarketUiState
 import net.metalbrain.paysmart.core.features.fx.state.ExchangeRatesUiState
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 
 @HiltViewModel
 class ExchangeRatesViewModel @Inject constructor(

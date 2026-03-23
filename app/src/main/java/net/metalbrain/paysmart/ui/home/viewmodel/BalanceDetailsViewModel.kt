@@ -23,7 +23,7 @@ import net.metalbrain.paysmart.data.repository.WalletBalanceRepository
 import net.metalbrain.paysmart.domain.auth.UserManager
 import net.metalbrain.paysmart.domain.auth.state.AuthState
 import net.metalbrain.paysmart.domain.model.Transaction
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 import net.metalbrain.paysmart.ui.home.state.BalanceDetailsUiState
 import net.metalbrain.paysmart.ui.home.support.balanceAmountForCurrency
 import net.metalbrain.paysmart.ui.home.support.resolvePrimaryBalanceCurrency

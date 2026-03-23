@@ -1,6 +1,5 @@
 package net.metalbrain.paysmart.core.features.account.authentication.email.screen
 
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +26,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.authentication.email.viewmodel.AddEmailViewModel
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 import net.metalbrain.paysmart.ui.components.AuthScreenSubtitle
 import net.metalbrain.paysmart.ui.components.AuthScreenTitle
 import net.metalbrain.paysmart.ui.components.EmailInputField
@@ -77,9 +76,12 @@ fun AddEmailScreen(
         PrimaryButton(
             text = stringResource(R.string.send_verification),
             onClick = {
-                viewModel.sendVerificationEmail {
+                viewModel.sendVerificationEmail(returnRoute = returnRoute) {
                     val targetRoute =
-                        "${Screen.EmailSent.routeWithEmail(uiState.email)}?returnRoute=${Uri.encode(returnRoute)}"
+                        Screen.EmailSent.routeWithArgs(
+                            email = uiState.email,
+                            returnRoute = returnRoute
+                        )
                     navController.navigate(
                         targetRoute
                     )

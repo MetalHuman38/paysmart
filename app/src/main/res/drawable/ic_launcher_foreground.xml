@@ -5,9 +5,24 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="@color/ic_launcher_foreground_color"
-        android:pathData="M54,26.5c-15.19,0 -27.5,12.31 -27.5,27.5s12.31,27.5 27.5,27.5s27.5,-12.31 27.5,-27.5S69.19,26.5 54,26.5zM54,72c-9.66,0 -17.5,-7.84 -17.5,-17.5S44.34,37 54,37s17.5,7.84 17.5,17.5S63.66,72 54,72z" />
+        android:fillColor="@color/ic_launcher_glow_outer"
+        android:pathData="M54,5c-27.06,0 -49,21.94 -49,49s21.94,49 49,49s49,-21.94 49,-49S81.06,5 54,5z" />
+    <path
+        android:fillColor="@color/ic_launcher_glow_inner"
+        android:pathData="M54,10c-24.3,0 -44,19.7 -44,44s19.7,44 44,44s44,-19.7 44,-44S78.3,10 54,10z" />
+    <path
+        android:fillColor="@color/ic_launcher_ring_outer"
+        android:pathData="M54,15c-21.54,0 -39,17.46 -39,39s17.46,39 39,39s39,-17.46 39,-39S75.54,15 54,15z" />
+    <path
+        android:fillColor="@color/ic_launcher_ring_inner"
+        android:pathData="M54,25c-16.02,0 -29,12.98 -29,29s12.98,29 29,29s29,-12.98 29,-29S70.02,25 54,25z" />
+    <path
+        android:fillColor="@color/ic_launcher_core"
+        android:pathData="M54,32c-12.15,0 -22,9.85 -22,22s9.85,22 22,22s22,-9.85 22,-22S66.15,32 54,32z" />
     <path
         android:fillColor="@color/ic_launcher_foreground_color"
-        android:pathData="M54,42c-5.52,0 -10,4.48 -10,10s4.48,10 10,10s10,-4.48 10,-10S59.52,42 54,42z" />
+        android:pathData="M46.33,61.4l6.53,6.53l20.81,-24.42l-6.03,-5.13L51.11,57.76l-4.46,-4.45L40.92,59z" />
+    <path
+        android:fillColor="@color/ic_launcher_dot"
+        android:pathData="M89.5,13.5c-4.69,0 -8.5,3.81 -8.5,8.5s3.81,8.5 8.5,8.5s8.5,-3.81 8.5,-8.5S94.19,13.5 89.5,13.5z" />
 </vector>

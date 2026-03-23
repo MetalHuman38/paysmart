@@ -2,20 +2,18 @@ package net.metalbrain.paysmart.core.features.invoicing.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.KeyboardType
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.invoicing.viewmodel.InvoiceSetupUiState
 import net.metalbrain.paysmart.ui.components.PrimaryButton
+import net.metalbrain.paysmart.ui.components.SecondaryButton
+import net.metalbrain.paysmart.ui.theme.Dimens
 
 @Composable
 fun InvoiceVenueSetupSection(
@@ -29,71 +27,62 @@ fun InvoiceVenueSetupSection(
     onAddVenue: () -> Unit,
     onSelectVenue: (String) -> Unit
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(text = stringResource(R.string.invoice_setup_venue_title))
-            Text(text = stringResource(R.string.invoice_setup_venue_hint))
+    InvoiceSurfaceCard {
+        InvoiceSectionHeading(
+            title = stringResource(R.string.invoice_setup_venue_title),
+            body = stringResource(R.string.invoice_setup_venue_hint)
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(Dimens.sm)) {
             if (state.venues.isNotEmpty()) {
-                Text(text = stringResource(R.string.invoice_setup_existing_venues_title))
+                Text(
+                    text = stringResource(R.string.invoice_setup_existing_venues_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 state.venues.forEach { venue ->
                     FilterChip(
                         selected = state.effectiveSelectedVenueId == venue.venueId,
                         onClick = { onSelectVenue(venue.venueId) },
-                        label = { Text(venue.venueName) },
-                        modifier = Modifier.fillMaxWidth()
+                        label = { Text(venue.venueName) }
                     )
                 }
             }
-            OutlinedTextField(
+            InvoiceInputField(
                 value = state.venueNameInput,
                 onValueChange = onVenueNameChanged,
-                label = { Text(stringResource(R.string.invoice_setup_venue_name_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = stringResource(R.string.invoice_setup_venue_name_label)
             )
-            OutlinedTextField(
+            InvoiceInputField(
                 value = state.venueAddressInput,
                 onValueChange = onVenueAddressChanged,
-                label = { Text(stringResource(R.string.invoice_setup_venue_address_label)) },
-                modifier = Modifier.fillMaxWidth()
+                label = stringResource(R.string.invoice_setup_venue_address_label),
+                singleLine = false
             )
-            OutlinedTextField(
+            InvoiceInputField(
                 value = state.venueCountryInput,
                 onValueChange = onVenueCountryChanged,
-                label = { Text(stringResource(R.string.invoice_setup_venue_country_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = stringResource(R.string.invoice_setup_venue_country_label)
             )
-            OutlinedTextField(
+            InvoiceInputField(
                 value = state.venueRateInput,
                 onValueChange = onVenueRateChanged,
-                label = { Text(stringResource(R.string.invoice_setup_venue_rate_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = stringResource(R.string.invoice_setup_venue_rate_label),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
-            OutlinedButton(
+            SecondaryButton(
+                text = stringResource(R.string.invoice_setup_search_address_action),
                 onClick = onSearchAddress,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = stringResource(R.string.invoice_setup_search_address_action))
-            }
+                enabled = !state.isAddressSearching
+            )
             if (state.suggestedVenueAddress != null) {
-                OutlinedButton(
-                    onClick = onApplySuggestedAddress,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = stringResource(R.string.invoice_setup_apply_address_action))
-                }
+                SecondaryButton(
+                    text = stringResource(R.string.invoice_setup_apply_address_action),
+                    onClick = onApplySuggestedAddress
+                )
             }
             PrimaryButton(
                 text = stringResource(R.string.invoice_setup_add_venue_action),
-                onClick = onAddVenue,
-                modifier = Modifier.fillMaxWidth()
+                onClick = onAddVenue
             )
         }
     }

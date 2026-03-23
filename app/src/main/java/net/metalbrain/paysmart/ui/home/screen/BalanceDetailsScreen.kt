@@ -46,7 +46,7 @@ import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CurrencyFlagResolver
 import net.metalbrain.paysmart.domain.model.Transaction
-import net.metalbrain.paysmart.ui.Screen
+import net.metalbrain.paysmart.navigator.Screen
 import net.metalbrain.paysmart.ui.home.state.BalanceDetailsUiState
 import net.metalbrain.paysmart.ui.theme.Dimens
 import java.time.Instant
@@ -266,6 +266,8 @@ fun BalanceDetailsScreen(
                             )
                         }
                     )
+                } else if (normalizedCurrency.equals("GBP", ignoreCase = true)) {
+                    UkDomesticAccountDetailsSection()
                 } else {
                     HomeDetailSectionCard {
                         if (orderedBalances.isEmpty()) {

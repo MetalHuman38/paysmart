@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.Manifest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -40,6 +41,7 @@ import net.metalbrain.paysmart.core.features.account.security.viewmodel.Security
 import net.metalbrain.paysmart.core.features.theme.data.AppThemeMode
 import net.metalbrain.paysmart.core.features.theme.viewmodel.AppThemeViewModel
 import net.metalbrain.paysmart.core.locale.LocaleManager
+import net.metalbrain.paysmart.core.notifications.NotificationBootstrapper
 import net.metalbrain.paysmart.core.session.IdleSessionWatcher
 import net.metalbrain.paysmart.core.session.SessionStateManager
 import net.metalbrain.paysmart.core.service.update.UpdateAppState
@@ -51,11 +53,10 @@ import net.metalbrain.paysmart.domain.auth.state.LocalSecurityState
 import net.metalbrain.paysmart.domain.auth.state.PostAuthState
 import net.metalbrain.paysmart.domain.auth.state.SecureNavIntent
 import net.metalbrain.paysmart.room.manager.RoomKeyManager
-import net.metalbrain.paysmart.ui.AppNavGraph
-import net.metalbrain.paysmart.ui.LocalizedAppWrapper
-import net.metalbrain.paysmart.ui.Screen
-import net.metalbrain.paysmart.ui.navigateClearingBackStackSafely
-import net.metalbrain.paysmart.ui.navigateSafely
+import net.metalbrain.paysmart.navigator.AppNavGraph
+import net.metalbrain.paysmart.navigator.Screen
+import net.metalbrain.paysmart.navigator.navigateClearingBackStackSafely
+import net.metalbrain.paysmart.navigator.navigateSafely
 import net.metalbrain.paysmart.ui.network.rememberIsInternetAvailable
 import net.metalbrain.paysmart.ui.screens.NoConnectionGateScreen
 import net.metalbrain.paysmart.ui.theme.Dimens
@@ -89,10 +90,19 @@ class MainActivity : FragmentActivity() {
     @Inject
     lateinit var updateCoordinator: UpdateCoordinator
 
+    @Inject
+    lateinit var notificationBootstrapper: NotificationBootstrapper
+
     private val inAppUpdateLauncher = registerForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         updateCoordinator.onActivityResult(result.resultCode)
+    }
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        notificationBootstrapper.onNotificationPermissionResult()
     }
 
     override fun attachBaseContext(base: Context) {
@@ -111,6 +121,7 @@ class MainActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
+        notificationBootstrapper.syncRegistrationIfPossible()
         lifecycleScope.launch {
             updateCoordinator.onAppForegrounded(inAppUpdateLauncher)
         }
@@ -126,6 +137,7 @@ class MainActivity : FragmentActivity() {
         RoomKeyManager.ensureKeyPairExists()
         enableEdgeToEdge()
         sessionStateManager.start(lifecycleScope)
+        notificationBootstrapper.start()
 
         setContent {
             val securityViewModel = hiltViewModel<SecurityViewModel>()
@@ -136,6 +148,7 @@ class MainActivity : FragmentActivity() {
             val sessionState by sessionStateManager.sessionState.collectAsState()
             val localSecurityState by securityViewModel.localSecurityState.collectAsState()
             val themeMode by appThemeViewModel.themeMode.collectAsState()
+            val themeVariant by appThemeViewModel.themeVariant.collectAsState()
             val isOnline = rememberIsInternetAvailable()
             var showNoConnectionGate by rememberSaveable { mutableStateOf(!isOnline) }
             val isDarkTheme = when (themeMode) {
@@ -148,9 +161,6 @@ class MainActivity : FragmentActivity() {
             val hasUnlockMethod = localSettings?.let {
                 it.biometricsEnabled || it.passcodeEnabled || it.passwordEnabled
             } ?: false
-            val passwordReady = localSettings?.let {
-                it.passwordEnabled && it.localPasswordSetAt != null
-            } == true
             val lockAfterMinutes = (localSettings?.lockAfterMinutes ?: 5).coerceAtLeast(1)
             val idleLockEnabled =
                 authState is AuthState.Authenticated &&
@@ -183,13 +193,6 @@ class MainActivity : FragmentActivity() {
                     currentRoute.startsWith(Screen.AddEmail.route) ||
                     currentRoute.startsWith("email_sent/") ||
                     currentRoute.startsWith(Screen.EmailVerified.route)
-            val shouldDeferPasswordFallback =
-                deferSecurityIntentForOnboarding ||
-                        currentRoute == Screen.Splash.route ||
-                        currentRoute == Screen.Startup.route ||
-                        currentRoute == Screen.Login.route ||
-                        currentRoute == Screen.LoginMfaChallenge.route ||
-                        currentRoute.startsWith("language")
 
             LaunchedEffect(sessionLocked, postAuthState, sessionState, currentRoute) {
                 Log.d(
@@ -236,36 +239,6 @@ class MainActivity : FragmentActivity() {
                 }
             }
 
-            LaunchedEffect(
-                authState,
-                passwordReady,
-                shouldDeferPasswordFallback,
-                currentRoute,
-                isOnline,
-                showNoConnectionGate,
-            ) {
-                val authenticated = authState is AuthState.Authenticated
-                if (!authenticated || !isOnline || shouldDeferPasswordFallback || showNoConnectionGate) {
-                    return@LaunchedEffect
-                }
-                if (!passwordReady &&
-                    currentRoute != Screen.CreatePassword.route &&
-                    currentRoute != Screen.RequireSessionUnlock.route
-                ) {
-                    Log.d(
-                        "LockStateTrace",
-                        "fallback_create_password_redirect route=$currentRoute"
-                    )
-                    navController.navigateSafely(
-                        route = Screen.CreatePassword.route,
-                        currentRoute = currentRoute,
-                        source = "password_fallback_redirect",
-                    ) {
-                        launchSingleTop = true
-                    }
-                }
-            }
-
             val authenticatedUid = (authState as? AuthState.Authenticated)?.uid
             LaunchedEffect(authenticatedUid) {
                 if (authenticatedUid == null) {
@@ -277,6 +250,22 @@ class MainActivity : FragmentActivity() {
                     "sid=${it.sid}, userId=${it.userId}, sv=${it.sessionVersion}, ts=${it.signInAtSeconds}, recordedAt=${it.recordedAt}"
                 } ?: "null"
                 Log.d("MainActivity", "roomSessionLog: $shape")
+            }
+
+            LaunchedEffect(authenticatedUid, currentRoute, showNoConnectionGate) {
+                if (authenticatedUid == null || showNoConnectionGate) {
+                    return@LaunchedEffect
+                }
+
+                if (
+                    currentRoute == Screen.Home.route &&
+                    notificationBootstrapper.shouldRequestNotificationPermission()
+                ) {
+                    notificationBootstrapper.markPermissionPromptShown()
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    notificationBootstrapper.syncRegistrationIfPossible()
+                }
             }
 
             val updateDownloadedMessage = stringResource(R.string.app_update_downloaded_message)
@@ -301,10 +290,12 @@ class MainActivity : FragmentActivity() {
                 if (result == SnackbarResult.ActionPerformed) {
                     updateCoordinator.completeUpdate()
                 }
-                updateCoordinator.acknowledgeRestartPrompt()
             }
 
-            PaysmartTheme(darkTheme = isDarkTheme) {
+            PaysmartTheme(
+                darkTheme = isDarkTheme,
+                themeVariant = themeVariant
+            ) {
                 LocalizedAppWrapper {
                     PaySmartAppBackground {
                         Surface(color = Color.Transparent) {
@@ -364,9 +355,31 @@ class MainActivity : FragmentActivity() {
                                                             )
                                                         } else if (currentRoute != Screen.CreatePassword.route) {
                                                             navController.navigateSafely(
-                                                                route = Screen.CreatePassword.route,
+                                                                route = Screen.CreatePassword.BASEROUTE,
                                                                 currentRoute = currentRoute,
                                                                 source = "secure_intent_create_password",
+                                                            ) {
+                                                                launchSingleTop = true
+                                                            }
+                                                        }
+                                                    }
+
+                                                    SecureNavIntent.ToPasswordRecovery -> {
+                                                        if (deferSecurityIntentForOnboarding) {
+                                                            Log.d(
+                                                                "LockStateTrace",
+                                                                "defer_password_recovery_intent route=$currentRoute"
+                                                            )
+                                                        } else if (
+                                                            currentRoute != Screen.Reauthenticate.route &&
+                                                            currentRoute != Screen.CreatePassword.route
+                                                        ) {
+                                                            navController.navigateSafely(
+                                                                route = Screen.Reauthenticate.routeWithTarget(
+                                                                    Screen.CreatePassword.BASEROUTE
+                                                                ),
+                                                                currentRoute = currentRoute,
+                                                                source = "secure_intent_password_recovery",
                                                             ) {
                                                                 launchSingleTop = true
                                                             }
@@ -466,6 +479,7 @@ private fun isCriticalUpdateRoute(route: String): Boolean {
         route.startsWith(Screen.RequireSessionUnlock.route) ||
         route.startsWith(Screen.AddMoney.route) ||
         route.startsWith(Screen.FundingAccount.route) ||
+        route.startsWith(Screen.UkAccount.BASEROUTE) ||
         route.startsWith(Screen.TransactionDetail.route.substringBefore("/{")) ||
         route.startsWith(Screen.Transactions.route) ||
         route.startsWith(Screen.InvoiceFlow.route) ||

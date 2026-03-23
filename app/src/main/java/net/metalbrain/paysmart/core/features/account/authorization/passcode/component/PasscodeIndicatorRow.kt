@@ -1,7 +1,6 @@
 package net.metalbrain.paysmart.core.features.account.authorization.passcode.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -16,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.LocalAppThemePack
 
 @Composable
 fun PasscodeIndicatorRow(
@@ -23,35 +23,25 @@ fun PasscodeIndicatorRow(
     isError: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val securityStyle = LocalAppThemePack.current.securityStyle
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(Dimens.sm, Alignment.CenterHorizontally)
     ) {
         repeat(6) { index ->
             val filled = index < passcode.length
-            val active = index == passcode.length && passcode.length < 6
             val containerColor = when {
-                isError -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f)
-                filled -> MaterialTheme.colorScheme.primaryContainer
+                isError -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.78f)
+                filled -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.92f)
+                securityStyle.useEditorialLayout -> MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.96f)
                 else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-            }
-            val borderColor = when {
-                isError -> MaterialTheme.colorScheme.error.copy(alpha = 0.75f)
-                filled -> MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                active -> MaterialTheme.colorScheme.primary.copy(alpha = 0.65f)
-                else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.9f)
             }
 
             Box(
                 modifier = Modifier
                     .size(width = 42.dp, height = 54.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(containerColor)
-                    .border(
-                        width = 1.dp,
-                        color = borderColor,
-                        shape = RoundedCornerShape(16.dp)
-                    ),
+                    .clip(RoundedCornerShape(if (securityStyle.useEditorialLayout) 18.dp else 16.dp))
+                    .background(containerColor),
                 contentAlignment = Alignment.Center
             ) {
                 if (filled) {

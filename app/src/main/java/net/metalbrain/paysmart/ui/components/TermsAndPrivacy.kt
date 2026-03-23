@@ -8,6 +8,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import net.metalbrain.paysmart.R
@@ -26,7 +27,8 @@ fun TermsAndPrivacyText(
             pushStyle(
                 SpanStyle(
                     color = MaterialTheme.colorScheme.primary,
-                    textDecoration = TextDecoration.Underline
+                    textDecoration = TextDecoration.Underline,
+                    fontWeight = FontWeight.SemiBold
                 )
             )
 
@@ -43,7 +45,8 @@ fun TermsAndPrivacyText(
             pushStyle(
                 SpanStyle(
                     color = MaterialTheme.colorScheme.primary,
-                    textDecoration = TextDecoration.Underline
+                    textDecoration = TextDecoration.Underline,
+                    fontWeight = FontWeight.SemiBold
                 )
             )
             append(stringResource(R.string.privacy_policy).trim())
@@ -55,7 +58,7 @@ fun TermsAndPrivacyText(
 
     Text(
         text = annotatedText,
-        style = MaterialTheme.typography.bodyMedium.copy(
+        style = MaterialTheme.typography.bodySmall.copy(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         modifier = modifier

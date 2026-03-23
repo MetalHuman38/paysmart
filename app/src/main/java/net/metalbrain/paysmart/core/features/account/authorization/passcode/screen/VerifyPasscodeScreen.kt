@@ -1,8 +1,8 @@
 package net.metalbrain.paysmart.core.features.account.authorization.passcode.screen
 
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,6 +45,7 @@ import net.metalbrain.paysmart.core.features.account.authorization.passcode.comp
 import net.metalbrain.paysmart.core.features.account.authorization.passcode.component.PasscodeIndicatorRow
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.LocalAppThemePack
 import net.metalbrain.paysmart.core.features.account.authorization.passcode.viewmodel.VerifyPasscodeViewModel
 import net.metalbrain.paysmart.utils.shake
 
@@ -63,6 +65,8 @@ fun VerifyPasscodeScreen(
     val isLockedOut by viewModel.isLockedOut.collectAsState()
     val shakeTrigger by viewModel.shakeTrigger
     val biometricFailedMessage = stringResource(R.string.verify_passcode_biometric_failed)
+    val securityStyle = LocalAppThemePack.current.securityStyle
+    val editorialLayout = securityStyle.useEditorialLayout
 
     LaunchedEffect(biometricPrompt, activity) {
         if (biometricPrompt) {
@@ -110,11 +114,19 @@ fun VerifyPasscodeScreen(
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.18f),
-                        MaterialTheme.colorScheme.background
-                    )
+                    colors = if (editorialLayout) {
+                        listOf(
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                            MaterialTheme.colorScheme.background
+                        )
+                    } else {
+                        listOf(
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.18f),
+                            MaterialTheme.colorScheme.background
+                        )
+                    }
                 )
             )
     ) {
@@ -125,60 +137,84 @@ fun VerifyPasscodeScreen(
                 .padding(
                     WindowInsets.systemBars.asPaddingValues()
                 )
-                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.md)
+                .padding(
+                    horizontal = securityStyle.outerHorizontalPadding,
+                    vertical = Dimens.md
+                )
         )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(WindowInsets.systemBars.asPaddingValues())
-                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.lg),
-            verticalArrangement = Arrangement.spacedBy(Dimens.lg)
+                .padding(
+                    horizontal = securityStyle.outerHorizontalPadding,
+                    vertical = if (editorialLayout) Dimens.xl else Dimens.lg
+                ),
+            verticalArrangement = Arrangement.spacedBy(if (editorialLayout) Dimens.xl else Dimens.lg)
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                verticalArrangement = if (editorialLayout) Arrangement.SpaceBetween else Arrangement.Center,
+                horizontalAlignment = if (editorialLayout) Alignment.Start else Alignment.CenterHorizontally
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(Dimens.lg),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    verticalArrangement = Arrangement.spacedBy(if (editorialLayout) Dimens.xl else Dimens.lg),
+                    horizontalAlignment = if (editorialLayout) Alignment.Start else Alignment.CenterHorizontally
                 ) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(Dimens.sm),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = if (editorialLayout) Alignment.Start else Alignment.CenterHorizontally
                     ) {
+                        if (editorialLayout) {
+                            Text(
+                                text = stringResource(R.string.verify_passcode).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                         Text(
                             text = stringResource(R.string.enter_your_passcode),
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = if (editorialLayout) {
+                                MaterialTheme.typography.headlineLarge
+                            } else {
+                                MaterialTheme.typography.headlineMedium
+                            },
                             color = MaterialTheme.colorScheme.onSurface,
-                            textAlign = TextAlign.Center
+                            textAlign = if (editorialLayout) TextAlign.Start else TextAlign.Center
                         )
 
                         Text(
                             text = stringResource(R.string.passcode_use_to_unlock),
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = if (editorialLayout) {
+                                MaterialTheme.typography.bodyMedium
+                            } else {
+                                MaterialTheme.typography.bodyLarge
+                            },
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
+                            textAlign = if (editorialLayout) TextAlign.Start else TextAlign.Center
                         )
                     }
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
+                        shape = RoundedCornerShape(if (editorialLayout) 30.dp else 24.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
+                            containerColor = if (editorialLayout) {
+                                MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = securityStyle.glassPanelAlpha)
+                            } else {
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
+                            }
                         ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                        border = BorderStroke(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
-                        )
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = Dimens.lg, vertical = Dimens.lg),
+                                .padding(
+                                    horizontal = if (editorialLayout) Dimens.xl else Dimens.lg,
+                                    vertical = if (editorialLayout) Dimens.xl else Dimens.lg
+                                ),
                             verticalArrangement = Arrangement.spacedBy(Dimens.md),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -224,14 +260,22 @@ fun VerifyPasscodeScreen(
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(Dimens.xl),
+                shape = RoundedCornerShape(if (editorialLayout) 32.dp else Dimens.xl),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+                    containerColor = if (editorialLayout) {
+                        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f)
+                    } else {
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+                    }
                 ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 border = BorderStroke(
                     width = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)
+                    color = if (editorialLayout) {
+                        MaterialTheme.colorScheme.outline.copy(alpha = securityStyle.ghostBorderAlpha + 0.08f)
+                    } else {
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.16f)
+                    }
                 )
             ) {
                 NumberPad(

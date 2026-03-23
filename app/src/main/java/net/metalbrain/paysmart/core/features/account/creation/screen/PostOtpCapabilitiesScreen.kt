@@ -28,7 +28,12 @@ fun PostOtpCapabilitiesScreen(
     AccountCreationScaffold(onBack = onBack) { innerPadding ->
         PostOtpCapabilitiesContent(
             profile = uiState.profile,
-            onNext = onNext,
+            selectedInterest = uiState.selectedInterest,
+            isPersistingSelection = uiState.isPersistingSelection,
+            onInterestSelected = viewModel::selectInterest,
+            onNext = {
+                viewModel.persistSelection(onPersisted = onNext)
+            },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)

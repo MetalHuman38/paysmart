@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.TipsAndUpdates
 import androidx.compose.material.icons.filled.Update
@@ -30,15 +31,22 @@ fun HomeNotificationPanel(
     onPrimaryAction: () -> Unit,
 ) {
     val title = when (notification.kind) {
-        HomeNotificationKind.PRODUCT -> stringResource(R.string.home_notification_products_title)
+        HomeNotificationKind.PLACEHOLDER -> stringResource(R.string.home_notification_products_title)
+        HomeNotificationKind.INBOX -> notification.title.ifBlank {
+            stringResource(R.string.home_notification_products_title)
+        }
         HomeNotificationKind.APP_UPDATE_READY -> stringResource(R.string.home_notification_update_title)
     }
     val body = when (notification.kind) {
-        HomeNotificationKind.PRODUCT -> stringResource(R.string.home_notification_products_body)
+        HomeNotificationKind.PLACEHOLDER -> stringResource(R.string.home_notification_products_body)
+        HomeNotificationKind.INBOX -> notification.body.ifBlank {
+            stringResource(R.string.home_notification_products_body)
+        }
         HomeNotificationKind.APP_UPDATE_READY -> stringResource(R.string.app_update_downloaded_message)
     }
     val icon = when (notification.kind) {
-        HomeNotificationKind.PRODUCT -> Icons.Default.TipsAndUpdates
+        HomeNotificationKind.PLACEHOLDER -> Icons.Default.TipsAndUpdates
+        HomeNotificationKind.INBOX -> Icons.Default.Notifications
         HomeNotificationKind.APP_UPDATE_READY -> Icons.Default.Update
     }
 

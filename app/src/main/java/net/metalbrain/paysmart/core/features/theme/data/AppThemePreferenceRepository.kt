@@ -15,6 +15,7 @@ class AppThemePreferenceRepository @Inject constructor(
 ) {
     companion object {
         private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
+        private val THEME_VARIANT_KEY = stringPreferencesKey("theme_variant")
     }
 
     fun observeThemeMode(): Flow<AppThemeMode> {
@@ -23,9 +24,21 @@ class AppThemePreferenceRepository @Inject constructor(
         }
     }
 
+    fun observeThemeVariant(): Flow<AppThemeVariant> {
+        return dataStore.data.map { prefs ->
+            AppThemeVariant.fromStorage(prefs[THEME_VARIANT_KEY])
+        }
+    }
+
     suspend fun setThemeMode(mode: AppThemeMode) {
         dataStore.edit { prefs ->
             prefs[THEME_MODE_KEY] = mode.storageValue
+        }
+    }
+
+    suspend fun setThemeVariant(variant: AppThemeVariant) {
+        dataStore.edit { prefs ->
+            prefs[THEME_VARIANT_KEY] = variant.storageValue
         }
     }
 }

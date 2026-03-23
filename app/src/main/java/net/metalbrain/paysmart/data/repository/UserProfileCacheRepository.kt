@@ -4,6 +4,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import net.metalbrain.paysmart.domain.model.AuthUserModel
+import net.metalbrain.paysmart.domain.model.LaunchInterest
 import net.metalbrain.paysmart.domain.model.ProfileDetailsDraft
 import net.metalbrain.paysmart.room.dao.UserProfileCacheDao
 import net.metalbrain.paysmart.room.entity.UserProfileCacheEntity
@@ -32,7 +33,8 @@ class UserProfileCacheRepository @Inject constructor(
                 displayName = resolveDisplayName(displayName, phoneNumber),
                 email = email,
                 phoneNumber = phoneNumber,
-                photoURL = photoURL
+                photoURL = photoURL,
+                launchInterest = null
             )
         )
     }
@@ -55,6 +57,7 @@ class UserProfileCacheRepository @Inject constructor(
                 city = user.city ?: existing?.city,
                 country = user.country ?: existing?.country,
                 postalCode = user.postalCode ?: existing?.postalCode,
+                launchInterest = user.launchInterest?.rawValue ?: existing?.launchInterest,
             )
         )
     }
@@ -81,6 +84,7 @@ class UserProfileCacheRepository @Inject constructor(
                 city = existing?.city,
                 country = existing?.country,
                 postalCode = existing?.postalCode,
+                launchInterest = existing?.launchInterest,
                 updatedAt = System.currentTimeMillis()
             )
         )
@@ -105,6 +109,31 @@ class UserProfileCacheRepository @Inject constructor(
                 city = details.city ?: existing?.city,
                 country = details.country ?: existing?.country,
                 postalCode = details.postalCode ?: existing?.postalCode,
+                launchInterest = existing?.launchInterest,
+                updatedAt = System.currentTimeMillis()
+            )
+        )
+    }
+
+    suspend fun updateLaunchInterest(uid: String, launchInterest: LaunchInterest) {
+        val existing = dao.getByUserId(uid)
+        val displayName = existing?.displayName
+            ?: resolveDisplayName(rawDisplayName = null, phoneNumber = existing?.phoneNumber)
+
+        dao.upsert(
+            UserProfileCacheEntity(
+                userId = uid,
+                displayName = displayName,
+                photoURL = existing?.photoURL,
+                email = existing?.email,
+                phoneNumber = existing?.phoneNumber,
+                dateOfBirth = existing?.dateOfBirth,
+                addressLine1 = existing?.addressLine1,
+                addressLine2 = existing?.addressLine2,
+                city = existing?.city,
+                country = existing?.country,
+                postalCode = existing?.postalCode,
+                launchInterest = launchInterest.rawValue,
                 updatedAt = System.currentTimeMillis()
             )
         )
@@ -150,6 +179,7 @@ private fun UserProfileCacheEntity.toDomain(): AuthUserModel {
         addressLine2 = addressLine2,
         city = city,
         country = country,
-        postalCode = postalCode
+        postalCode = postalCode,
+        launchInterest = LaunchInterest.fromRaw(launchInterest)
     )
 }

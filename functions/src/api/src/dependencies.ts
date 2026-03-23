@@ -2,6 +2,7 @@
 import { initializeApp, getApps, App } from "firebase-admin/app";
 import { getAuth, Auth } from "firebase-admin/auth";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
+import { getMessaging, Messaging } from "firebase-admin/messaging";
 
 import type { Config } from "./config/configuration.js";
 import { loadConfig } from "./config/configuration.js";
@@ -11,6 +12,7 @@ export type Deps = {
   app: App;
   auth: Auth;
   firestore: Firestore;
+  messaging: Messaging;
 };
 
 let singleton: Deps | null = null;
@@ -30,6 +32,7 @@ export function initDeps(): Deps {
 
   const auth = getAuth(app);
   const firestore = getFirestore(app);
+  const messaging = getMessaging(app);
 
   if (process.env.FIRESTORE_EMULATOR_HOST) {
     firestore.settings({
@@ -54,6 +57,7 @@ export function initDeps(): Deps {
     app,
     auth,
     firestore,
+    messaging,
   };
 
   return singleton;

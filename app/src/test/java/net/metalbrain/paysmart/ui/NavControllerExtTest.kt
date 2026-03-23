@@ -12,6 +12,9 @@ import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import net.metalbrain.paysmart.navigator.Screen
+import net.metalbrain.paysmart.navigator.navigateClearingBackStackSafely
+import net.metalbrain.paysmart.navigator.navigateSafely
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

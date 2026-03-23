@@ -4,12 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import net.metalbrain.paysmart.domain.model.Transaction
+import net.metalbrain.paysmart.navigator.Screen
 import net.metalbrain.paysmart.ui.home.viewmodel.BalanceDetailsViewModel
 
 @Composable
 fun BalanceDetailsRoute(
     viewModel: BalanceDetailsViewModel,
-    initialTab: net.metalbrain.paysmart.ui.Screen.BalanceDetails.Tab,
+    initialTab: Screen.BalanceDetails.Tab,
     onBack: () -> Unit,
     onViewAccountLimitsClick: (String) -> Unit,
     onSendClick: () -> Unit,

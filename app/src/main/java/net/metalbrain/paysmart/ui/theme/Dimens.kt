@@ -9,6 +9,13 @@ object Dimens {
     val md = 16.dp
     val lg = 24.dp
     val xl = 32.dp
+    val xxl = 40.dp
+    val widthX = 72.dp
+    val widthY = 144.dp
+    val widthZ = 256.dp
+    val heightX = 144.dp
+    val heightY = 256.dp
+
 
     // Legacy aliases kept for compatibility during migration.
     val space2 = xs

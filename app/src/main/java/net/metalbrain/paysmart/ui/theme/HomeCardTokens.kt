@@ -9,16 +9,16 @@ object HomeCardTokens {
 
     const val OUTLINE_ALPHA = 0.72f
     const val SURFACE_OVERLAY_ALPHA = 0.82f
-    val summaryCardHeight = 186.dp
-    val accountInfoCardWidth = 312.dp
-    val accountInfoCardHeight = 192.dp
+    val summaryCardHeight = 168.dp
+    val accountInfoCardWidth = 296.dp
+    val accountInfoCardHeight = 176.dp
     val serviceCardWidth = 116.dp
     val serviceCardHeight = 132.dp
     val serviceCardIconPadding = Dimens.md
-    val contentPadding = Dimens.md
-    val compactContentPadding = Dimens.md
-    val cardShape = RoundedCornerShape(24.dp)
-    val serviceCardShape = RoundedCornerShape(24.dp)
-    val defaultElevation = 2.dp
-    val subtleElevation = 1.dp
+    val contentPadding = 14.dp
+    val compactContentPadding = 14.dp
+    val cardShape = RoundedCornerShape(20.dp)
+    val serviceCardShape = RoundedCornerShape(22.dp)
+    val defaultElevation = 1.dp
+    val subtleElevation = 0.5.dp
 }

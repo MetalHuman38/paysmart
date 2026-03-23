@@ -27,7 +27,7 @@ type IdempotencyDoc = {
   result?: FinalizedInvoice;
 };
 
-const INVOICE_PDF_TEMPLATE_VERSION = "pay-smart-invoice-v1";
+const INVOICE_PDF_TEMPLATE_VERSION = "pay-smart-invoice-v2";
 
 export class FirestoreInvoiceRepository implements InvoiceRepository {
   constructor(

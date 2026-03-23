@@ -59,6 +59,19 @@
         ]
       },
       {
+        "source": "/email/unsubscribe/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow, noarchive"
+          }
+        ]
+      },
+      {
         "source": "/finishSignUp/**",
         "headers": [
           {
@@ -309,6 +322,20 @@
       }
     ],
     "rewrites": [
+      {
+        "source": "/data/product-updates.json",
+        "run": {
+          "serviceId": "api",
+          "region": "europe-west2"
+        }
+      },
+      {
+        "source": "/email/unsubscribe",
+        "run": {
+          "serviceId": "api",
+          "region": "europe-west2"
+        }
+      },
       {
         "source": "/facebook/data-deletion",
         "run": {

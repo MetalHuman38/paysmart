@@ -61,12 +61,12 @@
     <string name="welcome_back">Welcome back</string>
     <string name="enter_phone_to_associated_to_account">Enter the phone number associated with your PaySmart account</string>
     <string name="select_country">Select country of residence</string>
-    <string name="marketing">We would like to keep you up to date with similar PaySmart product and services by email and other means, so you can untick here if you dont want to receive these communications.</string>
-    <string name="terms_prefix">By checking this box, you agree to our</string>
-    <string name="terms_and_conditions">Terms &amp; Conditions </string>
-    <string name="terms_separator"> of service and </string>
-    <string name="privacy_policy"> Privacy Notice</string>
-    <string name="verification_policy">including verification of your identity through third party and your mobile service providers.</string>
+    <string name="marketing">Stay updated on PaySmart products and services. You can opt out of these communications at any time.</string>
+    <string name="terms_prefix">By continuing, you agree to our</string>
+    <string name="terms_and_conditions">Terms &amp; Conditions</string>
+    <string name="terms_separator">and</string>
+    <string name="privacy_policy">Privacy Notice</string>
+    <string name="verification_policy">including identity verification with trusted third parties and your mobile service providers.</string>
     <string name="email_placeholder">Email address</string>
     <string name="password_placeholder">Password</string>
     <string name="have_an_account">Have an account?</string>
@@ -335,6 +335,18 @@ how can we help?</string>
 
     <string name="identity_resolver_title">Identity verification</string>
     <string name="identity_resolver_subtitle">Identity verification is the final setup step for account limits and high-risk actions.</string>
+    <string name="identity_intro_title">Verify your identity</string>
+    <string name="identity_intro_subtitle">To comply with financial regulations and help prevent fraud, we may ask for a photo of your ID and a selfie to confirm it is really you.</string>
+    <string name="identity_intro_eta">This usually takes about 2 minutes to complete.</string>
+    <string name="identity_intro_photo_tips_title">Tips for photo ID</string>
+    <string name="identity_intro_photo_tip_readable">Ensure all text on your ID is readable.</string>
+    <string name="identity_intro_photo_tip_visible">Make sure the full ID is visible and there is no glare or reflection.</string>
+    <string name="identity_intro_selfie_tips_title">Tips for selfie</string>
+    <string name="identity_intro_selfie_tip_lighting">Use good lighting and keep your face clearly visible.</string>
+    <string name="identity_intro_selfie_tip_clear">Remove anything obscuring your face, such as hats or glasses.</string>
+    <string name="identity_intro_consent">By continuing, you consent to identity verification checks and the processing of your data for fraud prevention and compliance.</string>
+    <string name="identity_selection_title">Verify your photo ID</string>
+    <string name="identity_selection_subtitle">Choose an ID to use. Documents from your issuing country are usually the fastest for us to review.</string>
     <string name="identity_resolver_plan_title">Verification flow</string>
     <string name="identity_resolver_plan_step_1">1. Capture government-issued identity document.</string>
     <string name="identity_resolver_plan_step_2">2. Confirm name and date of birth match your profile.</string>
@@ -360,18 +372,31 @@ how can we help?</string>
     <string name="identity_resolver_done_action">Back to setup</string>
     <string name="identity_resolver_country_title">Issuing country</string>
     <string name="identity_resolver_country_selected">%1$s (%2$s)</string>
+    <string name="identity_resolver_review_time_title">Estimated review time</string>
+    <string name="identity_resolver_review_window_exact_hours">%1$d hours</string>
+    <string name="identity_resolver_review_window_range_hours">%1$d - %2$d hours</string>
     <string name="identity_resolver_document_unavailable_format">%1$s (Unavailable)</string>
     <string name="identity_resolver_capture_hint">Capture guide: %1$s (%2$s frame)</string>
     <string name="identity_resolver_frame_passport">Passport</string>
     <string name="identity_resolver_frame_card">Card</string>
     <string name="identity_resolver_frame_generic">Generic</string>
     <string name="identity_resolver_document_not_accepted">This document type is currently not accepted.</string>
-    <string name="identity_resolver_document_not_supported">This document type is accepted but upload is not yet enabled in this build.</string>`r`n    <string name="identity_resolver_capture_validating">Validating capture…</string>
+    <string name="identity_resolver_document_not_supported">This document type is accepted but upload is not yet enabled in this build.</string>
+    <string name="identity_resolver_capture_validating">Validating capture…</string>
     <string name="identity_resolver_capture_fallback_action">Use file instead</string>
     <string name="identity_resolver_camera_permission_required">Camera permission is required to capture your document.</string>
     <string name="identity_resolver_camera_permission_action">Allow camera</string>
     <string name="identity_resolver_camera_capture_action">Capture document</string>
     <string name="identity_resolver_camera_capturing">Capturing…</string>
+    <string name="identity_pending_title">Verification submitted</string>
+    <string name="identity_pending_subtitle">We are reviewing your identity now.</string>
+    <string name="identity_pending_waiting_body">Most checks for %1$s documents take %2$s.</string>
+    <string name="identity_pending_status_format">Status: %1$s</string>
+    <string name="identity_pending_reference_format">Reference: %1$s</string>
+    <string name="identity_pending_next_title">What happens next</string>
+    <string name="identity_pending_next_step_1">We will review your document and identity details.</string>
+    <string name="identity_pending_next_step_2">We may ask for a clearer capture if anything needs another check.</string>
+    <string name="identity_pending_next_step_3">You can keep using the features currently available on your account.</string>
 
     <string name="add_money_title">Add money</string>
     <string name="add_money_subtitle">Top up your wallet with Stripe PaymentSheet (sandbox).</string>
@@ -381,11 +406,15 @@ how can we help?</string>
     <string name="add_money_refresh_action">I completed payment, refresh status</string>
     <string name="add_money_session_id">Session: %1$s</string>
     <string name="add_money_status_value">Status: %1$s</string>
-    <string name="profile_theme_title">Appearance</string>
-    <string name="profile_account_info_theme_subtitle">App visual style and reading comfort</string>
+    <string name="profile_theme_title">Theme mode</string>
+    <string name="profile_account_info_theme_subtitle">Light, dark, or follow your device</string>
+    <string name="profile_theme_variant_title">Theme pack</string>
+    <string name="profile_account_info_theme_variant_subtitle">Switch the visual tone used across cards and surfaces</string>
     <string name="theme_mode_system">System</string>
     <string name="theme_mode_light">Light</string>
     <string name="theme_mode_dark">Dark</string>
+    <string name="theme_variant_paysmart">PaySmart</string>
+    <string name="theme_variant_obsidian">Obsidian</string>
     <string name="home_total_balance_label">Total balance</string>
     <string name="home_wallet_no_data">No wallet data yet</string>
     <string name="home_wallet_label">wallet</string>
@@ -442,6 +471,17 @@ how can we help?</string>
     <string name="home_notification_update_title">Update ready</string>
     <string name="home_notification_products_title">Product updates</string>
     <string name="home_notification_products_body">PaySmart app updates and new product announcements will appear here.</string>
+    <string name="notification_center_title">Notifications</string>
+    <string name="notification_center_empty_title">Nothing new yet</string>
+    <string name="notification_center_empty_body">Account updates, product launches, and app install prompts will appear here.</string>
+    <string name="notification_center_unread_label">Unread</string>
+    <string name="notification_center_all_caught_up">All caught up</string>
+    <string name="notification_channel_account_updates_name">Account updates</string>
+    <string name="notification_channel_account_updates_description">Identity, security, and account activity alerts.</string>
+    <string name="notification_channel_product_updates_name">Product updates</string>
+    <string name="notification_channel_product_updates_description">New features, launches, and PaySmart announcements.</string>
+    <string name="notification_channel_app_updates_name">App updates</string>
+    <string name="notification_channel_app_updates_description">Downloaded app updates ready to install.</string>
     <string name="add_money_create_flutterwave_action">Create Flutterwave session</string>
     <string name="add_money_open_provider_checkout_action">Continue payment securely</string>
     <string name="add_money_provider_value">Provider: %1$s</string>
@@ -470,10 +510,10 @@ how can we help?</string>
     <string name="biometric_face_id">Face ID</string>
     <string name="biometric_face_id_description">Use face ID authentication</string>
 
-    <string name="passkey_setup_title">Passkey setup</string>
-    <string name="passkey_setup_description">Register a device passkey and verify it against your PaySmart backend profile.</string>
+    <string name="passkey_setup_title">Passkey Security</string>
+    <string name="passkey_setup_description">Secure, passwordless authentication across your devices</string>
     <string name="passkey_create_action">Create passkey</string>
-    <string name="passkey_registered">Passkey registered</string>
+    <string name="passkey_registered">Passkey active on this device</string>
     <string name="passkey_verify_action">Verify passkey</string>
 
     <string name="identity_provider_title">Third-party identity verification</string>
@@ -508,6 +548,9 @@ how can we help?</string>
 
     <string name="reauth_title">Reauthenticate</string>
     <string name="reauth_verify_identity_message">For your security, please verify your identity</string>
+    <string name="reauth_alternative_factor_message">Phone verification is not available on this device. Use another linked sign-in method to continue.</string>
+    <string name="reauth_recovery_email_hint">Verification email: %1$s</string>
+    <string name="reauth_no_alternative_factor_message">No alternative recovery method is linked to this account yet.</string>
     <string name="reauth_enter_otp_label">Enter OTP</string>
     <string name="reauth_verify_action">Verify</string>
     <string name="reauth_verifying">Verifying…</string>
@@ -526,6 +569,7 @@ how can we help?</string>
     <string name="otp_invalid_code_error">Invalid verification code</string>
     <string name="otp_finish_setup_error">Unable to finish account setup. Please retry.</string>
 
+    <string name="verify_passcode">Verify passcode</string>
     <string name="verify_passcode_lockout_message">Too many attempts. Please wait…</string>
     <string name="verify_passcode_biometric_failed">Biometric authentication failed</string>
     <string name="passcode_prompt_subtitle">Enter your 4-digit passcode to log in</string>
@@ -672,9 +716,16 @@ how can we help?</string>
     <string name="post_otp_security_step_biometric_description">Faster secure access. If skipped, reminders may appear in security prompts.</string>
     <string name="post_otp_security_step_email_title">Verify your email</string>
     <string name="post_otp_security_step_email_description">Link Google/Facebook or add email manually. You can skip now and verify later when features require it.</string>
-    <string name="post_otp_capabilities_title">What you can do with PaySmart in %1$s</string>
-    <string name="post_otp_capabilities_subtitle">Your available features depend on your selected country.</string>
-    <string name="post_otp_capabilities_next">Next</string>
+    <string name="post_otp_capabilities_title">What do you want to do first?</string>
+    <string name="post_otp_capabilities_subtitle">We will shape your first PaySmart steps for %1$s and keep the rest ready when you need it.</string>
+    <string name="post_otp_capabilities_currency_label">Your main working currency</string>
+    <string name="post_otp_capabilities_supporting_note">You can still unlock more features later. Start with the path that gets value into your hands fastest.</string>
+    <string name="post_otp_interest_invoice_title">Create invoice</string>
+    <string name="post_otp_interest_invoice_subtitle">Set up your weekly invoice flow for shifts, freelance work, hospitality, care, or agency jobs.</string>
+    <string name="post_otp_interest_invoice_footnote">Best for UK workers who invoice every week and want a faster route to their first finished PDF.</string>
+    <string name="post_otp_interest_top_up_title">Top up</string>
+    <string name="post_otp_interest_top_up_subtitle">Prepare your wallet for funding, balances, and future payments once the required checks are complete.</string>
+    <string name="post_otp_capabilities_next">Continue</string>
     <string name="email_verification_success_title">Email verification successful</string>
     <string name="email_verification_success_subtitle">Your email has been successfully verified.</string>
     <string name="email_verification_success_action">Back to the app</string>
@@ -761,6 +812,10 @@ how can we help?</string>
     <string name="funding_account_status_loading_content_description">Funding account loading</string>
     <string name="funding_account_status_error_content_description">Funding account unavailable</string>
     <string name="funding_account_share_title">Share funding account</string>
+    <string name="uk_account_details_domestic_title">For domestic transfers within the UK only</string>
+    <string name="uk_account_details_status_title">UK local account details are coming here</string>
+    <string name="uk_account_details_status_body">This dedicated GBP account route is ready for a licensed UK banking partner. When PaySmart enables that flow, this screen will show your account holder name, sort code, account number, bank name, and share actions.</string>
+    <string name="uk_account_details_notice">Your money will be held with a licensed UK banking partner when this route goes live.</string>
     <string name="home_no_transaction_activity_title">No transaction activity</string>
     <string name="home_no_transaction_activity_subtitle">Your recent transaction activity will show here when you send, receive, or deposit money.</string>
     <string name="home_account_information_title">Account information</string>
@@ -826,24 +881,24 @@ how can we help?</string>
     <string name="profile_security_mfa_subtitle_enabled">2-step verification is enabled</string>
     <string name="profile_security_mfa_subtitle_disabled">Add an extra sign-in check</string>
     <string name="profile_security_passkey_title">Passkey</string>
-    <string name="profile_security_passkey_subtitle_enabled">Passkey is enabled</string>
-    <string name="profile_security_passkey_subtitle_disabled">Passkey is not enabled</string>
+    <string name="profile_security_passkey_subtitle_enabled">Your account is protected with biometric authentication</string>
+    <string name="profile_security_passkey_subtitle_disabled">Enable passkey to protect this device with passwordless sign-in</string>
     <string name="profile_security_biometric_toggle">Enable/disable Face or Touch ID</string>
     <string name="profile_security_view_privacy_settings">View privacy settings</string>
     <string name="profile_security_hide_balance">Hide balance</string>
-    <string name="profile_passkey_settings_title">Passkey</string>
-    <string name="profile_passkey_settings_description">Manage your device passkey for faster, more secure sign-in.</string>
-    <string name="profile_passkey_settings_toggle">Enable passkey</string>
-    <string name="profile_passkey_settings_status_enabled">Enabled</string>
-    <string name="profile_passkey_settings_status_disabled">Disabled</string>
-    <string name="profile_passkey_settings_registered_devices">Registered devices</string>
+    <string name="profile_passkey_settings_title">Passkey Security</string>
+    <string name="profile_passkey_settings_description">Secure, passwordless authentication across your devices</string>
+    <string name="profile_passkey_settings_toggle">Passkey Authentication</string>
+    <string name="profile_passkey_settings_status_enabled">Active</string>
+    <string name="profile_passkey_settings_status_disabled">Inactive</string>
+    <string name="profile_passkey_settings_registered_devices">Trusted Devices</string>
     <string name="profile_passkey_credential_added_at">Added %1$s</string>
     <string name="profile_passkey_credential_id_short">Credential ID: %1$s</string>
     <string name="profile_passkey_credential_action_revoke">Revoke</string>
     <string name="profile_passkey_credential_action_revoking">Revoking…</string>
-    <string name="profile_passkey_credential_device_fallback">Device</string>
-    <string name="profile_passkey_credential_backup_backed_up">Backed up</string>
-    <string name="profile_passkey_credential_backup_local_only">Local only</string>
+    <string name="profile_passkey_credential_device_fallback">Multi-Device Key</string>
+    <string name="profile_passkey_credential_backup_backed_up">Synced &amp; securely backed up</string>
+    <string name="profile_passkey_credential_backup_local_only">Stored only on this device</string>
     <string name="profile_passkey_credential_label_format">%1$s • %2$s</string>
     <string name="profile_passkey_credential_unknown_time">unknown</string>
     <string name="profile_passkey_nudge_title">Add passkey</string>
@@ -868,4 +923,10 @@ how can we help?</string>
     <string name="profile_change_photo_error">Unable to update photo right now.</string>
     <string name="profile_change_photo_camera_permission_error">Camera permission is required to take a profile photo. You can still choose one from your gallery.</string>
     <string name="profile_change_photo_contact_fallback">Add an email or phone number</string>
+
+    <string name="credit">Credit</string>
+    <string name="i_am_happy_paysmart_share_my_data">I agree to PaySmart securely sharing my details (name, address, and date of birth) with credit bureaus to assess eligibility and offer suitable credit products.</string>
+    <string name="social_media_advertisement_platform">I am happy for PaySmart to share my name, email address and app events with social media platforms.</string>
+    <string name="terms_of_use">https://pay-smart.net/terms/</string>
+
 </resources>

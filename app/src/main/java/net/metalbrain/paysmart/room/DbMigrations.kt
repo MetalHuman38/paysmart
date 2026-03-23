@@ -344,4 +344,53 @@ object DbMigrations {
             // Version 15 keeps the same schema as version 14.
         }
     }
+
+    val MIGRATION_15_16: Migration = object : Migration(15, 16) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS notification_inbox (
+                    userId TEXT NOT NULL,
+                    notificationId TEXT NOT NULL,
+                    source TEXT NOT NULL,
+                    type TEXT NOT NULL,
+                    channel TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL,
+                    deepLink TEXT,
+                    isUnread INTEGER NOT NULL,
+                    createdAtMs INTEGER NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    PRIMARY KEY(userId, notificationId)
+                )
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                CREATE INDEX IF NOT EXISTS index_notification_inbox_userId
+                ON notification_inbox(userId)
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                CREATE INDEX IF NOT EXISTS index_notification_inbox_userId_createdAtMs
+                ON notification_inbox(userId, createdAtMs)
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                CREATE INDEX IF NOT EXISTS index_notification_inbox_userId_isUnread
+                ON notification_inbox(userId, isUnread)
+                """.trimIndent()
+            )
+        }
+    }
+
+    val MIGRATION_16_17: Migration = object : Migration(16, 17) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE user_profile_cache ADD COLUMN launchInterest TEXT"
+            )
+        }
+    }
 }

@@ -295,6 +295,10 @@
     <string name="theme_mode_system">Sistema</string>
     <string name="theme_mode_light">Claro</string>
     <string name="theme_mode_dark">Oscuro</string>
+    <string name="profile_theme_variant_title">Paquete de tema</string>
+    <string name="profile_account_info_theme_variant_subtitle">Cambia el tono visual usado en tarjetas y superficies</string>
+    <string name="theme_variant_paysmart">PaySmart</string>
+    <string name="theme_variant_obsidian">Obsidian</string>
     <string name="home_total_balance_label">Saldo total</string>
     <string name="home_wallet_no_data">Sin datos de billetera aún</string>
     <string name="home_wallet_label">billetera</string>
@@ -386,7 +390,7 @@
     <string name="biometric_face_id">Face ID</string>
     <string name="biometric_face_id_description">Usar autenticación Face ID</string>
     <string name="passkey_setup_title">Configuración de Passkey</string>
-    <string name="passkey_setup_description">Registre una Passkey de dispositivo y verifíquela con su perfil de PaySmart.</string>
+    <string name="passkey_setup_description">Registre una Passkey de dispositivo y verifíquela con su perfil de PaySmart de back-end.</string>
     <string name="passkey_create_action">Crear Passkey</string>
     <string name="passkey_registered">Passkey registrada</string>
     <string name="passkey_verify_action">Verificar Passkey</string>
@@ -610,9 +614,9 @@
     <string name="funding_account_state_unsupported_title">Recibir dinero aún no está disponible</string>
     <string name="funding_account_state_unsupported_supporting_format">Habilitaremos cuentas de fondos permanentes en %1$s cuando ese mercado sea totalmente compatible.</string>
     <string name="funding_account_state_kyc_required_title">Se requiere más verificación</string>
-    <string name="funding_account_state_kyc_required_supporting">Se requiere un BVN o NIN verificado antes de emitir esta cuenta de fondos NGN permanente.</string>
     <string name="funding_account_state_error_title">No pudimos preparar tu cuenta de fondos</string>
     <string name="funding_account_state_error_supporting">Actualiza o intenta provisionar tu cuenta de nuevo.</string>
+    <string name="funding_account_state_kyc_required_supporting">Se requiere un BVN o NIN verificado antes de emitir esta cuenta de fondos NGN permanente.</string>
     <string name="funding_account_action_provision">Crear cuenta de fondos</string>
     <string name="funding_account_action_retry">Intentar de nuevo</string>
     <string name="funding_account_action_refresh">Actualizar detalles</string>
@@ -631,6 +635,10 @@
     <string name="funding_account_status_loading_content_description">Cuenta de fondos cargando</string>
     <string name="funding_account_status_error_content_description">Cuenta de fondos no disponible</string>
     <string name="funding_account_share_title">Compartir cuenta de fondos</string>
+    <string name="uk_account_details_domestic_title">For domestic transfers within the UK only</string>
+    <string name="uk_account_details_status_title">UK local account details are coming here</string>
+    <string name="uk_account_details_status_body">This dedicated GBP account route is ready for a licensed UK banking partner. When PaySmart enables that flow, this screen will show your account holder name, sort code, account number, bank name, and share actions.</string>
+    <string name="uk_account_details_notice">Your money will be held with a licensed UK banking partner when this route goes live.</string>
     <string name="home_no_transaction_activity_title">Sin actividad</string>
 
     <string name="feature_gate_security_strength_progress">Nivel de seguridad: %1$d de %2$d activados</string>
@@ -664,7 +672,7 @@
     <string name="transaction_summary_sent">Has enviado</string>
     <string name="transaction_summary_received">Has recibido</string>
     <string name="transaction_summary_added">Has añadido</string>
-    <string name="transaction_summary_activity">Actividad</string>
+    <string name="transaction_summary_activity">Activity</string>
     <string name="transaction_updates_title">Última actualización</string>
     <string name="password_recovery_local_note">Esta contraseña se guarda localmente. Nunca la comparta.</string>
     <string name="help_title">Ayuda</string>
@@ -792,14 +800,69 @@
     <string name="change_passcode_biometric_action">Verificar con biometría</string>
     <string name="change_passcode_biometric_retry">Intentar de nuevo</string>
     <string name="change_passcode_biometric_error">La verificación biométrica no se completó.</string>
-    <string name="profile_security_mfa_title">2-step verification</string>
-    <string name="profile_security_mfa_subtitle_enabled">2-step verification is enabled</string>
-    <string name="profile_security_mfa_subtitle_disabled">Add an extra sign-in check</string>
+    <string name="profile_security_mfa_title">Verificación en dos pasos</string>
+    <string name="profile_security_mfa_subtitle_enabled">La verificación en dos pasos está activada</string>
+    <string name="profile_security_mfa_subtitle_disabled">Añadir una verificación de inicio de sesión extra</string>
 
     <string name="account_limits_empty_accounts">Aún no hay cuentas de monedero disponibles.</string>
     <string name="account_limits_account_descriptor_bank_transfer">transferencia bancaria</string>
     <string name="account_limits_currency_title_format">%1$s límites</string>
     <string name="account_limits_details_subtitle_format">¿Cuánto puedes enviar y recibir con tu cuenta PaySmart de %1$s?</string>
-    <string name="account_limits_spent_of_limit_format">%1$s gastado %2$s</string>
+    <string name="account_limits_spent_of_limit_format">%1$s gastado / %2$s</string>
     <string name="account_limits_left_format">%1$s restantes</string>
+
+    <string name="identity_intro_title">Verifica tu identidad</string>
+    <string name="identity_intro_subtitle">Para cumplir con la normativa financiera y ayudar a prevenir el fraude, es posible que te pidamos una foto de tu identificación y una selfie para confirmar que realmente eres tú.</string>
+    <string name="identity_intro_eta">Normalmente tarda unos 2 minutos.</string>
+    <string name="identity_intro_photo_tips_title">Consejos para la identificación con foto</string>
+    <string name="identity_intro_photo_tip_readable">Asegúrate de que todo el texto de tu identificación sea legible.</string>
+    <string name="identity_intro_photo_tip_visible">Asegúrate de que se vea toda la identificación y de que no haya brillo ni reflejos.</string>
+    <string name="identity_intro_selfie_tips_title">Consejos para la selfie</string>
+    <string name="identity_intro_selfie_tip_lighting">Usa buena iluminación y mantén tu rostro claramente visible.</string>
+    <string name="identity_intro_selfie_tip_clear">Retira cualquier cosa que cubra tu rostro, como sombreros o gafas.</string>
+    <string name="identity_intro_consent">Al continuar, aceptas las comprobaciones de verificación de identidad y el tratamiento de tus datos para la prevención del fraude y el cumplimiento normativo.</string>
+    <string name="identity_selection_title">Verifica tu identificación con foto</string>
+    <string name="identity_selection_subtitle">Elige la identificación que vas a usar. Los documentos emitidos en tu país suelen ser los más rápidos de revisar.</string>
+
+    <string name="identity_resolver_review_time_title">Tiempo estimado de revisión</string>
+    <string name="identity_resolver_review_window_exact_hours">%1$d horas</string>
+    <string name="identity_resolver_review_window_range_hours">%1$d - %2$d horas</string>
+
+    <string name="identity_pending_title">Verificación enviada</string>
+    <string name="identity_pending_subtitle">Ahora estamos revisando tu identidad.</string>
+    <string name="identity_pending_waiting_body">La mayoría de las revisiones de documentos emitidos en %1$s tardan %2$s.</string>
+    <string name="identity_pending_status_format">Estado: %1$s</string>
+    <string name="identity_pending_reference_format">Referencia: %1$s</string>
+    <string name="identity_pending_next_title">Qué ocurre después</string>
+    <string name="identity_pending_next_step_1">Revisaremos tu documento y los datos de tu identidad.</string>
+    <string name="identity_pending_next_step_2">Podríamos pedirte una captura más clara si algo necesita una comprobación adicional.</string>
+    <string name="identity_pending_next_step_3">Puedes seguir usando las funciones que ya están disponibles en tu cuenta.</string>
+
+    <string name="verify_passcode">Verificar contraseña</string>
+    <string name="notification_center_title">Notificaciones</string>
+    <string name="notification_center_empty_title">Aún no hay novedades</string>
+    <string name="notification_center_empty_body">Aquí aparecerán actualizaciones de la cuenta, lanzamientos de productos y avisos de instalación de la app.</string>
+    <string name="notification_center_unread_label">No leídas</string>
+    <string name="notification_center_all_caught_up">Todo al día</string>
+    <string name="notification_channel_account_updates_name">Actualizaciones de la cuenta</string>
+    <string name="notification_channel_account_updates_description">Alertas sobre identidad, seguridad y actividad de la cuenta.</string>
+    <string name="notification_channel_product_updates_name">Novedades de producto</string>
+    <string name="notification_channel_product_updates_description">Nuevas funciones, lanzamientos y anuncios de PaySmart.</string>
+    <string name="notification_channel_app_updates_name">Actualizaciones de la app</string>
+    <string name="notification_channel_app_updates_description">Actualizaciones de la app descargadas listas para instalar.</string>
+    <string name="reauth_alternative_factor_message">La verificación por teléfono no está disponible en este dispositivo. Usa otro método de inicio de sesión vinculado para continuar.</string>
+    <string name="reauth_recovery_email_hint">Correo de verificación: %1$s</string>
+    <string name="reauth_no_alternative_factor_message">Todavía no hay ningún método alternativo de recuperación vinculado a esta cuenta.</string>
+    <string name="post_otp_capabilities_currency_label">Tu moneda principal de trabajo</string>
+    <string name="post_otp_capabilities_supporting_note">Aún puedes desbloquear más funciones más adelante. Empieza por el camino que te aporte valor más rápido.</string>
+    <string name="post_otp_interest_invoice_title">Crear factura</string>
+    <string name="post_otp_interest_invoice_subtitle">Configura tu flujo semanal de facturación para turnos, trabajo freelance, hostelería, cuidados o trabajos por agencia.</string>
+    <string name="post_otp_interest_invoice_footnote">Ideal para trabajadores del Reino Unido que facturan cada semana y quieren llegar más rápido a su primer PDF finalizado.</string>
+    <string name="post_otp_interest_top_up_title">Añadir fondos</string>
+    <string name="post_otp_interest_top_up_subtitle">Prepara tu cartera para fondos, saldos y futuros pagos una vez completadas las verificaciones necesarias.</string>
+
+    <string name="credit">Crédito</string>
+    <string name="i_am_happy_paysmart_share_my_data">Acepto que PaySmart comparta de forma segura mis datos (nombre, dirección y fecha de nacimiento) con agencias de crédito para evaluar mi elegibilidad y ofrecer productos de crédito adecuados.</string>
+    <string name="social_media_advertisement_platform">Acepto que PaySmart comparta mi nombre, dirección de correo electrónico y actividad en la aplicación con plataformas de redes sociales.</string>
+    <string name="terms_of_use">https://pay-smart.net/terms/</string>
 </resources>

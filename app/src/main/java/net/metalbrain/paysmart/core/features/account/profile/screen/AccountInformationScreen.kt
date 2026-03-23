@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,8 +30,10 @@ import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.profile.components.ProfileMenuItem
 import net.metalbrain.paysmart.core.features.account.profile.util.accountInformationLanguageLabel
 import net.metalbrain.paysmart.core.features.account.profile.util.accountInformationThemeModeRes
+import net.metalbrain.paysmart.core.features.account.profile.util.accountInformationThemeVariantRes
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountrySelectionCatalog
 import net.metalbrain.paysmart.core.features.theme.data.AppThemeMode
+import net.metalbrain.paysmart.core.features.theme.data.AppThemeVariant
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,13 +41,15 @@ import net.metalbrain.paysmart.core.features.theme.data.AppThemeMode
 fun AccountInformationScreen(
     currentLanguage: String,
     currentThemeMode: AppThemeMode,
+    currentThemeVariant: AppThemeVariant,
     profileStatusLabel: String,
     onBack: () -> Unit,
     onProfileClick: () -> Unit,
     onAccountLimitsClick: () -> Unit,
     onAccountStatementClick: () -> Unit,
     onLanguageClick: () -> Unit,
-    onThemeModeClick: () -> Unit
+    onThemeModeClick: () -> Unit,
+    onThemeVariantClick: () -> Unit
 ) {
     val context = LocalContext.current
     val languageLabel = accountInformationLanguageLabel(currentLanguage)
@@ -115,6 +120,14 @@ fun AccountInformationScreen(
                         leadingIcon = Icons.Default.DarkMode,
                         trailingText = stringResource(accountInformationThemeModeRes(currentThemeMode)),
                         onClick = onThemeModeClick
+                    )
+                    HorizontalDivider()
+                    ProfileMenuItem(
+                        title = stringResource(R.string.profile_theme_variant_title),
+                        subtitle = stringResource(R.string.profile_account_info_theme_variant_subtitle),
+                        leadingIcon = Icons.Default.Palette,
+                        trailingText = stringResource(accountInformationThemeVariantRes(currentThemeVariant)),
+                        onClick = onThemeVariantClick
                     )
                 }
             }

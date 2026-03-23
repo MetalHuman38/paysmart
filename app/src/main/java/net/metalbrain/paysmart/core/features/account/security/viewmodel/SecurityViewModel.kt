@@ -21,7 +21,54 @@ import net.metalbrain.paysmart.domain.auth.state.AuthState
 import net.metalbrain.paysmart.domain.auth.state.LocalSecurityState
 import net.metalbrain.paysmart.domain.auth.state.PostAuthState
 import net.metalbrain.paysmart.domain.model.LocalSecuritySettingsModel
+import net.metalbrain.paysmart.domain.model.SecuritySettingsModel
 import net.metalbrain.paysmart.domain.usecase.SecurityUseCase
+
+internal fun resolvePostAuthState(
+    authState: AuthState,
+    localState: LocalSecuritySettingsModel,
+    cloudState: SecuritySettingsModel?,
+    sessionState: SessionState
+): PostAuthState {
+    return when (authState) {
+        AuthState.Loading ->
+            PostAuthState.Loading
+
+        AuthState.Unauthenticated ->
+            PostAuthState.Unauthenticated
+
+        is AuthState.Authenticated -> {
+            val accountHasPrimaryUnlock =
+                localState.passcodeEnabled ||
+                    localState.biometricsEnabled ||
+                    localState.passwordEnabled ||
+                    cloudState?.passcodeEnabled == true ||
+                    cloudState?.biometricsEnabled == true ||
+                    cloudState?.passwordEnabled == true
+            val isPasswordReady =
+                localState.passwordEnabled && localState.localPasswordSetAt != null
+            val requiresPasswordRecovery =
+                cloudState?.passwordEnabled == true && !isPasswordReady
+
+            when {
+                !accountHasPrimaryUnlock ->
+                    PostAuthState.RequireAccountProtection
+
+                requiresPasswordRecovery ->
+                    PostAuthState.RequirePasswordRecovery
+
+                !isPasswordReady ->
+                    PostAuthState.RequirePasswordSetup
+
+                sessionState is SessionState.Locked ->
+                    PostAuthState.Locked
+
+                else ->
+                    PostAuthState.Ready
+            }
+        }
+    }
+}
 
 @HiltViewModel
 class SecurityViewModel @Inject constructor(
@@ -49,60 +96,28 @@ class SecurityViewModel @Inject constructor(
         combine(
             userManager.authState,
             securityPreference.localSecurityStateFlow,
+            securityPreference.cloudSecuritySettingsFlow,
             sessionStateManager.sessionState
-        ) { authState, localState, sessionState ->
-
-            when (authState) {
-
-                AuthState.Loading ->
-                    PostAuthState.Loading
-
-                AuthState.Unauthenticated ->
-                    PostAuthState.Unauthenticated
-
-                is AuthState.Authenticated -> {
-                    val hasAnyPrimaryUnlock =
-                        localState.passcodeEnabled || localState.biometricsEnabled || localState.passwordEnabled
-                    val isPasswordReady =
-                        localState.passwordEnabled && localState.localPasswordSetAt != null
-
-                    when {
-
-                        // 🔴 User must configure protection
-                        !hasAnyPrimaryUnlock ->
-                            PostAuthState.RequireAccountProtection
-
-                        !isPasswordReady ->
-                            PostAuthState.RequirePasswordSetup
-
-                        // 🔒 Session locked
-                        sessionState is SessionState.Locked ->
-                            PostAuthState.Locked
-
-                        // Email verification is intentionally enforced by
-                        // onboarding + feature gates, not global post-auth redirect.
-                        else ->
-                            PostAuthState.Ready
-                    }
-                }
-            }
+        ) { authState, localState, cloudState, sessionState ->
+            resolvePostAuthState(
+                authState = authState,
+                localState = localState,
+                cloudState = cloudState,
+                sessionState = sessionState
+            )
         }.stateIn(
                 viewModelScope,
-                SharingStarted.Companion.WhileSubscribed(5_000),
+                SharingStarted.WhileSubscribed(5_000),
                 PostAuthState.Loading
         )
 
-
-
-    val localSecuritySettings: StateFlow<LocalSecuritySettingsModel?> =
-        useCase.localSettingsFlow
 
     val localSecurityState: StateFlow<LocalSecurityState> =
         securityPreference.localSecurityStateFlow
             .map { LocalSecurityState.Ready(it) }
             .stateIn(
                 viewModelScope,
-                SharingStarted.Companion.WhileSubscribed(5_000),
+                SharingStarted.WhileSubscribed(5_000),
                 LocalSecurityState.Loading
             )
 
@@ -110,7 +125,23 @@ class SecurityViewModel @Inject constructor(
         securityPreference.hideBalanceFlow
             .stateIn(
                 viewModelScope,
-                SharingStarted.Companion.WhileSubscribed(5_000),
+                SharingStarted.WhileSubscribed(5_000),
+                false
+            )
+
+    val privacyCreditEnabled: StateFlow<Boolean> =
+        securityPreference.privacyCreditEnabledFlow
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                false
+            )
+
+    val privacySocialMediaEnabled: StateFlow<Boolean> =
+        securityPreference.privacySocialMediaEnabledFlow
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
                 false
             )
 
@@ -144,6 +175,18 @@ class SecurityViewModel @Inject constructor(
     fun setHideBalance(enabled: Boolean) {
         viewModelScope.launch {
             securityPreference.setHideBalance(enabled)
+        }
+    }
+
+    fun setPrivacyCreditEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            securityPreference.setPrivacyCreditEnabled(enabled)
+        }
+    }
+
+    fun setPrivacySocialMediaEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            securityPreference.setPrivacySocialMediaEnabled(enabled)
         }
     }
 

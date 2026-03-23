@@ -17,6 +17,7 @@ import net.metalbrain.paysmart.room.dao.InvoiceProfileDraftDao
 import net.metalbrain.paysmart.room.dao.InvoiceVenueDao
 import net.metalbrain.paysmart.room.dao.InvoiceWeeklyDraftDao
 import net.metalbrain.paysmart.room.dao.ManagedCardDao
+import net.metalbrain.paysmart.room.dao.NotificationInboxDao
 import net.metalbrain.paysmart.room.dao.SecuritySettingsDao
 import net.metalbrain.paysmart.room.dao.SecureTokenDao
 import net.metalbrain.paysmart.room.dao.SendMoneyRecipientDraftDao
@@ -70,6 +71,11 @@ object TestRoomModule {
     fun provideAuthSessionLogDao(
         db: EncryptedAppDatabase
     ): AuthSessionLogDao = db.authSessionLogDao()
+
+    @Provides
+    fun provideNotificationInboxDao(
+        db: EncryptedAppDatabase
+    ): NotificationInboxDao = db.notificationInboxDao()
 
     @Provides
     fun provideWalletBalanceDao(

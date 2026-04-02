@@ -10,9 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import net.metalbrain.paysmart.core.features.invoicing.screen.InvoiceDetailRoute
-import net.metalbrain.paysmart.core.features.invoicing.screen.InvoiceVenueSetupRoute
-import net.metalbrain.paysmart.core.features.invoicing.screen.InvoiceWorkerProfileRoute
-import net.metalbrain.paysmart.core.features.invoicing.utils.InvoiceWeeklyEntryRoute
+import net.metalbrain.paysmart.core.features.invoicing.routing.InvoiceSetupRoute
 import net.metalbrain.paysmart.core.features.invoicing.viewmodel.InvoiceDetailViewModel
 import net.metalbrain.paysmart.core.features.invoicing.viewmodel.InvoiceSetupViewModel
 
@@ -21,18 +19,34 @@ internal fun NavGraphBuilder.invoiceNavGraph(
 ) {
     navigation(
         route = Screen.InvoiceFlow.route,
-        startDestination = Screen.InvoiceWorkerProfile.route
+        startDestination = Screen.InvoiceWeeklyEntry.route
     ) {
+        composable(Screen.InvoiceWeeklyEntry.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.InvoiceFlow.route)
+            }
+            val viewModel: InvoiceSetupViewModel = hiltViewModel(parentEntry)
+            InvoiceSetupRoute(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onOpenInvoice = { invoiceId ->
+                    navController.navigateInGraph(Screen.InvoiceDetail.routeWithInvoiceId(invoiceId)) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
         composable(Screen.InvoiceWorkerProfile.route) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(Screen.InvoiceFlow.route)
             }
             val viewModel: InvoiceSetupViewModel = hiltViewModel(parentEntry)
-            InvoiceWorkerProfileRoute(
+            InvoiceSetupRoute(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
-                onContinue = {
-                    navController.navigateInGraph(Screen.InvoiceVenueSetup.route) {
+                onOpenInvoice = { invoiceId ->
+                    navController.navigateInGraph(Screen.InvoiceDetail.routeWithInvoiceId(invoiceId)) {
                         launchSingleTop = true
                     }
                 }
@@ -44,40 +58,9 @@ internal fun NavGraphBuilder.invoiceNavGraph(
                 navController.getBackStackEntry(Screen.InvoiceFlow.route)
             }
             val viewModel: InvoiceSetupViewModel = hiltViewModel(parentEntry)
-            InvoiceVenueSetupRoute(
+            InvoiceSetupRoute(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
-                onRequireProfile = {
-                    navController.navigateInGraph(Screen.InvoiceWorkerProfile.route) {
-                        launchSingleTop = true
-                    }
-                },
-                onContinue = {
-                    navController.navigateInGraph(Screen.InvoiceWeeklyEntry.route) {
-                        launchSingleTop = true
-                    }
-                }
-            )
-        }
-
-        composable(Screen.InvoiceWeeklyEntry.route) { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(Screen.InvoiceFlow.route)
-            }
-            val viewModel: InvoiceSetupViewModel = hiltViewModel(parentEntry)
-            InvoiceWeeklyEntryRoute(
-                viewModel = viewModel,
-                onBack = { navController.popBackStack() },
-                onRequireProfileSetup = {
-                    navController.navigateInGraph(Screen.InvoiceWorkerProfile.route) {
-                        launchSingleTop = true
-                    }
-                },
-                onRequireVenueSetup = {
-                    navController.navigateInGraph(Screen.InvoiceVenueSetup.route) {
-                        launchSingleTop = true
-                    }
-                },
                 onOpenInvoice = { invoiceId ->
                     navController.navigateInGraph(Screen.InvoiceDetail.routeWithInvoiceId(invoiceId)) {
                         launchSingleTop = true

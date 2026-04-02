@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.core.features.sendmoney.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +18,7 @@ import net.metalbrain.paysmart.core.features.fx.data.FxQuote
 import net.metalbrain.paysmart.core.features.fx.data.FxQuoteDataSource
 import net.metalbrain.paysmart.core.features.fx.data.FxQuoteQuery
 import net.metalbrain.paysmart.core.features.fx.repository.FxQuoteRepository
+import net.metalbrain.paysmart.core.features.sendmoney.data.RecentSendRecipientRepository
 import net.metalbrain.paysmart.core.features.sendmoney.data.SendMoneyRecipientDraftRepository
 import net.metalbrain.paysmart.core.features.sendmoney.domain.BankRecipientForm
 import net.metalbrain.paysmart.core.features.sendmoney.domain.DocumentRecipientForm
@@ -25,6 +27,7 @@ import net.metalbrain.paysmart.core.features.sendmoney.domain.RecipientFlowStep
 import net.metalbrain.paysmart.core.features.sendmoney.domain.RecipientMethod
 import net.metalbrain.paysmart.core.features.sendmoney.domain.SendMoneyRecipientDraft
 import net.metalbrain.paysmart.core.features.sendmoney.domain.VoltpayLookupRecipientForm
+import net.metalbrain.paysmart.navigator.Screen
 import java.util.Locale
 
 data class SendMoneyRecipientUiState(
@@ -58,16 +61,25 @@ data class SendMoneyRecipientUiState(
 class SendMoneyViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val draftRepository: SendMoneyRecipientDraftRepository,
-    private val fxQuoteRepository: FxQuoteRepository
+    private val fxQuoteRepository: FxQuoteRepository,
+    private val recentSendRecipientRepository: RecentSendRecipientRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SendMoneyRecipientUiState())
     val uiState: StateFlow<SendMoneyRecipientUiState> = _uiState.asStateFlow()
     private var quoteRefreshJob: Job? = null
     private var latestQuoteRequestId: Long = 0L
+    private val prefillRecipientKey = savedStateHandle
+        .get<String>(Screen.SendMoney.RECIPIENT_KEY_ARG)
+        .orEmpty()
+        .trim()
 
     init {
         observeRecipientDraft()
+        if (prefillRecipientKey.isNotEmpty()) {
+            prefillRecentRecipient(prefillRecipientKey)
+        }
     }
 
     fun selectMethod(method: RecipientMethod) {
@@ -232,7 +244,7 @@ class SendMoneyViewModel @Inject constructor(
             }
 
             RecipientFlowStep.REVIEW -> {
-                mutateDraft { draft -> draft.copy(step = RecipientFlowStep.DONE) }
+                confirmRecipient()
             }
 
             RecipientFlowStep.DONE -> Unit
@@ -369,6 +381,91 @@ class SendMoneyViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    private fun confirmRecipient() {
+        val userId = _uiState.value.userId
+        if (userId.isNullOrBlank()) {
+            _uiState.update {
+                it.copy(
+                    isHydrating = false,
+                    isPersisting = false,
+                    error = "Authentication required before starting send money"
+                )
+            }
+            return
+        }
+
+        val completedDraft = _uiState.value.draft
+            .copy(step = RecipientFlowStep.DONE)
+            .normalized()
+            .withUpdatedTimestamp()
+
+        _uiState.update {
+            it.copy(
+                draft = completedDraft,
+                isPersisting = true,
+                error = null
+            )
+        }
+
+        viewModelScope.launch {
+            runCatching {
+                recentSendRecipientRepository.recordFromDraft(userId, completedDraft)
+                draftRepository.upsert(userId, completedDraft)
+            }.onSuccess {
+                _uiState.update {
+                    it.copy(
+                        draft = completedDraft,
+                        isPersisting = false,
+                        error = null
+                    )
+                }
+            }.onFailure { error ->
+                _uiState.update {
+                    it.copy(
+                        isPersisting = false,
+                        error = error.localizedMessage ?: "Unable to save recipient"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun prefillRecentRecipient(recipientKey: String) {
+        val userId = authRepository.currentUser?.uid?.trim()
+        if (userId.isNullOrEmpty()) {
+            return
+        }
+
+        viewModelScope.launch {
+            val recipient = recentSendRecipientRepository.getByKey(
+                userId = userId,
+                recipientKey = recipientKey
+            ) ?: return@launch
+
+            val prefilledDraft = recipient.toPrefilledDraft()
+                .normalized()
+                .withUpdatedTimestamp()
+
+            _uiState.update {
+                it.copy(
+                    userId = userId,
+                    draft = prefilledDraft,
+                    isHydrating = false,
+                    quoteError = null,
+                    error = null
+                )
+            }
+
+            runCatching {
+                draftRepository.upsert(userId, prefilledDraft)
+            }.onFailure { error ->
+                _uiState.update {
+                    it.copy(error = error.localizedMessage ?: "Unable to load recipient")
+                }
+            }
         }
     }
 

@@ -94,7 +94,16 @@ internal fun NavGraphBuilder.walletNavGraph(
         )
     }
 
-    composable(Screen.SendMoney.route) {
+    composable(
+        route = "${Screen.SendMoney.route}?${Screen.SendMoney.RECIPIENT_KEY_ARG}={${Screen.SendMoney.RECIPIENT_KEY_ARG}}",
+        arguments = listOf(
+            navArgument(Screen.SendMoney.RECIPIENT_KEY_ARG) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = ""
+            }
+        )
+    ) {
         SendMoneyRecipientScreen(
             onBack = { navController.popBackStack() }
         )

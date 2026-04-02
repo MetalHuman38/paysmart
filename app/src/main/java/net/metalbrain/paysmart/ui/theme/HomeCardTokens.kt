@@ -12,8 +12,12 @@ object HomeCardTokens {
     val summaryCardHeight = 168.dp
     val accountInfoCardWidth = 296.dp
     val accountInfoCardHeight = 176.dp
-    val serviceCardWidth = 116.dp
-    val serviceCardHeight = 132.dp
+    val recentRecipientCardWidth = 148.dp
+    val recentRecipientCardHeight = 164.dp
+    val recentRecipientAvatarSize = 64.dp
+    val serviceCardWidth = 92.dp
+    val serviceCardHeight = 112.dp
+    val serviceCircleSize = 74.dp
     val serviceCardIconPadding = Dimens.md
     val contentPadding = 14.dp
     val compactContentPadding = 14.dp

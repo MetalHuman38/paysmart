@@ -76,15 +76,15 @@ fun ExchangeRatesScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
             contentPadding = PaddingValues(
-                horizontal = Dimens.screenPadding,
-                vertical = Dimens.md
+                horizontal = Dimens.md,
+                vertical = Dimens.sm
             ),
-            verticalArrangement = Arrangement.spacedBy(Dimens.md)
+            verticalArrangement = Arrangement.spacedBy(Dimens.sm)
         ) {
             item {
                 Text(
                     text = stringResource(R.string.exchange_rates_supporting),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

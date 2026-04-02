@@ -587,6 +587,7 @@
     <string name="status_time_format">%1$s · %2$s</string>
     <string name="home_rewards_subtitle">송금과 초대를 완료하여 더 많이 획득하세요.</string>
     <string name="home_recent_activity_empty">최근 거래가 없습니다.</string>
+    <string name="home_send_again_title">다시 보내기</string>
     <string name="home_services_title">서비스</string>
     <string name="home_services_unavailable">필수 보안 단계를 완료하면 서비스를 사용할 수 있습니다.</string>
     <string name="home_service_create_invoice">송장 만들기</string>

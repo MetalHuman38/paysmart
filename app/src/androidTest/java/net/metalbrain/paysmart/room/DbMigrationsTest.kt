@@ -86,4 +86,24 @@ class DbMigrationsTest {
             assertTrue(found)
         }
     }
+
+    @Test
+    fun migrate17To18AddsRecentSendRecipientTable() {
+        val databaseName = "recent-send-recipient-migration-test"
+
+        helper.createDatabase(databaseName, 17).close()
+
+        val migratedDb = helper.runMigrationsAndValidate(
+            databaseName,
+            18,
+            true,
+            DbMigrations.MIGRATION_17_18
+        )
+
+        migratedDb.query(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'send_money_recent_recipient'"
+        ).use { cursor ->
+            assertTrue(cursor.moveToFirst())
+        }
+    }
 }

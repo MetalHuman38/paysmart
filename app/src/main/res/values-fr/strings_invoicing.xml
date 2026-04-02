@@ -76,6 +76,10 @@
     <string name="invoice_setup_apply_address_action">Utiliser l’adresse suggérée</string>
     <string name="invoice_setup_add_venue_action">Ajouter un lieu</string>
     <string name="invoice_setup_continue_action">Continuer vers les services hebdomadaires</string>
+    <string name="invoice_setup_continue_action_short">Continuer</string>
+    <string name="invoice_setup_save_draft_action">Enregistrer le brouillon</string>
+    <string name="invoice_setup_footer_continue_hint">Remplissez les champs mis en évidence pour cette étape, puis continuez.</string>
+    <string name="invoice_setup_footer_review_hint">Vérifiez les détails de la facture, puis générez le PDF final.</string>
     <string name="invoice_profile_setup_title">Configurez votre profil de facturation</string>
     <string name="invoice_profile_setup_subtitle">Ajoutez les informations du travailleur et de paiement qui doivent apparaître sur chaque facture hebdomadaire.</string>
     <string name="invoice_profile_setup_continue_action">Continuer vers la configuration du lieu</string>

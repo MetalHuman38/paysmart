@@ -13,6 +13,7 @@ import net.metalbrain.paysmart.room.dao.InvoiceWeeklyDraftDao
 import net.metalbrain.paysmart.room.dao.ManagedCardDao
 import net.metalbrain.paysmart.room.dao.NotificationInboxDao
 import net.metalbrain.paysmart.room.dao.SecureTokenDao
+import net.metalbrain.paysmart.room.dao.SendMoneyRecentRecipientDao
 import net.metalbrain.paysmart.room.dao.SendMoneyRecipientDraftDao
 import net.metalbrain.paysmart.room.dao.SecuritySettingsDao
 import net.metalbrain.paysmart.room.dao.TransactionDao
@@ -29,6 +30,7 @@ import net.metalbrain.paysmart.room.entity.InvoiceWeeklyDraftEntity
 import net.metalbrain.paysmart.room.entity.ManagedCardEntity
 import net.metalbrain.paysmart.room.entity.NotificationInboxEntity
 import net.metalbrain.paysmart.room.entity.SecureTokenEntity
+import net.metalbrain.paysmart.room.entity.SendMoneyRecentRecipientEntity
 import net.metalbrain.paysmart.room.entity.SendMoneyRecipientDraftEntity
 import net.metalbrain.paysmart.room.entity.SecuritySettingsEntity
 import net.metalbrain.paysmart.room.entity.TransactionEntity
@@ -49,12 +51,13 @@ import net.metalbrain.paysmart.room.entity.WalletBalanceEntity
         ManagedCardEntity::class,
         NotificationInboxEntity::class,
         SendMoneyRecipientDraftEntity::class,
+        SendMoneyRecentRecipientEntity::class,
         InvoiceProfileDraftEntity::class,
         InvoiceVenueEntity::class,
         InvoiceWeeklyDraftEntity::class,
         TransactionEntity::class
     ],
-    version = 17,
+    version = 18,
     exportSchema = true
 )
 abstract class EncryptedAppDatabase : RoomDatabase() {
@@ -79,6 +82,8 @@ abstract class EncryptedAppDatabase : RoomDatabase() {
     abstract fun notificationInboxDao(): NotificationInboxDao
 
     abstract fun sendMoneyRecipientDraftDao(): SendMoneyRecipientDraftDao
+
+    abstract fun sendMoneyRecentRecipientDao(): SendMoneyRecentRecipientDao
 
     abstract fun invoiceProfileDraftDao(): InvoiceProfileDraftDao
 

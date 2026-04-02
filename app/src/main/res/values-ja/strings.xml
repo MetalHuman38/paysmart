@@ -588,6 +588,7 @@
     <string name="status_time_format">%1$s · %2$s</string>
     <string name="home_rewards_subtitle">送金や招待を完了してさらに獲得しましょう</string>
     <string name="home_recent_activity_empty">最近の取引はまだありません。</string>
+    <string name="home_send_again_title">もう一度送金</string>
     <string name="home_services_title">サービス</string>
     <string name="home_services_unavailable">必要なセキュリティ手順を完了するとサービスが利用可能になります。</string>
     <string name="home_service_create_invoice">請求書を作成</string>

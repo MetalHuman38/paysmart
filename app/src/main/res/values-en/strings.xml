@@ -624,6 +624,7 @@
     <string name="status_time_format">%1$s · %2$s</string>
     <string name="home_rewards_subtitle">Earn more by completing transfers and invites</string>
     <string name="home_recent_activity_empty">No recent transactions yet.</string>
+    <string name="home_send_again_title">Send again to</string>
     <string name="home_services_title">Services</string>
     <string name="home_services_unavailable">Services unlock after completing required security steps.</string>
     <string name="home_service_create_invoice">Create invoice</string>

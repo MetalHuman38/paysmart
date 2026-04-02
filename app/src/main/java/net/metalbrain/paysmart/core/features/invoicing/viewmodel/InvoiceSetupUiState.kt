@@ -2,11 +2,17 @@ package net.metalbrain.paysmart.core.features.invoicing.viewmodel
 
 import net.metalbrain.paysmart.core.auth.AddressLookupResult
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceSummary
-import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceProfileDraft
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceFinalizeResult
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceShiftDraft
+import net.metalbrain.paysmart.core.features.invoicing.domain.toLegacyProfileDraft
+import net.metalbrain.paysmart.core.features.invoicing.domain.toLegacyWeeklyDraft
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceVenueDraft
-import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceWeeklyDraft
+import net.metalbrain.paysmart.core.invoice.factory.InvoiceFactory
+import net.metalbrain.paysmart.core.invoice.model.Invoice
+import net.metalbrain.paysmart.core.invoice.model.InvoiceFormStep
+import net.metalbrain.paysmart.core.invoice.model.Profession
+import net.metalbrain.paysmart.core.invoice.model.Template
+import net.metalbrain.paysmart.core.invoice.template.InvoiceTemplateCatalog
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
@@ -43,13 +49,21 @@ enum class InvoiceSetupStep {
 data class InvoiceSetupUiState(
     val userId: String? = null,
     val step: InvoiceSetupStep = InvoiceSetupStep.PROFILE,
-    val profileDraft: InvoiceProfileDraft = InvoiceProfileDraft(),
+    val formStep: InvoiceFormStep = InvoiceFormStep.QUICK_START,
+    val draftInvoice: Invoice = InvoiceFactory.createFromTemplate(
+        templateId = "weekly_shift_worker_template",
+        professionId = "zero_hours_worker",
+        initialLineItemCount = 7
+    ),
+    val selectedProfession: Profession? = null,
+    val availableProfessions: List<Profession> = InvoiceTemplateCatalog.professions,
+    val availableTemplates: List<Template> = InvoiceTemplateCatalog.templates,
     val venues: List<InvoiceVenueDraft> = emptyList(),
+    val selectedVenueId: String = "",
     val venueNameInput: String = "",
     val venueAddressInput: String = "",
     val venueCountryInput: String = "GB",
     val venueRateInput: String = "",
-    val weeklyDraft: InvoiceWeeklyDraft = InvoiceWeeklyDraft(),
     val isHydrating: Boolean = true,
     val isPersisting: Boolean = false,
     val isFinalizing: Boolean = false,
@@ -61,11 +75,20 @@ data class InvoiceSetupUiState(
     val error: String? = null,
     val infoMessage: String? = null
 ) {
+    val profileDraft
+        get() = draftInvoice.toLegacyProfileDraft()
+
+    val weeklyDraft
+        get() = draftInvoice.toLegacyWeeklyDraft(selectedVenueId)
+
     val weeklyRows: List<InvoiceShiftDraft>
         get() = weeklyDraft.withFullWeek().shifts
 
+    val selectedTemplate: Template?
+        get() = draftInvoice.templateId?.let(InvoiceTemplateCatalog::template)
+
     val effectiveSelectedVenueId: String
-        get() = weeklyDraft.selectedVenueId
+        get() = selectedVenueId
             .trim()
             .ifBlank { venues.firstOrNull()?.venueId.orEmpty() }
 
@@ -87,7 +110,7 @@ data class InvoiceSetupUiState(
         get() = profileDraft.isValid
 
     val canProceedToWeekly: Boolean
-        get() = profileDraft.isValid && venues.isNotEmpty()
+        get() = profileDraft.isValid && venues.isNotEmpty() && effectiveSelectedVenueId.isNotBlank()
 
     val canFinalize: Boolean
         get() = effectiveSelectedVenueId.isNotBlank() &&

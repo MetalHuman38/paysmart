@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
@@ -27,6 +28,7 @@ import net.metalbrain.paysmart.core.features.capabilities.repository.CountryCapa
 import net.metalbrain.paysmart.core.features.fx.data.FxPaymentMethod
 import net.metalbrain.paysmart.core.features.fx.data.FxQuoteQuery
 import net.metalbrain.paysmart.core.features.fx.repository.FxQuoteRepository
+import net.metalbrain.paysmart.core.features.sendmoney.data.RecentSendRecipientRepository
 import net.metalbrain.paysmart.core.notifications.NotificationInboxItem
 import net.metalbrain.paysmart.core.notifications.NotificationInboxRepository
 import net.metalbrain.paysmart.domain.model.LaunchInterest
@@ -34,6 +36,7 @@ import net.metalbrain.paysmart.ui.home.state.HomeBalanceSnapshot
 import net.metalbrain.paysmart.ui.home.state.HomeExchangeRateSnapshot
 import net.metalbrain.paysmart.ui.home.state.HomeNotificationKind
 import net.metalbrain.paysmart.ui.home.state.HomeNotificationUiState
+import net.metalbrain.paysmart.ui.home.state.HomeRecentRecipient
 import net.metalbrain.paysmart.ui.home.state.HomeTransactionProviderFilter
 import net.metalbrain.paysmart.ui.home.state.HomeUiState
 import net.metalbrain.paysmart.ui.home.state.RewardEarnedSnapshot
@@ -49,7 +52,8 @@ class HomeViewModel @Inject constructor(
     private val countryCapabilityRepository: CountryCapabilityRepository,
     private val fxQuoteRepository: FxQuoteRepository,
     private val userManager: UserManager,
-    private val notificationInboxRepository: NotificationInboxRepository,
+    notificationInboxRepository: NotificationInboxRepository,
+    recentSendRecipientRepository: RecentSendRecipientRepository,
 ) : ViewModel() {
     private val transactions = transactionRepository.observeTransactions()
         .stateIn(
@@ -144,6 +148,40 @@ class HomeViewModel @Inject constructor(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = HomeHeaderState()
+        )
+
+    private val recentRecipients = userManager.authState
+        .flatMapLatest { auth ->
+            when (auth) {
+                is AuthState.Authenticated -> recentSendRecipientRepository.observeRecentByUserId(auth.uid)
+                else -> flowOf(emptyList())
+            }
+        }
+        .map { recipients ->
+            recipients.map { recipient ->
+                HomeRecentRecipient(
+                    recipientKey = recipient.recipientKey,
+                    displayName = recipient.displayName,
+                    subtitle = recipient.subtitle,
+                    targetCurrencyCode = recipient.targetCurrency
+                )
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
+
+    private val homeHeaderAndRecipients = combine(
+        headerState,
+        recentRecipients
+    ) { header, recipients ->
+        header to recipients
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = HomeHeaderState() to emptyList()
     )
 
     val uiState: StateFlow<HomeUiState> = combine(
@@ -151,12 +189,14 @@ class HomeViewModel @Inject constructor(
         walletBalances,
         countryCapabilities,
         exchangeRateSnapshot,
-        headerState,
-    ) { localSecurity, wallet, capabilityProfile, exchangeRate, headerState ->
+        homeHeaderAndRecipients,
+    ) { localSecurity, wallet, capabilityProfile, exchangeRate, homeHeaderAndRecipients ->
+        val (headerState, recentRecipients) = homeHeaderAndRecipients
         HomeUiState(
             security = localSecurity,
             displayName = headerState.displayName,
             recentTransactions = headerState.transactionSearch.visibleTransactions,
+            recentRecipients = recentRecipients,
             transactionSearchQuery = headerState.transactionSearch.searchQuery,
             isTransactionSearchActive = headerState.transactionSearch.isSearchActive,
             availableTransactionProviders = headerState.transactionSearch.availableProviders,

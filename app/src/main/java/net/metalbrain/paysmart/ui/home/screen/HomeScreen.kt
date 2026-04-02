@@ -68,6 +68,14 @@ fun HomeScreen(
                         )
                     )
                 },
+                onRecentRecipientClick = { recipient ->
+                    navController.navigate(
+                        Screen.FeatureGate.routeWithArgs(
+                            feature = FeatureKey.SEND_MONEY.id,
+                            resumeRoute = Screen.SendMoney.routeWithRecipientKey(recipient.recipientKey)
+                        )
+                    )
+                },
                 onReceiveMoneyClick = {
                     val receiveMoneyRoute = if (uiState.countryIso2.equals("GB", ignoreCase = true)) {
                         Screen.UkAccount.routeWithCurrency(uiState.countryCurrencyCode)
@@ -126,6 +134,7 @@ fun HomeScreen(
                 localSettings = uiState.security,
                 displayName = uiState.displayName,
                 transactions = uiState.recentTransactions,
+                recentRecipients = uiState.recentRecipients,
                 transactionSearchQuery = uiState.transactionSearchQuery,
                 isTransactionSearchActive = uiState.isTransactionSearchActive,
                 availableTransactionProviders = uiState.availableTransactionProviders,

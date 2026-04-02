@@ -591,6 +591,7 @@
     <string name="status_time_format">%1$s · %2$s</string>
     <string name="home_rewards_subtitle">Ganhe mais concluindo transferências e convites</string>
     <string name="home_recent_activity_empty">Ainda não há transações recentes.</string>
+    <string name="home_send_again_title">Enviar novamente para</string>
     <string name="home_services_title">Serviços</string>
     <string name="home_services_unavailable">Os serviços são desbloqueados após concluir as etapas de segurança obrigatórias.</string>
     <string name="home_service_create_invoice">Criar fatura</string>

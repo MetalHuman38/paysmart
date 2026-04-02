@@ -393,4 +393,50 @@ object DbMigrations {
             )
         }
     }
+
+    val MIGRATION_17_18: Migration = object : Migration(17, 18) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS send_money_recent_recipient (
+                    userId TEXT NOT NULL,
+                    recipientKey TEXT NOT NULL,
+                    selectedMethod TEXT NOT NULL,
+                    sourceCurrency TEXT NOT NULL,
+                    targetCurrency TEXT NOT NULL,
+                    displayName TEXT NOT NULL,
+                    subtitle TEXT NOT NULL,
+                    voltTag TEXT NOT NULL,
+                    lookupEmail TEXT NOT NULL,
+                    lookupMobile TEXT NOT NULL,
+                    bankFullName TEXT NOT NULL,
+                    bankIban TEXT NOT NULL,
+                    bankBic TEXT NOT NULL,
+                    bankSwift TEXT NOT NULL,
+                    bankName TEXT NOT NULL,
+                    bankAddress TEXT NOT NULL,
+                    bankCity TEXT NOT NULL,
+                    bankCountry TEXT NOT NULL,
+                    bankPostalCode TEXT NOT NULL,
+                    requestEmail TEXT NOT NULL,
+                    requestFullName TEXT NOT NULL,
+                    updatedAtMs INTEGER NOT NULL,
+                    PRIMARY KEY(userId, recipientKey)
+                )
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                CREATE INDEX IF NOT EXISTS index_send_money_recent_recipient_userId
+                ON send_money_recent_recipient(userId)
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                CREATE INDEX IF NOT EXISTS index_send_money_recent_recipient_userId_updatedAtMs
+                ON send_money_recent_recipient(userId, updatedAtMs)
+                """.trimIndent()
+            )
+        }
+    }
 }

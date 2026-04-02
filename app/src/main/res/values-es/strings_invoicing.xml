@@ -76,6 +76,10 @@
     <string name="invoice_setup_apply_address_action">Usar dirección sugerida</string>
     <string name="invoice_setup_add_venue_action">Añadir lugar</string>
     <string name="invoice_setup_continue_action">Continuar a los turnos semanales</string>
+    <string name="invoice_setup_continue_action_short">Continuar</string>
+    <string name="invoice_setup_save_draft_action">Guardar borrador</string>
+    <string name="invoice_setup_footer_continue_hint">Completa los campos resaltados de este paso y luego continúa.</string>
+    <string name="invoice_setup_footer_review_hint">Revisa los detalles de la factura y luego genera el PDF final.</string>
     <string name="invoice_profile_setup_title">Configura tu perfil de factura</string>
     <string name="invoice_profile_setup_subtitle">Añade los datos del trabajador y de pago que deben aparecer en cada factura semanal.</string>
     <string name="invoice_profile_setup_continue_action">Continuar a la configuración del lugar</string>

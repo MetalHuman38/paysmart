@@ -76,6 +76,10 @@
     <string name="invoice_setup_apply_address_action">Use suggested address</string>
     <string name="invoice_setup_add_venue_action">Add venue</string>
     <string name="invoice_setup_continue_action">Continue to weekly shifts</string>
+    <string name="invoice_setup_continue_action_short">Continue</string>
+    <string name="invoice_setup_save_draft_action">Save draft</string>
+    <string name="invoice_setup_footer_continue_hint">Complete the highlighted fields for this step, then continue.</string>
+    <string name="invoice_setup_footer_review_hint">Review the invoice details, then generate the final PDF.</string>
     <string name="invoice_profile_setup_title">Set up your invoice profile</string>
     <string name="invoice_profile_setup_subtitle">Add the worker and payment details that should appear on every weekly invoice.</string>
     <string name="invoice_profile_setup_continue_action">Continue to venue setup</string>

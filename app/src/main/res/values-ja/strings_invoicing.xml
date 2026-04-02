@@ -76,6 +76,10 @@
     <string name="invoice_setup_apply_address_action">候補の住所を使用</string>
     <string name="invoice_setup_add_venue_action">勤務先を追加</string>
     <string name="invoice_setup_continue_action">週次シフトへ進む</string>
+    <string name="invoice_setup_continue_action_short">続行</string>
+    <string name="invoice_setup_save_draft_action">下書きを保存</string>
+    <string name="invoice_setup_footer_continue_hint">この手順で強調表示された項目を入力してから続行してください。</string>
+    <string name="invoice_setup_footer_review_hint">請求書の詳細を確認してから、最終PDFを生成してください。</string>
     <string name="invoice_profile_setup_title">請求書プロフィールを設定</string>
     <string name="invoice_profile_setup_subtitle">毎週の請求書に表示する作業者情報と支払い情報を追加してください。</string>
     <string name="invoice_profile_setup_continue_action">勤務先設定へ進む</string>

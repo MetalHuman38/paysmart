@@ -20,6 +20,7 @@ import net.metalbrain.paysmart.room.dao.InvoiceWeeklyDraftDao
 import net.metalbrain.paysmart.room.dao.ManagedCardDao
 import net.metalbrain.paysmart.room.dao.NotificationInboxDao
 import net.metalbrain.paysmart.room.dao.SecureTokenDao
+import net.metalbrain.paysmart.room.dao.SendMoneyRecentRecipientDao
 import net.metalbrain.paysmart.room.dao.SendMoneyRecipientDraftDao
 import net.metalbrain.paysmart.room.dao.SecuritySettingsDao
 import net.metalbrain.paysmart.room.dao.TransactionDao
@@ -63,7 +64,8 @@ object RoomProvidesModule {
                 DbMigrations.MIGRATION_13_14,
                 DbMigrations.MIGRATION_14_15,
                 DbMigrations.MIGRATION_15_16,
-                DbMigrations.MIGRATION_16_17
+                DbMigrations.MIGRATION_16_17,
+                DbMigrations.MIGRATION_17_18
             )
             .fallbackToDestructiveMigration(false)
             .build()
@@ -111,6 +113,11 @@ object RoomProvidesModule {
     @Provides
     fun provideSendMoneyRecipientDraftDao(db: EncryptedAppDatabase): SendMoneyRecipientDraftDao =
         db.sendMoneyRecipientDraftDao()
+
+    @Provides
+    fun provideSendMoneyRecentRecipientDao(
+        db: EncryptedAppDatabase
+    ): SendMoneyRecentRecipientDao = db.sendMoneyRecentRecipientDao()
 
     @Provides
     fun provideInvoiceProfileDraftDao(db: EncryptedAppDatabase): InvoiceProfileDraftDao =

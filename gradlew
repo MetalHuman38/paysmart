@@ -88,6 +88,23 @@ APP_BASE_NAME=${0##*/}
 # Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
 APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s\n' "$PWD" ) || exit
 
+# Prefer the project-pinned Gradle JDK over IDE-injected JAVA_HOME values.
+project_java_home=
+if [ -f "$APP_HOME/gradle.properties" ]; then
+    project_java_home=$(sed -n 's/^org\.gradle\.java\.home=//p' "$APP_HOME/gradle.properties" | tail -n 1)
+fi
+if [ -n "$project_java_home" ]; then
+    project_java_home=$(printf '%s' "$project_java_home" | sed 's#\\\\#\\#g; s#\\:#:#g')
+    candidate_java_home=$project_java_home
+    if { [ "$cygwin" = true ] || [ "$msys" = true ]; } && command -v cygpath >/dev/null 2>&1; then
+        candidate_java_home=$(cygpath --unix "$project_java_home")
+    fi
+    if [ -x "$candidate_java_home/bin/java" ]; then
+        JAVA_HOME=$candidate_java_home
+    fi
+fi
+unset VSCODE_JAVA_HOME _JAVA_HOME
+
 # Use the maximum available, or set MAX_FD != -1 to use that value.
 MAX_FD=maximum
 

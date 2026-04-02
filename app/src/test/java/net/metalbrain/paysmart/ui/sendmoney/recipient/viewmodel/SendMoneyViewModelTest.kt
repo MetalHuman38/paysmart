@@ -1,9 +1,11 @@
 package net.metalbrain.paysmart.ui.sendmoney.recipient.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.firebase.auth.FirebaseUser
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import net.metalbrain.paysmart.core.features.sendmoney.data.RecentSendRecipientRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -86,7 +88,9 @@ class SendMoneyViewModelTest {
         val viewModel = SendMoneyViewModel(
             authRepository = createAuthRepository(userId),
             draftRepository = repository,
-            fxQuoteRepository = mockk(relaxed = true)
+            fxQuoteRepository = mockk(relaxed = true),
+            recentSendRecipientRepository = mockk(relaxed = true),
+            savedStateHandle = SavedStateHandle()
         )
 
         advanceUntilIdle()
@@ -133,7 +137,9 @@ class SendMoneyViewModelTest {
         val viewModel = SendMoneyViewModel(
             authRepository = createAuthRepository(userId),
             draftRepository = repository,
-            fxQuoteRepository = quoteRepository
+            fxQuoteRepository = quoteRepository,
+            recentSendRecipientRepository = mockk(relaxed = true),
+            savedStateHandle = SavedStateHandle()
         )
 
         advanceUntilIdle()
@@ -217,7 +223,9 @@ class SendMoneyViewModelTest {
         val viewModel = SendMoneyViewModel(
             authRepository = createAuthRepository(userId),
             draftRepository = repository,
-            fxQuoteRepository = quoteRepository
+            fxQuoteRepository = quoteRepository,
+            recentSendRecipientRepository = mockk(relaxed = true),
+            savedStateHandle = SavedStateHandle()
         )
 
         repository.upsert(
@@ -261,7 +269,9 @@ class SendMoneyViewModelTest {
         return SendMoneyViewModel(
             authRepository = createAuthRepository(userId),
             draftRepository = SendMoneyRecipientDraftRepository(dao),
-            fxQuoteRepository = mockk(relaxed = true)
+            fxQuoteRepository = mockk(relaxed = true),
+            recentSendRecipientRepository = mockk(relaxed = true),
+            savedStateHandle = SavedStateHandle()
         )
     }
 

@@ -76,6 +76,10 @@
     <string name="invoice_setup_apply_address_action">使用建议地址</string>
     <string name="invoice_setup_add_venue_action">添加工作地点</string>
     <string name="invoice_setup_continue_action">继续填写每周班次</string>
+    <string name="invoice_setup_continue_action_short">继续</string>
+    <string name="invoice_setup_save_draft_action">保存草稿</string>
+    <string name="invoice_setup_footer_continue_hint">完成此步骤中高亮显示的字段后继续。</string>
+    <string name="invoice_setup_footer_review_hint">请检查发票详情，然后生成最终 PDF。</string>
     <string name="invoice_profile_setup_title">设置你的发票资料</string>
     <string name="invoice_profile_setup_subtitle">添加需要显示在每周发票上的工作人员和付款信息。</string>
     <string name="invoice_profile_setup_continue_action">继续进行工作地点设置</string>

@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/core/invoice-models" />
             <option value="$PROJECT_DIR$/core/models" />
             <option value="$PROJECT_DIR$/sandbox" />
           </set>

@@ -76,6 +76,10 @@
     <string name="invoice_setup_apply_address_action">Vorgeschlagene Adresse verwenden</string>
     <string name="invoice_setup_add_venue_action">Einsatzort hinzufügen</string>
     <string name="invoice_setup_continue_action">Weiter zu den wöchentlichen Schichten</string>
+    <string name="invoice_setup_continue_action_short">Weiter</string>
+    <string name="invoice_setup_save_draft_action">Entwurf speichern</string>
+    <string name="invoice_setup_footer_continue_hint">Füllen Sie die hervorgehobenen Felder für diesen Schritt aus und fahren Sie dann fort.</string>
+    <string name="invoice_setup_footer_review_hint">Prüfen Sie die Rechnungsdetails und erstellen Sie dann das endgültige PDF.</string>
     <string name="invoice_profile_setup_title">Richten Sie Ihr Rechnungsprofil ein</string>
     <string name="invoice_profile_setup_subtitle">Fügen Sie die Mitarbeiter- und Zahlungsdaten hinzu, die auf jeder Wochenrechnung erscheinen sollen.</string>
     <string name="invoice_profile_setup_continue_action">Weiter zur Einsatzorteinrichtung</string>

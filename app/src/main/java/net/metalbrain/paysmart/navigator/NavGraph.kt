@@ -183,7 +183,13 @@ sealed class Screen(val route: String) {
             return "$BASEROUTE?$CURRENCYARG=${Uri.encode(currencyCode.trim())}"
         }
     }
-    object SendMoney : Screen("wallet/send_money")
+    object SendMoney : Screen("wallet/send_money") {
+        const val RECIPIENT_KEY_ARG = "recipientKey"
+
+        fun routeWithRecipientKey(recipientKey: String): String {
+            return "${route}?$RECIPIENT_KEY_ARG=${Uri.encode(recipientKey.trim())}"
+        }
+    }
     object InvoiceFlow : Screen("invoice_flow")
     object InvoiceWorkerProfile : Screen("invoice/profile")
     object InvoiceVenueSetup : Screen("invoice/venue")

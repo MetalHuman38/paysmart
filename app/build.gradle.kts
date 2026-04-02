@@ -17,6 +17,20 @@ val trackedVersionProperties = Properties().apply {
     }
 }
 
+val repoGradleProperties = Properties().apply {
+    val gradlePropertiesFile = rootProject.file("gradle.properties")
+    if (gradlePropertiesFile.exists()) {
+        gradlePropertiesFile.inputStream().use(::load)
+    }
+}
+
+val localBuildProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use(::load)
+    }
+}
+
 fun Project.stringPropertyOrEnv(name: String, defaultValue: String = ""): String =
     providers.gradleProperty(name).orNull?.trim().takeUnless { it.isNullOrEmpty() }
         ?: providers.environmentVariable(name).orNull?.trim().takeUnless { it.isNullOrEmpty() }
@@ -26,11 +40,32 @@ fun Project.stringPropertyOrEnv(name: String, defaultValue: String = ""): String
 fun Project.intPropertyOrEnv(name: String, defaultValue: Int): Int =
     stringPropertyOrEnv(name, defaultValue.toString()).toInt()
 
+fun Project.repoPropertyOrEnv(name: String, defaultValue: String = ""): String =
+    repoGradleProperties.getProperty(name)?.trim()?.takeUnless { it.isEmpty() }
+        ?: providers.environmentVariable(name).orNull?.trim()?.takeUnless { it.isEmpty() }
+        ?: defaultValue
+
+fun Project.localPropertyOrEnv(name: String, defaultValue: String = ""): String =
+    localBuildProperties.getProperty(name)?.trim()?.takeUnless { it.isEmpty() }
+        ?: providers.environmentVariable(name).orNull?.trim()?.takeUnless { it.isEmpty() }
+        ?: defaultValue
+
 val versionCodeValue = intPropertyOrEnv("PAYSMART_VERSION_CODE", defaultValue = 1)
 val versionMajor = intPropertyOrEnv("PAYSMART_VERSION_MAJOR", defaultValue = 1)
 val versionMinor = intPropertyOrEnv("PAYSMART_VERSION_MINOR", defaultValue = 0)
 val versionPatch = intPropertyOrEnv("PAYSMART_VERSION_PATCH", defaultValue = 0)
 val versionPreRelease = stringPropertyOrEnv("PAYSMART_VERSION_PRERELEASE")
+val releaseStoreFilePath = localPropertyOrEnv("RELEASE_STORE_FILE")
+val releaseStorePasswordValue = localPropertyOrEnv("RELEASE_STORE_PASSWORD")
+val releaseKeyAliasValue = localPropertyOrEnv("RELEASE_KEY_ALIAS")
+val releaseKeyPasswordValue = localPropertyOrEnv("RELEASE_KEY_PASSWORD")
+val releaseStoreFileValue = releaseStoreFilePath
+    .takeIf { it.isNotEmpty() }
+    ?.let { rootProject.file(it) }
+val hasValidReleaseSigning = releaseStoreFileValue?.exists() == true &&
+    releaseStorePasswordValue.isNotEmpty() &&
+    releaseKeyAliasValue.isNotEmpty() &&
+    releaseKeyPasswordValue.isNotEmpty()
 val paySmartSemVer = buildString {
     append("$versionMajor.$versionMinor.$versionPatch")
     if (versionPreRelease.isNotEmpty()) {
@@ -85,9 +120,8 @@ android {
             }
         }
 
-        val mapsApiKey = (project.findProperty("MAPS_API_KEY") as? String)
-            ?: (project.findProperty("ADDRESS_VALIDATION_API_KEY") as? String)
-            ?: ""
+        val mapsApiKey = localPropertyOrEnv("MAPS_API_KEY")
+            .ifEmpty { localPropertyOrEnv("ADDRESS_VALIDATION_API_KEY") }
         manifestPlaceholders["googleMapsApiKey"] = mapsApiKey
     }
 
@@ -100,19 +134,13 @@ android {
 
     signingConfigs {
         create("release") {
-            val storeFilePath = project.findProperty("RELEASE_STORE_FILE") as? String
-            val storePassword = project.findProperty("RELEASE_STORE_PASSWORD") as? String
-            val keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as? String
-            val keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as? String
-
-
-            if (storeFilePath != null && storePassword != null && keyAlias != null && keyPassword != null) {
-                storeFile = file(storeFilePath)
-                this.storePassword = storePassword
-                this.keyAlias = keyAlias
-                this.keyPassword = keyPassword
+            if (hasValidReleaseSigning) {
+                storeFile = releaseStoreFileValue
+                storePassword = releaseStorePasswordValue
+                keyAlias = releaseKeyAliasValue
+                keyPassword = releaseKeyPasswordValue
             } else {
-                println("⚠️ Warning: Release signing config values not set! AAB will be unsigned.")
+                println("⚠️ Warning: Release signing config values are missing or invalid in this repo. Release artifacts will be unsigned.")
             }
         }
     }
@@ -138,7 +166,9 @@ android {
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
+            if (hasValidReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -186,6 +216,7 @@ room {
 
 
 dependencies {
+    implementation(project(":core:invoice-models"))
     implementation(project(":core:models"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

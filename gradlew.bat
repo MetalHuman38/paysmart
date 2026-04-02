@@ -38,6 +38,19 @@ for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
+@rem Prefer the project-pinned Gradle JDK over IDE-injected JAVA_HOME values.
+set PAYSMART_GRADLE_JAVA_HOME=
+for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"org.gradle.java.home=" "%APP_HOME%\gradle.properties" 2^>NUL') do set PAYSMART_GRADLE_JAVA_HOME=%%B
+if defined PAYSMART_GRADLE_JAVA_HOME (
+    set "PAYSMART_GRADLE_JAVA_HOME=%PAYSMART_GRADLE_JAVA_HOME:\\=\%"
+    set "PAYSMART_GRADLE_JAVA_HOME=%PAYSMART_GRADLE_JAVA_HOME:\:=:%"
+    if exist "%PAYSMART_GRADLE_JAVA_HOME%\bin\java.exe" (
+        set "JAVA_HOME=%PAYSMART_GRADLE_JAVA_HOME%"
+    )
+)
+set "VSCODE_JAVA_HOME="
+set "_JAVA_HOME="
+
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
 

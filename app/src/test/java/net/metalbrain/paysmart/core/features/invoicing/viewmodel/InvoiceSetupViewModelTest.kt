@@ -15,6 +15,8 @@ import net.metalbrain.paysmart.core.auth.AddressResolverPolicyHandler
 import net.metalbrain.paysmart.core.features.invoicing.data.InvoiceFinalizeRepository
 import net.metalbrain.paysmart.core.features.invoicing.data.InvoiceProfileDraftRepository
 import net.metalbrain.paysmart.core.features.invoicing.data.InvoiceReadRepository
+import net.metalbrain.paysmart.core.features.invoicing.data.InvoiceSetupPreferenceRepository
+import net.metalbrain.paysmart.core.features.invoicing.data.InvoiceSetupSelection
 import net.metalbrain.paysmart.core.features.invoicing.data.InvoiceVenueRepository
 import net.metalbrain.paysmart.core.features.invoicing.data.InvoiceWeeklyDraftRepository
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceFinalizeResult
@@ -85,7 +87,7 @@ class InvoiceSetupViewModelTest {
         assertEquals(fixture.venue.venueId, state.effectiveSelectedVenueId)
         assertEquals("2026-03-09", state.weeklyDraft.invoiceDate)
         assertEquals("2026-03-08", state.weeklyDraft.weekEndingDate)
-        assertEquals("18.50", state.weeklyDraft.hourlyRateInput)
+        assertEquals(18.5, state.weeklyDraft.hourlyRateInput.toDouble(), 0.0)
         assertEquals("7", state.weeklyDraft.shifts.first().hoursInput)
     }
 
@@ -128,14 +130,14 @@ class InvoiceSetupViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(finalized, state.finalizedInvoice)
         assertEquals(fixture.venue.venueId, state.weeklyDraft.selectedVenueId)
-        assertEquals("20.00", state.weeklyDraft.hourlyRateInput)
+        assertEquals(20.0, state.weeklyDraft.hourlyRateInput.toDouble(), 0.0)
         assertTrue(state.weeklyDraft.invoiceDate.isBlank())
         assertTrue(state.weeklyDraft.weekEndingDate.isBlank())
         assertTrue(state.weeklyDraft.shifts.all { it.workDate.isBlank() && it.hoursInput.isBlank() })
 
         val persistedDraft = requireNotNull(fixture.weeklyFlow.value)
         assertEquals(fixture.venue.venueId, persistedDraft.selectedVenueId)
-        assertEquals("20.00", persistedDraft.hourlyRateInput)
+        assertEquals(20.0, persistedDraft.hourlyRateInput.toDouble(), 0.0)
         assertTrue(persistedDraft.invoiceDate.isBlank())
         assertTrue(persistedDraft.weekEndingDate.isBlank())
         assertTrue(persistedDraft.shifts.all { it.workDate.isBlank() && it.hoursInput.isBlank() })
@@ -153,6 +155,7 @@ private class InvoiceSetupFixture {
     val profileFlow = MutableStateFlow<InvoiceProfileDraft?>(null)
     val venueFlow = MutableStateFlow<List<InvoiceVenueDraft>>(emptyList())
     val weeklyFlow = MutableStateFlow<InvoiceWeeklyDraft?>(null)
+    val selectionFlow = MutableStateFlow(InvoiceSetupSelection())
 
     val authRepository = createAuthRepository(userId)
     val userProfileCacheRepository = mockk<UserProfileCacheRepository> {
@@ -176,6 +179,9 @@ private class InvoiceSetupFixture {
     val readRepository = mockk<InvoiceReadRepository> {
         coEvery { listFinalized(any()) } returns Result.success(emptyList())
     }
+    val setupPreferenceRepository = mockk<InvoiceSetupPreferenceRepository> {
+        every { observeSelection() } returns selectionFlow
+    }
     val addressResolverPolicyHandler = mockk<AddressResolverPolicyHandler>(relaxed = true)
 
     fun createViewModel(): InvoiceSetupViewModel {
@@ -187,6 +193,7 @@ private class InvoiceSetupFixture {
             weeklyDraftRepository = weeklyDraftRepository,
             finalizeRepository = finalizeRepository,
             readRepository = readRepository,
+            setupPreferenceRepository = setupPreferenceRepository,
             addressResolverPolicyHandler = addressResolverPolicyHandler
         )
     }

@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.ui.home.components.ExchangeRateFlagCircle
 import net.metalbrain.paysmart.ui.theme.Dimens
@@ -18,7 +19,9 @@ import net.metalbrain.paysmart.ui.theme.Dimens
 fun ExchangeRateFlagChip(
     baseFlag: String,
     targetFlag: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    minWidth: Dp = 72.dp,
+    circleMinWidth: Dp = 28.dp
 ) {
     Surface(
         modifier = modifier,
@@ -29,18 +32,18 @@ fun ExchangeRateFlagChip(
     ) {
         Row(
             modifier = Modifier
-                .widthIn(min = 72.dp)
+                .widthIn(min = minWidth)
                 .padding(horizontal = Dimens.sm, vertical = Dimens.xs),
             horizontalArrangement = Arrangement.spacedBy(Dimens.xs),
             verticalAlignment = Alignment.CenterVertically
         ) {
             ExchangeRateFlagCircle(
                 flag = baseFlag,
-                modifier = Modifier.widthIn(min = 28.dp)
+                modifier = Modifier.widthIn(min = circleMinWidth)
             )
             ExchangeRateFlagCircle(
                 flag = targetFlag,
-                modifier = Modifier.widthIn(min = 28.dp)
+                modifier = Modifier.widthIn(min = circleMinWidth)
             )
         }
     }

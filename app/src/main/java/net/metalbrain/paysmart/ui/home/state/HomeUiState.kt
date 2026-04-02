@@ -44,10 +44,18 @@ data class HomeExchangeRateSnapshot(
     val errorMessage: String? = null
 )
 
+data class HomeRecentRecipient(
+    val recipientKey: String,
+    val displayName: String,
+    val subtitle: String,
+    val targetCurrencyCode: String = CountryCapabilityCatalog.defaultProfile().currencyCode
+)
+
 data class HomeUiState(
     val security: LocalSecuritySettingsModel? = null,
     val displayName: String = "",
     val recentTransactions: List<Transaction> = emptyList(),
+    val recentRecipients: List<HomeRecentRecipient> = emptyList(),
     val transactionSearchQuery: String = "",
     val isTransactionSearchActive: Boolean = false,
     val availableTransactionProviders: List<HomeTransactionProviderFilter> = emptyList(),

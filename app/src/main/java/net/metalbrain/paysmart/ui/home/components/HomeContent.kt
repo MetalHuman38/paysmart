@@ -41,6 +41,7 @@ import net.metalbrain.paysmart.ui.home.card.RewardEarnedSummaryCard
 import net.metalbrain.paysmart.ui.home.state.HomeBalanceSnapshot
 import net.metalbrain.paysmart.ui.home.state.HomeExchangeRateSnapshot
 import net.metalbrain.paysmart.ui.home.state.HomeNotificationUiState
+import net.metalbrain.paysmart.ui.home.state.HomeRecentRecipient
 import net.metalbrain.paysmart.ui.home.state.HomeTransactionProviderFilter
 import net.metalbrain.paysmart.ui.home.state.RewardEarnedSnapshot
 import net.metalbrain.paysmart.ui.theme.Dimens
@@ -53,6 +54,7 @@ fun HomeContent(
     onTransactionClick: (Transaction) -> Unit,
     onCreateInvoiceClick: () -> Unit,
     onSendMoneyClick: () -> Unit,
+    onRecentRecipientClick: (HomeRecentRecipient) -> Unit,
     onReceiveMoneyClick: () -> Unit,
     onBalanceCardClick: () -> Unit,
     onRewardCardClick: () -> Unit,
@@ -65,6 +67,7 @@ fun HomeContent(
     localSettings: LocalSecuritySettingsModel?,
     displayName: String,
     transactions: List<Transaction>,
+    recentRecipients: List<HomeRecentRecipient>,
     transactionSearchQuery: String,
     isTransactionSearchActive: Boolean,
     availableTransactionProviders: List<HomeTransactionProviderFilter>,
@@ -197,6 +200,23 @@ fun HomeContent(
             }
         }
 
+        if (recentRecipients.isNotEmpty()) {
+            item {
+                HomeSectionHeader(
+                    title = stringResource(R.string.home_send_again_title)
+                )
+            }
+
+            item {
+                HomeRecentRecipientsSection(
+                    recipients = recentRecipients,
+                    preferredCurrencyCode = countryCurrencyCode,
+                    preferredFlagEmoji = countryFlagEmoji,
+                    onRecipientClick = onRecentRecipientClick
+                )
+            }
+        }
+
         item {
             HomeSectionHeader(
                 title = stringResource(R.string.home_services_title)
@@ -206,7 +226,7 @@ fun HomeContent(
         item {
             LazyRow(
                 contentPadding = PaddingValues(horizontal = Dimens.xs),
-                horizontalArrangement = Arrangement.spacedBy(Dimens.md)
+                horizontalArrangement = Arrangement.spacedBy(Dimens.lg)
             ) {
                 items(
                     items = availableServices,

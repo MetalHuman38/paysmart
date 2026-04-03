@@ -1,36 +1,26 @@
-// AppLoadingViewModel.kt
 package net.metalbrain.paysmart.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import net.metalbrain.paysmart.ui.screens.loader.LoadingPhase
 
-class AppLoadingViewModel : ViewModel() {
+@HiltViewModel
+class AppLoadingViewModel @Inject constructor() : ViewModel() {
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    private val _loadingPhase = MutableStateFlow<LoadingPhase>(LoadingPhase.Startup)
+    val loadingPhase: StateFlow<LoadingPhase> = _loadingPhase.asStateFlow()
 
-    private val _loadingMessage = MutableStateFlow("Welcome to PaySmart...")
-    val loadingMessage: StateFlow<String> = _loadingMessage
-
-    // Call this to start loading with rotating messages
-    suspend fun startLoading() {
-        val messages = listOf(
-            "Welcome to PaySmart...",
-            "Just a moment...",
-            "We're on it!",
-            "Almost ready...",
-            "Loading secure vault..."
-        )
-
-        for (message in messages) {
-            if (!_isLoading.value) break
-            _loadingMessage.emit(message)
-            kotlinx.coroutines.delay(2500L)
+    fun setPhase(phase: LoadingPhase) {
+        if (_loadingPhase.value != phase) {
+            _loadingPhase.value = phase
         }
     }
 
-    fun stopLoading() {
-        _isLoading.value = false
+    fun complete() {
+        _loadingPhase.value = LoadingPhase.Idle
     }
 }

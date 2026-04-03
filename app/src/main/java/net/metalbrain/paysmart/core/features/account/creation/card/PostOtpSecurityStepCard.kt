@@ -19,12 +19,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.core.features.account.creation.data.SecurityStepSpec
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
+/**
+ * A composable card that displays a specific security step or feature information,
+ * typically shown during the account creation flow after OTP verification.
+ *
+ * The card consists of a title followed by a row containing a themed icon and
+ * a detailed description.
+ *
+ * @param step The [SecurityStepSpec] containing the title, description, and icon to be displayed.
+ * @param modifier The [Modifier] to be applied to the card's container.
+ */
 @Composable
 fun PostOtpSecurityStepCard(
     step: SecurityStepSpec,
     modifier: Modifier = Modifier
 ) {
+    val colors = PaysmartTheme.colorTokens
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -34,7 +47,7 @@ fun PostOtpSecurityStepCard(
         Text(
             text = step.title,
             style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = colors.textPrimary
         )
 
         Row(
@@ -46,7 +59,7 @@ fun PostOtpSecurityStepCard(
                 modifier = Modifier
                     .size(Dimens.xl)
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = colors.fillHover,
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -54,7 +67,7 @@ fun PostOtpSecurityStepCard(
                 Icon(
                     imageVector = step.icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = colors.brandPrimary,
                     modifier = Modifier.size(Dimens.md)
                 )
             }
@@ -66,7 +79,7 @@ fun PostOtpSecurityStepCard(
                     .padding(top = 2.dp)
                     .heightIn(min = 36.dp),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = colors.textSecondary
             )
         }
     }

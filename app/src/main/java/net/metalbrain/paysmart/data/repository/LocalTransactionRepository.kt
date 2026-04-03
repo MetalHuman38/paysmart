@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionData
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneySessionStatus
+import net.metalbrain.paysmart.core.ui.R
 import net.metalbrain.paysmart.domain.auth.UserManager
 import net.metalbrain.paysmart.domain.auth.state.AuthState
 import net.metalbrain.paysmart.domain.model.Transaction

@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.recovery.components.RecoveryOptionItem
+import net.metalbrain.paysmart.core.ui.R as CoreUiR
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,7 +79,7 @@ fun RecoverAccountScreen(
 
                 // Change Phone Number Option
                 RecoveryOptionItem(
-                    icon = painterResource(id = R.drawable.ic_phone), // Replace with actual icon
+                    icon = painterResource(id = CoreUiR.drawable.ic_phone),
                     title = stringResource(R.string.change_phone_title),
                     description = stringResource(R.string.change_phone_description),
                     buttonText = stringResource(R.string.change_phone_number),

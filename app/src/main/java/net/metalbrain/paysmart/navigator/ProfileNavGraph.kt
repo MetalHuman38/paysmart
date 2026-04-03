@@ -16,6 +16,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import net.metalbrain.paysmart.BuildConfig
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.address.screen.AddressSetupResolverScreen
 import net.metalbrain.paysmart.core.features.account.address.viewmodel.AddressSetupResolverViewModel
@@ -56,6 +57,7 @@ import net.metalbrain.paysmart.core.features.language.viewmodel.LanguageViewMode
 import net.metalbrain.paysmart.core.features.theme.viewmodel.AppThemeViewModel
 import net.metalbrain.paysmart.domain.auth.state.LocalSecurityState
 import net.metalbrain.paysmart.domain.state.UserUiState
+import net.metalbrain.paysmart.room.manager.RoomKeyManager
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 
 internal fun NavGraphBuilder.profileNavGraph(
@@ -73,7 +75,15 @@ internal fun NavGraphBuilder.profileNavGraph(
             ProfileScreen(
                 user = (state as UserUiState.ProfileLoaded).user,
                 isVerified = verifiedFromServer,
-                viewModel = userViewModel,
+                versionLabel = if (BuildConfig.DEBUG) {
+                    stringResource(
+                        R.string.profile_version_format,
+                        BuildConfig.VERSION_NAME,
+                        BuildConfig.VERSION_CODE
+                    )
+                } else {
+                    null
+                },
                 onChangePhotoClick = {
                     navController.navigateInGraph(Screen.ProfilePhotoPicker.route)
                 },
@@ -93,6 +103,8 @@ internal fun NavGraphBuilder.profileNavGraph(
                     navController.navigateInGraph(Screen.ProfileAbout.route)
                 },
                 onLogout = {
+                    userViewModel.signOut()
+                    RoomKeyManager.deleteKey()
                     navController.navigateClearingBackStackInGraph(
                         route = Screen.Startup.route,
                         source = "profile_logout",
@@ -369,6 +381,11 @@ internal fun NavGraphBuilder.profileNavGraph(
                 isLocked = profileState.isLocked,
                 missingItems = profileState.missingItems,
                 nextStep = profileState.nextStep,
+                versionLabel = stringResource(
+                    R.string.profile_version_format,
+                    BuildConfig.VERSION_NAME,
+                    BuildConfig.VERSION_CODE
+                ),
                 onResolveSetup = {
                     when (profileState.nextStep) {
                         ProfileNextStep.VERIFY_EMAIL -> {
@@ -426,6 +443,11 @@ internal fun NavGraphBuilder.profileNavGraph(
                 isLocked = profileState.isLocked,
                 missingItems = profileState.missingItems,
                 nextStep = profileState.nextStep,
+                versionLabel = stringResource(
+                    R.string.profile_version_format,
+                    BuildConfig.VERSION_NAME,
+                    BuildConfig.VERSION_CODE
+                ),
                 onResolveSetup = {
                     when (profileState.nextStep) {
                         ProfileNextStep.VERIFY_EMAIL -> {

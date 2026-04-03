@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,12 +33,25 @@ import net.metalbrain.paysmart.core.features.notifications.state.NotificationCen
 import net.metalbrain.paysmart.core.features.notifications.viewmodel.NotificationCenterViewModel
 import net.metalbrain.paysmart.ui.theme.Dimens
 
+/**
+ * Composable that represents the main Notification Center screen.
+ *
+ * Displays a list of user notifications, a summary of unread alerts, and provides
+ * navigation back to the previous screen. It handles empty states and interaction
+ * with individual notification cards.
+ *
+ * @param viewModel The [NotificationCenterViewModel] that manages the UI state and logic.
+ * @param onBack Callback invoked when the back navigation button is clicked.
+ */
 @Composable
 fun NotificationCenterScreen(
     viewModel: NotificationCenterViewModel = hiltViewModel(),
     onBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+
+
 
     LazyColumn(
         modifier = Modifier

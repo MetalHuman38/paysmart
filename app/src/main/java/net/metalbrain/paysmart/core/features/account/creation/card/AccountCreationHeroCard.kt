@@ -17,7 +17,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
+/**
+ * A hero card component used within the account creation flow to highlight specific steps or sections.
+ * Displays an optional emoji, a prominent title, and a descriptive subtitle over a themed gradient background.
+ *
+ * @param modifier The [Modifier] to be applied to the card.
+ * @param emoji An optional emoji string to be displayed at the top of the card.
+ * @param title The main headline text for the card.
+ * @param subtitle The supporting text providing additional details.
+ */
 @Composable
 internal fun AccountCreationHeroCard(
     modifier: Modifier = Modifier,
@@ -25,11 +35,13 @@ internal fun AccountCreationHeroCard(
     title: String,
     subtitle: String,
 ) {
+    val colors = PaysmartTheme.colorTokens
+
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            containerColor = colors.surfacePrimary,
+            contentColor = colors.textPrimary
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -39,9 +51,9 @@ internal fun AccountCreationHeroCard(
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
-                            MaterialTheme.colorScheme.surfaceContainerLow
+                            colors.brandPrimary.copy(alpha = 0.12f),
+                            colors.brandAccent.copy(alpha = 0.08f),
+                            colors.surfacePrimary
                         )
                     )
                 )
@@ -62,13 +74,13 @@ internal fun AccountCreationHeroCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = colors.textPrimary,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = colors.textSecondary,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )

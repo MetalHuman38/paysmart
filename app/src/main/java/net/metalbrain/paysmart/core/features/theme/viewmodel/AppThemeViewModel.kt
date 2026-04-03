@@ -21,14 +21,14 @@ class AppThemeViewModel @Inject constructor(
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000),
-            AppThemeMode.SYSTEM
+            AppThemeMode.DARK
         )
 
     val themeVariant: StateFlow<AppThemeVariant> = repository.observeThemeVariant()
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000),
-            AppThemeVariant.PAYSMART
+            AppThemeVariant.OBSIDIAN
         )
 
     fun cycleThemeMode() {

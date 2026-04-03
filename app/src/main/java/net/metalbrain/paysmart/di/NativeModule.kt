@@ -8,6 +8,8 @@ import net.metalbrain.paysmart.core.features.account.authorization.password.repo
 import net.metalbrain.paysmart.core.auth.NativePasswordHasher
 import net.metalbrain.paysmart.domain.crypto.CryptoUseCase
 import net.metalbrain.paysmart.domain.crypto.NativeCryptoUseCase
+import net.metalbrain.paysmart.domain.room.NativeRoomUseCase
+import net.metalbrain.paysmart.domain.room.RoomUseCase
 
 
 @Module
@@ -18,6 +20,11 @@ abstract class CryptoModule {
     abstract fun bindCryptoUseCase(
         impl: NativeCryptoUseCase
     ): CryptoUseCase
+
+    @Binds
+    abstract fun bindRoomUseCase(
+        impl: NativeRoomUseCase
+    ): RoomUseCase
 }
 
 @Module

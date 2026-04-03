@@ -21,7 +21,7 @@ class WalletBalanceRepository @Inject constructor(
     private val dao: WalletBalanceDao,
     private val firestore: FirebaseFirestore,
     private val roomPassphraseRepository: RoomPassphraseRepository
-) {
+) : WalletBalanceGateway {
     private companion object {
         const val TAG = "WalletBalanceRepo"
         @Volatile
@@ -36,13 +36,13 @@ class WalletBalanceRepository @Inject constructor(
         val updatedAtMs: Long = System.currentTimeMillis()
     )
 
-    fun observeByUserId(userId: String): Flow<WalletBalanceModel?> {
+    override fun observeByUserId(userId: String): Flow<WalletBalanceModel?> {
         return dao.observeByUserId(userId).map { entity ->
             entity?.let { decryptEntity(userId, it) }
         }
     }
 
-    suspend fun syncFromServer(userId: String): Result<WalletBalanceModel?> {
+    override suspend fun syncFromServer(userId: String): Result<WalletBalanceModel?> {
         return runCatching {
             val server = loadServerWallet(userId)
             if (server == null) {
@@ -55,7 +55,7 @@ class WalletBalanceRepository @Inject constructor(
         }
     }
 
-    suspend fun upsert(model: WalletBalanceModel) {
+    override suspend fun upsert(model: WalletBalanceModel) {
         val encrypted = encryptModel(model)
         dao.upsert(
             WalletBalanceEntity(

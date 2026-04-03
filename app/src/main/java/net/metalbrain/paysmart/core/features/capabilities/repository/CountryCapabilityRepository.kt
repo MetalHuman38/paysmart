@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.addmoney.data.AddMoneyProvider
 import net.metalbrain.paysmart.core.features.capabilities.catalog.AddMoneyMarketPolicy
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityItem
@@ -17,6 +16,7 @@ import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityKey
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityProfile
 import net.metalbrain.paysmart.core.features.fx.data.FxPaymentMethod
+import net.metalbrain.paysmart.core.ui.R
 import net.metalbrain.paysmart.room.dao.CountryCapabilityDao
 import net.metalbrain.paysmart.room.entity.CountryCapabilityEntity
 import org.json.JSONArray

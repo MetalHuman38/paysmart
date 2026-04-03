@@ -17,14 +17,14 @@ import net.metalbrain.paysmart.core.features.capabilities.repository.CountryCapa
 import net.metalbrain.paysmart.core.features.capabilities.state.AccountLimitSelectorRowUiState
 import net.metalbrain.paysmart.core.features.capabilities.state.AccountLimitsListUiState
 import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
-import net.metalbrain.paysmart.data.repository.WalletBalanceRepository
+import net.metalbrain.paysmart.data.repository.WalletBalanceGateway
 import net.metalbrain.paysmart.domain.auth.UserManager
 import net.metalbrain.paysmart.domain.auth.state.AuthState
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class AccountLimitsListViewModel @Inject constructor(
-    private val walletBalanceRepository: WalletBalanceRepository,
+    private val walletBalanceRepository: WalletBalanceGateway,
     private val profileCacheRepository: UserProfileCacheRepository,
     private val countryCapabilityRepository: CountryCapabilityRepository,
     private val accountTypeAndLimitCatalog: AccountTypeAndLimitCatalog,

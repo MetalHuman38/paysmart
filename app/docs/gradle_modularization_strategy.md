@@ -125,10 +125,16 @@ Pilot feature extraction with the cleanest seams:
 - `:feature:notifications`
 - `:feature:identity`
 
+Theme stabilization should happen before those feature extractions. See:
+- `app/docs/phase2_theme_and_feature_strategy.md`
+
 ### Phase 3
 Move infrastructure out of `:app`:
 - `:core:database`
 - `:core:firebase`
+
+Execution detail and the app-shell target are mapped here:
+- `app/docs/phase3_infrastructure_and_app_shell_strategy.md`
 
 ### Phase 4
 Extract the remaining heavy surfaces:
@@ -197,6 +203,10 @@ Rule:
   - `/email/unsubscribe`
 
 ## 8) Exact Phase 1 Module Extraction List
+
+For the audited, executable Phase 1 file list, see:
+
+- `app/docs/gradle_modularization_phase1_revised_move_list.md`
 
 Phase 1 should not move whole business features yet. It should create the shared foundations the later feature modules will depend on.
 

@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.core.features.account.creation.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import net.metalbrain.paysmart.core.features.account.creation.card.PostOtpSecurityStepCard
 import net.metalbrain.paysmart.core.features.account.creation.data.SecurityStepSpec
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -22,12 +24,15 @@ fun SecurityStepSection(
     title: String,
     steps: List<SecurityStepSpec>
 ) {
+    val colors = PaysmartTheme.colorTokens
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+            containerColor = colors.surfacePrimary
+        ),
+        border = BorderStroke(1.dp, colors.borderSubtle)
     ) {
         Column(
             modifier = Modifier.padding(Dimens.md),
@@ -36,7 +41,7 @@ fun SecurityStepSection(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = colors.textPrimary
             )
 
             steps.forEachIndexed { index, step ->
@@ -44,7 +49,7 @@ fun SecurityStepSection(
 
                 if (index != steps.lastIndex) {
                     HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)
+                        color = colors.divider
                     )
                 }
             }

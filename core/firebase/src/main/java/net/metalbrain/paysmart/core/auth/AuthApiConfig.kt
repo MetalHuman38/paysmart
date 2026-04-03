@@ -1,0 +1,150 @@
+package net.metalbrain.paysmart.core.auth
+
+import android.net.Uri
+
+data class AuthApiConfig (
+    val baseUrl: String,
+    val checkPhoneOrEmail: String = "/auth/check-email-or-phone",
+    val checkIfPhoneAlreadyExist: String = "/auth/check-phone",
+    val finalizePhoneSignup: String = "/auth/finalize-phone-signup",
+    val allowFederatedLinking: String = "/auth/allowFederatedLinking",
+    val setBiometricEnabled: String = "/auth/setBiometricEnabled",
+    val getBiometricEnabled: String = "/auth/getBiometricEnabled",
+    val setPasswordEnabled: String = "/auth/setPasswordEnabled",
+    val getPasswordEnabled: String = "/auth/getPasswordEnabled",
+    val confirmPhoneChanged: String = "/auth/confirmPhoneChanged",
+    val lookupAddress: String = "/auth/lookupAddress",
+    val setHomeAddressVerified: String = "/auth/setHomeAddressVerified",
+    val setMfaEnrollmentPromptState: String = "/auth/setMfaEnrollmentPromptState",
+    val setPasskeyEnabled: String = "/auth/setPasskeyEnabled",
+    val identityUploadSession: String = "/auth/identity/upload/session",
+    val identityUploadPayload: String = "/auth/identity/upload/payload",
+    val identityUploadCommit: String = "/auth/identity/upload/commit",
+    val identityExtractText: String = "/auth/identity/extractText",
+    val identityImageAttestation: String = "/auth/identity/image/attestation",
+    val identityProviderStart: String = "/auth/identity/provider/startSession",
+    val identityProviderResume: String = "/auth/identity/provider/resume",
+    val identityProviderCallback: String = "/auth/identity/provider/callback",
+    val passkeyRegisterOptions: String = "/auth/passkeys/register/options",
+    val passkeyRegisterVerify: String = "/auth/passkeys/register/verify",
+    val passkeyAuthenticateOptions: String = "/auth/passkeys/authenticate/options",
+    val passkeyAuthenticateVerify: String = "/auth/passkeys/authenticate/verify",
+    val passkeyList: String = "/auth/passkeys/list",
+    val passkeyRevoke: String = "/auth/passkeys/revoke",
+    val passkeySignInOptions: String = "/auth/passkeys/signin/options",
+    val passkeySignInVerify: String = "/auth/passkeys/signin/verify",
+    val invoiceFinalize: String = "/invoices/finalize",
+    val invoiceList: String = "/invoices",
+    val invoiceById: String = "/invoices/{invoiceId}",
+    val invoiceQueuePdf: String = "/invoices/{invoiceId}/pdf",
+    val invoiceDownloadPdf: String = "/invoices/{invoiceId}/pdf/download",
+    val addMoneySession: String = "/payments/add-money/session",
+    val managedCards: String = "/payments/stripe/managed-cards",
+    val addMoneyFlutterwaveSession: String = "/payments/flutterwave/add-money/session",
+    val flutterwaveFundingAccount: String = "/payments/flutterwave/funding-account",
+    val flutterwaveFundingAccountProvision: String = "/payments/flutterwave/funding-account/provision",
+    val setPassCodeEnabled: String = "/auth/setPassCodeEnabled",
+    val getPassCodeEnabled: String = "/auth/getPassCodeEnabled",
+    val generateEmailVerificationHandler: String = "/auth/generate",
+    val checkEmailVerificationStatusHandler: String = "/auth/status",
+    val getSecuritySettings: String = "/auth/getSecuritySettings",
+    val registerNotificationInstallation: String = "/notifications/installations/register",
+    val usersEnsurePath: String = "/users/ensure",
+    val attachApiPrefix: Boolean = false
+) {
+    val apiBase: String
+        get() {
+            val root = baseUrl.trimEnd('/')
+            return if (attachApiPrefix && !root.endsWith("/api")) "$root/api" else root
+        }
+
+    val checkPhoneOrEmailUrl get() = "$apiBase$checkPhoneOrEmail"
+    val checkIfPhoneAlreadyExistUrl get() = "$apiBase$checkIfPhoneAlreadyExist"
+    val finalizePhoneSignupUrl get() = "$apiBase$finalizePhoneSignup"
+    val allowFederatedLinkingUrl get() = "$apiBase$allowFederatedLinking"
+    val setBiometricEnabledUrl get() = "$apiBase$setBiometricEnabled"
+    val getBiometricEnabledUrl get() = "$apiBase$getBiometricEnabled"
+    val setPasswordEnabledUrl get() = "$apiBase$setPasswordEnabled"
+    val getPasswordEnabledUrl get() = "$apiBase$getPasswordEnabled"
+    val confirmPhoneChangedUrl get() = "$apiBase$confirmPhoneChanged"
+    val lookupAddressUrl get() = "$apiBase$lookupAddress"
+    val setHomeAddressVerifiedUrl get() = "$apiBase$setHomeAddressVerified"
+    val setMfaEnrollmentPromptStateUrl get() = "$apiBase$setMfaEnrollmentPromptState"
+    val setPasskeyEnabledUrl get() = "$apiBase$setPasskeyEnabled"
+    val identityUploadSessionUrl get() = "$apiBase$identityUploadSession"
+    val identityUploadCommitUrl get() = "$apiBase$identityUploadCommit"
+    val identityUploadPayloadUrl get() = "$apiBase$identityUploadPayload"
+    val identityExtractTextUrl get() = "$apiBase$identityExtractText"
+    val identityImageAttestationUrl get() = "$apiBase$identityImageAttestation"
+    val identityProviderStartUrl get() = "$apiBase$identityProviderStart"
+    val identityProviderResumeUrl get() = "$apiBase$identityProviderResume"
+    val identityProviderCallbackUrl get() = "$apiBase$identityProviderCallback"
+    val passkeyRegisterOptionsUrl get() = "$apiBase$passkeyRegisterOptions"
+    val passkeyRegisterVerifyUrl get() = "$apiBase$passkeyRegisterVerify"
+    val passkeyAuthenticateOptionsUrl get() = "$apiBase$passkeyAuthenticateOptions"
+    val passkeyAuthenticateVerifyUrl get() = "$apiBase$passkeyAuthenticateVerify"
+    val passkeyListUrl get() = "$apiBase$passkeyList"
+    val passkeyRevokeUrl get() = "$apiBase$passkeyRevoke"
+    val passkeySignInOptionsUrl get() = "$apiBase$passkeySignInOptions"
+    val passkeySignInVerifyUrl get() = "$apiBase$passkeySignInVerify"
+    val invoiceFinalizeUrl get() = "$apiBase$invoiceFinalize"
+
+    fun invoiceListUrl(limit: Int, cursor: String? = null): String {
+        val safeLimit = limit.coerceIn(1, 100)
+        val base = "$apiBase$invoiceList?limit=$safeLimit"
+        val cleanCursor = cursor?.trim().orEmpty()
+        return if (cleanCursor.isNotEmpty()) {
+            "$base&cursor=${Uri.encode(cleanCursor)}"
+        } else {
+            base
+        }
+    }
+
+    fun invoiceByIdUrl(invoiceId: String): String {
+        return "$apiBase$invoiceById".replace("{invoiceId}", Uri.encode(invoiceId.trim()))
+    }
+
+    fun invoiceQueuePdfUrl(invoiceId: String): String {
+        return "$apiBase$invoiceQueuePdf".replace("{invoiceId}", Uri.encode(invoiceId.trim()))
+    }
+
+    fun invoiceDownloadPdfUrl(invoiceId: String): String {
+        return "$apiBase$invoiceDownloadPdf".replace("{invoiceId}", Uri.encode(invoiceId.trim()))
+    }
+
+    val addMoneySessionUrl get() = "$apiBase$addMoneySession"
+    val managedCardsUrl get() = "$apiBase$managedCards"
+    val addMoneyFlutterwaveSessionUrl get() = "$apiBase$addMoneyFlutterwaveSession"
+    val flutterwaveFundingAccountUrl get() = "$apiBase$flutterwaveFundingAccount"
+    val flutterwaveFundingAccountProvisionUrl get() = "$apiBase$flutterwaveFundingAccountProvision"
+
+    fun addMoneySessionStatusUrl(sessionId: String): String {
+        return "$apiBase$addMoneySession/${sessionId.trim()}"
+    }
+
+    fun managedCardDeleteUrl(paymentMethodId: String): String {
+        return "$apiBase$managedCards/${Uri.encode(paymentMethodId.trim())}"
+    }
+
+    fun managedCardDefaultUrl(paymentMethodId: String): String {
+        return "${managedCardDeleteUrl(paymentMethodId)}/default"
+    }
+
+    fun addMoneyFlutterwaveSessionStatusUrl(sessionId: String): String {
+        return "$apiBase$addMoneyFlutterwaveSession/${sessionId.trim()}"
+    }
+
+    val setPassCodeEnabledUrl get() = "$apiBase$setPassCodeEnabled"
+    val getPassCodeEnabledUrl get() = "$apiBase$getPassCodeEnabled"
+    val generateEmailVerificationHandlerUrl get() = "$apiBase$generateEmailVerificationHandler"
+    val checkEmailVerificationStatusHandlerUrl get() = "$apiBase$checkEmailVerificationStatusHandler"
+    val getSecuritySettingsUrl get() = "$apiBase$getSecuritySettings"
+    val registerNotificationInstallationUrl get() = "$apiBase$registerNotificationInstallation"
+    val usersEnsureUrl get() = "$apiBase$usersEnsurePath"
+
+    companion object {
+        fun withApiPrefix(baseUrl: String): AuthApiConfig {
+            return AuthApiConfig(baseUrl = baseUrl, attachApiPrefix = true)
+        }
+    }
+}

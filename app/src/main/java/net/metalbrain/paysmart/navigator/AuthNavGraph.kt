@@ -76,6 +76,7 @@ import net.metalbrain.paysmart.domain.model.normalizeCountryIso2
 import net.metalbrain.paysmart.domain.model.supportedLanguages
 import net.metalbrain.paysmart.ui.screens.FederatedLinkingScreen
 import net.metalbrain.paysmart.ui.screens.SplashScreen
+import net.metalbrain.paysmart.ui.screens.loader.LoadingPhase
 import net.metalbrain.paysmart.ui.screens.startup.StartupScreen
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 import net.metalbrain.paysmart.utils.formatPhoneNumberForDisplay
@@ -84,7 +85,7 @@ internal fun NavGraphBuilder.authNavGraph(
     navController: NavHostController
 ) {
     composable(Screen.Splash.route) {
-        SplashScreen()
+        SplashScreen(phase = LoadingPhase.Startup)
     }
 
     composable(Screen.Startup.route) {
@@ -217,7 +218,7 @@ internal fun NavGraphBuilder.authNavGraph(
 
         when {
             localSecurityState is LocalSecurityState.Loading -> {
-                SplashScreen()
+                SplashScreen(phase = LoadingPhase.Authentication)
             }
 
             localSettings?.biometricsEnabled == true -> {
@@ -932,7 +933,7 @@ internal fun NavGraphBuilder.authNavGraph(
         }
 
         if (localSecurityState is LocalSecurityState.Loading || decision == null) {
-            SplashScreen()
+            SplashScreen(phase = LoadingPhase.FetchingData)
             return@composable
         }
 

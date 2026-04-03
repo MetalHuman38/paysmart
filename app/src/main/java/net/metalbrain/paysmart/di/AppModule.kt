@@ -8,11 +8,8 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import net.metalbrain.paysmart.Env
-import net.metalbrain.paysmart.core.auth.AuthApiConfig
 import net.metalbrain.paysmart.core.auth.AuthHook
 import net.metalbrain.paysmart.core.auth.AuthService
-import net.metalbrain.paysmart.core.features.account.authorization.password.repository.PasswordPolicyHandler
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.FirebaseAuthRepository
 import net.metalbrain.paysmart.data.repository.FirestoreUserProfileRepository
@@ -46,31 +43,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthApiConfig(): AuthApiConfig {
-        return AuthApiConfig(
-            baseUrl = Env.authBase,
-            attachApiPrefix = false
-        )
-    }
-
-    @Provides
-    @Singleton
     fun provideAuthService(
         authRepository: AuthRepository,
         hooks: List<AuthHook>
     ): AuthService {
         return AuthService(authRepository, hooks)
-    }
-
-    @Module
-    @InstallIn(SingletonComponent::class)
-    object PasswordPolicyModule {
-
-        @Provides
-        @Singleton
-        fun providePasswordPolicyHandler(): PasswordPolicyHandler {
-            return PasswordPolicyHandler()
-        }
     }
 
     @Module

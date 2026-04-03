@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.data.repository.TransactionRepository
 import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
 import net.metalbrain.paysmart.domain.auth.UserManager
 import net.metalbrain.paysmart.domain.auth.state.AuthState
 import net.metalbrain.paysmart.domain.model.Transaction
+import net.metalbrain.paysmart.core.ui.R
 import java.util.Locale
 
 data class HelpUiState(

@@ -1,0 +1,113 @@
+package net.metalbrain.paysmart.data.repository
+
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.FirebaseFunctionsException
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import javax.inject.Inject
+
+/**
+ * Firebase-based implementation of [AuthRepository] that manages user authentication state
+ * and handles interactions with Firebase Authentication services.
+ *
+ * This repository provides functionality for signing in through various methods (anonymous,
+ * credentials, custom tokens), monitoring authentication state changes via [Flow], and
+ */
+class FirebaseAuthRepository @Inject constructor(
+    private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
+) : AuthRepository {
+
+    override val authChanges: Flow<Boolean> = callbackFlow {
+        val listener = FirebaseAuth.AuthStateListener { auth ->
+            trySend(auth.currentUser != null)
+        }
+        firebaseAuth.addAuthStateListener(listener)
+        awaitClose { firebaseAuth.removeAuthStateListener(listener) }
+    }
+
+    override val isLoggedIn: Boolean
+        get() = firebaseAuth.currentUser != null
+
+    override val currentUser: FirebaseUser?
+        get() = firebaseAuth.currentUser
+
+    override suspend fun getCurrentSession(): AuthSession? {
+        val user = firebaseAuth.currentUser ?: return null
+        return try {
+            val tokenResult = user.getIdToken(false).await()
+            val token = tokenResult.token ?: return null
+            AuthSession(user, token)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    override suspend fun getCurrentSessionOrThrow(): AuthSession {
+        val user = firebaseAuth.currentUser
+            ?: throw IllegalStateException("User is not logged in")
+
+        val tokenResult = user.getIdToken(false).await()
+        val token = tokenResult.token
+            ?: throw IllegalStateException("Failed to get ID token")
+        return AuthSession(user, token)
+    }
+
+
+    override suspend fun isPhoneUnique(phone: String): Boolean {
+        return try {
+            FirebaseFunctions.getInstance()
+                .getHttpsCallable("checkPhoneUnique")
+                .call(mapOf("phoneNumber" to phone))
+                .await()
+            true
+        } catch (e: FirebaseFunctionsException) {
+            e.code != FirebaseFunctionsException.Code.ALREADY_EXISTS
+        } catch (e: Exception) {
+            // Optional: log or rethrow
+            e.printStackTrace()
+            false
+        }
+    }
+
+
+
+    override suspend fun checkPhoneAlreadyRegistered(phone: String): Boolean {
+        val snapshot = firestore.collection("users")
+            .whereEqualTo("phoneNumber", phone)
+            .limit(1)
+            .get()
+            .await()
+
+        return !snapshot.isEmpty
+    }
+
+    override suspend fun signInAnonymously(): AuthResult = firebaseAuth.signInAnonymously().await()
+
+    override suspend fun signInWithCustomToken(customToken: String): AuthResult {
+        val result = firebaseAuth.signInWithCustomToken(customToken).await()
+        // Force-refresh token so sid/sv claims from custom token are immediately available
+        // to first protected API calls after one-tap passkey sign-in.
+        result.user?.getIdToken(true)?.await()
+        return result
+    }
+
+    override suspend fun signInWithCredential(credential: AuthCredential): AuthResult =
+        firebaseAuth.signInWithCredential(credential).await()
+
+    override suspend fun linkWithCredential(credential: AuthCredential) =
+        firebaseAuth.currentUser?.linkWithCredential(credential)?.await()
+            ?: throw IllegalStateException("No current user to link credentials")
+
+    override suspend fun signOut() {
+        firebaseAuth.signOut()
+    }
+}

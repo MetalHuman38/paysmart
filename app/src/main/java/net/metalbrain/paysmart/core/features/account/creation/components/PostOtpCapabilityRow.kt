@@ -1,5 +1,6 @@
 package net.metalbrain.paysmart.core.features.account.creation.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityItem
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CapabilityKey
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun PostOtpCapabilityRow(
@@ -40,10 +42,13 @@ fun PostOtpCapabilityRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = PaysmartTheme.colorTokens
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = colors.surfacePrimary,
+        border = BorderStroke(1.dp, colors.borderSubtle)
     ) {
         Row(
             modifier = Modifier
@@ -61,7 +66,7 @@ fun PostOtpCapabilityRow(
                 modifier = Modifier
                     .size(Dimens.largeSpacing)
                     .background(
-                        color = MaterialTheme.colorScheme.surface,
+                        color = colors.fillHover,
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -69,7 +74,7 @@ fun PostOtpCapabilityRow(
                 Icon(
                     imageVector = capabilityIcon(item.key),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface,
+                    tint = colors.brandPrimary,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -84,20 +89,21 @@ fun PostOtpCapabilityRow(
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.titleSmall,
+                    color = colors.textPrimary,
                     fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
                     text = item.subtitle,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colors.textSecondary
                 )
 
                 item.footnote?.takeIf { it.isNotBlank() }?.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = colors.textTertiary
                     )
                 }
             }

@@ -7,11 +7,15 @@ import net.metalbrain.paysmart.R
 @Composable
 fun AppLoadingScreen(
     modifier: Modifier = Modifier,
-    message: String = "Loading...",
+    phase: LoadingPhase = LoadingPhase.Startup,
+    message: String? = null,
+    hint: String? = null,
 ) {
     LoadingState(
         modifier = modifier,
+        phase = phase,
         message = message,
+        hint = hint,
         animationRes = R.raw.coin_spin
     )
 }

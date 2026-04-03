@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -22,17 +23,21 @@ import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.domain.model.Country
 import net.metalbrain.paysmart.domain.model.countryDisplayName
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun CountryHeaderRow(
     country: Country,
     onClick: () -> Unit
 ) {
+    val colors = PaysmartTheme.colorTokens
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.72f)
+        color = colors.surfaceElevated,
+        border = BorderStroke(1.dp, colors.borderSubtle)
     ) {
         Column(
             modifier = Modifier
@@ -49,12 +54,12 @@ fun CountryHeaderRow(
                     Text(
                         text = stringResource(R.string.select_country),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = colors.textSecondary
                     )
                     Text(
                         text = countryDisplayName(country),
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = colors.textPrimary,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1
                     )
@@ -67,12 +72,12 @@ fun CountryHeaderRow(
                     Text(
                         text = country.dialCode,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = colors.textSecondary
                     )
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = stringResource(R.string.content_desc_select_country),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = colors.textSecondary
                     )
                 }
             }

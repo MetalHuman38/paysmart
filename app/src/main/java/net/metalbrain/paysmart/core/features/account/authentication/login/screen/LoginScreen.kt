@@ -154,7 +154,7 @@ fun LoginScreen(
                             if (activity != null) {
                                 if (viewModel.phoneNumber.isNotBlank()) {
                                     reauthOtpViewModel.startReauthFlow(activity)
-                                    navController.navigate(Screen.Reauthenticate.baseRoute)
+                                    navController.navigate(Screen.Reauthenticate.BASEROUTES)
                                 } else {
                                     reauthOtpViewModel.errorHandled()
                                 }

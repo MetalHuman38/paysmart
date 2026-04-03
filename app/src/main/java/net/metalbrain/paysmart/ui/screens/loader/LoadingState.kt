@@ -1,56 +1,39 @@
 package net.metalbrain.paysmart.ui.screens.loader
 
 
-import android.os.SystemClock
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.*
-import kotlinx.coroutines.delay
 import net.metalbrain.paysmart.R
-
-@Composable
-fun rememberStabilizedLoading(
-    isLoading: Boolean,
-    showDelayMillis: Long = 150L,
-    minVisibleMillis: Long = 400L
-): Boolean {
-    var isVisible by remember { mutableStateOf(false) }
-    var visibleSince by remember { mutableLongStateOf(0L) }
-
-    LaunchedEffect(isLoading) {
-        if (isLoading) {
-            if (showDelayMillis > 0) {
-                delay(showDelayMillis)
-            }
-            isVisible = true
-            visibleSince = SystemClock.elapsedRealtime()
-            return@LaunchedEffect
-        }
-
-        if (!isVisible) {
-            return@LaunchedEffect
-        }
-
-        val elapsed = SystemClock.elapsedRealtime() - visibleSince
-        val remaining = (minVisibleMillis - elapsed).coerceAtLeast(0L)
-        if (remaining > 0) {
-            delay(remaining)
-        }
-        isVisible = false
-    }
-
-    return isVisible
-}
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun LoadingState(
     modifier: Modifier = Modifier,
-    message: String = "Loading...",
+    phase: LoadingPhase = LoadingPhase.Processing,
+    message: String? = null,
+    hint: String? = null,
     animationRes: Int = R.raw.loader
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(animationRes))
@@ -59,27 +42,73 @@ fun LoadingState(
         iterations = LottieConstants.IterateForever,
         isPlaying = true
     )
+    val showLoading = stabilizedLoading(phase)
+    var displayPhase by remember { mutableStateOf(phase) }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        LottieAnimation(
-            composition = composition,
-            progress = { progress },
-            modifier = Modifier
-                .size(160.dp)
-        )
+    LaunchedEffect(phase, showLoading) {
+        if (phase != LoadingPhase.Idle) {
+            displayPhase = phase
+        } else if (!showLoading) {
+            displayPhase = LoadingPhase.Idle
+        }
+    }
 
-        Spacer(modifier = Modifier.height(24.dp))
+    val messageSpec = remember(displayPhase, message, hint) {
+        when {
+            !message.isNullOrBlank() -> LoadingMessageSpec(message = message, hint = hint)
+            displayPhase == LoadingPhase.Idle -> LoadingMessageSpec(message = "Loading...")
+            else -> resolveMessage(displayPhase)
+        }
+    }
 
-        Text(
-            text = message,
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center
-        )
+    Crossfade(
+        targetState = showLoading,
+        label = "loading_visibility"
+    ) { isLoading ->
+        if (!isLoading) {
+            return@Crossfade
+        }
+
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            LottieAnimation(
+                composition = composition,
+                progress = { progress },
+                modifier = Modifier.size(160.dp)
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            AnimatedContent(
+                targetState = messageSpec,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "loading_message"
+            ) { content ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = content.message,
+                        style = PaysmartTheme.typographyTokens.heading4,
+                        color = PaysmartTheme.colorTokens.textPrimary,
+                        textAlign = TextAlign.Center
+                    )
+                    content.hint?.takeIf { it.isNotBlank() }?.let { helperText ->
+                        Text(
+                            text = helperText,
+                            style = PaysmartTheme.typographyTokens.bodyMedium,
+                            color = PaysmartTheme.colorTokens.textSecondary,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
     }
 }

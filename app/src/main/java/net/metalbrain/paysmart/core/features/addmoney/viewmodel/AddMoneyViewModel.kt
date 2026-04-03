@@ -31,7 +31,7 @@ import net.metalbrain.paysmart.core.features.cards.repository.ManagedCardsGatewa
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.TransactionRepository
 import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
-import net.metalbrain.paysmart.data.repository.WalletBalanceRepository
+import net.metalbrain.paysmart.data.repository.WalletBalanceGateway
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityProfile
 import net.metalbrain.paysmart.core.features.capabilities.repository.CountryCapabilityRepository
@@ -49,7 +49,7 @@ class AddMoneyViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val userProfileCacheRepository: UserProfileCacheRepository,
     private val countryCapabilityRepository: CountryCapabilityRepository,
-    private val walletBalanceRepository: WalletBalanceRepository,
+    private val walletBalanceRepository: WalletBalanceGateway,
     private val fxQuoteRepository: FxQuoteRepository,
     private val managedCardsGateway: ManagedCardsGateway
 ) : ViewModel() {

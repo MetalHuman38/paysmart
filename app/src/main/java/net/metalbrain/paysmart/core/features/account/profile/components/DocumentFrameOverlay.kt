@@ -19,7 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.feature.profile.R
 import net.metalbrain.paysmart.core.features.identity.provider.CameraFrameShape
 
 

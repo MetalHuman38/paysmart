@@ -29,6 +29,19 @@ import net.metalbrain.paysmart.ui.screens.CountryPickerBottomSheet
 import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.utils.detectDeviceCountryIso2
 
+/**
+ * Composable that represents the account creation screen.
+ *
+ * This screen allows users to input their phone number, select their country, and accept
+ * terms and conditions to initiate the phone verification process.
+ *
+ * @param viewModel The [CreateAccountViewModel] that manages the state and logic for this screen.
+ * @param onVerificationContinue Callback triggered when the phone verification has successfully
+ * started, passing the normalized ISO country code.
+ * @param onGetHelpClicked Callback triggered when the "Get Help" button is clicked.
+ * @param onSignInClicked Callback triggered when the user opts to navigate to the sign-in screen.
+ * @param onBackClicked Callback triggered when the user navigates back.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateAccountScreen(

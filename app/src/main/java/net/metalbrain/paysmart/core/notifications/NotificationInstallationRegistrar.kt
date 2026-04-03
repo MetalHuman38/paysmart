@@ -10,13 +10,13 @@ import jakarta.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import net.metalbrain.paysmart.BuildConfig
-import net.metalbrain.paysmart.Env
 import android.Manifest
 import net.metalbrain.paysmart.core.auth.AuthApiConfig
 import net.metalbrain.paysmart.core.auth.appcheck.provider.AppCheckTokenProvider
 import net.metalbrain.paysmart.core.auth.appcheck.provider.attachRequiredAppCheckToken
+import net.metalbrain.paysmart.core.common.runtime.AppVersionInfo
 import net.metalbrain.paysmart.core.locale.LocaleManager
+import net.metalbrain.paysmart.core.runtime.di.ApiPrefixedAuthConfig
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -32,8 +32,9 @@ class NotificationInstallationRegistrar @Inject constructor(
     private val appCheckTokenProvider: AppCheckTokenProvider,
     private val notificationInstallationStore: NotificationInstallationStore,
     private val okHttpClient: OkHttpClient,
+    private val appVersionInfo: AppVersionInfo,
+    @ApiPrefixedAuthConfig private val authApiConfig: AuthApiConfig,
 ) {
-    private val authApiConfig = AuthApiConfig.withApiPrefix(Env.apiBase)
     private val jsonMediaType = "application/json".toMediaType()
 
     suspend fun cacheAndRegisterToken(token: String) {
@@ -56,7 +57,7 @@ class NotificationInstallationRegistrar @Inject constructor(
             fcmToken,
             locale,
             permissionGranted.toString(),
-            BuildConfig.VERSION_NAME,
+            appVersionInfo.versionName,
         ).joinToString("|")
 
         if (!force && fingerprint == notificationInstallationStore.getLastUploadFingerprint()) {
@@ -67,7 +68,7 @@ class NotificationInstallationRegistrar @Inject constructor(
             .put("installationId", notificationInstallationStore.installationId())
             .put("fcmToken", fcmToken)
             .put("locale", locale)
-            .put("appVersion", BuildConfig.VERSION_NAME)
+            .put("appVersion", appVersionInfo.versionName)
             .put("notificationsPermissionGranted", permissionGranted)
             .toString()
             .toRequestBody(jsonMediaType)

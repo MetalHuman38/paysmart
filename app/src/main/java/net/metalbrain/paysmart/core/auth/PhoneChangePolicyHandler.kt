@@ -1,16 +1,12 @@
 package net.metalbrain.paysmart.core.auth
 
 import android.util.Log
-import net.metalbrain.paysmart.Env
+import net.metalbrain.paysmart.core.runtime.di.ApiPrefixedAuthConfig
 import javax.inject.Inject
 
-class PhoneChangePolicyHandler @Inject constructor() {
-
-    private val config = AuthApiConfig(
-        baseUrl = Env.apiBase,
-        attachApiPrefix = true
-    )
-
+class PhoneChangePolicyHandler @Inject constructor(
+    @ApiPrefixedAuthConfig config: AuthApiConfig
+) {
     private val client = PhoneChangePolicyClient(config)
 
     suspend fun confirmPhoneChanged(idToken: String, phoneNumber: String): Boolean {

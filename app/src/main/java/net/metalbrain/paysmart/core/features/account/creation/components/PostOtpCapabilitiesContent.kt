@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.creation.card.AccountCreationHeroCard
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabilityCatalog
@@ -28,6 +29,7 @@ import net.metalbrain.paysmart.core.features.capabilities.catalog.CountryCapabil
 import net.metalbrain.paysmart.domain.model.LaunchInterest
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 internal fun PostOtpCapabilitiesContent(
@@ -38,6 +40,8 @@ internal fun PostOtpCapabilitiesContent(
     onNext: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = PaysmartTheme.colorTokens
+
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(Dimens.space8)
@@ -69,7 +73,11 @@ internal fun PostOtpCapabilitiesContent(
             onClick = { onInterestSelected(LaunchInterest.TOP_UP) }
         )
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = colors.surfacePrimary),
+            border = BorderStroke(1.dp, colors.borderSubtle)
+        ) {
             Column(
                 modifier = Modifier.padding(Dimens.space10),
                 verticalArrangement = Arrangement.spacedBy(Dimens.space4)
@@ -77,16 +85,17 @@ internal fun PostOtpCapabilitiesContent(
                 Text(
                     text = stringResource(R.string.post_otp_capabilities_currency_label),
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
+                    color = colors.brandPrimary
                 )
                 Text(
                     text = profile.currencyCode,
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = colors.textPrimary
                 )
                 Text(
                     text = stringResource(R.string.post_otp_capabilities_supporting_note),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colors.textSecondary
                 )
             }
         }
@@ -111,23 +120,25 @@ private fun LaunchInterestCard(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = PaysmartTheme.colorTokens
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = if (selected) {
-                MaterialTheme.colorScheme.primaryContainer
+                colors.fillHover
             } else {
-                MaterialTheme.colorScheme.surface
+                colors.surfacePrimary
             }
         ),
         border = BorderStroke(
             width = Dimens.xs / 6,
             color = if (selected) {
-                MaterialTheme.colorScheme.primary
+                colors.brandPrimary
             } else {
-                MaterialTheme.colorScheme.outline.copy(alpha = 0.28f)
+                colors.borderSubtle
             }
         )
     ) {
@@ -139,24 +150,25 @@ private fun LaunchInterestCard(
                 imageVector = icon,
                 contentDescription = null,
                 tint = if (selected) {
-                    MaterialTheme.colorScheme.primary
+                    colors.brandPrimary
                 } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
+                    colors.textSecondary
                 }
             )
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.textPrimary
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = colors.textSecondary
             )
             Text(
                 text = footnote,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = colors.textTertiary
             )
         }
     }

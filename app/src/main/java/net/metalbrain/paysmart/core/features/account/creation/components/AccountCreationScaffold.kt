@@ -15,11 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import net.metalbrain.paysmart.R
-import net.metalbrain.paysmart.ui.theme.LocalAppThemePack
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,16 +27,16 @@ internal fun AccountCreationScaffold(
     topBarAction: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit
 ) {
-    val backgroundPalette = LocalAppThemePack.current.darkBackground
+    val colors = PaysmartTheme.colorTokens
 
     Box(
         modifier = Modifier.background(
             brush = Brush.verticalGradient(
                 colors = listOf(
-                    backgroundPalette.start,
-                    backgroundPalette.accentOne,
-                    backgroundPalette.accentTwo,
-                    backgroundPalette.end
+                    colors.backgroundGradientTop,
+                    colors.backgroundGradientMiddle,
+                    colors.surfaceElevated,
+                    colors.backgroundGradientBottom
                 )
             )
         )
@@ -49,16 +48,16 @@ internal fun AccountCreationScaffold(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
                         scrolledContainerColor = Color.Transparent,
-                        navigationIconContentColor = Color.Unspecified,
-                        actionIconContentColor = Color.Unspecified,
-                        titleContentColor = Color.Unspecified
+                        navigationIconContentColor = colors.textPrimary,
+                        actionIconContentColor = colors.textPrimary,
+                        titleContentColor = colors.textPrimary
                     ),
                     title = { Text(text = "") },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.common_back)
+                                contentDescription = androidx.compose.ui.res.stringResource(R.string.common_back)
                             )
                         }
                     },

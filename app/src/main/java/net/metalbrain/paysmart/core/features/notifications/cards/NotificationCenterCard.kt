@@ -37,6 +37,18 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+/**
+ * A composable card that displays a single notification item within the Notification Center.
+ *
+ * This component renders the notification's icon, title, timestamp, body text, and an unread
+ * indicator if applicable. It dynamically adjusts its icon and accent color based on the
+ * notification's type or channel. For specific notification types, such as app updates,
+ * it provides a primary action button.
+ *
+ * @param item The notification data to display, including its status, content, and metadata.
+ * @param onPrimaryAction The callback to be invoked when the primary action button
+ * (e.g., "Restart" for app updates) is clicked.
+ */
 @Composable
 fun NotificationCenterCard(
     item: NotificationInboxItem,

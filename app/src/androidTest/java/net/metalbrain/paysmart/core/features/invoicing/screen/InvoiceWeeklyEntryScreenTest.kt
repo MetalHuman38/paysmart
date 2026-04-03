@@ -18,6 +18,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceVenueDraft
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceWeeklyDraft
+import net.metalbrain.paysmart.core.features.invoicing.domain.toDynamicInvoice
 import net.metalbrain.paysmart.core.features.invoicing.viewmodel.InvoiceSetupUiState
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 import org.junit.Rule
@@ -58,18 +59,16 @@ class InvoiceWeeklyEntryScreenTest {
                     state = state,
                     onBack = {},
                     onVenueSelected = { venueId ->
-                        state = state.copy(
-                            weeklyDraft = state.weeklyDraft.copy(selectedVenueId = venueId).withFullWeek()
-                        )
+                        state = state.withWeeklyDraft(state.weeklyDraft.copy(selectedVenueId = venueId).withFullWeek())
                     },
                     onInvoiceDateChanged = { value: String ->
-                        state = state.copy(weeklyDraft = state.weeklyDraft.copy(invoiceDate = value).withFullWeek())
+                        state = state.withWeeklyDraft(state.weeklyDraft.copy(invoiceDate = value).withFullWeek())
                     },
                     onWeekEndingDateChanged = { value: String ->
-                        state = state.copy(weeklyDraft = state.weeklyDraft.copy(weekEndingDate = value).withFullWeek())
+                        state = state.withWeeklyDraft(state.weeklyDraft.copy(weekEndingDate = value).withFullWeek())
                     },
                     onHourlyRateChanged = { value: String ->
-                        state = state.copy(weeklyDraft = state.weeklyDraft.copy(hourlyRateInput = value).withFullWeek())
+                        state = state.withWeeklyDraft(state.weeklyDraft.copy(hourlyRateInput = value).withFullWeek())
                     },
                     onShiftDateChanged = { index: Int, value: String ->
                         state = state.withRowDate(index, value)
@@ -108,24 +107,24 @@ class InvoiceWeeklyEntryScreenTest {
 
     @Test
     fun finalizeEnablesForSingleWorkedDayWhenDatesAndRateAreValid() {
-        composeRule.setContent {
-            val state = seedState().copy(
-                weeklyDraft = InvoiceWeeklyDraft(
-                    selectedVenueId = "venue_1",
-                    invoiceDate = "2026-03-09",
-                    weekEndingDate = "2026-03-08",
-                    hourlyRateInput = "14.50",
-                    shifts = listOf(
-                        InvoiceWeeklyDraft.defaultWeekShifts()[0],
-                        InvoiceWeeklyDraft.defaultWeekShifts()[1],
-                        InvoiceWeeklyDraft.defaultWeekShifts()[2],
-                        InvoiceWeeklyDraft.defaultWeekShifts()[3],
-                        InvoiceWeeklyDraft.defaultWeekShifts()[4].copy(hoursInput = "10"),
-                        InvoiceWeeklyDraft.defaultWeekShifts()[5],
-                        InvoiceWeeklyDraft.defaultWeekShifts()[6]
-                    )
-                ).withFullWeek()
+        val draft = InvoiceWeeklyDraft(
+            selectedVenueId = "venue_1",
+            invoiceDate = "2026-03-09",
+            weekEndingDate = "2026-03-08",
+            hourlyRateInput = "14.50",
+            shifts = listOf(
+                InvoiceWeeklyDraft.defaultWeekShifts()[0],
+                InvoiceWeeklyDraft.defaultWeekShifts()[1],
+                InvoiceWeeklyDraft.defaultWeekShifts()[2],
+                InvoiceWeeklyDraft.defaultWeekShifts()[3],
+                InvoiceWeeklyDraft.defaultWeekShifts()[4].copy(hoursInput = "10"),
+                InvoiceWeeklyDraft.defaultWeekShifts()[5],
+                InvoiceWeeklyDraft.defaultWeekShifts()[6]
             )
+        ).withFullWeek()
+
+        composeRule.setContent {
+            val state = seedState().withWeeklyDraft(draft)
 
             PaysmartTheme {
                 InvoiceWeeklyEntryScreen(
@@ -151,18 +150,18 @@ class InvoiceWeeklyEntryScreenTest {
 
     @Test
     fun finalizeEnablesWhenVenueSelectionHydrationLagsButVenueExists() {
+        val draft = InvoiceWeeklyDraft(
+            selectedVenueId = "",
+            invoiceDate = "2026-03-09",
+            weekEndingDate = "2026-03-08",
+            hourlyRateInput = "14.50",
+            shifts = InvoiceWeeklyDraft.defaultWeekShifts().mapIndexed { index, row ->
+                if (index == 4) row.copy(hoursInput = "10") else row
+            }
+        ).withFullWeek()
+
         composeRule.setContent {
-            val state = seedState().copy(
-                weeklyDraft = InvoiceWeeklyDraft(
-                    selectedVenueId = "",
-                    invoiceDate = "2026-03-09",
-                    weekEndingDate = "2026-03-08",
-                    hourlyRateInput = "14.50",
-                    shifts = InvoiceWeeklyDraft.defaultWeekShifts().mapIndexed { index, row ->
-                        if (index == 4) row.copy(hoursInput = "10") else row
-                    }
-                ).withFullWeek()
-            )
+            val state = seedState().withWeeklyDraft(draft)
 
             PaysmartTheme {
                 InvoiceWeeklyEntryScreen(
@@ -187,28 +186,36 @@ class InvoiceWeeklyEntryScreenTest {
     }
 
     private fun seedState(): InvoiceSetupUiState {
+        val draft = InvoiceWeeklyDraft(
+            selectedVenueId = "venue_1",
+            hourlyRateInput = "10",
+            shifts = InvoiceWeeklyDraft.defaultWeekShifts()
+        ).withFullWeek()
+        val venues = listOf(InvoiceVenueDraft(venueId = "venue_1", venueName = "Alpha Venue"))
         return InvoiceSetupUiState(
-            venues = listOf(InvoiceVenueDraft(venueId = "venue_1", venueName = "Alpha Venue")),
-            weeklyDraft = InvoiceWeeklyDraft(
-                selectedVenueId = "venue_1",
-                hourlyRateInput = "10",
-                shifts = InvoiceWeeklyDraft.defaultWeekShifts()
-            ).withFullWeek(),
+            venues = venues,
             isHydrating = false
-        )
+        ).withWeeklyDraft(draft)
     }
+}
+
+private fun InvoiceSetupUiState.withWeeklyDraft(draft: InvoiceWeeklyDraft): InvoiceSetupUiState {
+    val venue = venues.firstOrNull { it.venueId == draft.selectedVenueId }
+        ?: venues.firstOrNull()
+    val updatedInvoice = draft.toDynamicInvoice(profileDraft, venue)
+    return copy(draftInvoice = updatedInvoice, selectedVenueId = draft.selectedVenueId)
 }
 
 private fun InvoiceSetupUiState.withRowDate(index: Int, value: String): InvoiceSetupUiState {
     val updatedRows = weeklyRows.mapIndexed { i, row ->
         if (i == index) row.copy(workDate = value) else row
     }
-    return copy(weeklyDraft = weeklyDraft.copy(shifts = updatedRows).withFullWeek())
+    return withWeeklyDraft(weeklyDraft.copy(shifts = updatedRows).withFullWeek())
 }
 
 private fun InvoiceSetupUiState.withRowHours(index: Int, value: String): InvoiceSetupUiState {
     val updatedRows = weeklyRows.mapIndexed { i, row ->
         if (i == index) row.copy(hoursInput = value) else row
     }
-    return copy(weeklyDraft = weeklyDraft.copy(shifts = updatedRows).withFullWeek())
+    return withWeeklyDraft(weeklyDraft.copy(shifts = updatedRows).withFullWeek())
 }

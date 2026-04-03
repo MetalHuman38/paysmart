@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App / shared -->
+    <string name="app_name">PaySmart</string>
+    <string name="common_back">Back</string>
+    <string name="common_clear">Clear</string>
+    <string name="common_copy">Copy</string>
+    <string name="common_processing">Processing…</string>
+    <string name="get_help">Get help</string>
+    <string name="profile_title">Profile</string>
+    <string name="transactions_title">Transactions</string>
+    <string name="see_all">See all</string>
+
+    <!-- Home – balance / wallet -->
+    <string name="home_total_balance_label">Total balance</string>
+    <string name="home_wallet_label">wallet</string>
+    <string name="home_wallet_no_data">No wallet data yet</string>
+    <string name="home_balance_currency_title">%1$s balance</string>
+    <string name="home_balance_amount_value">%1$s %2$s</string>
+    <string name="home_balance_no_transactions">No transactions yet for this currency.</string>
+    <string name="home_balance_no_account_data">No wallet balance data is available yet.</string>
+    <string name="home_balance_last_synced">Last synced</string>
+    <string name="home_currency_amount">%1$s %2$s</string>
+
+    <!-- Home – account information -->
+    <string name="home_account_information_title">Account information</string>
+    <string name="home_segment_transactions">Transactions</string>
+    <string name="home_segment_account_details">Account details</string>
+    <string name="home_view_account_limits">View account limits</string>
+
+    <!-- Home – balance transfer instructions -->
+    <string name="home_balance_transfer_account_holder_label">Account holder</string>
+    <string name="home_balance_transfer_account_supporting">Use these details to complete your one-time bank transfer top up.</string>
+    <string name="home_balance_transfer_exact_amount_label">Exact amount</string>
+    <string name="home_balance_transfer_expires_label">Expires</string>
+    <string name="home_balance_transfer_instruction_title">Before you send money</string>
+    <string name="home_balance_transfer_instruction_exact_amount">Transfer the exact amount shown above.</string>
+    <string name="home_balance_transfer_instruction_one_time">This virtual account is for this top up only and cannot be reused.</string>
+    <string name="home_balance_transfer_instruction_expiry_format">Send the transfer before %1$s.</string>
+    <string name="home_balance_transfer_instruction_confirmation">Your wallet updates after Flutterwave confirms the transfer.</string>
+    <string name="home_balance_transfer_copy_success_format">%1$s copied</string>
+    <string name="home_balance_transfer_share_title">Share transfer details</string>
+
+    <!-- Home – funding account details -->
+    <string name="funding_account_action_share_details">Share details</string>
+    <string name="funding_account_details_account_number">Account number</string>
+    <string name="funding_account_details_bank_name">Bank</string>
+    <string name="funding_account_details_reference">Reference</string>
+
+    <!-- Home – quick actions -->
+    <string name="home_quick_action_send">Send</string>
+    <string name="home_quick_action_add">Add</string>
+    <string name="home_quick_action_withdraw">Withdraw</string>
+    <string name="home_quick_action_convert">Convert</string>
+    <string name="add_money">Add Money</string>
+    <string name="add_money_provider_stripe">Stripe</string>
+    <string name="add_money_provider_flutterwave">Flutterwave</string>
+
+    <!-- Home – transactions -->
+    <string name="home_recent_activity_title">Recent activity</string>
+    <string name="home_no_transaction_activity_title">No transaction activity</string>
+    <string name="home_no_transaction_activity_subtitle">Your recent transaction activity will show here when you send, receive, or deposit money.</string>
+    <string name="home_transaction_search_title">Search transactions</string>
+    <string name="home_transaction_search_placeholder">Search amount, provider, or reference</string>
+    <string name="home_transaction_search_empty_title">No transactions match this search</string>
+    <string name="home_transaction_search_empty_body">Try a different amount, provider, or reference.</string>
+
+    <!-- Home – exchange rates -->
+    <string name="home_exchange_rate_label">Exchange rate</string>
+    <string name="home_exchange_rate_value">1 %1$s = %2$s %3$s</string>
+    <string name="home_exchange_rate_unavailable">%1$s → %2$s unavailable</string>
+    <string name="home_view_rates">View rates</string>
+
+    <!-- Home – daily limits -->
+    <string name="home_daily_limits_title">Daily limits</string>
+    <string name="home_daily_limits_hint_verified">Identity verified. Full limits are active.</string>
+    <string name="home_daily_limits_hint_identity_required">Verify identity to unlock higher limits.</string>
+    <string name="home_daily_limits_hint_address_required">Add and verify home address to continue.</string>
+    <string name="home_daily_limits_hint_email_required">Verify email to continue.</string>
+
+    <!-- Home – rewards -->
+    <string name="home_rewards_title">Rewards</string>
+    <string name="home_rewards_points_suffix"> pts</string>
+    <string name="home_rewards_balance_updated">Balance synced %1$s</string>
+    <string name="home_rewards_sync_note">Rewards currently sync as a single wallet balance. Detailed earning history is not available yet.</string>
+    <string name="home_rewards_recent_transactions_title">Recent transactions</string>
+    <string name="home_rewards_no_recent_transactions">No recent transactions yet.</string>
+    <string name="earn_more_by_completing_transfers_and_invites">Earn more by completing transfers and invites</string>
+
+    <!-- Home – send again -->
+    <string name="home_send_again_title">Send again to</string>
+
+    <!-- Home – services -->
+    <string name="home_services_title">Services</string>
+    <string name="home_service_create_invoice">Create invoice</string>
+
+    <!-- Home – notifications -->
+    <string name="home_notification_update_title">Update ready</string>
+    <string name="home_notification_products_title">Product updates</string>
+    <string name="home_notification_products_body">PaySmart app updates and new product announcements will appear here.</string>
+    <string name="app_update_downloaded_message">A PaySmart update is ready. Restart to finish installing it.</string>
+    <string name="app_update_restart_action">Restart</string>
+
+    <!-- Home – top bar -->
+    <string name="home_top_bar_search_content_description">Search transactions</string>
+    <string name="home_top_bar_notifications_content_description">View notifications</string>
+
+    <!-- UK domestic account details -->
+    <string name="uk_account_details_domestic_title">For domestic transfers within the UK only</string>
+    <string name="uk_account_details_status_title">UK local account details are coming here</string>
+    <string name="uk_account_details_status_body">This dedicated GBP account route is ready for a licensed UK banking partner. When PaySmart enables that flow, this screen will show your account holder name, sort code, account number, bank name, and share actions.</string>
+    <string name="uk_account_details_notice">Your money will be held with a licensed UK banking partner when this route goes live.</string>
+</resources>

@@ -10,6 +10,8 @@ import {
 } from "./workers/processTransactionalNotifications.js";
 import { processProductUpdateCampaign } from "./workers/processProductUpdateCampaign.js";
 
+const apiApp = buildApp();
+
 // Firebase HTTP function export
 export const api = onRequest(
   {
@@ -17,10 +19,7 @@ export const api = onRequest(
     secrets: [...API_FUNCTION_SECRETS],
     cors: false,
   },
-  (req, res) => {
-    const app = buildApp();
-    return app(req, res);
-  }
+  apiApp
 );
 
 export {

@@ -20,6 +20,7 @@ import net.metalbrain.paysmart.room.dao.ManagedCardDao
 import net.metalbrain.paysmart.room.dao.NotificationInboxDao
 import net.metalbrain.paysmart.room.dao.SecuritySettingsDao
 import net.metalbrain.paysmart.room.dao.SecureTokenDao
+import net.metalbrain.paysmart.room.dao.SendMoneyRecentRecipientDao
 import net.metalbrain.paysmart.room.dao.SendMoneyRecipientDraftDao
 import net.metalbrain.paysmart.room.dao.TransactionDao
 import net.metalbrain.paysmart.room.dao.UserProfileCacheDao
@@ -106,6 +107,11 @@ object TestRoomModule {
     fun provideManagedCardDao(
         db: EncryptedAppDatabase
     ): ManagedCardDao = db.managedCardDao()
+
+    @Provides
+    fun provideSendMoneyRecentRecipientDao(
+        db: EncryptedAppDatabase
+    ): SendMoneyRecentRecipientDao = db.sendMoneyRecentRecipientDao()
 
     @Provides
     fun provideSendMoneyRecipientDraftDao(

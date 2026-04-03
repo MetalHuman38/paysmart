@@ -17,15 +17,11 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -46,6 +43,7 @@ import net.metalbrain.paysmart.domain.state.UserUiState
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.ui.theme.LocalAppThemePack
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
 
 @Composable
@@ -71,10 +69,13 @@ fun BiometricSessionUnlock(
     val photoModel = profile?.photoURL
     val securityStyle = LocalAppThemePack.current.securityStyle
     val editorialLayout = securityStyle.useEditorialLayout
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
 
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(colors.backgroundPrimary)
             .padding(WindowInsets.systemBars.asPaddingValues())
             .padding(horizontal = securityStyle.outerHorizontalPadding)
             .padding(bottom = Dimens.largeScreenPadding)
@@ -89,7 +90,7 @@ fun BiometricSessionUnlock(
                 Card(
                     shape = RoundedCornerShape(32.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(
+                        containerColor = colors.surfaceElevated.copy(
                             alpha = securityStyle.glassPanelAlpha
                         )
                     ),
@@ -105,7 +106,7 @@ fun BiometricSessionUnlock(
                         Box(
                             modifier = Modifier
                                 .background(
-                                    color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.92f),
+                                    color = colors.fillHover.copy(alpha = 0.94f),
                                     shape = CircleShape
                                 )
                                 .padding(18.dp),
@@ -114,23 +115,26 @@ fun BiometricSessionUnlock(
                             Icon(
                                 imageVector = Icons.Outlined.Fingerprint,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = colors.brandPrimary
                             )
                         }
                         Column(
+                            modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(Dimens.xs)
                         ) {
                             Text(
-                                text = stringResource(R.string.welcome_back),
-                                style = MaterialTheme.typography.headlineLarge,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 2
+                                text = resolvedName,
+                                style = typography.heading2,
+                                color = colors.textPrimary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = resolvedName,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1
+                                text = stringResource(R.string.welcome_back),
+                                style = typography.bodyMedium,
+                                color = colors.textSecondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -146,8 +150,9 @@ fun BiometricSessionUnlock(
 
                 Text(
                     text = stringResource(R.string.welcome_back) + ", " + resolvedName,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = typography.heading3,
                     fontWeight = FontWeight.Bold,
+                    color = colors.textPrimary,
                     textAlign = TextAlign.Center,
                     maxLines = 2
                 )
@@ -164,8 +169,8 @@ fun BiometricSessionUnlock(
             errorMessage?.let {
                 Text(
                     text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.error,
+                    style = typography.bodySmall,
                     textAlign = if (editorialLayout) TextAlign.Start else TextAlign.Center
                 )
             }
@@ -188,29 +193,6 @@ fun BiometricSessionUnlock(
                 onClick = onLogout,
                 alignment = if (editorialLayout) Alignment.Start else Alignment.CenterHorizontally
             )
-
-//            Row(
-//                modifier = Modifier
-//                    .fillMaxWidth(),
-//                horizontalArrangement = if (editorialLayout) Arrangement.Start else Arrangement.Center,
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                IconButton(
-//                    onClick = onLogout
-//                ) {
-//                    Icon(
-//                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-//                        contentDescription = stringResource(R.string.profile_logout),
-//                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-//                    )
-//                }
-//
-//                Text(
-//                    text = stringResource(R.string.profile_logout),
-//                    style = MaterialTheme.typography.bodyMedium,
-//                    color = MaterialTheme.colorScheme.onSurfaceVariant
-//                )
-//            }
 
         }
     }

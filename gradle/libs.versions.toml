@@ -5,28 +5,27 @@ kotlin = "2.2.10"
 room = "2.8.4"
 sqlite = "2.6.2"
 ksp = "2.3.4"
-coreKtx = "1.18.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
-composeBom = "2026.03.00"
+composeBom = "2026.03.01"
 firebase-bom = "34.11.0"
-credentials = "1.5.0"
+credentials = "1.6.0-beta01"
 hilt = "2.59"
-runtime = "1.10.5"
-foundationLayout = "1.10.5"
+runtime = "1.10.6"
+foundationLayout = "1.10.6"
 lottie = "6.7.1"
 datastoreCore = "1.2.1"
 transportRuntime = "4.1.0"
 datastorePreferencesCore = "1.2.1"
 cronetEmbedded = "143.7445.0"
-ui = "1.10.5"
-foundation = "1.10.5"
-uiUnit = "1.10.5"
+ui = "1.10.6"
+foundation = "1.10.6"
+uiUnit = "1.10.6"
 firebaseAppcheckDebug = "19.0.2"
-libphonenumber = "9.0.26"
+libphonenumber = "9.0.27"
 material3 = "1.4.0"
 bcrypt = "0.10.2"
 securitycrypto = "1.1.0"
@@ -37,17 +36,17 @@ coroutines = "1.10.2"
 mockk = "1.14.9"
 runner = "1.7.0"
 googleid = "1.2.0"
-facebook-login = "18.1.3"
+facebook-login = "18.2.3"
 playServicesMaps = "20.0.0"
-cameraX = "1.5.3"
-stripeAndroid = "23.0.2"
-stripeJava = "31.4.1"
+cameraX = "1.6.0"
+stripeAndroid = "23.2.0"
+stripeJava = "32.0.0"
 playServicesAnalytics = "18.1.1"
 playIntegrity = "1.6.0"
 playAppUpdate = "2.1.0"
 paging = "3.4.2"
 pagingCompose = "3.4.2"
-runtimeVersion = "1.10.5"
+runtimeVersion = "1.10.6"
 
 [libraries]
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -86,7 +85,7 @@ navigation-compose = { group = "androidx.navigation", name = "navigation-compose
 bcrypt = { module = "at.favre.lib:bcrypt", version.ref = "bcrypt" }
 security-crypto = { module = "androidx.security:security-crypto", version.ref = "securitycrypto" }
 biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
-tink = { group = "com.google.crypto.tink", name = "tink-android", version = "1.20.0" }
+tink = { group = "com.google.crypto.tink", name = "tink-android", version = "1.21.0" }
 firebase-functions = { module = "com.google.firebase:firebase-functions-ktx", version.ref = "firebase-functions" }
 firebase-config = { group = "com.google.firebase", name = "firebase-config" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
@@ -145,7 +144,7 @@ androidx-runner = { group = "androidx.test", name = "runner", version.ref = "run
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 google-play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
-androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version = "1.6.0" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 stripe-android = { group = "com.stripe", name = "stripe-android", version.ref = "stripeAndroid" }

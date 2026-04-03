@@ -1,5 +1,10 @@
 import { createApiApp } from "./bootstrap/createApiApp.js";
 
+let cachedApp: ReturnType<typeof createApiApp> | null = null;
+
 export function buildApp() {
-  return createApiApp();
+  if (!cachedApp) {
+    cachedApp = createApiApp();
+  }
+  return cachedApp;
 }

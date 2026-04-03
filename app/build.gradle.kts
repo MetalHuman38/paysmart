@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.firebase.crashlytics)
-    id("androidx.room")
+    // androidx.room plugin moved to :core:database
     id("com.google.gms.google-services")
 }
 
@@ -50,6 +50,9 @@ fun Project.localPropertyOrEnv(name: String, defaultValue: String = ""): String 
         ?: providers.environmentVariable(name).orNull?.trim()?.takeUnless { it.isEmpty() }
         ?: defaultValue
 
+fun Project.localBooleanPropertyOrEnv(name: String, defaultValue: Boolean = false): Boolean =
+    localPropertyOrEnv(name, defaultValue.toString()).equals("true", ignoreCase = true)
+
 val versionCodeValue = intPropertyOrEnv("PAYSMART_VERSION_CODE", defaultValue = 1)
 val versionMajor = intPropertyOrEnv("PAYSMART_VERSION_MAJOR", defaultValue = 1)
 val versionMinor = intPropertyOrEnv("PAYSMART_VERSION_MINOR", defaultValue = 0)
@@ -73,6 +76,25 @@ val paySmartSemVer = buildString {
         append(versionPreRelease)
     }
 }
+val localDevEnabled = localBooleanPropertyOrEnv("LOCAL_DEV", defaultValue = false)
+val localApiBaseUrl = localPropertyOrEnv(
+    name = "LOCAL_API_BASE_URL",
+    defaultValue = "http://10.0.2.2:5001/paysmart-7ee79/europe-west2/api"
+)
+val localFunctionApiUrl = localPropertyOrEnv(
+    name = "LOCAL_FUNCTION_API_URL",
+    defaultValue = "http://10.0.2.2:5001/paysmart-7ee79/europe-west2"
+)
+val remoteApiBaseUrl = localPropertyOrEnv(
+    name = "REMOTE_API_BASE_URL",
+    defaultValue = "https://europe-west2-paysmart-7ee79.cloudfunctions.net/api"
+)
+val remoteFunctionApiUrl = localPropertyOrEnv(
+    name = "REMOTE_FUNCTION_API_URL",
+    defaultValue = "https://europe-west2-paysmart-7ee79.cloudfunctions.net"
+)
+val debugApiBaseUrl = if (localDevEnabled) localApiBaseUrl else remoteApiBaseUrl
+val debugFunctionApiUrl = if (localDevEnabled) localFunctionApiUrl else remoteFunctionApiUrl
 
 android {
     namespace = "net.metalbrain.paysmart"
@@ -98,6 +120,12 @@ android {
         buildConfig = true
     }
 
+    sourceSets {
+        getByName("androidTest") {
+            assets.directories.add(file("$rootDir/core/database/schemas").toString())
+        }
+    }
+
     defaultConfig {
         applicationId = "net.metalbrain.paysmart"
         minSdk = 33
@@ -110,15 +138,7 @@ android {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
         }
 
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += mapOf(
-                    "room.schemaLocation" to "$projectDir/schemas",
-                    "room.incremental" to "true",
-                    "room.expandProjection" to "true"
-                )
-            }
-        }
+        // Room schema/KSP args moved to :core:database
 
         val mapsApiKey = localPropertyOrEnv("MAPS_API_KEY")
             .ifEmpty { localPropertyOrEnv("ADDRESS_VALIDATION_API_KEY") }
@@ -150,11 +170,11 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:5001/paysmart-7ee79/europe-west2/api\"")
-            buildConfigField("String", "FUNCTION_API_URL", "\"http://10.0.2.2:8080\"")
-            buildConfigField("Boolean", "IS_LOCAL", "true")
+            buildConfigField("String", "API_BASE_URL", "\"$debugApiBaseUrl\"")
+            buildConfigField("String", "FUNCTION_API_URL", "\"$debugFunctionApiUrl\"")
+            buildConfigField("Boolean", "IS_LOCAL", localDevEnabled.toString())
             buildConfigField("Boolean", "APP_CHECK_ENFORCED", "false")
-            buildConfigField("Boolean", "PHONE_PNV_PREVIEW_ENABLED", "true")
+            buildConfigField("Boolean", "PHONE_PNV_PREVIEW_ENABLED", localDevEnabled.toString())
             buildConfigField("String", "IDENTITY_IMAGE_DETECTION_MODE", "\"on_device\"")
             buildConfigField("Boolean", "IDENTITY_IMAGE_DETECTION_FAIL_OPEN", "true")
             buildConfigField("String", "IDENTITY_DOCUMENT_OCR_MODE", "\"remote_api\"")
@@ -210,12 +230,24 @@ tasks.matching { it.name == "uploadCrashlyticsMappingFileRelease" }.configureEac
 }
 
 
-room {
-    schemaDirectory("$projectDir/schemas")
-}
+// room {} block moved to :core:database
 
 
 dependencies {
+    implementation(project(":core:common"))
+    implementation(project(":core:navigation"))
+    implementation(project(":core:ui"))
+    implementation(project(":core:security"))
+    implementation(project(":core:database"))
+    implementation(project(":core:firebase"))
+    implementation(project(":data:auth"))
+    implementation(project(":data:user"))
+    implementation(project(":data:wallet"))
+    implementation(project(":data:invoice"))
+    implementation(project(":feature:account"))
+    implementation(project(":feature:profile"))
+    implementation(project(":feature:home"))
+    implementation(project(":feature:wallet"))
     implementation(project(":core:invoice-models"))
     implementation(project(":core:models"))
     implementation(libs.androidx.core.ktx)
@@ -293,8 +325,7 @@ dependencies {
     testImplementation(libs.coroutines.test)
     testImplementation(libs.mockk)
 
-    // Ksp
-    ksp(libs.androidx.room.compiler)
+    // Ksp — Room compiler lives in :core:database
 
     // Android Instrumented tests
     testImplementation(libs.arch.core.testing)
@@ -305,21 +336,10 @@ dependencies {
     implementation(libs.libphonenumber)
     implementation(libs.androidx.material3)
 
-    // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
+    // Room implementation lives in :core:database
+    implementation(libs.androidx.sqlite.core)
     implementation(libs.androidx.paging.compose)
     implementation(libs.androidx.paging.runtime)
-
-    // Sqlite
-    implementation(libs.androidx.sqlite.core)
-
-
-
-    // optional
-    implementation(libs.androidx.room.paging)
-    implementation(libs.androidx.room.guava)
-    implementation(libs.androidx.room.rxjava2) // or rxjava3
     testImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.room.testing)
 

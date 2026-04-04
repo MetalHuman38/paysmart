@@ -244,6 +244,7 @@ dependencies {
     implementation(project(":data:user"))
     implementation(project(":data:wallet"))
     implementation(project(":data:invoice"))
+    implementation(project(":data:notifications"))
     implementation(project(":feature:account"))
     implementation(project(":feature:profile"))
     implementation(project(":feature:home"))

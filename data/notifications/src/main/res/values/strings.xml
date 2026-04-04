@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_update_downloaded_message">A PaySmart update is ready. Restart to finish installing it.</string>
+    <string name="home_notification_update_title">Update ready</string>
+    <string name="email_verification_success_title">Email verification successful</string>
+    <string name="email_verification_success_subtitle">Your email has been successfully verified.</string>
+</resources>

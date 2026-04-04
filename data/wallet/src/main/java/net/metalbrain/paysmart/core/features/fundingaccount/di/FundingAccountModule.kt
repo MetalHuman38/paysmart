@@ -1,4 +1,4 @@
-package net.metalbrain.paysmart.di
+package net.metalbrain.paysmart.core.features.fundingaccount.di
 
 import dagger.Binds
 import dagger.Module
@@ -11,10 +11,9 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class FundingAccountModule {
-
     @Binds
     @Singleton
     abstract fun bindFundingAccountGateway(
-        impl: FundingAccountRepository
+        repository: FundingAccountRepository
     ): FundingAccountGateway
 }

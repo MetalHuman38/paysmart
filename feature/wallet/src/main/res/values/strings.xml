@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- common shared -->
+    <string name="common_back">Back</string>
+
+    <!-- AddMoney screens -->
+    <string name="add_money_title">Add money</string>
+    <string name="add_money_subtitle">Top up your wallet with Stripe PaymentSheet (sandbox).</string>
+    <string name="add_money_amount_label">Amount</string>
+    <string name="add_money_currency_label">Currency</string>
+    <string name="add_money_currency_supporting">Tap to select</string>
+    <string name="add_money_payment_sheet_action">Open Stripe PaymentSheet</string>
+    <string name="add_money_refresh_action">I completed payment, refresh status</string>
+    <string name="add_money_view_account_details_action">View account details</string>
+    <string name="add_money_create_flutterwave_action">Create Flutterwave session</string>
+    <string name="add_money_open_provider_checkout_action">Continue payment securely</string>
+    <string name="add_money_provider_stripe">Stripe</string>
+    <string name="add_money_provider_flutterwave">Flutterwave</string>
+    <string name="add_money_you_add">You add</string>
+    <string name="add_money_quote_rate_format">1 %1$s = %2$s %3$s</string>
+    <string name="add_money_summary_paying_in">Paying in</string>
+    <string name="add_money_summary_paying_with">Paying with</string>
+    <string name="add_money_summary_arrives">Arrives</string>
+    <string name="add_money_summary_arrives_today_seconds">Today - in seconds</string>
+    <string name="add_money_summary_arrives_today">Today</string>
+    <string name="add_money_summary_arrives_estimate">Estimate after quote</string>
+    <string name="add_money_summary_you_pay">You pay</string>
+    <string name="add_money_payment_method_title">Payment method</string>
+    <string name="add_money_refresh_quote_action">Refresh live FX quote</string>
+    <string name="add_money_select_currency_title">Select currency</string>
+    <string name="add_money_backend_code_format">Backend code: %1$s</string>
+    <string name="add_money_unavailable_title">Add money unavailable</string>
+    <string name="add_money_unavailable_message_format">Add money is not available in %1$s yet.</string>
+    <string name="add_money_unavailable_supporting_format">We will enable top ups in %1$s once a supported funding provider is live for that market.</string>
+    <string name="add_money_session_provider_label">Provider</string>
+    <string name="add_money_session_status_label">Status</string>
+    <string name="add_money_session_id_label">Session ID</string>
+    <string name="add_money_session_flutterwave_ready_title">Funding account created</string>
+    <string name="add_money_session_ready_title">Session ready</string>
+    <string name="add_money_session_pending_title">Session pending</string>
+    <string name="add_money_session_succeeded_title">Top up completed</string>
+    <string name="add_money_session_failed_title">Top up failed</string>
+    <string name="add_money_session_expired_title">Session expired</string>
+    <string name="add_money_session_flutterwave_ready_supporting">Transfer to the provided account and refresh status after payment lands.</string>
+    <string name="add_money_session_ready_supporting">Your payment session is ready to continue.</string>
+    <string name="add_money_session_pending_supporting">We are still waiting for the payment provider to confirm this session.</string>
+    <string name="add_money_session_succeeded_supporting">Your wallet top up was confirmed successfully.</string>
+    <string name="add_money_session_failed_supporting">This session could not be completed. Try again or create a new one.</string>
+    <string name="add_money_session_expired_supporting">This session is no longer active. Create a new session to continue.</string>
+
+    <!-- FundingAccount screens -->
+    <string name="feature_gate_receive_money_description">Complete these checks to unlock your local funding account.</string>
+    <string name="funding_account_title">Receive money</string>
+    <string name="funding_account_hero_title_format">Receive money in %1$s</string>
+    <string name="funding_account_hero_supporting_format">Create or manage your permanent %1$s funding account for wallet top ups in %2$s.</string>
+    <string name="funding_account_hero_market_label">Market</string>
+    <string name="funding_account_hero_provider_label">Provider</string>
+    <string name="funding_account_state_loading_title">Checking your funding account</string>
+    <string name="funding_account_state_loading_supporting">We are loading your latest account details.</string>
+    <string name="funding_account_state_ready_title">Funding account ready</string>
+    <string name="funding_account_state_ready_supporting">Transfer funds to this account to top up your PaySmart wallet.</string>
+    <string name="funding_account_state_pending_title">Funding account is almost ready</string>
+    <string name="funding_account_state_pending_supporting">We are still waiting for Flutterwave to finish preparing this account.</string>
+    <string name="funding_account_state_empty_title">Create your PaySmart funding account</string>
+    <string name="funding_account_state_empty_supporting">Provision a permanent local account number for fast NGN wallet funding.</string>
+    <string name="funding_account_state_unsupported_title">Receive money is not available yet</string>
+    <string name="funding_account_state_unsupported_supporting_format">We will enable permanent funding accounts in %1$s once that market is fully supported.</string>
+    <string name="funding_account_state_kyc_required_title">More verification is required</string>
+    <string name="funding_account_state_kyc_required_supporting">A verified BVN or NIN is required before we can issue this permanent NGN funding account.</string>
+    <string name="funding_account_state_error_title">We could not prepare your funding account</string>
+    <string name="funding_account_state_error_supporting">Please refresh or try provisioning your account again.</string>
+    <string name="funding_account_action_provision">Create funding account</string>
+    <string name="funding_account_action_retry">Try again</string>
+    <string name="funding_account_action_refresh">Refresh details</string>
+    <string name="funding_account_action_copy_account_number">Copy account number</string>
+    <string name="funding_account_action_share_details">Share details</string>
+    <string name="funding_account_copy_success">Account number copied</string>
+    <string name="funding_account_share_title">Share funding account</string>
+    <string name="funding_account_details_title">Account details</string>
+    <string name="funding_account_details_account_number">Account number</string>
+    <string name="funding_account_details_bank_name">Bank</string>
+    <string name="funding_account_details_account_name">Account name</string>
+    <string name="funding_account_details_reference">Reference</string>
+    <string name="funding_account_details_status">Status</string>
+    <string name="funding_account_details_note">How to use it</string>
+    <string name="funding_account_status_ready_content_description">Funding account ready</string>
+    <string name="funding_account_status_pending_content_description">Funding account pending</string>
+    <string name="funding_account_status_loading_content_description">Funding account loading</string>
+    <string name="funding_account_status_error_content_description">Funding account unavailable</string>
+
+    <!-- ManagedCards screens -->
+    <string name="profile_connected_accounts_cards_empty_title">No saved cards yet</string>
+    <string name="profile_connected_accounts_cards_empty_supporting">When you save a card during a Stripe payment, you will be able to review, update, or remove it here.</string>
+    <string name="profile_connected_accounts_cards_refresh_action">Refresh cards</string>
+    <string name="profile_connected_accounts_cards_make_default_action">Make default</string>
+    <string name="profile_connected_accounts_cards_remove_action">Remove</string>
+    <string name="profile_connected_accounts_cards_default_label">Default</string>
+    <string name="profile_connected_accounts_cards_expiry_format">Expires %1$02d/%2$d</string>
+</resources>

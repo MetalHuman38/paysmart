@@ -22,6 +22,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:models"))
     implementation(project(":core:database"))
+    implementation(project(":core:ui"))
     implementation(project(":core:firebase"))
     implementation(project(":data:auth"))
     implementation(libs.androidx.core.ktx)

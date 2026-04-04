@@ -22,10 +22,10 @@ Detailed commit 9 plan:
 - [x] `:data:auth`
 - [x] `:data:user`
 - [x] `:data:invoice`
-- [x] `:data:wallet` bootstrap slice
-- [ ] `:data:notifications`
+- [x] `:data:wallet` — data + UI/viewmodel layer
+- [x] `:data:notifications` — inbox, installation, store repositories
 - [x] `:feature:home` UI slice
-- [x] `:feature:wallet` bootstrap slice
+- [x] `:feature:wallet` — add-money + funding-account + managed-cards UI/viewmodel
 - [ ] finish `:feature:profile` by extracting the wallet/capability-coupled profile surfaces that still belong to `:app`
 - [ ] finish `:feature:account` UI and remaining viewmodels
 - [ ] reduce `:app` to shell only
@@ -35,7 +35,7 @@ Detailed commit 9 plan:
 - [x] run `:app:assembleDebug`
 - [x] run `:app:testDebugUnitTest`
 - [ ] run `:app:assembleRelease`
-- [x] run `:app:lintDebug`
+- [x] run `:app:lintDebug` (commit 9 session)
 - [x] centralize startup loading so the app root does not render home beneath the loading screen
 - [x] run affected Android test compile targets and resolve or explicitly waive any known baseline failures
 - [ ] smoke test account creation, sign-in, home, add money, notifications, invoice flow, passkey, and biometric unlock on device

@@ -112,6 +112,10 @@ Status: `in progress`
 
 Status: `in progress`
 
+Detailed plan:
+
+- `app/docs/commit9_wallet_notifications_shell_plan.md`
+
 - [x] Create `:feature:wallet`
 - [x] Move the first safe add-money state/resolver slice:
   - `AddMoneyUiState`

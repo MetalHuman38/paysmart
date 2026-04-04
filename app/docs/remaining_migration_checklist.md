@@ -7,6 +7,10 @@ This checklist is split into two tracks:
 
 See also: `app/docs/next_10_migration_commits.md`
 
+Detailed commit 9 plan:
+
+- `app/docs/commit9_wallet_notifications_shell_plan.md`
+
 ## Current Module State
 
 - [x] `:core:common`

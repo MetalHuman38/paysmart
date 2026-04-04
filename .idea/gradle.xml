@@ -28,6 +28,7 @@
             <option value="$PROJECT_DIR$/feature/account" />
             <option value="$PROJECT_DIR$/feature/home" />
             <option value="$PROJECT_DIR$/feature/profile" />
+            <option value="$PROJECT_DIR$/feature/wallet" />
             <option value="$PROJECT_DIR$/sandbox" />
           </set>
         </option>

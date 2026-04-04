@@ -31,7 +31,7 @@ See also: `app/docs/next_10_migration_commits.md`
 - [x] run `:app:assembleDebug`
 - [x] run `:app:testDebugUnitTest`
 - [ ] run `:app:assembleRelease`
-- [ ] run `:app:lintDebug`
+- [x] run `:app:lintDebug`
 - [x] centralize startup loading so the app root does not render home beneath the loading screen
 - [x] run affected Android test compile targets and resolve or explicitly waive any known baseline failures
 - [ ] smoke test account creation, sign-in, home, add money, notifications, invoice flow, passkey, and biometric unlock on device

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "net.metalbrain.paysmart.feature.profile"
+    namespace = "net.metalbrain.paysmart.feature.notifications"
     compileSdk = 36
 
     defaultConfig {
@@ -24,27 +24,19 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:common"))
-    implementation(project(":core:models"))
-    implementation(project(":core:security"))
     implementation(project(":core:ui"))
-    implementation(project(":data:auth"))
-    implementation(project(":data:user"))
-    implementation(project(":data:wallet"))
-    implementation(project(":feature:wallet"))
+    implementation(project(":core:models"))
+    implementation(project(":data:notifications"))
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
     implementation(libs.hilt.core)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
     ksp(libs.hilt.compiler)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.material.icons.extended)
     implementation(libs.androidx.compose.foundation.layout)
-    implementation(libs.coil.compose.v270)
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.storage)
+    implementation(libs.androidx.compose.foundation)
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.junit)

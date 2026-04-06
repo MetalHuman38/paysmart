@@ -220,7 +220,7 @@ private fun Throwable.toFundingAccountErrorCode(): FundingAccountErrorCode {
         ?: FundingAccountErrorCode.FLUTTERWAVE_PROVIDER_REJECTED
 }
 
-internal fun isFundingAccountMarketSupported(profile: CountryCapabilityProfile): Boolean {
+fun isFundingAccountMarketSupported(profile: CountryCapabilityProfile): Boolean {
     val supportsReceiveMoney = profile.capabilities.any { item ->
         item.key == CapabilityKey.RECEIVE_MONEY
     }

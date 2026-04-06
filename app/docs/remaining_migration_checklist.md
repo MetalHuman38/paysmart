@@ -7,10 +7,6 @@ This checklist is split into two tracks:
 
 See also: `app/docs/next_10_migration_commits.md`
 
-Detailed commit 9 plan:
-
-- `app/docs/commit9_wallet_notifications_shell_plan.md`
-
 ## Current Module State
 
 - [x] `:core:common`
@@ -26,6 +22,7 @@ Detailed commit 9 plan:
 - [x] `:data:notifications` — inbox, installation, store repositories
 - [x] `:feature:home` UI slice
 - [x] `:feature:wallet` — add-money + funding-account + managed-cards UI/viewmodel
+- [x] `:feature:notifications` so notification center UI no longer lives in `:app`
 - [ ] finish `:feature:profile` by extracting the wallet/capability-coupled profile surfaces that still belong to `:app`
 - [ ] finish `:feature:account` UI and remaining viewmodels
 - [ ] reduce `:app` to shell only
@@ -34,8 +31,8 @@ Detailed commit 9 plan:
 
 - [x] run `:app:assembleDebug`
 - [x] run `:app:testDebugUnitTest`
-- [ ] run `:app:assembleRelease`
-- [x] run `:app:lintDebug` (commit 9 session)
+- [x] run `:app:assembleRelease`
+- [x] run `:app:lintDebug`
 - [x] centralize startup loading so the app root does not render home beneath the loading screen
 - [x] run affected Android test compile targets and resolve or explicitly waive any known baseline failures
 - [ ] smoke test account creation, sign-in, home, add money, notifications, invoice flow, passkey, and biometric unlock on device
@@ -83,6 +80,7 @@ Detailed commit 9 plan:
 
 - [x] create `:feature:account` module
 - [x] move account headless security/auth/passkey/recovery slice
+- [x] rebalance shared headless account security services back into `:core:security`
 - [x] move runtime-config dependencies out of `:app`
 - [x] move the safe account UI slice into `:feature:account`
   - safe slice now owned by `:feature:account`:
@@ -117,19 +115,36 @@ Detailed commit 9 plan:
 
 - [x] create `:feature:wallet`
 - [x] move the first safe add-money state/resolver slice
-- [ ] move wallet headless state/viewmodel/repository contracts once native bridge blockers are resolved
-- [ ] move wallet screens/components after funding/add-money/account-details boundaries are stable
+- [x] move add-money, funding-account, and managed-cards UI/viewmodel surface into `:feature:wallet`
+- [x] move wallet remote/data ownership for those surfaces into `:data:wallet`
+- [ ] keep the native-bridge / wallet-balance boundary deferred until JNI-backed ownership is ready
 
 ### 5. Build `:data:notifications`
 
-- [ ] move inbox/installations/preferences repositories out of `:app`
-- [ ] leave FCM service in `:app` until activity/resource coupling is removed
+- [x] move inbox/installations/preferences repositories out of `:app`
+- [x] move clean gateway adapters and DI modules into `:data:notifications`
+- [x] leave FCM/runtime notification glue in `:app` by design
+- [x] move notification center UI/viewmodel/card ownership into `:feature:notifications`
 
 ### 6. Reduce `:app` to Shell
 
 - [ ] keep only `Application`, manifest, launcher resources, root nav host, startup orchestration, and top-level DI bootstrap
 - [ ] remove feature implementation ownership from `:app`
 - [ ] verify no feature module imports an app-owned class
+
+## Current Release-Stable Position
+
+- local validation is green for:
+  - `:feature:profile:compileDebugKotlin`
+  - `:app:compileDebugKotlin`
+  - `:app:testDebugUnitTest`
+  - `:app:lintDebug`
+  - `:app:assembleRelease`
+- the active migration blockers are now architectural cleanup, not build stability
+- the next high-value cleanup is:
+  - finish the blocked `:feature:profile` wallet/capability surfaces
+  - finish the blocked `:feature:account` onboarding/login/address surfaces
+  - then reduce `:app` to a shell
 
 ## Validation Gate After Each Slice
 

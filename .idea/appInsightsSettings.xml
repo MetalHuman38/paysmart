@@ -48,8 +48,8 @@
                   <option name="projectNumber" value="285308278238" />
                 </ConnectionSetting>
               </option>
-              <option name="signal" value="SIGNAL_FRESH" />
-              <option name="timeIntervalDays" value="ONE_DAY" />
+              <option name="signal" value="SIGNAL_UNSPECIFIED" />
+              <option name="timeIntervalDays" value="THIRTY_DAYS" />
               <option name="visibilityType" value="ALL" />
             </InsightsFilterSettings>
           </value>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_center_back">Back</string>
+    <string name="notification_center_title">Notifications</string>
+    <string name="notification_center_empty_title">Nothing new yet</string>
+    <string name="notification_center_empty_body">Account updates, product launches, and app install prompts will appear here.</string>
+    <string name="notification_center_unread_label">Unread</string>
+    <string name="notification_center_all_caught_up">All caught up</string>
+    <string name="app_update_restart_action">Restart</string>
+</resources>

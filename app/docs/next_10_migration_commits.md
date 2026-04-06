@@ -104,17 +104,14 @@ Status: `in progress`
 - [x] Abstract `PasscodePrompt` so it no longer depends on the app-owned `SecurityViewModel`
 - [x] Abstract the email verification notification dependency behind a feature-owned gateway
 - [x] Move the email verification sent-state viewmodel into `:feature:account`
+- [x] Rebalance shared headless account security services into `:core:security`
 - [ ] Move remaining account viewmodels/helpers that still sit in `:app`
 - [ ] Keep only root onboarding/auth shell wiring in `:app`
 - [ ] Move the remaining app-owned account screens after their branding/onboarding/address dependencies are shared
 
 ## 9. Build `:feature:wallet` + `:data:notifications`
 
-Status: `in progress`
-
-Detailed plan:
-
-- `app/docs/commit9_wallet_notifications_shell_plan.md`
+Status: `done`
 
 - [x] Create `:feature:wallet`
 - [x] Move the first safe add-money state/resolver slice:
@@ -125,21 +122,47 @@ Detailed plan:
   - `AddMoneySessionVisualState`
   - `resolveAddMoneySessionVisualState`
   - `shouldShowStandaloneSessionInfo`
-- [ ] Move add-money / FX / funding-account / managed-card UI state and screens
-- [ ] Extract `:data:notifications`
-- [ ] Keep FCM service in `:app` until activity/resource coupling is removed
-
-## 10. Reduce `:app` to shell and run final verification
-
-- `:app` keeps:
-  - `Application`
-  - manifest
-  - launcher resources
-  - root nav host
-  - startup orchestration
-  - top-level DI bootstrap
-- Final validation:
-  - `:app:assembleDebug`
+- [x] Move add-money / funding-account / managed-card UI state and screens
+- [x] Extract `:data:notifications`
+- [x] Move clean notification gateway adapters + DI modules into `:data:notifications`
+- [x] Keep FCM/runtime notification glue in `:app` until activity/resource coupling is removed
+- [x] Validate:
+  - `:app:compileDebugKotlin`
   - `:app:testDebugUnitTest`
   - `:app:compileDebugAndroidTestKotlin`
-  - focused device smoke test for auth, home, wallet, notifications, invoice, and passkeys
+  - `:app:assembleRelease`
+  - `:app:lintDebug`
+
+## 10. Build `:feature:notifications`, then resume shell reduction
+
+Status: `done`
+
+- Create `:feature:notifications`
+- Move notification center UI/viewmodel/state/cards out of `:app`
+- Leave these in `:app` by design:
+  - `NotificationBootstrapper`
+  - `NotificationChannelRegistrar`
+  - `PaySmartFirebaseMessagingService`
+  - `PushMessageNotifier`
+- Validation:
+  - `:app:compileDebugKotlin`
+  - `:app:testDebugUnitTest`
+  - `:app:lintDebug`
+  - `:app:assembleRelease`
+
+## Next Cleanup
+
+Status: `next`
+
+- Finish the blocked `:feature:profile` surfaces:
+  - account information
+  - account limits
+  - account statement
+  - connected accounts
+- Finish the blocked `:feature:account` surfaces:
+  - login and recovery screens
+  - create-account / OTP / onboarding screens
+  - email verification sent/success screens
+  - address setup flow
+- Reduce `:app` to shell-only ownership after those surfaces leave
+- Run device smoke coverage for auth, home, wallet, notifications, invoice, passkeys, and biometric unlock

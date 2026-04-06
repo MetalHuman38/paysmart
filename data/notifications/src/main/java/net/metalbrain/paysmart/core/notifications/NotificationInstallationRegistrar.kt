@@ -33,7 +33,7 @@ class NotificationInstallationRegistrar @Inject constructor(
     private val notificationInstallationStore: NotificationInstallationStore,
     private val okHttpClient: OkHttpClient,
     private val appVersionInfo: AppVersionInfo,
-    @ApiPrefixedAuthConfig private val authApiConfig: AuthApiConfig,
+    @param:ApiPrefixedAuthConfig private val authApiConfig: AuthApiConfig,
 ) {
     private val jsonMediaType = "application/json".toMediaType()
 

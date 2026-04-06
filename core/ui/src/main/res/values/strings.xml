@@ -55,6 +55,22 @@
     <string name="transaction_summary_added">You added</string>
     <string name="transaction_summary_activity">Activity</string>
 
+    <!-- Common actions -->
+    <string name="ok" translatable="false">OK</string>
+    <string name="common_cancel">Cancel</string>
+
+    <!-- Language display names (Language.kt / LanguageDisplayCatalog) -->
+    <string name="lang_english_uk">English (UK)</string>
+    <string name="lang_english_us">English (US)</string>
+    <string name="lang_german">German (Deutsch)</string>
+    <string name="lang_french">French (Français)</string>
+    <string name="lang_chinese">Chinese (中文)</string>
+    <string name="lang_portuguese">Portuguese (Português)</string>
+    <string name="lang_spanish">Spanish (Español)</string>
+    <string name="lang_italian">Italian (Italiano)</string>
+    <string name="lang_japanese">Japanese (日本語)</string>
+    <string name="lang_korean">Korean (한국어)</string>
+
     <!-- TermsAndPrivacy -->
     <string name="terms_prefix">By continuing, you agree to our</string>
     <string name="terms_and_conditions">Terms &amp; Conditions</string>

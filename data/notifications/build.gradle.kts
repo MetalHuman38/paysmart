@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:firebase"))
     implementation(project(":data:auth"))
+    implementation(project(":feature:home"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.hilt.core)
     ksp(libs.hilt.compiler)

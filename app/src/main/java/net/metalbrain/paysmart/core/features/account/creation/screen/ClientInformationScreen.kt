@@ -10,11 +10,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import net.metalbrain.paysmart.R
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import net.metalbrain.paysmart.core.features.account.creation.components.AccountCreationScaffold
 import net.metalbrain.paysmart.core.features.account.creation.components.ClientInformationContent
-import net.metalbrain.paysmart.core.features.account.creation.components.ClientInformationDatePickerDialog
+import net.metalbrain.paysmart.ui.components.ClientInformationDatePickerDialog
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.ClientInformationViewModel
 import net.metalbrain.paysmart.core.features.capabilities.catalog.CountrySelectionCatalog
 import net.metalbrain.paysmart.ui.theme.Dimens
@@ -65,6 +67,7 @@ fun ClientInformationScreen(
 
     if (showDatePicker) {
         ClientInformationDatePickerDialog(
+            title = stringResource(R.string.client_info_pick_date_of_birth),
             initialDate = initialDob,
             earliestDate = earliestDob,
             latestDate = latestDob,

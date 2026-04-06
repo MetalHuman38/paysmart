@@ -2,9 +2,20 @@
     <string name="account_limits_tier_restricted">Restricted</string>
     <string name="account_limits_tier_standard">Standard</string>
     <string name="account_limits_tier_enhanced">Enhanced</string>
+    <string name="account_statement_title">Account statement</string>
+    <string name="account_statement_empty">No statement entries yet.</string>
     <string name="account_statement_amount_format">%1$s %2$s %3$.2f</string>
     <string name="account_statement_datetime_format">%1$s at %2$s</string>
     <string name="account_statement_status_format">Status: %1$s</string>
+    <string name="account_statement_supporting">Choose a timeframe for your statement and select the format you want it in.</string>
+    <string name="account_statement_currency_label">Select currency</string>
+    <string name="account_statement_start_date_label">Start date</string>
+    <string name="account_statement_end_date_label">End date</string>
+    <string name="account_statement_date_placeholder">DD/MM/YYYY</string>
+    <string name="account_statement_format_label">Format</string>
+    <string name="account_statement_format_pdf">PDF Format</string>
+    <string name="account_statement_get_action">Get Statement</string>
+    <string name="account_statement_export_pending">Statement export is not connected yet. This form is ready for the statement pipeline.</string>
     <string name="common_back">Back</string>
     <string name="common_completed">Completed</string>
     <string name="common_navigate">Open</string>
@@ -108,4 +119,46 @@
     <string name="profile_version_format">Version: %1$s (%2$d)</string>
     <string name="social_media_advertisement_platform">I am happy for PaySmart to share my name, email address and app events with social media platforms.</string>
     <string name="terms_of_use">https://pay-smart.net/terms/</string>
+
+    <!-- Connected Accounts screens -->
+    <string name="profile_connected_accounts_overview_title">Payments connected to your wallet</string>
+    <string name="profile_connected_accounts_overview_supporting">Review the payment methods PaySmart uses for top ups and payouts. Bank accounts are powered by Flutterwave, and saved cards will appear here once Stripe card vault data is available.</string>
+    <string name="profile_connected_accounts_tab_bank_accounts">Bank accounts</string>
+    <string name="profile_connected_accounts_tab_cards">Cards</string>
+    <string name="profile_connected_accounts_bank_supporting">Permanent local funding accounts for receiving money into your wallet.</string>
+    <string name="profile_connected_accounts_cards_supporting">Cards saved during Stripe checkout will be managed here.</string>
+    <string name="profile_connected_accounts_cards_loading_title">Loading saved cards</string>
+    <string name="profile_connected_accounts_cards_loading_supporting">Checking Stripe for the latest cards saved to your wallet.</string>
+    <string name="profile_connected_accounts_cards_error_title">Saved cards are unavailable</string>
+    <string name="profile_connected_accounts_cards_error_supporting">We could not load your saved cards right now. Try refreshing again.</string>
+    <string name="profile_connected_accounts_cards_refresh_action">Refresh cards</string>
+
+    <!-- Funding account strings (shared with :feature:wallet) -->
+    <string name="add_money_provider_stripe">Stripe</string>
+    <string name="add_money_provider_flutterwave">Flutterwave</string>
+    <string name="funding_account_state_loading_title">Checking your funding account</string>
+    <string name="funding_account_state_loading_supporting">We are loading your latest account details.</string>
+    <string name="funding_account_state_ready_title">Funding account ready</string>
+    <string name="funding_account_state_ready_supporting">Transfer funds to this account to top up your PaySmart wallet.</string>
+    <string name="funding_account_state_pending_title">Funding account is almost ready</string>
+    <string name="funding_account_state_pending_supporting">We are still waiting for Flutterwave to finish preparing this account.</string>
+    <string name="funding_account_state_empty_title">Create your PaySmart funding account</string>
+    <string name="funding_account_state_empty_supporting">Provision a permanent local account number for fast NGN wallet funding.</string>
+    <string name="funding_account_state_unsupported_title">Receive money is not available yet</string>
+    <string name="funding_account_state_unsupported_supporting_format">We will enable permanent funding accounts in %1$s once that market is fully supported.</string>
+    <string name="funding_account_state_kyc_required_title">More verification is required</string>
+    <string name="funding_account_state_kyc_required_supporting">A verified BVN or NIN is required before we can issue this permanent NGN funding account.</string>
+    <string name="funding_account_state_error_title">We could not prepare your funding account</string>
+    <string name="funding_account_state_error_supporting">Please refresh or try provisioning your account again.</string>
+    <string name="funding_account_action_provision">Create funding account</string>
+    <string name="funding_account_action_retry">Try again</string>
+    <string name="funding_account_action_refresh">Refresh details</string>
+    <string name="funding_account_action_copy_account_number">Copy account number</string>
+    <string name="funding_account_action_share_details">Share details</string>
+    <string name="funding_account_details_account_number">Account number</string>
+    <string name="funding_account_details_bank_name">Bank</string>
+    <string name="funding_account_details_account_name">Account name</string>
+    <string name="funding_account_details_reference">Reference</string>
+    <string name="funding_account_details_status">Status</string>
+    <string name="funding_account_details_note">How to use it</string>
 </resources>

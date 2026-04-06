@@ -248,6 +248,7 @@ dependencies {
     implementation(project(":feature:account"))
     implementation(project(":feature:profile"))
     implementation(project(":feature:home"))
+    implementation(project(":feature:notifications"))
     implementation(project(":feature:wallet"))
     implementation(project(":core:invoice-models"))
     implementation(project(":core:models"))

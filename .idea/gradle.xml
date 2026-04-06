@@ -22,11 +22,13 @@
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/data/auth" />
             <option value="$PROJECT_DIR$/data/invoice" />
+            <option value="$PROJECT_DIR$/data/notifications" />
             <option value="$PROJECT_DIR$/data/user" />
             <option value="$PROJECT_DIR$/data/wallet" />
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/account" />
             <option value="$PROJECT_DIR$/feature/home" />
+            <option value="$PROJECT_DIR$/feature/notifications" />
             <option value="$PROJECT_DIR$/feature/profile" />
             <option value="$PROJECT_DIR$/feature/wallet" />
             <option value="$PROJECT_DIR$/sandbox" />

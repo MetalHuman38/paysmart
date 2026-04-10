@@ -75,15 +75,7 @@ internal fun NavGraphBuilder.profileNavGraph(
             ProfileScreen(
                 user = (state as UserUiState.ProfileLoaded).user,
                 isVerified = verifiedFromServer,
-                versionLabel = if (BuildConfig.DEBUG) {
-                    stringResource(
-                        R.string.profile_version_format,
-                        BuildConfig.VERSION_NAME,
-                        BuildConfig.VERSION_CODE
-                    )
-                } else {
-                    null
-                },
+                showVersionLabel = BuildConfig.DEBUG,
                 onChangePhotoClick = {
                     navController.navigateInGraph(Screen.ProfilePhotoPicker.route)
                 },
@@ -381,11 +373,7 @@ internal fun NavGraphBuilder.profileNavGraph(
                 isLocked = profileState.isLocked,
                 missingItems = profileState.missingItems,
                 nextStep = profileState.nextStep,
-                versionLabel = stringResource(
-                    R.string.profile_version_format,
-                    BuildConfig.VERSION_NAME,
-                    BuildConfig.VERSION_CODE
-                ),
+                showVersionLabel = true,
                 onResolveSetup = {
                     when (profileState.nextStep) {
                         ProfileNextStep.VERIFY_EMAIL -> {
@@ -443,11 +431,7 @@ internal fun NavGraphBuilder.profileNavGraph(
                 isLocked = profileState.isLocked,
                 missingItems = profileState.missingItems,
                 nextStep = profileState.nextStep,
-                versionLabel = stringResource(
-                    R.string.profile_version_format,
-                    BuildConfig.VERSION_NAME,
-                    BuildConfig.VERSION_CODE
-                ),
+                showVersionLabel = true,
                 onResolveSetup = {
                     when (profileState.nextStep) {
                         ProfileNextStep.VERIFY_EMAIL -> {

@@ -6,9 +6,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,34 +20,33 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import net.metalbrain.paysmart.feature.profile.R
 import net.metalbrain.paysmart.domain.model.AuthUserModel
-import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.screens.PaySmartScreen
+import net.metalbrain.paysmart.ui.screens.PaySmartTopBarRow
+import net.metalbrain.paysmart.ui.screens.ScreenSpacing
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
+import net.metalbrain.paysmart.ui.version.AppVersionLabel
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun ProfileScreen(
     user: AuthUserModel,
     isVerified: Boolean,
-    versionLabel: String? = null,
+    showVersionLabel: Boolean = false,
     onChangePhotoClick: () -> Unit,
     onAccountInformationClick: () -> Unit,
     onSecurityPrivacyClick: () -> Unit,
@@ -59,6 +58,7 @@ fun ProfileScreen(
 ) {
     val colors = PaysmartTheme.colorTokens
     val typography = PaysmartTheme.typographyTokens
+    val spacing = PaysmartTheme.spacing
     val menuEntries = listOf(
         ProfileMenuEntry(
             title = stringResource(R.string.profile_menu_account_information_title),
@@ -97,102 +97,105 @@ fun ProfileScreen(
         contentVisible = true
     }
 
-    Scaffold(
-        containerColor = colors.backgroundPrimary,
+    PaySmartScreen(
+        contentPadding = PaddingValues(
+            start = ScreenSpacing.contentHorizontal,
+            top = ScreenSpacing.sectionGap,
+            end = ScreenSpacing.contentHorizontal,
+            bottom = ScreenSpacing.contentVertical,
+        ),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.profile_title),
-                        style = typography.heading3,
-                        color = colors.textPrimary
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
+            PaySmartTopBarRow(
+                startContent = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(spacing.space2),
+                    ) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.common_back),
+                                tint = colors.textPrimary
+                            )
+                        }
+
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back),
-                            tint = colors.textPrimary
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            tint = colors.brandPrimary
+                        )
+
+                        Text(
+                            text = stringResource(R.string.profile_title),
+                            style = typography.heading3,
+                            color = colors.textPrimary
                         )
                     }
                 }
             )
-        }
-    ) { innerPadding ->
+        },
+    ) {
         AnimatedVisibility(
             visible = contentVisible,
             enter = fadeIn() + slideInVertically { it / 12 },
             exit = fadeOut() + slideOutVertically { it / 12 }
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(
-                    start = Dimens.mediumScreenPadding,
-                    top = Dimens.md,
-                    end = Dimens.mediumScreenPadding,
-                    bottom = Dimens.lg
-                ),
-                verticalArrangement = Arrangement.spacedBy(Dimens.md)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(ScreenSpacing.sectionGap)
             ) {
-                item {
-                    ProfileHeader(
-                        displayName = user.displayName.orEmpty(),
-                        contactText = user.email ?: user.phoneNumber,
-                        photoURL = user.photoURL,
-                        isVerified = isVerified,
-                        onChangePhotoClick = onChangePhotoClick
-                    )
-                }
-
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = androidx.compose.material3.CardDefaults.cardColors(
-                            containerColor = colors.surfaceElevated
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(ScreenSpacing.sectionGap)
+                ) {
+                    item {
+                        ProfileHeader(
+                            displayName = user.displayName.orEmpty(),
+                            contactText = user.email ?: user.phoneNumber,
+                            photoURL = user.photoURL,
+                            isVerified = isVerified,
+                            onChangePhotoClick = onChangePhotoClick
                         )
-                    ) {
-                        Column {
-                            menuEntries.forEachIndexed { index, entry ->
-                                ProfileMenuItem(
-                                    title = entry.title,
-                                    subtitle = entry.subtitle,
-                                    leadingIcon = entry.icon,
-                                    onClick = entry.onClick
-                                )
-                                if (index < menuEntries.lastIndex) {
-                                    HorizontalDivider()
+                    }
+
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = androidx.compose.material3.CardDefaults.cardColors(
+                                containerColor = colors.surfaceElevated
+                            )
+                        ) {
+                            Column {
+                                menuEntries.forEachIndexed { index, entry ->
+                                    ProfileMenuItem(
+                                        title = entry.title,
+                                        subtitle = entry.subtitle,
+                                        leadingIcon = entry.icon,
+                                        onClick = entry.onClick
+                                    )
+                                    if (index < menuEntries.lastIndex) {
+                                        HorizontalDivider()
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                item {
-                    TextButton(
-                        onClick = {
-                            onLogout()
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.profile_logout),
-                            color = colors.error
-                        )
-                    }
+                TextButton(
+                    onClick = onLogout,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = stringResource(R.string.profile_logout),
+                        color = colors.error
+                    )
                 }
 
-                item {
-                    if (!versionLabel.isNullOrBlank()) {
-                        Text(
-                            text = versionLabel,
-                            style = typography.caption,
-                            color = colors.textTertiary,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                if (showVersionLabel) {
+                    AppVersionLabel(modifier = Modifier.padding(top = spacing.space1))
                 }
             }
         }

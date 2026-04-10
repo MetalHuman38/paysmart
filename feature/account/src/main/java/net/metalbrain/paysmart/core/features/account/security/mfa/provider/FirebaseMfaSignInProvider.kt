@@ -37,7 +37,6 @@ class FirebaseMfaSignInProvider @Inject constructor(
     override fun beginChallenge(exception: FirebaseAuthMultiFactorException): Result<MfaSignInChallenge> {
         return runCatching {
             val resolver = exception.resolver
-                ?: throw IllegalStateException("2-step verification session is missing. Start sign-in again.")
             val hints = resolver.hints
                 .filterIsInstance<PhoneMultiFactorInfo>()
             val initialHint = hints.firstOrNull()
@@ -242,7 +241,7 @@ class FirebaseMfaSignInProvider @Inject constructor(
     }
 
     private fun resolveDestinationHint(hint: PhoneMultiFactorInfo): String {
-        val phone = hint.phoneNumber?.trim().orEmpty()
+        val phone = hint.phoneNumber.trim()
         if (phone.isBlank()) {
             return "your verified phone"
         }

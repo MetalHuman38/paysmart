@@ -1,10 +1,7 @@
 package net.metalbrain.paysmart.domain.usecase
 
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.tasks.await
-import net.metalbrain.paysmart.core.features.account.authorization.passcode.remote.PassCodePolicyHandler
 import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
 import net.metalbrain.paysmart.core.features.account.security.repository.SecurityRepositoryInterface
 import net.metalbrain.paysmart.domain.security.SecuritySettingsManager
@@ -18,7 +15,6 @@ class DefaultSecurityUseCase @Inject constructor(
     private val repository: SecurityRepositoryInterface,
     private val manager: SecuritySettingsManager,
     private val securityPrefs: SecurityPreference,
-    private val passcodePolicyHandler: PassCodePolicyHandler,
 ) : SecurityUseCase {
 
     private val _settingsFlow = MutableStateFlow<SecuritySettingsModel?>(null)
@@ -83,37 +79,6 @@ class DefaultSecurityUseCase @Inject constructor(
 
           Result.success(Unit)
       }
-    }
-
-    override suspend fun markPasscodeEnabledOnServer(): Result<Unit> {
-        return try {
-            val user = FirebaseAuth.getInstance().currentUser
-                ?: return Result.failure(IllegalStateException("User not authenticated"))
-
-            val idToken = user.getIdToken(false).await().token
-                ?: return Result.failure(IllegalStateException("Token missing"))
-
-            val success = passcodePolicyHandler.setPassCodeEnabled(idToken)
-
-            if (success) {
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("Server failed to acknowledge passcode"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getPasscodeEnabledOnServer(): Boolean {
-        return try {
-            val user = FirebaseAuth.getInstance().currentUser ?: return false
-            val idToken = user.getIdToken(false).await().token ?: return false
-            passcodePolicyHandler.getPassCodeEnabled(idToken)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
     }
 
     override suspend fun isLocked(): Boolean =

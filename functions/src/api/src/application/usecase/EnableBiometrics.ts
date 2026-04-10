@@ -10,7 +10,6 @@ export class EnableBiometrics {
     await this.repo.createIfMissing(uid);
 
     await this.repo.update(uid, {
-      biometricsRequired: false,
       biometricsEnabled: true,
       biometricsEnabledAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),

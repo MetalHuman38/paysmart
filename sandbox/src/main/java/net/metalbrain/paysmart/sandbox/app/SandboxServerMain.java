@@ -5,10 +5,6 @@ import net.metalbrain.paysmart.sandbox.di.SandboxContainer;
 
 public final class SandboxServerMain {
 
-    private SandboxServerMain() {
-        throw new UnsupportedOperationException();
-    }
-
     public static void main(String[] args) {
         try {
             SandboxContainer container = SandboxContainer.boot();

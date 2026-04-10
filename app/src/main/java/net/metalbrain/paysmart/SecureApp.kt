@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart
 
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import net.metalbrain.paysmart.domain.auth.state.PostAuthState
@@ -15,13 +16,14 @@ fun SecureApp(
         val intent = when (postAuthState) {
             PostAuthState.Loading -> SecureNavIntent.None
             PostAuthState.Unauthenticated -> SecureNavIntent.ToStartup
-            PostAuthState.RequireAccountProtection -> SecureNavIntent.ToAccountProtection
-            PostAuthState.RequirePasswordSetup -> SecureNavIntent.ToCreatePassword
+            PostAuthState.RequireRecoveryMethod -> SecureNavIntent.ToRecoveryMethod
+            PostAuthState.RequireRecoveryPassword -> SecureNavIntent.ToCreatePassword
             PostAuthState.RequirePasswordRecovery -> SecureNavIntent.ToPasswordRecovery
-            PostAuthState.RequireEmailVerification -> SecureNavIntent.ToEmailVerification
             PostAuthState.Locked -> SecureNavIntent.RequireSessionUnlock
             PostAuthState.Ready -> SecureNavIntent.None
         }
+
+        Log.d("SecureNavTrace", "postAuthState=$postAuthState intent=$intent")
 
         if (intent != SecureNavIntent.None) onIntent(intent)
     }

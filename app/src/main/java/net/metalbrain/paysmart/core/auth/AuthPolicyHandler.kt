@@ -4,6 +4,7 @@ package net.metalbrain.paysmart.core.auth
 import android.util.Log
 import net.metalbrain.paysmart.core.auth.appcheck.provider.AppCheckTokenProvider
 import net.metalbrain.paysmart.core.runtime.di.ApiRootAuthConfig
+import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 
 class AuthPolicyHandler @Inject constructor(
@@ -23,6 +24,8 @@ class AuthPolicyHandler @Inject constructor(
     suspend fun isPhoneAlreadyRegistered(e164: String): Boolean {
         return try {
             client.checkIfPhoneNumberAlreadyExist(e164)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e("AuthPolicyHandler", "Phone check failed", e)
             throw IllegalStateException(
@@ -35,6 +38,8 @@ class AuthPolicyHandler @Inject constructor(
     suspend fun finalizePhoneSignup(idToken: String): Boolean {
         return try {
             client.finalizePhoneSignup(idToken)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e("AuthPolicyHandler", "Phone signup finalization failed", e)
             throw IllegalStateException(

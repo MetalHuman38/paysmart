@@ -17,10 +17,6 @@ interface SecurityUseCase {
 
     suspend fun fetchCloudSettings(userId: String): Result<Unit>
 
-    suspend fun markPasscodeEnabledOnServer(): Result<Unit>
-
-    suspend fun getPasscodeEnabledOnServer(): Boolean
-
     /* ---- suspend (DataStore / Flow) ---- */
     suspend fun isLocked(): Boolean
     suspend fun unlockSession()

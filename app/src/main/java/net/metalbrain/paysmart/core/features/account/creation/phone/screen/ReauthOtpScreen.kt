@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.auth.providers.GoogleAuthIntent
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.ReauthOtpViewModel
 import net.metalbrain.paysmart.ui.components.EmailSignInBtn
 import net.metalbrain.paysmart.ui.components.FacebookSignInButton
@@ -42,6 +43,7 @@ import net.metalbrain.paysmart.ui.components.GoogleSignInBtn
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.screens.loader.AppLoadingScreen
 import net.metalbrain.paysmart.ui.screens.loader.rememberStabilizedLoading
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +57,8 @@ fun ReauthOtpScreen(
     val showLoading = rememberStabilizedLoading(uiState.isLoading)
     val code by viewModel.code
     val context = LocalContext.current
+    val color = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
     val googleLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
@@ -103,7 +107,11 @@ fun ReauthOtpScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (uiState.hasPhoneFactor) {
-                Text(stringResource(R.string.reauth_verify_identity_message))
+                Text(
+                    stringResource(R.string.reauth_verify_identity_message),
+                    style = typography.bodyMedium,
+                    color = color.textPrimary
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -137,26 +145,33 @@ fun ReauthOtpScreen(
                         stringResource(
                             R.string.reauth_resend_available_in,
                             uiState.timerSeconds
-                        )
+                        ),
+                        style = typography.bodyMedium,
+                        color = color.textPrimary
+
                     )
                 }
             } else {
-                Text(stringResource(R.string.reauth_verify_identity_message))
+                Text(stringResource(
+                    R.string.reauth_verify_identity_message),
+                    style = typography.bodyMedium,
+                    color = color.textPrimary
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = stringResource(R.string.reauth_alternative_factor_message),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = typography.bodyMedium,
+                    color = color.textPrimary
                 )
 
                 uiState.recoveryEmail?.let {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.reauth_recovery_email_hint, it),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = typography.bodySmall,
+                        color = color.textPrimary
                     )
                 }
 
@@ -182,6 +197,7 @@ fun ReauthOtpScreen(
                 if (uiState.canUseGoogle) {
                     GoogleSignInBtn(
                         launcher = googleLauncher,
+                        intent = GoogleAuthIntent.SIGN_IN,
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !uiState.isLoading,
                         isLoading = uiState.isLoading,
@@ -215,7 +231,7 @@ fun ReauthOtpScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.reauth_no_alternative_factor_message),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = color.textPrimary
                     )
                 }
             }

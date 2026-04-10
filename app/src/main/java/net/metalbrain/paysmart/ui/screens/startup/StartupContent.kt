@@ -1,21 +1,15 @@
 package net.metalbrain.paysmart.ui.screens.startup
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import net.metalbrain.paysmart.ui.theme.Dimens
-import net.metalbrain.paysmart.ui.theme.PaySmartAppBackground
+import net.metalbrain.paysmart.ui.screens.PaySmartScreen
+import net.metalbrain.paysmart.ui.screens.ScreenSpacing
 
 @Composable
 fun StartupContent(
@@ -24,45 +18,40 @@ fun StartupContent(
     onCreateAccountClick: () -> Unit,
     onLoginClick: () -> Unit
 ) {
-    PaySmartAppBackground {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(WindowInsets.systemBars.asPaddingValues())
-                .padding(horizontal = Dimens.screenPadding)
-        ) {
+    PaySmartScreen(
+        topBar = {
             StartupTopBar(
                 currentLanguage = currentLanguage,
-                onLanguageClick = onLanguageClick,
-                modifier = Modifier.align(Alignment.TopCenter)
+                onLanguageClick = onLanguageClick
             )
-
-            Column(
+        },
+        bottomBar = {
+            StartupActionCard(
+                onCreateAccountClick = onCreateAccountClick,
+                onLoginClick = onLoginClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxSize()
-                    .padding(top = Dimens.largeSpacing)
-                    .padding(bottom = Dimens.largeSpacing),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                StartupBrandSection(
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                StartupAnimationStage(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 240.dp, max = 320.dp)
-                        .weight(1f)
-                )
-
-                StartupActionCard(
-                    onCreateAccountClick = onCreateAccountClick,
-                    onLoginClick = onLoginClick,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+                    .padding(
+                        start = ScreenSpacing.contentHorizontal,
+                        end = ScreenSpacing.contentHorizontal,
+                        bottom = ScreenSpacing.contentVertical
+                    )
+            )
         }
+    ) {
+        Spacer(modifier = Modifier.height(ScreenSpacing.sectionGap))
+
+        StartupBrandSection(
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(ScreenSpacing.sectionGap))
+
+        StartupAnimationStage(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 230.dp, max = 310.dp)
+                .weight(1f, fill = false)
+        )
     }
 }

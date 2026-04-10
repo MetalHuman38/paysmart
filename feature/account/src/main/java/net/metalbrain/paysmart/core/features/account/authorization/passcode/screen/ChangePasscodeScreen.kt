@@ -36,6 +36,8 @@ import net.metalbrain.paysmart.core.features.account.authorization.passcode.view
 import net.metalbrain.paysmart.ui.components.AuthScreenSubtitle
 import net.metalbrain.paysmart.ui.components.AuthScreenTitle
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
+import net.metalbrain.paysmart.utils.shake
 
 @Composable
 fun ChangePasscodeScreen(
@@ -56,6 +58,7 @@ fun ChangePasscodeScreen(
     var showNewPasscode by remember { mutableStateOf(false) }
     var showConfirmPasscode by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    val color = PaysmartTheme.colorTokens
 
     Box(
         modifier = Modifier
@@ -89,7 +92,8 @@ fun ChangePasscodeScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back)
+                            contentDescription = stringResource(R.string.common_back),
+                            tint = color.textPrimary
                         )
                     }
                 }

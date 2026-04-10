@@ -22,6 +22,7 @@ import net.metalbrain.paysmart.ui.components.CircularProgressWithText
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.components.SetupStep
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun AccountSetupSheetContent(
@@ -50,6 +51,9 @@ fun AccountSetupSheetContent(
     val addAddress = stringResource(R.string.add_address)
     val verifyIdentity = stringResource(R.string.verify_identity)
     val continueText = stringResource(R.string.continue_text)
+    val color = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
+
 
     Column(
         modifier = Modifier
@@ -68,15 +72,15 @@ fun AccountSetupSheetContent(
         Text(
             text = title,
             modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.titleLarge,
+            style = typography.heading2,
             textAlign = TextAlign.Center,
         )
 
         Text(
             text = supporting,
             modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = typography.bodyMedium,
+            color = color.textPrimary,
             textAlign = TextAlign.Center,
         )
 

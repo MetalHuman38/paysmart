@@ -91,14 +91,12 @@ describe("collectSecurityNotificationRequests", () => {
   it("detects new security controls and passkey removal", () => {
     const notifications = collectSecurityNotificationRequests(
       {
-        passcodeEnabled: false,
         passwordEnabled: false,
         passkeyEnabled: true,
         biometricsEnabled: false,
         hasEnrolledMfaFactor: false,
       },
       {
-        passcodeEnabled: true,
         passwordEnabled: true,
         passkeyEnabled: false,
         biometricsEnabled: true,
@@ -108,7 +106,6 @@ describe("collectSecurityNotificationRequests", () => {
     );
 
     expect(notifications.map((item) => item.type)).toEqual([
-      "passcode_enabled",
       "password_enabled",
       "biometrics_enabled",
       "passkey_disabled",
@@ -119,14 +116,12 @@ describe("collectSecurityNotificationRequests", () => {
   it("returns an empty list when nothing relevant changes", () => {
     const notifications = collectSecurityNotificationRequests(
       {
-        passcodeEnabled: true,
         passwordEnabled: true,
         passkeyEnabled: true,
         biometricsEnabled: true,
         hasEnrolledMfaFactor: true,
       },
       {
-        passcodeEnabled: true,
         passwordEnabled: true,
         passkeyEnabled: true,
         biometricsEnabled: true,

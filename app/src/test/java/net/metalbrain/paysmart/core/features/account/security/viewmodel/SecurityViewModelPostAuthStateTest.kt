@@ -12,7 +12,7 @@ import org.junit.Test
 class SecurityViewModelPostAuthStateTest {
 
     @Test
-    fun `requires account protection when no primary unlock exists`() {
+    fun `requires recovery method when no recovery signal exists`() {
         val result = resolvePostAuthState(
             authState = AuthState.Authenticated(uid = "user-1"),
             localState = LocalSecuritySettingsModel(),
@@ -20,11 +20,11 @@ class SecurityViewModelPostAuthStateTest {
             sessionState = SessionState.Unlocked
         )
 
-        assertEquals(PostAuthState.RequireAccountProtection, result)
+        assertEquals(PostAuthState.RequireRecoveryMethod, result)
     }
 
     @Test
-    fun `requires password setup when account has unlock but no password yet`() {
+    fun `requires recovery method when passcode is set but no email or password recovery signal`() {
         val result = resolvePostAuthState(
             authState = AuthState.Authenticated(uid = "user-1"),
             localState = LocalSecuritySettingsModel(passcodeEnabled = true),
@@ -32,7 +32,19 @@ class SecurityViewModelPostAuthStateTest {
             sessionState = SessionState.Unlocked
         )
 
-        assertEquals(PostAuthState.RequirePasswordSetup, result)
+        assertEquals(PostAuthState.RequireRecoveryMethod, result)
+    }
+
+    @Test
+    fun `requires recovery password when email is verified but no local password yet`() {
+        val result = resolvePostAuthState(
+            authState = AuthState.Authenticated(uid = "user-1"),
+            localState = LocalSecuritySettingsModel(hasVerifiedEmail = true),
+            cloudState = null,
+            sessionState = SessionState.Unlocked
+        )
+
+        assertEquals(PostAuthState.RequireRecoveryPassword, result)
     }
 
     @Test
@@ -60,5 +72,36 @@ class SecurityViewModelPostAuthStateTest {
         )
 
         assertEquals(PostAuthState.Locked, result)
+    }
+
+    @Test
+    fun `returns ready when recovery method and local password are both set`() {
+        val result = resolvePostAuthState(
+            authState = AuthState.Authenticated(uid = "user-1"),
+            localState = LocalSecuritySettingsModel(
+                passwordEnabled = true,
+                localPasswordSetAt = Timestamp.now()
+            ),
+            cloudState = SecuritySettingsModel(passwordEnabled = true),
+            sessionState = SessionState.Unlocked
+        )
+
+        assertEquals(PostAuthState.Ready, result)
+    }
+
+    @Test
+    fun `returns ready when recovery method is explicitly marked ready and password is set`() {
+        val result = resolvePostAuthState(
+            authState = AuthState.Authenticated(uid = "user-1"),
+            localState = LocalSecuritySettingsModel(
+                recoveryMethodReady = true,
+                passwordEnabled = true,
+                localPasswordSetAt = Timestamp.now()
+            ),
+            cloudState = null,
+            sessionState = SessionState.Unlocked
+        )
+
+        assertEquals(PostAuthState.Ready, result)
     }
 }

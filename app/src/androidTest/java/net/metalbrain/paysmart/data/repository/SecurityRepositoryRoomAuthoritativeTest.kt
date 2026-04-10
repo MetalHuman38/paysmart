@@ -56,6 +56,7 @@ class SecurityRepositoryRoomAuthoritativeTest {
                     passcodeEnabled = false,
                     passwordEnabled = false,
                     biometricsRequired = true,
+                    biometricsEnabled = true,
                     hasVerifiedEmail = false,
                     lockAfterMinutes = 20,
                     sessionLocked = true
@@ -68,6 +69,7 @@ class SecurityRepositoryRoomAuthoritativeTest {
                     passcodeEnabled = true,
                     passwordEnabled = true,
                     biometricsRequired = false,
+                    biometricsEnabled = false,
                     hasVerifiedEmail = true,
                     lockAfterMinutes = 5
                 )
@@ -81,6 +83,7 @@ class SecurityRepositoryRoomAuthoritativeTest {
             assertTrue(settings!!.passcodeEnabled)
             assertTrue(settings.passwordEnabled)
             assertFalse(settings.biometricsRequired)
+            assertTrue(settings.biometricsEnabled)
             assertTrue(settings.hasVerifiedEmail)
             assertEquals(5, settings.lockAfterMinutes)
             assertTrue(settings.sessionLocked)

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -23,6 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import net.metalbrain.paysmart.feature.account.R
 import net.metalbrain.paysmart.core.features.account.authorization.passcode.card.BrandFooter
 import net.metalbrain.paysmart.core.features.account.passkey.cards.PasskeySurfaceCard
@@ -142,6 +148,24 @@ fun PasskeySetupScreen(
                             onClick = { viewModel.verifyPasskey(activity) },
                             enabled = !state.isLoading
                         )
+
+                        if (state.isLoading) {
+                            val composition by rememberLottieComposition(
+                                LottieCompositionSpec.RawRes(R.raw.loader)
+                            )
+                            val progress by animateLottieCompositionAsState(
+                                composition,
+                                iterations = LottieConstants.IterateForever,
+                                isPlaying = true
+                            )
+                            LottieAnimation(
+                                composition = composition,
+                                progress = { progress },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(80.dp)
+                            )
+                        }
                     }
                 }
 
@@ -156,7 +180,7 @@ fun PasskeySetupScreen(
                         state.isRegistered -> stringResource(R.string.profile_security_passkey_subtitle_enabled)
                         else -> stringResource(R.string.passkey_setup_description)
                     },
-                    supporting = state.statusMessage,
+                    supporting = null,
                     tone = when {
                         state.error != null -> PasskeyStatusTone.Danger
                         state.isRegistered -> PasskeyStatusTone.Active

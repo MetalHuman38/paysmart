@@ -23,6 +23,18 @@ import net.metalbrain.paysmart.ui.theme.Dimens
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
+/**
+ * Composable screen that collects personal information from the client during the account creation process.
+ *
+ * This screen displays a form for the user to enter their name, email, and date of birth.
+ * It also handles country-specific UI elements based on the provided ISO code and performs
+ * age validation (restricting selection between 18 and 120 years ago).
+ *
+ * @param countryIso2 The ISO 3166-1 alpha-2 country code used to display the relevant flag and country name.
+ * @param onBack Callback invoked when the user navigates back.
+ * @param onContinue Callback invoked after the information is successfully validated and submitted.
+ * @param viewModel The [ClientInformationViewModel] that manages the state and logic for this screen.
+ */
 @Composable
 fun ClientInformationScreen(
     countryIso2: String,

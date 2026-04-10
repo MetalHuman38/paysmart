@@ -20,6 +20,7 @@ export interface SecuritySettingsModel {
   hasSkippedPasskeyEnrollmentPrompt: boolean;
   hasEnrolledMfaFactor: boolean;
   mfaEnrolledAt: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue | null;
+  kycStatus?: string | null;
   localPassCodeSetAt: FirebaseFirestore.Timestamp | null;
   localPasswordSetAt: FirebaseFirestore.Timestamp | null;
   updatedAt: FirebaseFirestore.FieldValue;

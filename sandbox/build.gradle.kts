@@ -26,7 +26,7 @@ fun String?.cleanOrNull(): String? {
     return clean.takeIf { it.isNotEmpty() }
 }
 
-val sandboxLocalFile = layout.projectDirectory.file("local.env.properties").asFile!!
+val sandboxLocalFile = layout.projectDirectory.file("local.env.properties").asFile
 val sandboxLocalProps = Properties().apply {
     if (sandboxLocalFile.exists()) {
         sandboxLocalFile.inputStream().use(::load)

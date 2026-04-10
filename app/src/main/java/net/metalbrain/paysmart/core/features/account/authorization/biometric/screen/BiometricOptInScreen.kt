@@ -49,6 +49,7 @@ import net.metalbrain.paysmart.core.features.account.authorization.biometric.vie
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.ui.components.BiometricToggleRow
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun BiometricOptInScreen(
@@ -72,6 +73,10 @@ fun BiometricOptInScreen(
     val lockedOut by viewModel.lockedOut.collectAsState()
 
     val scrollState = rememberScrollState()
+
+    val color = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
+
 
     // Lottie Setup 🎞️
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.biometric))
@@ -119,15 +124,18 @@ fun BiometricOptInScreen(
 
         Text(
             text = stringResource(R.string.Secure_your_account),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            style = typography.heading4,
+            fontWeight = FontWeight.Bold,
+            color = color.textPrimary,
+            textAlign = TextAlign.Center
         )
 
 
         Text(
             text = stringResource(R.string.add_passcode_title),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
+            style = typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = color.textSecondary
         )
 
         Spacer(modifier = Modifier.height(32.dp))

@@ -1,6 +1,7 @@
 package net.metalbrain.paysmart.core.features.account.authorization.biometric.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -32,7 +34,9 @@ class BiometricOptInViewModel @Inject constructor(
 
     val biometricCompleted: StateFlow<Boolean> =
         securityPreference.localSecurityStateFlow
-            .map { it.biometricsRequired && it.biometricsEnabled }
+            .combine(biometricAvailable) { settings, available ->
+                settings.biometricsEnabled && available
+            }
             .stateIn(viewModelScope, SharingStarted.Companion.WhileSubscribed(5000), false)
 
     private val _loading = MutableStateFlow(false)
@@ -75,21 +79,17 @@ class BiometricOptInViewModel @Inject constructor(
                         onSuccess()
                         return@launch
                     }
-                    // 2️⃣ Attempt secure server sync in background
+                    biometricRepository.enableBiometricLocal()
                     val idToken = FirebaseAuth.getInstance()
                         .currentUser?.getIdToken(false)?.await()?.token
-                    if (idToken.isNullOrBlank()) {
-                        _errorMessage.value = "Missing auth token"
-                        return@launch
-                    }
-
-                    val success = biometricRepository.enableBiometric(idToken)
                     _loading.value = false
-                    if (success) {
-                        // ✅ Notify UI that biometric setup was successful
-                        onSuccess()
-                    } else {
-                        _errorMessage.value = "Failed to enable biometric security"
+                    onSuccess()
+
+                    if (!idToken.isNullOrBlank()) {
+                        val synced = biometricRepository.syncBiometricEnabled(idToken)
+                        if (!synced) {
+                            Log.w("BiometricOptIn", "Server biometric sync failed")
+                        }
                     }
                 }
             },

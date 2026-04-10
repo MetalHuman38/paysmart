@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,7 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.feature.profile.R
-import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 private val ProfileHeaderAvatarSize = 116.dp
@@ -44,6 +42,7 @@ fun ProfileHeader(
 ) {
     val colors = PaysmartTheme.colorTokens
     val typography = PaysmartTheme.typographyTokens
+    val spacing = PaysmartTheme.spacing
     val resolvedName = displayName.ifBlank { stringResource(R.string.profile_default_name) }
     val supportingText = contactText?.takeIf { it.isNotBlank() }
         ?: stringResource(R.string.profile_change_photo_contact_fallback)
@@ -95,7 +94,7 @@ fun ProfileHeader(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(top = Dimens.space6, bottom = Dimens.space6)
+            modifier = Modifier.padding(top = spacing.space3, bottom = spacing.space4)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -119,7 +118,7 @@ fun ProfileHeader(
                         colors.textTertiary
                     },
                     modifier = Modifier
-                        .padding(start = Dimens.sm)
+                        .padding(start = spacing.space2)
                         .size(20.dp)
                 )
             }
@@ -128,7 +127,7 @@ fun ProfileHeader(
                 text = supportingText,
                 style = typography.bodyMedium,
                 color = colors.textSecondary,
-                modifier = Modifier.padding(top = Dimens.sm)
+                modifier = Modifier.padding(top = spacing.space2)
             )
         }
     }

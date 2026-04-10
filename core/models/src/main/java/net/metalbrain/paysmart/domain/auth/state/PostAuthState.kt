@@ -5,11 +5,9 @@ sealed interface PostAuthState {
     data object Loading : PostAuthState
     data object Unauthenticated : PostAuthState
 
-    data object RequireAccountProtection : PostAuthState
-    data object RequirePasswordSetup : PostAuthState
+    data object RequireRecoveryMethod : PostAuthState
+    data object RequireRecoveryPassword : PostAuthState
     data object RequirePasswordRecovery : PostAuthState
-
-    data object RequireEmailVerification : PostAuthState
 
     data object Locked : PostAuthState
 

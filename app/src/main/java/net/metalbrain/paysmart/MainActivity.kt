@@ -9,7 +9,6 @@ import android.Manifest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -43,6 +42,7 @@ import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.core.features.account.security.viewmodel.SecurityViewModel
 import net.metalbrain.paysmart.core.features.theme.data.AppThemeMode
 import net.metalbrain.paysmart.core.features.theme.viewmodel.AppThemeViewModel
+import net.metalbrain.paysmart.core.common.runtime.AppVersionInfo
 import net.metalbrain.paysmart.core.locale.LocaleManager
 import net.metalbrain.paysmart.core.notifications.NotificationBootstrapper
 import net.metalbrain.paysmart.core.session.IdleSessionWatcher
@@ -69,6 +69,7 @@ import net.metalbrain.paysmart.ui.screens.loader.rememberStabilizedLoading
 import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.ui.theme.PaySmartAppBackground
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
+import net.metalbrain.paysmart.ui.version.ProvideAppVersionInfo
 
 /**
  * The main entry point for the PaySmart application.
@@ -99,6 +100,9 @@ class MainActivity : FragmentActivity() {
 
     @Inject
     lateinit var notificationBootstrapper: NotificationBootstrapper
+
+    @Inject
+    lateinit var appVersionInfo: AppVersionInfo
 
     private val inAppUpdateLauncher = registerForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
@@ -193,7 +197,9 @@ class MainActivity : FragmentActivity() {
                 showNoConnectionGate = showNoConnectionGate,
             )
             val deferSecurityIntentForOnboarding =
-                currentRoute == Screen.CreateAccount.route ||
+                currentRoute == "unknown" ||
+                    currentRoute == Screen.Splash.route ||
+                    currentRoute == Screen.CreateAccount.route ||
                     currentRoute.startsWith("otp_verification/") ||
                     currentRoute.startsWith("onboarding/capabilities/") ||
                     currentRoute.startsWith("onboarding/security_steps/") ||
@@ -206,9 +212,31 @@ class MainActivity : FragmentActivity() {
                     currentRoute.startsWith(Screen.ProfileChangePasscode.route) ||
                     currentRoute.startsWith(Screen.PasskeySetup.route) ||
                     currentRoute.startsWith(Screen.LinkFederatedAccount.route) ||
+                    currentRoute.startsWith(Screen.CreatePassword.BASEROUTE) ||
                     currentRoute.startsWith(Screen.AddEmail.route) ||
                     currentRoute.startsWith("email_sent/") ||
                     currentRoute.startsWith(Screen.EmailVerified.route)
+
+            LaunchedEffect(
+                loadingPhase,
+                rootLoadingPhase,
+                authState,
+                postAuthState,
+                localSecurityState,
+                currentRoute,
+                startDestination,
+                showNoConnectionGate,
+                deferSecurityIntentForOnboarding,
+            ) {
+                Log.d(
+                    "RootLoadingTrace",
+                    "loadingPhase=$loadingPhase rootLoadingPhase=$rootLoadingPhase " +
+                        "auth=${authState::class.simpleName} post=$postAuthState " +
+                        "local=${localSecurityState::class.simpleName} route=$currentRoute " +
+                        "start=$startDestination noConnection=$showNoConnectionGate " +
+                        "defer=$deferSecurityIntentForOnboarding"
+                )
+            }
 
             LaunchedEffect(sessionLocked, postAuthState, sessionState, currentRoute) {
                 Log.d(
@@ -320,151 +348,136 @@ class MainActivity : FragmentActivity() {
                 darkTheme = isDarkTheme,
                 themeVariant = themeVariant
             ) {
-                LocalizedAppWrapper {
-                    PaySmartAppBackground {
-                        Surface(color = Color.Transparent) {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                IdleSessionWatcher(
-                                    enabled = idleLockEnabled,
-                                    lockAfterMinutes = lockAfterMinutes,
-                                    onTimeout = {
-                                        Log.d(
-                                            "LockStateTrace",
-                                            "idle_timeout sessionLockedBefore=$sessionLocked postAuthState=$postAuthState route=$currentRoute"
-                                        )
-                                        lifecycleScope.launch {
-                                            sessionStateManager.lockSession()
-                                        }
-                                    },
-                                    onInteraction = {
-                                        securityViewModel.registerInteractionHeartbeat()
-                                    }
-                                ) {
-                                    AppRoot(
-                                        navController = navController,
-                                        startDestination = startDestination,
-                                        loadingPhase = loadingPhase,
-                                        showNoConnectionGate = showNoConnectionGate,
-                                        isOnline = isOnline,
-                                        postAuthState = postAuthState,
-                                        onReturnToLogin = {
-                                            if (isOnline) {
-                                                showNoConnectionGate = false
-                                                navController.navigateClearingBackStackSafely(
-                                                    route = Screen.Login.route,
-                                                    currentRoute = currentRoute,
-                                                    source = "connectivity_return_to_login",
-                                                )
+                ProvideAppVersionInfo(appVersionInfo = appVersionInfo) {
+                    LocalizedAppWrapper {
+                        PaySmartAppBackground {
+                            Surface(color = Color.Transparent) {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    IdleSessionWatcher(
+                                        enabled = idleLockEnabled,
+                                        lockAfterMinutes = lockAfterMinutes,
+                                        onTimeout = {
+                                            Log.d(
+                                                "LockStateTrace",
+                                                "idle_timeout sessionLockedBefore=$sessionLocked postAuthState=$postAuthState route=$currentRoute"
+                                            )
+                                            lifecycleScope.launch {
+                                                sessionStateManager.lockSession()
                                             }
                                         },
-                                        onIntent = { intent ->
-                                            when (intent) {
-                                                SecureNavIntent.ToStartup -> {
-                                                    navController.navigateClearingBackStackSafely(
-                                                        route = Screen.Startup.route,
-                                                        currentRoute = currentRoute,
-                                                        source = "secure_intent_startup",
-                                                    )
-                                                }
-
-                                                SecureNavIntent.ToAccountProtection -> {
-                                                    if (deferSecurityIntentForOnboarding) {
-                                                        Log.d(
-                                                            "LockStateTrace",
-                                                            "defer_account_protection_intent route=$currentRoute"
-                                                        )
-                                                    } else {
-                                                        navController.navigateSafely(
-                                                            route = Screen.ProtectAccount.route,
-                                                            currentRoute = currentRoute,
-                                                            source = "secure_intent_account_protection",
-                                                        ) {
-                                                            launchSingleTop = true
-                                                        }
-                                                    }
-                                                }
-
-                                                SecureNavIntent.ToCreatePassword -> {
-                                                    if (deferSecurityIntentForOnboarding) {
-                                                        Log.d(
-                                                            "LockStateTrace",
-                                                            "defer_create_password_intent route=$currentRoute"
-                                                        )
-                                                    } else if (currentRoute != Screen.CreatePassword.route) {
-                                                        navController.navigateSafely(
-                                                            route = Screen.CreatePassword.BASEROUTE,
-                                                            currentRoute = currentRoute,
-                                                            source = "secure_intent_create_password",
-                                                        ) {
-                                                            launchSingleTop = true
-                                                        }
-                                                    }
-                                                }
-
-                                                SecureNavIntent.ToPasswordRecovery -> {
-                                                    if (deferSecurityIntentForOnboarding) {
-                                                        Log.d(
-                                                            "LockStateTrace",
-                                                            "defer_password_recovery_intent route=$currentRoute"
-                                                        )
-                                                    } else if (
-                                                        currentRoute != Screen.Reauthenticate.route &&
-                                                        currentRoute != Screen.CreatePassword.route
-                                                    ) {
-                                                        navController.navigateSafely(
-                                                            route = Screen.Reauthenticate.routeWithTarget(
-                                                                Screen.CreatePassword.BASEROUTE
-                                                            ),
-                                                            currentRoute = currentRoute,
-                                                            source = "secure_intent_password_recovery",
-                                                        ) {
-                                                            launchSingleTop = true
-                                                        }
-                                                    }
-                                                }
-
-                                                SecureNavIntent.ToEmailVerification -> {
-                                                    if (deferSecurityIntentForOnboarding) {
-                                                        Log.d(
-                                                            "LockStateTrace",
-                                                            "defer_email_verification_intent route=$currentRoute"
-                                                        )
-                                                    } else {
-                                                        navController.navigateSafely(
-                                                            route = Screen.AddEmail.route,
-                                                            currentRoute = currentRoute,
-                                                            source = "secure_intent_email_verification",
-                                                        ) {
-                                                            launchSingleTop = true
-                                                        }
-                                                    }
-                                                }
-
-                                                SecureNavIntent.RequireSessionUnlock -> {
-                                                    Log.d(
-                                                        "LockStateTrace",
-                                                        "lock_intent route=$currentRoute to=${Screen.RequireSessionUnlock.route}"
-                                                    )
-                                                    navController.navigateSafely(
-                                                        route = Screen.RequireSessionUnlock.route,
-                                                        currentRoute = currentRoute,
-                                                        source = "secure_intent_session_unlock",
-                                                    ) {
-                                                        launchSingleTop = true
-                                                    }
-                                                }
-
-                                                SecureNavIntent.None -> Unit
-                                            }
+                                        onInteraction = {
+                                            securityViewModel.registerInteractionHeartbeat()
                                         }
+                                    ) {
+                                        AppRoot(
+                                            navController = navController,
+                                            startDestination = startDestination,
+                                            loadingPhase = loadingPhase,
+                                            showNoConnectionGate = showNoConnectionGate,
+                                            isOnline = isOnline,
+                                            postAuthState = postAuthState,
+                                            onReturnToLogin = {
+                                                if (isOnline) {
+                                                    showNoConnectionGate = false
+                                                    navController.navigateClearingBackStackSafely(
+                                                        route = Screen.Login.route,
+                                                        currentRoute = currentRoute,
+                                                        source = "connectivity_return_to_login",
+                                                    )
+                                                }
+                                            },
+                                            onIntent = { intent ->
+                                                when (intent) {
+                                                    SecureNavIntent.ToStartup -> {
+                                                        navController.navigateClearingBackStackSafely(
+                                                            route = Screen.Startup.route,
+                                                            currentRoute = currentRoute,
+                                                            source = "secure_intent_startup",
+                                                        )
+                                                    }
+
+                                                    SecureNavIntent.ToRecoveryMethod -> {
+                                                        if (deferSecurityIntentForOnboarding) {
+                                                            Log.d(
+                                                                "LockStateTrace",
+                                                                "defer_recovery_method_intent route=$currentRoute"
+                                                            )
+                                                        } else {
+                                                            navController.navigateSafely(
+                                                                route = Screen.LinkFederatedAccount.route,
+                                                                currentRoute = currentRoute,
+                                                                source = "secure_intent_recovery_method",
+                                                            ) {
+                                                                launchSingleTop = true
+                                                            }
+                                                        }
+                                                    }
+
+                                                    SecureNavIntent.ToCreatePassword -> {
+                                                        if (deferSecurityIntentForOnboarding) {
+                                                            Log.d(
+                                                                "LockStateTrace",
+                                                                "defer_create_password_intent route=$currentRoute"
+                                                            )
+                                                        } else if (currentRoute != Screen.CreatePassword.route) {
+                                                            navController.navigateSafely(
+                                                                route = Screen.CreatePassword.BASEROUTE,
+                                                                currentRoute = currentRoute,
+                                                                source = "secure_intent_create_password",
+                                                            ) {
+                                                                launchSingleTop = true
+                                                            }
+                                                        }
+                                                    }
+
+                                                    SecureNavIntent.ToPasswordRecovery -> {
+                                                        if (deferSecurityIntentForOnboarding) {
+                                                            Log.d(
+                                                                "LockStateTrace",
+                                                                "defer_password_recovery_intent route=$currentRoute"
+                                                            )
+                                                        } else if (
+                                                            currentRoute != Screen.Reauthenticate.route &&
+                                                            currentRoute != Screen.CreatePassword.route
+                                                        ) {
+                                                            navController.navigateSafely(
+                                                                route = Screen.Reauthenticate.routeWithTarget(
+                                                                    Screen.CreatePassword.BASEROUTE
+                                                                ),
+                                                                currentRoute = currentRoute,
+                                                                source = "secure_intent_password_recovery",
+                                                            ) {
+                                                                launchSingleTop = true
+                                                            }
+                                                        }
+                                                    }
+
+                                                    SecureNavIntent.RequireSessionUnlock -> {
+                                                        Log.d(
+                                                            "LockStateTrace",
+                                                            "lock_intent route=$currentRoute to=${Screen.RequireSessionUnlock.route}"
+                                                        )
+                                                        navController.navigateSafely(
+                                                            route = Screen.RequireSessionUnlock.route,
+                                                            currentRoute = currentRoute,
+                                                            source = "secure_intent_session_unlock",
+                                                        ) {
+                                                            launchSingleTop = true
+                                                        }
+                                                    }
+
+                                                    SecureNavIntent.None -> Unit
+                                                }
+                                            }
+                                        )
+                                    }
+                                    SnackbarHost(
+                                        hostState = updateSnackbarHostState,
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .padding(Dimens.screenPadding)
                                     )
                                 }
-                                SnackbarHost(
-                                    hostState = updateSnackbarHostState,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .padding(Dimens.screenPadding)
-                                )
                             }
                         }
                     }
@@ -502,6 +515,24 @@ private fun AppRoot(
     onIntent: (SecureNavIntent) -> Unit,
 ) {
     val showLoading = rememberStabilizedLoading(phase = loadingPhase)
+    val initialStartDestination = rememberSaveable { startDestination }
+
+    LaunchedEffect(
+        showLoading,
+        loadingPhase,
+        startDestination,
+        initialStartDestination,
+        showNoConnectionGate,
+        postAuthState,
+    ) {
+        Log.d(
+            "RootLoadingTrace",
+            "app_root showLoading=$showLoading " +
+                "loadingPhase=$loadingPhase start=$startDestination " +
+                "initialStart=$initialStartDestination " +
+                "noConnection=$showNoConnectionGate post=$postAuthState"
+        )
+    }
 
     when {
         showNoConnectionGate -> {
@@ -512,23 +543,18 @@ private fun AppRoot(
         }
 
         else -> {
-            Crossfade(
-                targetState = showLoading,
-                label = "app_root_loading_gate"
-            ) { isLoading ->
-                if (isLoading) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                AppNavGraph(
+                    navController = navController,
+                    startDestination = initialStartDestination,
+                )
+                SecureApp(
+                    postAuthState = postAuthState,
+                    onIntent = onIntent,
+                )
+
+                if (showLoading) {
                     AppLoadingScreen(phase = loadingPhase)
-                } else {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        AppNavGraph(
-                            navController = navController,
-                            startDestination = startDestination,
-                        )
-                        SecureApp(
-                            postAuthState = postAuthState,
-                            onIntent = onIntent,
-                        )
-                    }
                 }
             }
         }
@@ -559,13 +585,11 @@ private fun resolveRootStartDestination(postAuthState: PostAuthState): String {
     return when (postAuthState) {
         PostAuthState.Loading -> Screen.Startup.route
         PostAuthState.Unauthenticated -> Screen.Startup.route
-        PostAuthState.RequireAccountProtection -> Screen.ProtectAccount.route
-        PostAuthState.RequirePasswordSetup -> Screen.CreatePassword.BASEROUTE
+        PostAuthState.RequireRecoveryMethod -> Screen.LinkFederatedAccount.route
+        PostAuthState.RequireRecoveryPassword -> Screen.CreatePassword.BASEROUTE
         PostAuthState.RequirePasswordRecovery -> Screen.Reauthenticate.routeWithTarget(
             Screen.CreatePassword.BASEROUTE
         )
-
-        PostAuthState.RequireEmailVerification -> Screen.AddEmail.route
         PostAuthState.Locked -> Screen.RequireSessionUnlock.route
         PostAuthState.Ready -> Screen.Home.route
     }

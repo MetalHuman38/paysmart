@@ -16,6 +16,7 @@ import net.metalbrain.paysmart.ui.components.PasscodeField
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.ui.theme.LocalAppThemePack
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 
 @Composable
@@ -35,6 +36,9 @@ fun PasscodeSetupCard(
     onSubmit: () -> Unit,
 ) {
     val securityStyle = LocalAppThemePack.current.securityStyle
+    val color = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
@@ -42,7 +46,7 @@ fun PasscodeSetupCard(
             containerColor = if (securityStyle.useEditorialLayout) {
                 MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = securityStyle.glassPanelAlpha)
             } else {
-                MaterialTheme.colorScheme.surface
+                color.textPrimary
             }
         )
     ) {
@@ -56,14 +60,14 @@ fun PasscodeSetupCard(
                     style = if (securityStyle.useEditorialLayout) {
                         MaterialTheme.typography.headlineSmall
                     } else {
-                        MaterialTheme.typography.titleMedium
+                        typography.heading3
                     },
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = stringResource(R.string.add_passcode_advisory_text),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = typography.bodySmall,
+                    color = color.textPrimary
                 )
             }
 

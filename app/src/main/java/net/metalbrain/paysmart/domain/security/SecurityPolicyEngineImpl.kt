@@ -1,6 +1,8 @@
 package net.metalbrain.paysmart.domain.security
 
 import androidx.fragment.app.FragmentActivity
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -16,6 +18,7 @@ import javax.inject.Singleton
 
 @Singleton
 class SecurityPolicyEngineImpl @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val prefs: SecurityPreference,
     @param:AppCoroutineScope private val appScope: CoroutineScope
 ) : SecurityPolicyEngine {
@@ -45,7 +48,11 @@ class SecurityPolicyEngineImpl @Inject constructor(
         // 🚨 HARD LOCK CONDITIONS (cannot proceed)
         if (state.killSwitchActive) return@withLock true
 
-        if (state.biometricsRequired && !prefs.hasBiometricAuth()) return@withLock true
+        if (state.biometricsRequired) {
+            val isAvailable = BiometricHelper.isBiometricAvailable(context)
+            val hasLocalOptIn = state.biometricsEnabled
+            if (!hasLocalOptIn || !isAvailable) return@withLock true
+        }
 
         if (state.passcodeEnabled && !prefs.hasPasscode()) return@withLock true
 

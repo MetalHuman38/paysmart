@@ -4,6 +4,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Represents the color theme for a transaction status, providing specific colors
+ * for both the background container and the foreground content.
+ *
+ * @property containerColor The color to be used for the background of the status indicator.
+ * @property contentColor The color to be used for text or icons displayed on top of the container.
+ */
 data class TransactionStatusTone(
     val containerColor: Color,
     val contentColor: Color

@@ -10,9 +10,18 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import net.metalbrain.paysmart.utils.FailureCounter
 import java.util.concurrent.Executor
 
+/**
+ * A helper object that simplifies the implementation of biometric authentication and device credentials.
+ *
+ * This utility manages the interaction with [BiometricManager] and [BiometricPrompt], providing
+ * both callback-based interactions and a [kotlinx.coroutines.flow.Flow] of results.
+ *
+ * @property biometricResultFlow A flow that emits [BiometricResult] updates, allowing observers
+ * to react to authentication states reactively.
+ */
 object BiometricHelper {
 
-    private val resultChannel = Channel<BiometricResult>(Channel.Factory.BUFFERED)
+    private val resultChannel = Channel<BiometricResult>(Channel.BUFFERED)
     val biometricResultFlow = resultChannel.receiveAsFlow()
 
     fun isBiometricAvailable(context: Context): Boolean {

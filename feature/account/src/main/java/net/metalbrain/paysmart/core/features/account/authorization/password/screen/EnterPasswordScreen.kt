@@ -50,6 +50,7 @@ import net.metalbrain.paysmart.ui.components.AuthScreenSubtitle
 import net.metalbrain.paysmart.ui.components.AuthScreenTitle
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun EnterPasswordScreen(
@@ -59,6 +60,10 @@ fun EnterPasswordScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showPassword by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    val typography = PaysmartTheme.typographyTokens
+    val color = PaysmartTheme.colorTokens
+
+
 
     Box(
         modifier = Modifier
@@ -110,13 +115,13 @@ fun EnterPasswordScreen(
                         Icon(
                             imageVector = Icons.Outlined.Lock,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = color.textPrimary
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = stringResource(R.string.password_placeholder),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            style = typography.labelMedium,
+                            color = color.textPrimary
                         )
                     }
 
@@ -153,8 +158,8 @@ fun EnterPasswordScreen(
                     uiState.errorMessage?.takeIf { it.isNotBlank() }?.let { error ->
                         Text(
                             text = error,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
+                            color = color.error,
+                            style = typography.bodySmall,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -179,7 +184,8 @@ fun EnterPasswordScreen(
             ) {
                 Text(
                     text = stringResource(R.string.trouble_loggin_in),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = typography.bodyMedium,
+                    color = color.textPrimary
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 TextButton(
@@ -188,7 +194,7 @@ fun EnterPasswordScreen(
                     Text(
                         text = stringResource(R.string.recover_your_account),
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.primary
+                            color = color.textPrimary
                         )
                     )
                 }

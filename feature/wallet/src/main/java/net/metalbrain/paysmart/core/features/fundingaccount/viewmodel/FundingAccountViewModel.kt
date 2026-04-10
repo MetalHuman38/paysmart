@@ -7,7 +7,6 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
@@ -235,7 +234,7 @@ internal fun resolveFundingAccountProvider(
     account: FundingAccountData?,
     profile: CountryCapabilityProfile
 ): String? {
-    if (!account?.provider.isNullOrBlank()) return account?.provider
+    if (!account?.provider.isNullOrBlank()) return account.provider
 
     return profile.addMoney.preferredProvider
         ?.takeIf { provider -> provider == AddMoneyProvider.FLUTTERWAVE }

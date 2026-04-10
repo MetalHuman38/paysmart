@@ -1,0 +1,6 @@
+<resources>
+    <!-- Used by AccountTypeAndLimitCatalog -->
+    <string name="account_limits_account_descriptor_bank_transfer">Bank transfer</string>
+    <string name="funding_account_details_account_number">Account number</string>
+    <string name="send_money_field_iban">IBAN</string>
+</resources>

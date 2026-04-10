@@ -401,7 +401,7 @@ internal fun NavGraphBuilder.authNavGraph(
             onBack = { navController.popBackStack() },
             onContinue = {
                 navController.navigateInGraph(
-                    Screen.LinkFederatedAccount.routeWithReturn(Screen.ProtectAccount.route)
+                    Screen.LinkFederatedAccount.routeWithReturn("")
                 ) {
                     popUpTo(currentDestinationId) { inclusive = true }
                 }
@@ -429,14 +429,13 @@ internal fun NavGraphBuilder.authNavGraph(
             viewModel = mfaViewModel,
             onBack = { navController.popBackStack() },
             onPrimaryAction = { hasVerifiedEmail ->
-                if (hasVerifiedEmail) {
-                    navController.navigateInGraph(Screen.ProtectAccount.route) {
-                        popUpTo(currentDestinationId) { inclusive = true }
-                    }
+                val next = if (hasVerifiedEmail) {
+                    Screen.CreatePassword.BASEROUTE
                 } else {
-                    navController.navigateInGraph(
-                        Screen.LinkFederatedAccount.routeWithReturn(Screen.ProtectAccount.route)
-                    )
+                    Screen.LinkFederatedAccount.routeWithReturn("")
+                }
+                navController.navigateInGraph(next) {
+                    popUpTo(currentDestinationId) { inclusive = true }
                 }
             },
             onBlockedAction = {
@@ -447,7 +446,9 @@ internal fun NavGraphBuilder.authNavGraph(
                 )
             },
             onSkip = {
-                navController.navigateInGraph(Screen.ProtectAccount.route) {
+                navController.navigateInGraph(
+                    Screen.LinkFederatedAccount.routeWithReturn("")
+                ) {
                     popUpTo(currentDestinationId) { inclusive = true }
                 }
             }
@@ -504,6 +505,8 @@ internal fun NavGraphBuilder.authNavGraph(
         val localSettings = (localSecurityState as? LocalSecurityState.Ready)?.settings
         val hasReadyPassword = localSettings?.passwordEnabled == true &&
             localSettings.localPasswordSetAt != null
+        val hasRecoveryMethod = localSettings?.recoveryMethodReady == true ||
+            localSettings?.hasVerifiedEmail == true
         val nextRouteAfterLinkNudge = if (hasReadyPassword) {
             Screen.Home.route
         } else {
@@ -515,18 +518,23 @@ internal fun NavGraphBuilder.authNavGraph(
             viewModel = hiltViewModel(),
             emailReturnRoute = destination,
             onSkip = {
-                navController.navigateInGraph(destination) {
-                    popUpTo(backStackEntry.destination.id) { inclusive = true }
-                    launchSingleTop = true
+                if (hasRecoveryMethod) {
+                    navController.navigateInGraph(destination) {
+                        popUpTo(backStackEntry.destination.id) { inclusive = true }
+                        launchSingleTop = true
+                    }
                 }
+                // else: stay on screen — user must link a recovery method first
             },
             onGoogleLinkSuccess = {
+                securityViewModel.markRecoveryMethodReady()
                 navController.navigateInGraph(destination) {
                     popUpTo(backStackEntry.destination.id) { inclusive = true }
                     launchSingleTop = true
                 }
             },
             onFacebookLinkSuccess = {
+                securityViewModel.markRecoveryMethodReady()
                 navController.navigateInGraph(destination) {
                     popUpTo(backStackEntry.destination.id) { inclusive = true }
                     launchSingleTop = true
@@ -788,10 +796,12 @@ internal fun NavGraphBuilder.authNavGraph(
         val returnRoute = Uri.decode(it.arguments?.getString("returnRoute") ?: Screen.Home.route)
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
+        val securityViewModel: SecurityViewModel = hiltViewModel()
         val emailSentViewModel: EmailSentViewModel = hiltViewModel()
         val emailSentState by emailSentViewModel.uiState.collectAsState()
-        val openSuccessScreen = remember(navController, returnRoute) {
+        val openSuccessScreen = remember(navController, returnRoute, securityViewModel) {
             {
+                securityViewModel.markRecoveryMethodReady()
                 navController.navigateInGraph(
                     Screen.EmailVerified.routeWithReturn(returnRoute)
                 ) {
@@ -861,9 +871,11 @@ internal fun NavGraphBuilder.authNavGraph(
         )
     ) {
         val returnRoute = Uri.decode(it.arguments?.getString("returnRoute") ?: Screen.Home.route)
+        val securityViewModel: SecurityViewModel = hiltViewModel()
         val emailSentViewModel: EmailSentViewModel = hiltViewModel()
 
         LaunchedEffect(Unit) {
+            securityViewModel.markRecoveryMethodReady()
             emailSentViewModel.refreshVerificationStatus(
                 email = "",
                 onVerified = {}

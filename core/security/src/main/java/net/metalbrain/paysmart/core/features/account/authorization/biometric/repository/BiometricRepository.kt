@@ -2,6 +2,7 @@ package net.metalbrain.paysmart.core.features.account.authorization.biometric.re
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import com.google.firebase.Timestamp
 import net.metalbrain.paysmart.core.features.account.authorization.biometric.remote.BiometricPolicyHandler
 import net.metalbrain.paysmart.core.features.account.security.data.SecurityPreference
 
@@ -12,12 +13,22 @@ class BiometricRepository @Inject constructor(
 ) {
 
     suspend fun enableBiometric(idToken: String): Boolean {
-        val serverAccepted = biometricPolicyHandler.setBiometricEnabled(idToken)
+        enableBiometricLocal()
+        return biometricPolicyHandler.setBiometricEnabled(idToken)
+    }
+
+    suspend fun enableBiometricLocal() {
         val updated = securityPreference
             .loadLocalSecurityState()
-            .copy(biometricsEnabled = serverAccepted)
+            .copy(
+                biometricsEnabled = true,
+                biometricsEnabledAt = Timestamp.now()
+            )
         securityPreference.saveLocalSecurityState(updated)
-        return serverAccepted
+    }
+
+    suspend fun syncBiometricEnabled(idToken: String): Boolean {
+        return biometricPolicyHandler.setBiometricEnabled(idToken)
     }
 
     suspend fun isBiometricEnabled(): Boolean {
@@ -26,7 +37,7 @@ class BiometricRepository @Inject constructor(
 
     suspend fun isBiometricSetupComplete(): Boolean {
         val localState = securityPreference.loadLocalSecurityState()
-        return localState.biometricsRequired && localState.biometricsEnabled
+        return localState.biometricsEnabled
     }
 
     suspend fun clearBiometric() {

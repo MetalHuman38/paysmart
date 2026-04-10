@@ -30,11 +30,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.auth.providers.GoogleAuthIntent
 import net.metalbrain.paysmart.core.features.account.authentication.login.card.LoginSectionCard
 import net.metalbrain.paysmart.core.features.account.authentication.login.utils.LoginDivider
 import net.metalbrain.paysmart.core.features.account.authentication.login.utils.LoginHeaderRow
 import net.metalbrain.paysmart.core.features.account.authentication.login.utils.LoginRecoveryRow
-import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.GoogleAuthIntent
 import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.LoginViewModel
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.ReauthOtpViewModel
 import net.metalbrain.paysmart.core.features.language.viewmodel.LanguageViewModel
@@ -78,6 +78,7 @@ fun LoginScreen(
     val activity = LocalActivity.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+
 
     LaunchedEffect(activity?.intent?.dataString) {
         val currentIntent = activity?.intent ?: return@LaunchedEffect
@@ -211,6 +212,7 @@ fun LoginScreen(
 
                     GoogleSignInBtn(
                         launcher = googleLauncher,
+                        intent = GoogleAuthIntent.SIGN_IN,
                         enabled = !isAuthLoading,
                         isLoading = isAuthLoading,
                         loadingText = stringResource(R.string.common_processing),

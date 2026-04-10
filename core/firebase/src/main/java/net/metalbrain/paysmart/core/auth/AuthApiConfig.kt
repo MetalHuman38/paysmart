@@ -43,8 +43,6 @@ data class AuthApiConfig (
     val addMoneyFlutterwaveSession: String = "/payments/flutterwave/add-money/session",
     val flutterwaveFundingAccount: String = "/payments/flutterwave/funding-account",
     val flutterwaveFundingAccountProvision: String = "/payments/flutterwave/funding-account/provision",
-    val setPassCodeEnabled: String = "/auth/setPassCodeEnabled",
-    val getPassCodeEnabled: String = "/auth/getPassCodeEnabled",
     val generateEmailVerificationHandler: String = "/auth/generate",
     val checkEmailVerificationStatusHandler: String = "/auth/status",
     val getSecuritySettings: String = "/auth/getSecuritySettings",
@@ -134,8 +132,6 @@ data class AuthApiConfig (
         return "$apiBase$addMoneyFlutterwaveSession/${sessionId.trim()}"
     }
 
-    val setPassCodeEnabledUrl get() = "$apiBase$setPassCodeEnabled"
-    val getPassCodeEnabledUrl get() = "$apiBase$getPassCodeEnabled"
     val generateEmailVerificationHandlerUrl get() = "$apiBase$generateEmailVerificationHandler"
     val checkEmailVerificationStatusHandlerUrl get() = "$apiBase$checkEmailVerificationStatusHandler"
     val getSecuritySettingsUrl get() = "$apiBase$getSecuritySettings"

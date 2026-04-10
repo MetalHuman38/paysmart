@@ -7,17 +7,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.AuthCredential
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.R
 import androidx.compose.ui.res.stringResource
+import net.metalbrain.paysmart.core.auth.providers.GoogleAuthIntent
 import net.metalbrain.paysmart.core.auth.providers.GoogleAuthProvider
 
 @Composable
 fun GoogleSignInBtn(
     modifier: Modifier = Modifier,
     launcher: ManagedActivityResultLauncher<Intent, ActivityResult>? = null,
+    intent: GoogleAuthIntent = GoogleAuthIntent.SIGN_IN,
     enabled: Boolean = true,
     isLoading: Boolean = false,
     loadingText: String = "Please wait...",
@@ -34,7 +35,11 @@ fun GoogleSignInBtn(
         onClick = {
             coroutineScope.launch {
                 try {
-                    val credential = GoogleAuthProvider.getGoogleCredential(context, launcher)
+                    val credential = GoogleAuthProvider.getGoogleCredential(
+                        context = context,
+                        intent = intent,
+                        launcher = launcher
+                    )
                     onCredentialReceived(credential)
                 } catch (e: Exception) {
                     onError(e)

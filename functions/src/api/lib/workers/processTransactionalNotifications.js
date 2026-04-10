@@ -115,9 +115,6 @@ export function buildWalletTransactionNotificationRequest(doc, transactionId) {
 }
 export function collectSecurityNotificationRequests(before, after, eventId) {
     const requests = [];
-    if (!isEnabled(before.passcodeEnabled) && isEnabled(after.passcodeEnabled)) {
-        requests.push(buildSecurityNotificationRequest(eventId, "passcode_enabled", "Passcode enabled", "A new passcode is now protecting your PaySmart account."));
-    }
     if (!isEnabled(before.passwordEnabled) && isEnabled(after.passwordEnabled)) {
         requests.push(buildSecurityNotificationRequest(eventId, "password_enabled", "Password protection enabled", "Your PaySmart account now has password protection enabled."));
     }

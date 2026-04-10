@@ -1,28 +1,4 @@
-import { FieldValue } from "firebase-admin/firestore";
-export const getDefaultSecuritySettings = () => ({
-    allowFederatedLinking: false,
-    passcodeEnabled: false,
-    passwordEnabled: false,
-    passkeyEnabled: false,
-    biometricsRequired: true,
-    biometricsEnabled: false,
-    biometricsEnabledAt: null,
-    emailToVerify: null,
-    emailVerificationSentAt: null,
-    emailVerificationAttemptsToday: 0,
-    lockAfterMinutes: 5,
-    onboardingRequired: {},
-    onboardingCompleted: {},
-    hasVerifiedEmail: false,
-    hasAddedHomeAddress: false,
-    hasVerifiedIdentity: false,
-    hasSkippedMfaEnrollmentPrompt: false,
-    hasSkippedPasskeyEnrollmentPrompt: true,
-    hasEnrolledMfaFactor: false,
-    mfaEnrolledAt: null,
-    kycStatus: null,
-    localPassCodeSetAt: null,
-    localPasswordSetAt: null,
-    updatedAt: FieldValue.serverTimestamp(),
-});
+export {};
+// Security defaults are owned exclusively by the auth codebase.
+// This file is intentionally empty — api must not define security defaults.
 //# sourceMappingURL=index.js.map

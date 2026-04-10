@@ -140,6 +140,17 @@ app/google-services.json
 # Project-level tools
 ###############################
 
+# Instruction docs
+CODEX.md
+CLAUDE.md
+app/docs/app_shell_completion_plan.md
+app/docs/auth_flow_stabilization_strategy.md
+app/docs/biometric_flag_ownership_contract.md
+app/docs/create_account_recovery_execution_plan.md
+app/docs/passcode_pin_pipeline_plan.md
+functions/backend.md
+functions/security_pipeline_usage.md
+
 ###############################
 # C++ Openssl lib
 ###############################

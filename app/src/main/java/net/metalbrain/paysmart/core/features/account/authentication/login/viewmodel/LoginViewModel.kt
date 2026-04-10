@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import net.metalbrain.paysmart.data.repository.AuthRepository
+import net.metalbrain.paysmart.core.auth.providers.GoogleAuthIntent
 import net.metalbrain.paysmart.core.features.account.passkey.repository.PasskeyApiRepository
 import net.metalbrain.paysmart.core.features.account.passkey.repository.PasskeyCredentialManager
 import net.metalbrain.paysmart.core.features.account.security.repository.SecurityRepository
@@ -32,12 +33,6 @@ import net.metalbrain.paysmart.domain.model.normalizeCountryIso2
 import net.metalbrain.paysmart.domain.model.supportedCountries
 import net.metalbrain.paysmart.domain.usecase.EmailLinkUseCase
 import javax.inject.Inject
-
-
-
-enum class GoogleAuthIntent {
-    SIGN_IN,
-}
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(

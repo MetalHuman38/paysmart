@@ -38,6 +38,7 @@ class SecurityPreference @Inject constructor(
         private val PASSCODE_ENABLED = booleanPreferencesKey("passcode_enabled")
         private val PASSKEY_ENABLED = booleanPreferencesKey("passkey_enabled")
 
+        private val RECOVERY_METHOD_READY = booleanPreferencesKey("recovery_method_ready")
         private val HAS_VERIFIED_EMAIL = booleanPreferencesKey("has_verified_email")
         private val HAS_ADDED_HOME_ADDRESS = booleanPreferencesKey("has_added_home_address")
         private val HAS_VERIFIED_IDENTITY = booleanPreferencesKey("has_verified_identity")
@@ -69,6 +70,7 @@ class SecurityPreference @Inject constructor(
             passcodeEnabled = prefs[PASSCODE_ENABLED] ?: false,
             passwordEnabled = prefs[PASSWORD_ENABLED] ?: false,
             passkeyEnabled = prefs[PASSKEY_ENABLED] ?: false,
+            recoveryMethodReady = prefs[RECOVERY_METHOD_READY] ?: false,
             hasVerifiedEmail = prefs[HAS_VERIFIED_EMAIL] ?: false,
             hasAddedHomeAddress = prefs[HAS_ADDED_HOME_ADDRESS],
             hasVerifiedIdentity = prefs[HAS_VERIFIED_IDENTITY] ?: false,
@@ -100,6 +102,7 @@ class SecurityPreference @Inject constructor(
             passcodeEnabled = prefs[PASSCODE_ENABLED] ?: fromJson.passcodeEnabled,
             passwordEnabled = prefs[PASSWORD_ENABLED] ?: fromJson.passwordEnabled,
             passkeyEnabled = prefs[PASSKEY_ENABLED] ?: fromJson.passkeyEnabled,
+            recoveryMethodReady = prefs[RECOVERY_METHOD_READY] ?: fromJson.recoveryMethodReady,
             hasVerifiedEmail = prefs[HAS_VERIFIED_EMAIL] ?: fromJson.hasVerifiedEmail,
             hasAddedHomeAddress = prefs[HAS_ADDED_HOME_ADDRESS] ?: fromJson.hasAddedHomeAddress,
             hasVerifiedIdentity = prefs[HAS_VERIFIED_IDENTITY] ?: fromJson.hasVerifiedIdentity,
@@ -126,6 +129,7 @@ class SecurityPreference @Inject constructor(
             prefs[PASSWORD_ENABLED] = state.passwordEnabled
             prefs[PASSCODE_ENABLED] = state.passcodeEnabled
             prefs[PASSKEY_ENABLED] = state.passkeyEnabled
+            prefs[RECOVERY_METHOD_READY] = state.recoveryMethodReady
             prefs[HAS_VERIFIED_EMAIL] = state.hasVerifiedEmail
             prefs[HAS_ADDED_HOME_ADDRESS] = state.hasAddedHomeAddress == true
             prefs[HAS_VERIFIED_IDENTITY] = state.hasVerifiedIdentity
@@ -144,6 +148,12 @@ class SecurityPreference @Inject constructor(
     suspend fun saveLastSyncedTimestamp() {
         context.securityDataStore.edit {
             it[LAST_SYNCED] = System.currentTimeMillis()
+        }
+    }
+
+    suspend fun markRecoveryMethodReady() {
+        context.securityDataStore.edit { prefs ->
+            prefs[RECOVERY_METHOD_READY] = true
         }
     }
 
@@ -231,6 +241,13 @@ class SecurityPreference @Inject constructor(
         local: LocalSecuritySettingsModel
     ): LocalSecuritySettingsModel {
         val hasVerifiedEmailMerged = local.hasVerifiedEmail || (server?.hasVerifiedEmail == true)
+        // Once set, keep recovery method ready. Treat existing users with a password
+        // (local or cloud) as having already satisfied the recovery requirement (backward compat).
+        val localPasswordSetOnDevice = (server?.localPasswordSetAt ?: local.localPasswordSetAt) != null
+        val recoveryMethodReadyMerged = local.recoveryMethodReady
+            || hasVerifiedEmailMerged
+            || localPasswordSetOnDevice
+            || server?.passwordEnabled == true
         val hasAddedHomeAddressMerged =
             (local.hasAddedHomeAddress == true) || (server?.hasAddedHomeAddress == true)
         val hasVerifiedIdentityMerged = local.hasVerifiedIdentity || (server?.hasVerifiedIdentity == true)
@@ -238,18 +255,13 @@ class SecurityPreference @Inject constructor(
             local.hasEnrolledMfaFactor || (server?.hasEnrolledMfaFactor == true)
 
         return local.copy(
+            recoveryMethodReady = recoveryMethodReadyMerged,
             // Server overrides requirements (e.g. what's required)
             biometricsRequired = server?.biometricsRequired ?: local.biometricsRequired,
-            // Mirror account-level enablement from server/Room to avoid stale local truth.
-            passcodeEnabled = server?.passcodeEnabled ?: local.passcodeEnabled,
             passwordEnabled = server?.passwordEnabled ?: local.passwordEnabled,
             passkeyEnabled = server?.passkeyEnabled ?: local.passkeyEnabled,
-            biometricsEnabled = server?.biometricsEnabled ?: local.biometricsEnabled,
-            biometricsEnabledAt = server?.biometricsEnabledAt ?: local.biometricsEnabledAt,
-            localPassCodeSetAt = mostRecentTimestamp(
-                local.localPassCodeSetAt,
-                server?.localPassCodeSetAt
-            ),
+            biometricsEnabled = local.biometricsEnabled,
+            biometricsEnabledAt = local.biometricsEnabledAt,
             localPasswordSetAt = mostRecentTimestamp(
                 local.localPasswordSetAt,
                 server?.localPasswordSetAt

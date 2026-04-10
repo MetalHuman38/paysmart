@@ -38,27 +38,26 @@ internal fun resolvePostAuthState(
             PostAuthState.Unauthenticated
 
         is AuthState.Authenticated -> {
-            val accountHasPrimaryUnlock =
-                localState.passcodeEnabled ||
-                    localState.biometricsEnabled ||
-                    localState.passwordEnabled ||
-                    cloudState?.passcodeEnabled == true ||
-                    cloudState?.biometricsEnabled == true ||
-                    cloudState?.passwordEnabled == true
             val isPasswordReady =
                 localState.passwordEnabled && localState.localPasswordSetAt != null
+            val recoveryMethodReady =
+                localState.recoveryMethodReady ||
+                    localState.hasVerifiedEmail ||
+                    cloudState?.hasVerifiedEmail == true ||
+                    isPasswordReady || // backward compat: local password set implies recovery was done
+                    cloudState?.passwordEnabled == true // cloud password enabled means user previously registered
             val requiresPasswordRecovery =
                 cloudState?.passwordEnabled == true && !isPasswordReady
 
             when {
-                !accountHasPrimaryUnlock ->
-                    PostAuthState.RequireAccountProtection
+                !recoveryMethodReady ->
+                    PostAuthState.RequireRecoveryMethod
 
                 requiresPasswordRecovery ->
                     PostAuthState.RequirePasswordRecovery
 
                 !isPasswordReady ->
-                    PostAuthState.RequirePasswordSetup
+                    PostAuthState.RequireRecoveryPassword
 
                 sessionState is SessionState.Locked ->
                     PostAuthState.Locked
@@ -193,6 +192,12 @@ class SecurityViewModel @Inject constructor(
     fun clearBiometricOptIn() {
         viewModelScope.launch {
             biometricRepository.clearBiometric()
+        }
+    }
+
+    fun markRecoveryMethodReady() {
+        viewModelScope.launch {
+            securityPreference.markRecoveryMethodReady()
         }
     }
 }

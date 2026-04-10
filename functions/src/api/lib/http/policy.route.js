@@ -4,7 +4,6 @@ import { requireActiveSession } from "../middleware/requireActiveSession.js";
 // 🔐 Clean-architecture handlers
 import { getSecuritySettingsHandler } from "../handlers/getSecuritySettings.js";
 import { biometricsEnabledHandler } from "../handlers/biometricEnabled.js";
-import { passcodeEnabledHandler } from "../handlers/passcodeEnabled.js";
 import { passwordEnabledHandler } from "../handlers/passwordEnabled.js";
 import { allowFederatedLinkingHandler } from "../handlers/allowFederatedLinking.js";
 import { checkEmailVerificationStatusHandler, generateEmailVerificationHandler } from "../handlers/emailVerificationHandlers.js";
@@ -35,14 +34,9 @@ export function mountAuthPolicyRoutes(app) {
     // Email Verification
     app.post("/auth/generate", requireActiveSession, generateEmailVerificationHandler);
     app.post("/auth/status", requireActiveSession, checkEmailVerificationStatusHandler);
-    // ---- Password / Passcode / Biometrics ----
+    // ---- Password / Biometrics ----
     app.post("/auth/setPasswordEnabled", requireActiveSession, passwordEnabledHandler);
     app.options("/auth/setPasswordEnabled", (_, res) => {
-        corsify(res);
-        res.status(204).end();
-    });
-    app.post("/auth/setPasscodeEnabled", requireActiveSession, passcodeEnabledHandler);
-    app.options("/auth/setPasscodeEnabled", (_, res) => {
         corsify(res);
         res.status(204).end();
     });

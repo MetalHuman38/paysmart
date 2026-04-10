@@ -19,6 +19,7 @@ export const SECURITY_SETTINGS_COLLECTION = {
   hasSkippedPasskeyEnrollmentPrompt: true,
   hasEnrolledMfaFactor: false,
   mfaEnrolledAt: null,
+  kycStatus: null,
   localPassCodeSetAt: null,
   localPasswordSetAt: null,
 }

@@ -10,6 +10,17 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
+/**
+ * Client responsible for interacting with the remote authentication API to manage and query
+ * biometric authentication policies for a user.
+ *
+ * This class handles network requests to sync the biometric enablement status between the
+ * local device and the server backend.
+ *
+ * @property config The configuration containing API endpoints for biometric operations.
+ * @property httpClient The [OkHttpClient] used to perform network requests. Defaults to a standard client with a 5-second timeout.
+ * @property debugLoggingEnabled Whether to log request and error information to Logcat.
+ */
 class BiometricPolicyClient(
     private val config: AuthApiConfig,
     private val httpClient: OkHttpClient = defaultClient,

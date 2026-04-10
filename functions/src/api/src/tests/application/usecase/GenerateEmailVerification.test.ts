@@ -1,7 +1,32 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Timestamp } from "firebase-admin/firestore";
-import { getDefaultSecuritySettings } from "../../../constants/index.js";
 import { GenerateEmailVerification } from "../../../application/usecase/GenerateEmailVerification.js";
+
+const baseSecuritySettings = {
+  allowFederatedLinking: false,
+  passcodeEnabled: false,
+  passwordEnabled: false,
+  passkeyEnabled: false,
+  biometricsRequired: false,
+  biometricsEnabled: false,
+  biometricsEnabledAt: null,
+  lockAfterMinutes: 5,
+  onboardingRequired: {},
+  onboardingCompleted: {},
+  emailToVerify: null,
+  emailVerificationSentAt: null,
+  emailVerificationAttemptsToday: 0,
+  hasVerifiedEmail: false,
+  hasAddedHomeAddress: false,
+  hasVerifiedIdentity: false,
+  hasSkippedMfaEnrollmentPrompt: false,
+  hasSkippedPasskeyEnrollmentPrompt: true,
+  hasEnrolledMfaFactor: false,
+  mfaEnrolledAt: null,
+  kycStatus: null,
+  localPassCodeSetAt: null,
+  localPasswordSetAt: null,
+};
 
 describe("GenerateEmailVerification", () => {
   const securityRepo = {
@@ -28,7 +53,7 @@ describe("GenerateEmailVerification", () => {
 
     securityRepo.createIfMissing.mockResolvedValue(undefined);
     securityRepo.get.mockResolvedValue({
-      ...getDefaultSecuritySettings(),
+      ...baseSecuritySettings,
       emailVerificationSentAt: null,
       emailVerificationAttemptsToday: 0,
       hasVerifiedEmail: false,
@@ -152,7 +177,7 @@ describe("GenerateEmailVerification", () => {
     const now = Timestamp.fromMillis(Date.UTC(2026, 2, 19, 12, 0, 30));
     vi.spyOn(Timestamp, "now").mockReturnValue(now);
     securityRepo.get.mockResolvedValue({
-      ...getDefaultSecuritySettings(),
+      ...baseSecuritySettings,
       emailVerificationSentAt: Timestamp.fromMillis(Date.UTC(2026, 2, 19, 12, 0, 0)),
       emailVerificationAttemptsToday: 1,
       hasVerifiedEmail: false,
@@ -188,7 +213,7 @@ describe("GenerateEmailVerification", () => {
     const now = Timestamp.fromMillis(Date.UTC(2026, 2, 19, 8, 0, 0));
     vi.spyOn(Timestamp, "now").mockReturnValue(now);
     securityRepo.get.mockResolvedValue({
-      ...getDefaultSecuritySettings(),
+      ...baseSecuritySettings,
       emailVerificationSentAt: Timestamp.fromMillis(Date.UTC(2026, 2, 18, 23, 0, 0)),
       emailVerificationAttemptsToday: 5,
       hasVerifiedEmail: false,
@@ -225,7 +250,7 @@ describe("GenerateEmailVerification", () => {
     const now = Timestamp.fromMillis(Date.UTC(2026, 2, 19, 22, 0, 0));
     vi.spyOn(Timestamp, "now").mockReturnValue(now);
     securityRepo.get.mockResolvedValue({
-      ...getDefaultSecuritySettings(),
+      ...baseSecuritySettings,
       emailVerificationSentAt: Timestamp.fromMillis(Date.UTC(2026, 2, 19, 10, 0, 0)),
       emailVerificationAttemptsToday: 5,
       hasVerifiedEmail: false,
@@ -259,7 +284,7 @@ describe("GenerateEmailVerification", () => {
 
   it("returns already verified when the account email is already confirmed", async () => {
     securityRepo.get.mockResolvedValue({
-      ...getDefaultSecuritySettings(),
+      ...baseSecuritySettings,
       hasVerifiedEmail: true,
     });
 

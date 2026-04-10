@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -36,6 +35,8 @@ internal fun AccountCreationHeroCard(
     subtitle: String,
 ) {
     val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
+
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -60,26 +61,26 @@ internal fun AccountCreationHeroCard(
         ) {
             Column(
                 modifier = Modifier.padding(horizontal = Dimens.lg, vertical = Dimens.lg),
-                verticalArrangement = Arrangement.spacedBy(Dimens.sm)
+                verticalArrangement = Arrangement.spacedBy(Dimens.lg)
             ) {
                 emoji
                     ?.takeIf { it.isNotBlank() }
                     ?.let {
                         Text(
                             text = it,
-                            style = MaterialTheme.typography.titleLarge
+                            style = typography.heading1
                         )
                     }
 
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = typography.heading3,
                     color = colors.textPrimary,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = typography.bodyMedium,
                     color = colors.textSecondary,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis

@@ -1,9 +1,9 @@
 {
   "name": "functions",
   "scripts": {
-    "install:all": "npm --prefix src/api install && npm --prefix src/auth install && npm --prefix src/security install",
-    "build": "npm --prefix src/api run build && npm --prefix src/auth run build && npm --prefix src/security run build",
-    "test": "npm --prefix src/api run test && npm --prefix src/auth run test && npm --prefix src/security run test",
+    "install:all": "npm --prefix src/api install && npm --prefix src/auth install",
+    "build": "npm --prefix src/api run build && npm --prefix src/auth run build",
+    "test": "npm --prefix src/api run test && npm --prefix src/auth run test",
     "bootstrap": "npm run install:all && npm run build",
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions",
@@ -13,8 +13,8 @@
     "node": "22"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.57.0",
-    "@typescript-eslint/parser": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
     "eslint": "^9.39.4",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.32.0",

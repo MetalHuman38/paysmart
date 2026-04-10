@@ -45,6 +45,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import net.metalbrain.paysmart.R
+import net.metalbrain.paysmart.core.auth.providers.GoogleAuthIntent
 import net.metalbrain.paysmart.navigator.Screen
 import net.metalbrain.paysmart.ui.components.BackendErrorModal
 import net.metalbrain.paysmart.ui.components.EmailVerificationBtn
@@ -163,6 +164,7 @@ fun FederatedLinkingScreen(
                     ) {
                         GoogleSignInBtn(
                             launcher = launcher,
+                            intent = GoogleAuthIntent.LINK,
                             modifier = Modifier.fillMaxWidth(),
                             enabled = !isAuthLoading,
                             isLoading = isAuthLoading,

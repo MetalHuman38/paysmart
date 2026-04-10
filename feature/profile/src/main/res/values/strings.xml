@@ -79,9 +79,17 @@
     <string name="profile_incomplete_title">Complete your profile setup</string>
     <string name="profile_locked_message">You are unable to edit this profile because your account has already been verified. If you need to make changes, please contact customer support.</string>
     <string name="profile_locked_title">Profile locked</string>
+    <string name="profile_language_title">Language</string>
     <string name="profile_logout">Log out</string>
     <string name="profile_menu_about_subtitle">Information about this app</string>
     <string name="profile_menu_about_title">About</string>
+    <string name="profile_account_information_title">Account information</string>
+    <string name="profile_account_info_profile_subtitle">Personal details and profile preferences</string>
+    <string name="profile_account_info_limits_subtitle">Verification-driven account limits</string>
+    <string name="profile_account_info_statement_subtitle">Transaction history and statement entries</string>
+    <string name="profile_account_info_language_subtitle">Select your preferred language</string>
+    <string name="profile_account_info_theme_subtitle">Light, dark, or follow your device</string>
+    <string name="profile_account_info_theme_variant_subtitle">Switch the visual tone used across cards and surfaces</string>
     <string name="profile_menu_account_information_subtitle">Information about your account</string>
     <string name="profile_menu_account_information_title">Account information</string>
     <string name="profile_menu_connected_accounts_subtitle">Stripe cards and Flutterwave funding accounts</string>
@@ -113,12 +121,32 @@
     <string name="profile_security_passkey_title">Passkey</string>
     <string name="profile_security_reset_password">Reset password</string>
     <string name="profile_security_transaction_pin">Transaction PIN</string>
+    <string name="profile_theme_title">Theme mode</string>
+    <string name="profile_theme_variant_title">Theme style</string>
     <string name="profile_security_view_privacy_settings">View privacy settings</string>
     <string name="profile_title">Profile</string>
     <string name="profile_verified_status_content_description">Verified status</string>
     <string name="profile_version_format">Version: %1$s (%2$d)</string>
+    <string name="theme_mode_system">System</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+    <string name="theme_variant_paysmart">PaySmart</string>
+    <string name="theme_variant_obsidian">Obsidian</string>
     <string name="social_media_advertisement_platform">I am happy for PaySmart to share my name, email address and app events with social media platforms.</string>
     <string name="terms_of_use">https://pay-smart.net/terms/</string>
+
+    <!-- Account limits screens -->
+    <string name="account_limits_title">Account limits</string>
+    <string name="account_limits_details_subtitle_format">How much can you send and receive with your %1$s PaySmart account</string>
+    <string name="account_limits_spent_of_limit_format">%1$s spent / %2$s</string>
+    <string name="account_limits_left_format">%1$s left</string>
+    <string name="select_account_limits_to_see_or_receive">Select an account to see send and receive limit.</string>
+    <string name="account_limits_empty_accounts">No wallet accounts available yet.</string>
+    <string name="account_limits_currency_title_format">%1$s limits</string>
+    <string name="home_balance_last_synced">Last synced</string>
+    <string name="account_limits_info_note">Limits are derived from current verification status and update after successful sync.</string>
+    <string name="common_never">Never</string>
+    <string name="content_desc_help">Help</string>
 
     <!-- Connected Accounts screens -->
     <string name="profile_connected_accounts_overview_title">Payments connected to your wallet</string>

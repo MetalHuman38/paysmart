@@ -7,11 +7,13 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.launch
@@ -54,6 +56,7 @@ class OTPViewModel @Inject constructor(
     private val _formattedPhoneNumber = MutableStateFlow("")
 
     private var timerJob: Job? = null
+    private var finalizeJob: Job? = null
     private var lastObservedVerificationId: String? = null
 
     init {
@@ -73,16 +76,25 @@ class OTPViewModel @Inject constructor(
 
         viewModelScope.launch {
             clearActionError()
-            val result = phoneVerifier.submitOtp(code)
-            result
-                .onSuccess {
-                    onSuccess()
-                }
-                .onFailure { error ->
-                    Log.e("OTP", "OTP verification failed", error)
-                    setActionError(error.localizedMessage ?: "Invalid verification code")
-                    onError(error)
-                }
+            _uiState.update { it.copy(loading = true) }
+            try {
+                val result = phoneVerifier.submitOtp(code)
+                result
+                    .onSuccess {
+                        onSuccess()
+                    }
+                    .onFailure { error ->
+                        Log.e("OTP", "OTP verification failed", error)
+                        setActionError(error.localizedMessage ?: "Invalid verification code")
+                        _uiState.update { it.copy(loading = false) }
+                        onError(error)
+                    }
+            } catch (error: Throwable) {
+                Log.e("OTP", "OTP verification failed", error)
+                setActionError(error.localizedMessage ?: "Invalid verification code")
+                _uiState.update { it.copy(loading = false) }
+                onError(error)
+            }
         }
     }
 
@@ -90,7 +102,7 @@ class OTPViewModel @Inject constructor(
         onSuccess: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
-        if (_uiState.value.loading) return
+        if (finalizeJob?.isActive == true) return
 
         val firebaseUser = auth.currentUser
         if (firebaseUser == null) {
@@ -100,7 +112,7 @@ class OTPViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch {
+        finalizeJob = viewModelScope.launch {
             _uiState.update {
                 it.copy(
                     loading = true,
@@ -108,7 +120,7 @@ class OTPViewModel @Inject constructor(
                 )
             }
 
-            runCatching {
+            try {
                 withTimeout(USER_FINALIZE_TIMEOUT_MS) {
                     val idToken = firebaseUser.getIdToken(false).await().token
                         ?: throw IllegalStateException("Authenticated session token is unavailable")
@@ -117,18 +129,26 @@ class OTPViewModel @Inject constructor(
                         throw IllegalStateException("Unable to finish account setup. Please retry.")
                     }
                 }
-            }.onSuccess {
                 phoneVerifier.cancel()
                 onSuccess()
-            }.onFailure { error ->
+            } catch (error: TimeoutCancellationException) {
+                Log.e("OTP", "Phone signup finalization timed out", error)
+                val message = "Unable to finish account setup. Please retry."
+                setActionError(message)
+                onError(IllegalStateException(message, error))
+            } catch (error: CancellationException) {
+                Log.d("OTP", "Phone signup finalization cancelled", error)
+                throw error
+            } catch (error: Throwable) {
                 Log.e("OTP", "Failed to finalize verified phone signup", error)
                 setActionError(
                     error.localizedMessage ?: "Unable to finish account setup. Please retry."
                 )
                 onError(error)
+            } finally {
+                finalizeJob = null
+                _uiState.update { it.copy(loading = false) }
             }
-
-            _uiState.update { it.copy(loading = false) }
         }
     }
 

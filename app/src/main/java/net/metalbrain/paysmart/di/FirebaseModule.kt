@@ -11,7 +11,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.metalbrain.paysmart.core.auth.AllowFederatedLinkingPolicy
 import net.metalbrain.paysmart.core.auth.AuthApiConfig
-import net.metalbrain.paysmart.core.features.account.authorization.passcode.remote.PassCodePolicyClient
 import javax.inject.Singleton
 
 @Module
@@ -38,13 +37,6 @@ object FirebaseModule {
     @Provides
     @Singleton
     fun provideFirebaseMessaging(): FirebaseMessaging = FirebaseMessaging.getInstance()
-
-    @Provides
-    fun providePassCodePolicyClient(
-        config: AuthApiConfig,
-    ): PassCodePolicyClient {
-        return PassCodePolicyClient(config)
-    }
 
     @Provides
     fun provideAllowFederatedLinkingPolicyClient(

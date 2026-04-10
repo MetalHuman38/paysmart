@@ -27,6 +27,7 @@ data class LocalSecuritySettingsModel(
 
     var hasAddedHomeAddress: Boolean? = null,
 
+    var recoveryMethodReady: Boolean = false,
     var hasVerifiedEmail: Boolean = false,
     var emailVerificationSentAt: Timestamp? = null,
     var emailToVerify: String? = null,

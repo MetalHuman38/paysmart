@@ -263,7 +263,7 @@ class FirebaseMfaEnrollmentProvider @Inject constructor(
     private fun resolveBlockedActionLabel(user: FirebaseUser): String {
         val linkedProviderLabels = user.providerData
             .mapNotNull { profile ->
-                when (profile.providerId?.lowercase()) {
+                when (profile.providerId.lowercase()) {
                     "google.com" -> "Google"
                     "facebook.com" -> "Facebook"
                     "password" -> "email"

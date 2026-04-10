@@ -17,7 +17,6 @@ type WalletTransactionNotificationDoc = {
 };
 
 type SecuritySettingsNotificationDoc = {
-  passcodeEnabled?: boolean | null;
   passwordEnabled?: boolean | null;
   passkeyEnabled?: boolean | null;
   biometricsEnabled?: boolean | null;
@@ -181,12 +180,6 @@ export function collectSecurityNotificationRequests(
   eventId: string
 ): TransactionalNotificationRequest[] {
   const requests: TransactionalNotificationRequest[] = [];
-
-  if (!isEnabled(before.passcodeEnabled) && isEnabled(after.passcodeEnabled)) {
-    requests.push(
-      buildSecurityNotificationRequest(eventId, "passcode_enabled", "Passcode enabled", "A new passcode is now protecting your PaySmart account.")
-    );
-  }
 
   if (!isEnabled(before.passwordEnabled) && isEnabled(after.passwordEnabled)) {
     requests.push(

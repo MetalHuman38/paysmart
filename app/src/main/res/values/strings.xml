@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">PaySmart</string>
-    <string name="default_web_client_id" translatable="false">285308278238-43rog12vseckpu8qn67dn67nruk8s613.apps.googleusercontent.com</string>
+    <string name="default_web_client_id" translatable="false">285308278238-rvjt9mmuifert291uj75vnd20mksjlsj.apps.googleusercontent.com</string>
     <string name="or">Or</string>
     <string name="see_all">See all</string>
     <string name="get_started">Get started</string>
@@ -557,7 +557,7 @@ how can we help?</string>
     <string name="reauth_resend_code">Resend code</string>
     <string name="reauth_resend_available_in">Resend available in %1$ds</string>
     <string name="loading_signing_in">Signing in…</string>
-    <string name="otp_loading_message">Creating your account…</string>
+    <string name="otp_loading_message">Verifying your code…</string>
     <string name="otp_verify_phone_title">Verify phone number</string>
     <string name="otp_verify_phone_subtitle">Enter the 6-digit code sent to %1$s</string>
     <string name="otp_waiting_for_code_message" translatable="false">We are sending your verification code now. Delivery can take longer on slower networks.</string>

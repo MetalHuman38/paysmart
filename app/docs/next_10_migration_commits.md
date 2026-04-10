@@ -74,7 +74,7 @@ Status: `in progress`
   - `ProfileAbout*`
   - `ProfilePhotoPicker*`
 - [x] Make `:feature:profile` resource-complete for the safe UI slice
-- [ ] Move the last app-owned display helpers still tied to app-owned language/capability catalogs
+- [x] Move the last app-owned display helpers still tied to app-owned language/capability catalogs
 - [ ] Move the remaining wallet/capability/account-information profile surfaces after `:feature:wallet` and shared capability boundaries exist
 - [ ] Remove app-owned profile implementation leftovers once those blocked surfaces leave `:app`
 
@@ -154,6 +154,9 @@ Status: `done`
 
 Status: `next`
 
+- Focus is now shell reduction first, not broader auth redesign.
+- Use `app/docs/app_shell_completion_plan.md` as the active plan.
+- Keep the broader onboarding redesign in `app/docs/create_account_recovery_execution_plan.md` as a separate follow-up track.
 - Finish the blocked `:feature:profile` surfaces:
   - account information
   - account limits
@@ -164,5 +167,11 @@ Status: `next`
   - create-account / OTP / onboarding screens
   - email verification sent/success screens
   - address setup flow
+- Extract the remaining shared capability/catalog helpers from `:app`
+- Create the remaining feature modules:
+  - `:feature:identity`
+  - `:feature:invoicing`
+  - `:feature:transactions`
+  - `:feature:sendmoney`
 - Reduce `:app` to shell-only ownership after those surfaces leave
 - Run device smoke coverage for auth, home, wallet, notifications, invoice, passkeys, and biometric unlock

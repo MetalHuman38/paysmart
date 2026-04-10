@@ -10,7 +10,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -29,6 +28,7 @@ import net.metalbrain.paysmart.core.features.account.profile.state.ProfileNextSt
 import net.metalbrain.paysmart.domain.model.AuthUserModel
 import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
+import net.metalbrain.paysmart.ui.version.AppVersionLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,7 +37,7 @@ fun ProfileDetailsScreen(
     isLocked: Boolean,
     missingItems: List<ProfileMissingItem>,
     nextStep: ProfileNextStep?,
-    versionLabel: String? = null,
+    showVersionLabel: Boolean = true,
     onResolveSetup: () -> Unit,
     showSecuritySetupCta: Boolean = false,
     onContinueToSecuritySetup: (() -> Unit)? = null,
@@ -132,11 +132,8 @@ fun ProfileDetailsScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            if (!versionLabel.isNullOrBlank()) {
-                Text(
-                    text = versionLabel,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.textTertiary,
+            if (showVersionLabel) {
+                AppVersionLabel(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(top = Dimens.xs)

@@ -17,6 +17,7 @@ import net.metalbrain.paysmart.feature.account.R
 import net.metalbrain.paysmart.ui.components.PasscodeField
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun ChangePasscodeCard(
@@ -39,6 +40,9 @@ fun ChangePasscodeCard(
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val color = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
@@ -55,13 +59,13 @@ fun ChangePasscodeCard(
             Column(verticalArrangement = Arrangement.spacedBy(Dimens.xs)) {
                 Text(
                     text = stringResource(R.string.change_passcode_update_action),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = typography.heading2,
+                    color = color.textPrimary
                 )
                 Text(
                     text = stringResource(R.string.change_passcode_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = typography.bodySmall,
+                    color = color.textPrimary
                 )
             }
 
@@ -93,8 +97,8 @@ fun ChangePasscodeCard(
             if (error != null) {
                 Text(
                     text = error,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
+                    color = color.error,
+                    style = typography.bodySmall
                 )
             }
 

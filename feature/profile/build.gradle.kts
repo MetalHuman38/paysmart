@@ -26,6 +26,7 @@ android {
 dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:models"))
+    implementation(project(":core:navigation"))
     implementation(project(":core:security"))
     implementation(project(":core:ui"))
     implementation(project(":data:auth"))
@@ -35,6 +36,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.hilt.core)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
     ksp(libs.hilt.compiler)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -45,7 +47,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.storage)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.junit)
 }

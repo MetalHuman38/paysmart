@@ -12,6 +12,14 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "email_draft")
 
+/**
+ * A persistent data store for managing an email address draft and its verification status.
+ *
+ * This class uses Android DataStore Preferences to store [EmailDraft] objects, allowing
+ * the application to preserve the user's progress during email-related authentication flows.
+ *
+ * @property context The application context used to initialize the underlying DataStore.
+ */
 @Singleton
 class EmailDraftStore @Inject constructor(
     @ApplicationContext context: Context

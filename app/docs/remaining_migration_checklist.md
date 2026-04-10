@@ -6,6 +6,9 @@ This checklist is split into two tracks:
 - `Post-release migration`: architecture cleanup that can continue after a stable release candidate exists
 
 See also: `app/docs/next_10_migration_commits.md`
+See also: `app/docs/auth_flow_stabilization_strategy.md`
+See also: `app/docs/create_account_recovery_execution_plan.md`
+See also: `app/docs/app_shell_completion_plan.md`
 
 ## Current Module State
 
@@ -23,6 +26,7 @@ See also: `app/docs/next_10_migration_commits.md`
 - [x] `:feature:home` UI slice
 - [x] `:feature:wallet` — add-money + funding-account + managed-cards UI/viewmodel
 - [x] `:feature:notifications` so notification center UI no longer lives in `:app`
+- [x] adopt the shared `PaySmartScreen` shell for the main profile screen so its spacing now follows the reusable `:core:ui` screen layer
 - [ ] finish `:feature:profile` by extracting the wallet/capability-coupled profile surfaces that still belong to `:app`
 - [ ] finish `:feature:account` UI and remaining viewmodels
 - [ ] reduce `:app` to shell only
@@ -35,13 +39,24 @@ See also: `app/docs/next_10_migration_commits.md`
 - [x] run `:app:lintDebug`
 - [x] centralize startup loading so the app root does not render home beneath the loading screen
 - [x] run affected Android test compile targets and resolve or explicitly waive any known baseline failures
+- [x] complete the authentication and startup routing audit from `CODEX.md`
 - [ ] smoke test account creation, sign-in, home, add money, notifications, invoice flow, passkey, and biometric unlock on device
 - [ ] confirm no moved feature module is still depending on an app-owned implementation class
 - [ ] confirm release signing, release network security config, and production Firebase config are aligned with the migrated module graph
 
+## Current Priority
+
+- finish migration and reduce `:app` to a shell
+- treat the broader onboarding redesign in `CODEX.md` as a separate follow-up track, not the current migration blocker
+
 ## Remaining Migration Work
 
 ## Strict Order
+
+### 0. Unblock Shell Reduction
+
+- [x] extract the remaining shared capability/catalog helpers from `:app`
+- [ ] keep the broader onboarding redesign in `app/docs/create_account_recovery_execution_plan.md` deferred until shell reduction is done
 
 ### 1. Finish `:feature:home`
 
@@ -68,11 +83,17 @@ See also: `app/docs/next_10_migration_commits.md`
     - photo picker UI
     - profile details UI
     - security/privacy UI
-- [ ] move the remaining app-owned display helpers that still depend on app-owned language/capability catalogs
+- [x] move the remaining app-owned display helpers that still depend on app-owned language/capability catalogs
+  - `AccountLimitMarketProfile`, `AccountTypeAndLimitCatalog`, `AccountLimitValueCatalog` → `:data:wallet`
+  - `CountryAccountLimitRepository`, `AccountLimitJsonParser`, parser utils → `:data:wallet`
+  - `AccountLimitDetailsUiMapper` → `:data:wallet`
+  - raw resources (`account_limit_values.json`, `account_type_and_limit.json`, `account_limits_properties.json`) → `:data:wallet`
+- [x] move account-limits presentational screens/cards into `:feature:profile`
+- [x] move account-limits viewmodels into `:feature:profile` (`AccountLimitsListViewModel`, `AccountLimitDetailsViewModel`)
 - [ ] move the remaining profile screens/cards/components that are still coupled to wallet/capability/account feature code
-  - still app-owned for now:
+  - still app-owned for now (only route wiring remains):
+    - account limits routes (`AccountLimitsRoute`, `AccountLimitDetailsRoute`) — can move to `:feature:profile` in next pass
     - account information
-    - account limits
     - account statement
     - connected accounts
 
@@ -132,6 +153,17 @@ See also: `app/docs/next_10_migration_commits.md`
 - [ ] remove feature implementation ownership from `:app`
 - [ ] verify no feature module imports an app-owned class
 
+### 7. Create The Remaining Feature Modules
+
+- [ ] create `:feature:identity`
+- [ ] create `:feature:invoicing`
+- [ ] create `:feature:transactions`
+- [ ] create `:feature:sendmoney`
+- [ ] extract smaller app-owned surfaces:
+  - `referral`
+  - `help`
+  - `fx`
+
 ## Current Release-Stable Position
 
 - local validation is green for:
@@ -142,8 +174,13 @@ See also: `app/docs/next_10_migration_commits.md`
   - `:app:assembleRelease`
 - the active migration blockers are now architectural cleanup, not build stability
 - the next high-value cleanup is:
+  - extract the remaining shared capability boundary
   - finish the blocked `:feature:profile` wallet/capability surfaces
   - finish the blocked `:feature:account` onboarding/login/address surfaces
+  - create the remaining large feature modules:
+    - `:feature:identity`
+    - `:feature:invoicing`
+    - `:feature:transactions`
   - then reduce `:app` to a shell
 
 ## Validation Gate After Each Slice
@@ -151,4 +188,4 @@ See also: `app/docs/next_10_migration_commits.md`
 - [x] `:app:compileDebugKotlin`
 - [x] `:app:testDebugUnitTest`
 - [x] affected Android test compile target where applicable
-- [ ] device smoke test for auth, home, notifications, invoice, and passkey flows
+- [ ] device smoke test for auth, home, notifications, invoice, passkey, and biometric deferral flows

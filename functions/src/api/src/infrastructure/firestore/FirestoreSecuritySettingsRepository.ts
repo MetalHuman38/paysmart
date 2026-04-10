@@ -1,7 +1,36 @@
-import { Firestore } from "firebase-admin/firestore";
+import { Firestore, FieldValue } from "firebase-admin/firestore";
 import { SecuritySettingsModel } from "../../domain/model/securitySettings.js";
 import { SecuritySettingsRepository } from "../../domain/repository/SecuritySettingsRepository.js";
-import { getDefaultSecuritySettings } from "../../constants/index.js";
+
+// Canonical recovery-first defaults — ownership lives in the auth codebase.
+// This fallback is a safety net for the rare case the auth beforeCreate hook
+// has not yet run when UpsertVerifiedPhoneUser executes.
+const CANONICAL_SECURITY_DEFAULTS: SecuritySettingsModel = {
+  allowFederatedLinking: false,
+  passcodeEnabled: false,
+  passwordEnabled: false,
+  passkeyEnabled: false,
+  biometricsRequired: false,
+  biometricsEnabled: false,
+  biometricsEnabledAt: null,
+  lockAfterMinutes: 5,
+  onboardingRequired: {},
+  onboardingCompleted: {},
+  emailToVerify: null,
+  emailVerificationSentAt: null,
+  emailVerificationAttemptsToday: 0,
+  hasVerifiedEmail: false,
+  hasAddedHomeAddress: false,
+  hasVerifiedIdentity: false,
+  hasSkippedMfaEnrollmentPrompt: false,
+  hasSkippedPasskeyEnrollmentPrompt: true,
+  hasEnrolledMfaFactor: false,
+  mfaEnrolledAt: null,
+  kycStatus: null,
+  localPassCodeSetAt: null,
+  localPasswordSetAt: null,
+  updatedAt: FieldValue.serverTimestamp(),
+};
 
 export class FirestoreSecuritySettingsRepository implements SecuritySettingsRepository {
   constructor(private readonly firestore: Firestore) {}
@@ -25,7 +54,7 @@ export class FirestoreSecuritySettingsRepository implements SecuritySettingsRepo
     await this.firestore.runTransaction(async (tx) => {
       const snap = await tx.get(ref);
       if (!snap.exists) {
-        tx.set(ref, getDefaultSecuritySettings());
+        tx.set(ref, CANONICAL_SECURITY_DEFAULTS);
       }
     });
   }

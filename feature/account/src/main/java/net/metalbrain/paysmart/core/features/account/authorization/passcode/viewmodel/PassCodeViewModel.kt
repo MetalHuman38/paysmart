@@ -3,12 +3,10 @@ package net.metalbrain.paysmart.core.features.account.authorization.passcode.vie
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import net.metalbrain.paysmart.core.features.account.authorization.passcode.repository.PasscodeRepository
 import net.metalbrain.paysmart.data.repository.UserProfileRepository
 import javax.inject.Inject
@@ -51,15 +49,12 @@ class PasscodeViewModel @Inject constructor(
             }
 
             try {
-                val user = FirebaseAuth.getInstance().currentUser
-                    ?: throw IllegalStateException("User not authenticated")
+                passcodeRepo.setPasscode(code)
 
-                val idToken = user.getIdToken(false).await().token
-                    ?: throw IllegalStateException("Missing ID token")
-
-                passcodeRepo.setPasscode(code, idToken)
-
-                userProfileRepository.touchLastSignedIn(user.uid)
+                val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+                if (user != null) {
+                    userProfileRepository.touchLastSignedIn(user.uid)
+                }
 
                 // ✅ Navigation should happen only here
                 onSuccess()

@@ -15,11 +15,6 @@
       "source": "functions/src/auth",
       "codebase": "auth",
       "disallowLegacyRuntimeConfig": true
-    },
-    {
-      "source": "functions/src/security",
-      "codebase": "security",
-      "disallowLegacyRuntimeConfig": true
     }
   ],
   "hosting": {

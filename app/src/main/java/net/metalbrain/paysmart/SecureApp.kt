@@ -17,7 +17,7 @@ fun SecureApp(
             PostAuthState.Loading -> SecureNavIntent.None
             PostAuthState.Unauthenticated -> SecureNavIntent.ToStartup
             PostAuthState.RequireRecoveryMethod -> SecureNavIntent.ToRecoveryMethod
-            PostAuthState.RequireRecoveryPassword -> SecureNavIntent.ToCreatePassword
+            PostAuthState.RequireRecoveryPassword -> SecureNavIntent.ToRecoveryPassword
             PostAuthState.RequirePasswordRecovery -> SecureNavIntent.ToPasswordRecovery
             PostAuthState.Locked -> SecureNavIntent.RequireSessionUnlock
             PostAuthState.Ready -> SecureNavIntent.None

@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.ui.theme.LocalAppThemePack
@@ -98,7 +99,7 @@ fun PasskeyGlowSwitch(
     ) {
         Box(
             modifier = Modifier
-                .offset(x = thumbOffset)
+                .offset { IntOffset(x = thumbOffset.roundToPx(), y = 0) }
                 .size(Dimens.lg)
                 .background(color = thumbColor, shape = CircleShape)
                 .border(

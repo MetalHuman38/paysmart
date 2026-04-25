@@ -33,9 +33,9 @@ import net.metalbrain.paysmart.domain.model.matchCountryByInternationalPrefix
 import net.metalbrain.paysmart.domain.model.supportedCountries
 import androidx.fragment.app.FragmentActivity
 import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePhoneRecoveryViewModel
-import net.metalbrain.paysmart.ui.components.PhoneNumberInput
+import net.metalbrain.paysmart.core.features.account.components.PhoneNumberInput
 import net.metalbrain.paysmart.ui.components.PrimaryButton
-import net.metalbrain.paysmart.ui.screens.CountryPickerBottomSheet
+import net.metalbrain.paysmart.core.features.account.components.CountryPickerBottomSheet
 import net.metalbrain.paysmart.utils.detectDeviceCountryIso2
 
 @OptIn(ExperimentalMaterial3Api::class)

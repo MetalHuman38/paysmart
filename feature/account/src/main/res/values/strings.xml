@@ -2,6 +2,44 @@
     <string name="common_back">Back</string>
     <string name="common_processing">Processing…</string>
     <string name="continue_text">Continue</string>
+    <string name="lets_get_started">Let us get started</string>
+    <string name="enter_phone_to_signup">Enter your phone number to set up your account</string>
+    <string name="marketing">Stay updated on PaySmart products and services. You can opt out of these communications at any time.</string>
+    <string name="create_account_phone_verification_error" translatable="false">Unable to start phone verification. Please retry.</string>
+
+    <string name="or">or</string>
+    <string name="welcome_back">Welcome Back!</string>
+    <string name="enter_phone_to_associated_to_account">Enter the phone number associated to your account</string>
+
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="continue_with_email">Continue with Email</string>
+    <string name="content_desc_google_sign_in_button">Google sign-in button</string>
+    <string name="content_desc_verify_email_button">Verify an email</string>
+    <string name="content_desc_select_country">Select country</string>
+    <string name="phone_place_holder">7xxxxxxxxx</string>
+    <string name="select_country">Select country of residence</string>
+    <string name="search_hint">Search</string>
+    <string name="link_federated_account">For added security, please verify at least one additional login method.</string>
+    <string name="skip_federated_linking">Skip linking for now</string>
+    <string name="how_this_works">Why add an extra verification method?</string>
+    <string name="how_this_works_desc">Linking a second method like Google, Facebook, or email helps you recover access if you lose your primary login. It also keeps your account more secure from unauthorized access. We recommend setting this up before continuing.</string>
+
+    <string name="verify_your_email">Verify your email to keep your account secured.</string>
+    <string name="why_verifying_your_email">Verifying your email helps you safely recover your account if you lose access to your phone. We will also send secure communication to your email address.</string>
+    <string name="send_verification">Send verification</string>
+    <string name="get_help">Get help</string>
+
+    <string name="email_sent_title">Check your email</string>
+    <string name="email_sent_subtitle">We sent a verification email to</string>
+    <string name="email_sent_change_email">Not you? Change email</string>
+    <string name="email_sent_instruction">Click the link in the email to verify your address. Check spam if it is missing from inbox.</string>
+    <string name="email_sent_open_app">Open email app</string>
+    <string name="email_sent_resend">Resend email</string>
+    <string name="email_sent_resending">Resending…</string>
+
+    <string name="email_verification_success_title">Email verification successful</string>
+    <string name="email_verification_success_subtitle">Your email has been successfully verified.</string>
+    <string name="email_verification_success_action">Back to the app</string>
 
     <string name="password_placeholder">Password</string>
     <string name="enter_your_password">Enter your password</string>
@@ -45,7 +83,7 @@
     <string name="change_passcode_validation_error">Enter a matching 4–6 digit passcode.</string>
     <string name="change_passcode_reuse_error">Choose a different passcode.</string>
     <string name="change_passcode_update_error">Unable to update the passcode right now.</string>
-    <string name="change_passcode_biometric_title">Confirm it&#39;s you</string>
+    <string name="change_passcode_biometric_title">Confirm it\'s you</string>
     <string name="change_passcode_biometric_description">Use biometrics before changing your transaction passcode.</string>
     <string name="change_passcode_biometric_action">Verify with biometrics</string>
     <string name="change_passcode_biometric_retry">Try again</string>

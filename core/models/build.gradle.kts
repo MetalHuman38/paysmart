@@ -20,4 +20,5 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.store)
+    implementation(libs.libphonenumber)
 }

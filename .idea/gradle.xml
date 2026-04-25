@@ -31,7 +31,6 @@
             <option value="$PROJECT_DIR$/feature/notifications" />
             <option value="$PROJECT_DIR$/feature/profile" />
             <option value="$PROJECT_DIR$/feature/wallet" />
-            <option value="$PROJECT_DIR$/sandbox" />
           </set>
         </option>
       </GradleProjectSettings>

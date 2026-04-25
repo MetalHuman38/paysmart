@@ -413,17 +413,17 @@ class MainActivity : FragmentActivity() {
                                                         }
                                                     }
 
-                                                    SecureNavIntent.ToCreatePassword -> {
+                                                    SecureNavIntent.ToRecoveryPassword -> {
                                                         if (deferSecurityIntentForOnboarding) {
                                                             Log.d(
                                                                 "LockStateTrace",
-                                                                "defer_create_password_intent route=$currentRoute"
+                                                                "defer_recovery_password_intent route=$currentRoute"
                                                             )
                                                         } else if (currentRoute != Screen.CreatePassword.route) {
                                                             navController.navigateSafely(
                                                                 route = Screen.CreatePassword.BASEROUTE,
                                                                 currentRoute = currentRoute,
-                                                                source = "secure_intent_create_password",
+                                                                source = "secure_intent_recovery_password",
                                                             ) {
                                                                 launchSingleTop = true
                                                             }

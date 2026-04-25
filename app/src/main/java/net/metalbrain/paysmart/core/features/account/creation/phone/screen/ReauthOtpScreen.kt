@@ -39,7 +39,7 @@ import net.metalbrain.paysmart.core.auth.providers.GoogleAuthIntent
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.ReauthOtpViewModel
 import net.metalbrain.paysmart.ui.components.EmailSignInBtn
 import net.metalbrain.paysmart.ui.components.FacebookSignInButton
-import net.metalbrain.paysmart.ui.components.GoogleSignInBtn
+import net.metalbrain.paysmart.core.features.account.components.GoogleSignInBtn
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.screens.loader.AppLoadingScreen
 import net.metalbrain.paysmart.ui.screens.loader.rememberStabilizedLoading
@@ -196,6 +196,7 @@ fun ReauthOtpScreen(
 
                 if (uiState.canUseGoogle) {
                     GoogleSignInBtn(
+                        clientId = stringResource(R.string.default_web_client_id),
                         launcher = googleLauncher,
                         intent = GoogleAuthIntent.SIGN_IN,
                         modifier = Modifier.fillMaxWidth(),

@@ -24,11 +24,28 @@ Builders exposes many small projects in `settings.gradle.kts`:
 
 Those modules have narrow dependency edges, so Gradle can schedule and cache work independently.
 
-PaySmart currently exposes only:
+PaySmart now exposes a broader modular graph:
 - `:app`
+- `:core:common`
+- `:core:navigation`
+- `:core:ui`
+- `:core:security`
+- `:core:database`
+- `:core:firebase`
 - `:core:invoice-models`
 - `:core:models`
-- `:sandbox`
+- `:data:auth`
+- `:data:user`
+- `:data:wallet`
+- `:data:invoice`
+- `:data:notifications`
+- `:feature:account`
+- `:feature:profile`
+- `:feature:home`
+- `:feature:notifications`
+- `:feature:wallet`
+
+That is already a meaningful improvement over the earlier single-module-heavy state, but `:app` still owns too much runtime wiring and account-flow implementation. The next wins come from tightening boundaries, not from keeping standalone experimental modules around.
 
 That means almost every Android edit dirties `:app`, even though the codebase is already logically separated into packages such as:
 - `core/features/*`

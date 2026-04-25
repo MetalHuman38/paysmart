@@ -119,11 +119,6 @@ fun ProfileScreen(
                             )
                         }
 
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = colors.brandPrimary
-                        )
 
                         Text(
                             text = stringResource(R.string.profile_title),

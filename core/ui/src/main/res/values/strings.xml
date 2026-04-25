@@ -56,6 +56,9 @@
     <string name="transaction_summary_added">You added</string>
     <string name="transaction_summary_activity">Activity</string>
 
+    <!-- LanguageSelector -->
+    <string name="content_desc_select_language">Select language</string>
+
     <!-- Common actions -->
     <string name="ok" translatable="false">OK</string>
     <string name="common_cancel">Cancel</string>

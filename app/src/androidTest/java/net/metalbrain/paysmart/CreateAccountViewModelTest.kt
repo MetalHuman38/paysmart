@@ -42,7 +42,7 @@ class CreateAccountViewModelTest {
     fun getFullPhoneNumber_returnsE164Formatted() {
         viewModel.onPhoneNumberChanged("7988777954")
         viewModel.onCountrySelected(
-            Country("gb", R.string.country_uk, "\uD83C\uDDEC\uD83C\uDDE7", "+44"  )
+            Country("GB", "\uD83C\uDDEC\uD83C\uDDE7", "+44")
         )
         val full = viewModel.getFullPhoneNumber()
         assertEquals("+447988777954", full)

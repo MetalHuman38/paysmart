@@ -30,6 +30,11 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.store)
     implementation(libs.firebase.functions)
+    implementation(libs.kotlin.coroutines.play.services)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.facebook.login)
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.junit)
 }

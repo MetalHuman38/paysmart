@@ -2,31 +2,23 @@ package net.metalbrain.paysmart.navigator
 
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.LocalActivity
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import net.metalbrain.paysmart.core.features.account.authentication.email.screen.AddEmailScreen
-import net.metalbrain.paysmart.core.features.account.authentication.email.screen.EmailSentScreen
-import net.metalbrain.paysmart.core.features.account.authentication.email.screen.EmailVerificationSuccessScreen
-import net.metalbrain.paysmart.core.features.account.authentication.email.viewmodel.EmailSentViewModel
-import net.metalbrain.paysmart.core.features.account.authentication.login.screen.LoginScreen
+import net.metalbrain.paysmart.core.features.account.authentication.federated.route.LinkFederatedAccountRoute
 import net.metalbrain.paysmart.core.features.account.authentication.login.viewmodel.LoginViewModel
+import net.metalbrain.paysmart.core.features.account.navigation.accountAuthRoutes
+import net.metalbrain.paysmart.core.features.account.navigation.accountCreationRoutes
 import net.metalbrain.paysmart.core.features.account.authorization.biometric.screen.BiometricOptInScreen
 import net.metalbrain.paysmart.core.features.account.authorization.biometric.screen.BiometricSessionUnlock
 import net.metalbrain.paysmart.core.features.account.authorization.biometric.viewmodel.BiometricOptInViewModel
@@ -44,11 +36,9 @@ import net.metalbrain.paysmart.core.features.account.creation.phone.screen.Reaut
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.OTPViewModel
 import net.metalbrain.paysmart.core.features.account.creation.phone.viewModel.ReauthOtpViewModel
 import net.metalbrain.paysmart.core.features.account.creation.screen.ClientInformationScreen
-import net.metalbrain.paysmart.core.features.account.creation.screen.CreateAccountScreen
 import net.metalbrain.paysmart.core.features.account.creation.screen.PostOtpCapabilitiesScreen
 import net.metalbrain.paysmart.core.features.account.creation.screen.PostOtpSecurityStepsScreen
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.ClientInformationViewModel
-import net.metalbrain.paysmart.core.features.account.creation.viewmodel.CreateAccountViewModel
 import net.metalbrain.paysmart.core.features.account.creation.viewmodel.PostOtpCapabilitiesViewModel
 import net.metalbrain.paysmart.core.features.account.passkey.screen.PasskeySetupScreen
 import net.metalbrain.paysmart.core.features.account.passkey.viewmodel.PasskeySetupViewModel
@@ -59,9 +49,7 @@ import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePa
 import net.metalbrain.paysmart.core.features.account.recovery.viewmodel.ChangePhoneRecoveryViewModel
 import net.metalbrain.paysmart.core.features.account.screen.AccountProtectionContent
 import net.metalbrain.paysmart.core.features.account.security.mfa.screen.MfaNudgeScreen
-import net.metalbrain.paysmart.core.features.account.security.mfa.screen.MfaSignInChallengeScreen
 import net.metalbrain.paysmart.core.features.account.security.mfa.viewmodel.MfaNudgeViewModel
-import net.metalbrain.paysmart.core.features.account.security.mfa.viewmodel.MfaSignInViewModel
 import net.metalbrain.paysmart.core.features.account.security.viewmodel.SecurityViewModel
 import net.metalbrain.paysmart.core.features.featuregate.FeatureAccessPolicy
 import net.metalbrain.paysmart.core.features.featuregate.FeatureGateScreen
@@ -74,11 +62,11 @@ import net.metalbrain.paysmart.domain.auth.state.LocalSecurityState
 import net.metalbrain.paysmart.domain.model.DEFAULT_COUNTRY_ISO2
 import net.metalbrain.paysmart.domain.model.normalizeCountryIso2
 import net.metalbrain.paysmart.domain.model.supportedLanguages
-import net.metalbrain.paysmart.ui.screens.FederatedLinkingScreen
 import net.metalbrain.paysmart.ui.screens.SplashScreen
 import net.metalbrain.paysmart.ui.screens.loader.LoadingPhase
 import net.metalbrain.paysmart.ui.screens.startup.StartupScreen
 import net.metalbrain.paysmart.ui.viewmodel.UserViewModel
+import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.utils.formatPhoneNumberForDisplay
 
 internal fun NavGraphBuilder.authNavGraph(
@@ -455,36 +443,36 @@ internal fun NavGraphBuilder.authNavGraph(
         )
     }
 
-    composable(Screen.CreateAccount.route) {
-        val createAccount: CreateAccountViewModel = hiltViewModel()
-        val dialCode = createAccount.selectedCountry.value.dialCode
-        val rawPhone = createAccount.phoneNumber
-        CreateAccountScreen(
-            viewModel = createAccount,
-            onVerificationContinue = { countryIso2 ->
-                navController.navigateInGraph(
-                    Screen.OtpVerification.routeWithArgs(
-                        dialCode = dialCode,
-                        phoneNumber = rawPhone,
-                        countryIso2 = countryIso2
-                    )
+    accountCreationRoutes(
+        onCreateComplete = { dialCode, phoneNumber, countryIso2 ->
+            navController.navigateInGraph(
+                Screen.OtpVerification.routeWithArgs(
+                    dialCode = dialCode,
+                    phoneNumber = phoneNumber,
+                    countryIso2 = countryIso2
                 )
-            },
-            onGetHelpClicked = {
-                navController.navigateInGraph(Screen.Help.route) {
-                    launchSingleTop = true
-                }
-            },
-            onSignInClicked = {
-                navController.navigateInGraph(Screen.Login.route) {
-                    launchSingleTop = true
-                }
-            },
-            onBackClicked = {
-                navController.popBackStack()
-            }
-        )
-    }
+            )
+        },
+        onCreateSignIn = {
+            navController.navigateInGraph(Screen.Login.route) { launchSingleTop = true }
+        },
+        onCreateHelp = {
+            navController.navigateInGraph(Screen.Help.route) { launchSingleTop = true }
+        },
+        onCreateBack = { navController.popBackStack() },
+        onOtpComplete = {},
+        onOtpBack = {},
+        onPostOtpCapabilitiesNext = {},
+        onPostOtpCapabilitiesBack = {},
+        onPostOtpSecurityStepsNext = {},
+        onPostOtpSecurityStepsBack = {},
+        onClientInformationContinue = {},
+        onClientInformationBack = {},
+        onMfaNudgePrimaryAction = {},
+        onMfaNudgeSkip = {},
+        onMfaNudgeBlocked = {},
+        onMfaNudgeBack = {},
+    )
 
     composable(
         route = "${Screen.LinkFederatedAccount.route}?${Screen.LinkFederatedAccount.RETURN_ROUTE_ARG}={${Screen.LinkFederatedAccount.RETURN_ROUTE_ARG}}",
@@ -495,11 +483,6 @@ internal fun NavGraphBuilder.authNavGraph(
             }
         )
     ) { backStackEntry ->
-        val returnRoute = Uri.decode(
-            backStackEntry.arguments
-                ?.getString(Screen.LinkFederatedAccount.RETURN_ROUTE_ARG)
-                .orEmpty()
-        )
         val securityViewModel: SecurityViewModel = hiltViewModel()
         val localSecurityState by securityViewModel.localSecurityState.collectAsState()
         val localSettings = (localSecurityState as? LocalSecurityState.Ready)?.settings
@@ -507,87 +490,100 @@ internal fun NavGraphBuilder.authNavGraph(
             localSettings.localPasswordSetAt != null
         val hasRecoveryMethod = localSettings?.recoveryMethodReady == true ||
             localSettings?.hasVerifiedEmail == true
-        val nextRouteAfterLinkNudge = if (hasReadyPassword) {
-            Screen.Home.route
-        } else {
-            Screen.CreatePassword.BASEROUTE
-        }
-        val destination = returnRoute.ifBlank { nextRouteAfterLinkNudge }
 
-        FederatedLinkingScreen(
-            viewModel = hiltViewModel(),
-            emailReturnRoute = destination,
-            onSkip = {
-                if (hasRecoveryMethod) {
-                    navController.navigateInGraph(destination) {
-                        popUpTo(backStackEntry.destination.id) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-                // else: stay on screen — user must link a recovery method first
-            },
-            onGoogleLinkSuccess = {
-                securityViewModel.markRecoveryMethodReady()
+        LinkFederatedAccountRoute(
+            clientId = stringResource(R.string.default_web_client_id),
+            returnRoute = Uri.decode(
+                backStackEntry.arguments
+                    ?.getString(Screen.LinkFederatedAccount.RETURN_ROUTE_ARG)
+                    .orEmpty()
+            ),
+            hasReadyPassword = hasReadyPassword,
+            hasRecoveryMethod = hasRecoveryMethod,
+            onRecoveryMethodReady = { securityViewModel.markRecoveryMethodReady() },
+            onNavigateToDestination = { destination ->
                 navController.navigateInGraph(destination) {
                     popUpTo(backStackEntry.destination.id) { inclusive = true }
                     launchSingleTop = true
                 }
             },
-            onFacebookLinkSuccess = {
+            onNavigateToPasskeySetup = {
+                navController.navigateInGraph(Screen.PasskeySetup.route) {
+                    launchSingleTop = true
+                }
+            },
+            onNavigateToAddEmail = {
+                navController.navigateInGraph(Screen.AddEmail.route) {
+                    launchSingleTop = true
+                }
+            },
+        )
+    }
+
+    accountAuthRoutes(
+        clientId = { stringResource(R.string.default_web_client_id) },
+        currentLanguage = {
+            val languageViewModel: LanguageViewModel = hiltViewModel()
+            val currentLang by languageViewModel.currentLanguage.collectAsState()
+            currentLang
+        },
+        onLoginSuccess = {
+            navController.navigateInGraph(Screen.Home.route) {
+                popUpTo(Screen.Login.route) { inclusive = true }
+            }
+        },
+        onLoginMfaRequired = {
+            navController.navigateInGraph(Screen.LoginMfaChallenge.route) {
+                launchSingleTop = true
+            }
+        },
+        onLoginForgotPassword = {
+            navController.navigateInGraph(Screen.RecoverAccount.routeWithOrigin("login"))
+        },
+        onLoginSignUp = {
+            navController.navigateInGraph(Screen.CreateAccount.route)
+        },
+        onLoginBack = { navController.popBackStack() },
+        onLoginNavigateToLanguage = {
+            navController.navigateInGraph(Screen.Language.routeWithOrigin(Screen.Origin.LOGIN))
+        },
+        onLoginNavigateToReauth = {
+            navController.navigate(Screen.Reauthenticate.BASEROUTES)
+        },
+        onLoginEmailSent = { email ->
+            navController.navigate(Screen.EmailSent.routeWithEmail(email))
+        },
+        onMfaChallengeBack = { navController.popBackStack() },
+        onMfaChallengeSuccess = {
+            navController.navigateInGraph(Screen.Home.route) {
+                popUpTo(Screen.Login.route) { inclusive = true }
+            }
+        },
+        onAddEmailSent = { email, returnRoute ->
+            navController.navigateInGraph(
+                Screen.EmailSent.routeWithArgs(email = email, returnRoute = returnRoute)
+            ) { launchSingleTop = true }
+        },
+        onMarkRecoveryReady = {
+            val securityViewModel: SecurityViewModel = hiltViewModel()
+            val markRecoveryReady: () -> Unit = {
                 securityViewModel.markRecoveryMethodReady()
-                navController.navigateInGraph(destination) {
-                    popUpTo(backStackEntry.destination.id) { inclusive = true }
-                    launchSingleTop = true
-                }
-            },
-            navController = navController,
-        )
-    }
-
-    composable(Screen.Login.route) {
-        val loginViewModel: LoginViewModel = hiltViewModel()
-        val reauthOtpViewModel: ReauthOtpViewModel = hiltViewModel()
-        val languageViewModel: LanguageViewModel = hiltViewModel()
-
-        LoginScreen(
-            viewModel = loginViewModel,
-            reauthOtpViewModel = reauthOtpViewModel,
-            languageViewModel = languageViewModel,
-            navController = navController,
-            onContinue = {
-                navController.navigateInGraph(Screen.Home.route) {
-                    popUpTo(Screen.Login.route) { inclusive = true }
-                }
-            },
-            onMfaRequired = {
-                navController.navigateInGraph(Screen.LoginMfaChallenge.route) {
-                    launchSingleTop = true
-                }
-            },
-            onForgotPassword = {
-                navController.navigateInGraph(Screen.RecoverAccount.routeWithOrigin("login"))
-            },
-            onSignUp = {
-                navController.navigateInGraph(Screen.CreateAccount.route)
-            },
-            onBackClicked = {
-                navController.popBackStack()
             }
-        )
-    }
-
-    composable(Screen.LoginMfaChallenge.route) {
-        val viewModel: MfaSignInViewModel = hiltViewModel()
-        MfaSignInChallengeScreen(
-            viewModel = viewModel,
-            onBack = { navController.popBackStack() },
-            onSuccess = {
-                navController.navigateInGraph(Screen.Home.route) {
-                    popUpTo(Screen.Login.route) { inclusive = true }
-                }
+            markRecoveryReady
+        },
+        onEmailSentNavigateToVerified = { returnRoute ->
+            navController.navigateInGraph(Screen.EmailVerified.routeWithReturn(returnRoute)) {
+                launchSingleTop = true
             }
-        )
-    }
+        },
+        onEmailSentBack = { navController.popBackStack() },
+        onEmailVerifiedBackToApp = { returnRoute ->
+            navController.navigateClearingBackStackInGraph(
+                route = returnRoute,
+                source = "email_verification_success",
+            )
+        },
+    )
 
     composable(
         route = Screen.Reauthenticate.route,
@@ -763,132 +759,6 @@ internal fun NavGraphBuilder.authNavGraph(
                     popUpTo(Screen.VerifyPasscode.route) { inclusive = true }
                 }
             },
-        )
-    }
-
-    composable(
-        route = "${Screen.AddEmail.route}?returnRoute={returnRoute}",
-        arguments = listOf(
-            navArgument("returnRoute") {
-                type = NavType.StringType
-                defaultValue = Screen.Home.route
-            }
-        )
-    ) {
-        val returnRoute = Uri.decode(it.arguments?.getString("returnRoute") ?: Screen.Home.route)
-        AddEmailScreen(
-            navController = navController,
-            returnRoute = returnRoute
-        )
-    }
-
-    composable(
-        route = "${Screen.EmailSent.route}?returnRoute={returnRoute}",
-        arguments = listOf(
-            navArgument("email") { type = NavType.StringType },
-            navArgument("returnRoute") {
-                type = NavType.StringType
-                defaultValue = Screen.Home.route
-            }
-        )
-    ) {
-        val email = Uri.decode(it.arguments?.getString("email") ?: "")
-        val returnRoute = Uri.decode(it.arguments?.getString("returnRoute") ?: Screen.Home.route)
-        val context = LocalContext.current
-        val lifecycleOwner = LocalLifecycleOwner.current
-        val securityViewModel: SecurityViewModel = hiltViewModel()
-        val emailSentViewModel: EmailSentViewModel = hiltViewModel()
-        val emailSentState by emailSentViewModel.uiState.collectAsState()
-        val openSuccessScreen = remember(navController, returnRoute, securityViewModel) {
-            {
-                securityViewModel.markRecoveryMethodReady()
-                navController.navigateInGraph(
-                    Screen.EmailVerified.routeWithReturn(returnRoute)
-                ) {
-                    launchSingleTop = true
-                }
-            }
-        }
-
-        LaunchedEffect(emailSentState.infoMessage, emailSentState.errorMessage) {
-            val message = emailSentState.infoMessage ?: emailSentState.errorMessage
-            if (!message.isNullOrBlank()) {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                emailSentViewModel.consumeTransientMessage()
-            }
-        }
-
-        LaunchedEffect(email) {
-            emailSentViewModel.refreshVerificationStatus(
-                email = email,
-                onVerified = openSuccessScreen
-            )
-        }
-
-        DisposableEffect(lifecycleOwner, email) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    emailSentViewModel.refreshVerificationStatus(
-                        email = email,
-                        onVerified = openSuccessScreen
-                    )
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
-        }
-
-        EmailSentScreen(
-            email = email,
-            onResend = {
-                emailSentViewModel.resendVerificationEmail(
-                    email = email,
-                    returnRoute = returnRoute
-                )
-            },
-            onOpenEmailApp = {
-                if (!openEmailApp(context)) {
-                    Toast.makeText(context, "No email app found.", Toast.LENGTH_SHORT).show()
-                }
-            },
-            onChangeEmail = { navController.popBackStack() },
-            onBack = { navController.popBackStack() },
-            isResending = emailSentState.isResending,
-            infoMessage = emailSentState.infoMessage,
-            errorMessage = emailSentState.errorMessage
-        )
-    }
-
-    composable(
-        route = "${Screen.EmailVerified.route}?returnRoute={returnRoute}",
-        arguments = listOf(
-            navArgument("returnRoute") {
-                type = NavType.StringType
-                defaultValue = Screen.Home.route
-            }
-        )
-    ) {
-        val returnRoute = Uri.decode(it.arguments?.getString("returnRoute") ?: Screen.Home.route)
-        val securityViewModel: SecurityViewModel = hiltViewModel()
-        val emailSentViewModel: EmailSentViewModel = hiltViewModel()
-
-        LaunchedEffect(Unit) {
-            securityViewModel.markRecoveryMethodReady()
-            emailSentViewModel.refreshVerificationStatus(
-                email = "",
-                onVerified = {}
-            )
-        }
-
-        EmailVerificationSuccessScreen(
-            onBackToApp = {
-                navController.navigateClearingBackStackInGraph(
-                    route = returnRoute,
-                    source = "email_verification_success",
-                )
-            }
         )
     }
 

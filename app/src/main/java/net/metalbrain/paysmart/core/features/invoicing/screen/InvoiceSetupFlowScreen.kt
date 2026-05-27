@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -27,23 +28,23 @@ import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.invoicing.card.InvoiceDynamicSectionCard
 import net.metalbrain.paysmart.core.features.invoicing.card.InvoiceLineItemsCard
 import net.metalbrain.paysmart.core.features.invoicing.card.InvoiceProfessionSelectionCard
+import net.metalbrain.paysmart.core.features.invoicing.card.InvoiceReadOnlySectionCard
+import net.metalbrain.paysmart.core.features.invoicing.card.InvoiceTotalsOverviewCard
 import net.metalbrain.paysmart.core.features.invoicing.components.InvoiceSetupBottomBar
 import net.metalbrain.paysmart.core.features.invoicing.components.InvoiceSetupProgressHeader
 import net.metalbrain.paysmart.core.features.invoicing.utils.canAdvanceCurrentStep
 import net.metalbrain.paysmart.core.features.invoicing.utils.filteredCopy
 import net.metalbrain.paysmart.core.features.invoicing.utils.filteredForReview
 import net.metalbrain.paysmart.core.features.invoicing.utils.progressiveStepIndex
-import net.metalbrain.paysmart.core.features.invoicing.utils.primaryLineRateValue
 import net.metalbrain.paysmart.core.features.invoicing.utils.sectionOrNull
 import net.metalbrain.paysmart.core.features.invoicing.utils.stepBody
 import net.metalbrain.paysmart.core.features.invoicing.utils.stepTitle
 import net.metalbrain.paysmart.core.features.invoicing.viewmodel.InvoiceSetupUiState
-import net.metalbrain.paysmart.core.features.invoicing.card.InvoiceReadOnlySectionCard
-import net.metalbrain.paysmart.core.features.invoicing.card.InvoiceTotalsOverviewCard
 import net.metalbrain.paysmart.core.invoice.model.InvoiceFieldKeys
 import net.metalbrain.paysmart.core.invoice.model.InvoiceFormStep
 import net.metalbrain.paysmart.core.invoice.model.Profession
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +61,7 @@ fun InvoiceSetupFlowScreen(
         value: Any?) -> Unit,
     onVenueNameChanged: (String) -> Unit,
     onVenueAddressChanged: (String) -> Unit,
+    onVenuePostcodeChanged: (String) -> Unit,
     onVenueCountryChanged: (String) -> Unit,
     onVenueRateChanged: (String) -> Unit,
     onSearchAddress: () -> Unit,
@@ -67,6 +69,8 @@ fun InvoiceSetupFlowScreen(
     onAddVenue: () -> Unit,
     onSelectVenue: (String) -> Unit,
     onLineItemFieldChanged: (index: Int, fieldKey: String, value: Any?) -> Unit,
+    onAddLineItem: () -> Unit,
+    onRemoveLineItem: (String) -> Unit,
     onSaveDraft: () -> Unit,
     onContinue: () -> Unit,
     onFinalize: () -> Unit,
@@ -81,8 +85,15 @@ fun InvoiceSetupFlowScreen(
     }
 
     Scaffold(
+        containerColor = PaysmartTheme.colorTokens.backgroundPrimary,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = PaysmartTheme.colorTokens.surfaceElevated,
+                    titleContentColor = PaysmartTheme.colorTokens.textPrimary,
+                    navigationIconContentColor = PaysmartTheme.colorTokens.textPrimary,
+                    actionIconContentColor = PaysmartTheme.colorTokens.brandPrimary
+                ),
                 title = {
                     Text(
                         text = if (state.formStep == InvoiceFormStep.QUICK_START) {
@@ -209,6 +220,7 @@ fun InvoiceSetupFlowScreen(
                             state = state,
                             onVenueNameChanged = onVenueNameChanged,
                             onVenueAddressChanged = onVenueAddressChanged,
+                            onVenuePostcodeChanged = onVenuePostcodeChanged,
                             onVenueCountryChanged = onVenueCountryChanged,
                             onVenueRateChanged = onVenueRateChanged,
                             onSearchAddress = onSearchAddress,
@@ -257,18 +269,14 @@ fun InvoiceSetupFlowScreen(
                     item {
                         InvoiceLineItemsCard(
                             invoice = state.draftInvoice,
-                            onLineItemFieldChanged = onLineItemFieldChanged
+                            onLineItemFieldChanged = onLineItemFieldChanged,
+                            onAddLineItem = onAddLineItem,
+                            onRemoveLineItem = onRemoveLineItem
                         )
                     }
                 }
 
                 InvoiceFormStep.REVIEW -> {
-                    item {
-                        InvoiceWeeklySummaryCard(
-                            totalHours = state.draftInvoice.totals.totalHours,
-                            hourlyRateInput = state.primaryLineRateValue()
-                        )
-                    }
                     item {
                         InvoiceTotalsOverviewCard(state = state)
                     }
@@ -298,7 +306,7 @@ fun InvoiceSetupFlowScreen(
                 }
             }
 
-            state.infoMessage?.let { infoMessage ->
+            state.infoMessage?.takeIf { state.finalizedInvoice == null }?.let { infoMessage ->
                 item {
                     InvoiceNoticeCard(
                         title = stringResource(R.string.invoice_weekly_status_info),
@@ -311,7 +319,7 @@ fun InvoiceSetupFlowScreen(
             state.finalizedInvoice?.let { finalized ->
                 item {
                     InvoiceNoticeCard(
-                        title = stringResource(R.string.invoice_weekly_finalize_action),
+                        title = stringResource(R.string.invoice_weekly_finalized_title),
                         body = stringResource(
                             R.string.invoice_weekly_finalize_success,
                             finalized.invoiceNumber

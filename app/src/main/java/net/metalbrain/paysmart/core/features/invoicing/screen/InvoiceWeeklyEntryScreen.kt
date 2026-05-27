@@ -37,6 +37,8 @@ fun InvoiceWeeklyEntryScreen(
     onHourlyRateChanged: (String) -> Unit,
     onShiftDateChanged: (index: Int, value: String) -> Unit,
     onShiftHoursChanged: (index: Int, value: String) -> Unit,
+    onAddShift: () -> Unit,
+    onRemoveShift: (index: Int) -> Unit,
     onFinalize: () -> Unit,
     onOpenInvoice: (String) -> Unit
 ) {
@@ -102,7 +104,9 @@ fun InvoiceWeeklyEntryScreen(
                 InvoiceWeeklyShiftRows(
                     rows = state.weeklyRows,
                     onShiftDateChanged = onShiftDateChanged,
-                    onShiftHoursChanged = onShiftHoursChanged
+                    onShiftHoursChanged = onShiftHoursChanged,
+                    onAddShift = onAddShift,
+                    onRemoveShift = onRemoveShift
                 )
             }
 

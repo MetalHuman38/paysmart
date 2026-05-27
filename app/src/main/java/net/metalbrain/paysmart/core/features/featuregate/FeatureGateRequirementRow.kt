@@ -9,16 +9,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun FeatureGateRequirementRow(label: String) {
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -27,16 +30,17 @@ fun FeatureGateRequirementRow(label: String) {
         Icon(
             imageVector = Icons.Default.Check,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = colors.brandPrimary,
             modifier = Modifier
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                .background(colors.fillHover)
                 .padding(Dimens.space2)
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            modifier = Modifier.weight(1f),
+            style = typography.bodyMedium,
+            color = colors.textPrimary
         )
     }
 }

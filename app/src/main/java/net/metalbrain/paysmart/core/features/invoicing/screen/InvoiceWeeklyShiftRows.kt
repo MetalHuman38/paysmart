@@ -5,7 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -32,7 +38,9 @@ import java.time.LocalDate
 fun InvoiceWeeklyShiftRows(
     rows: List<InvoiceShiftDraft>,
     onShiftDateChanged: (index: Int, value: String) -> Unit,
-    onShiftHoursChanged: (index: Int, value: String) -> Unit
+    onShiftHoursChanged: (index: Int, value: String) -> Unit,
+    onAddShift: () -> Unit,
+    onRemoveShift: (index: Int) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.md)) {
         rows.forEachIndexed { index, row ->
@@ -41,11 +49,25 @@ fun InvoiceWeeklyShiftRows(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(Dimens.sm)
                 ) {
-                    Text(
-                        text = row.dayLabel,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = row.dayLabel.ifBlank { "Shift ${index + 1}" },
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        IconButton(
+                            onClick = { onRemoveShift(index) },
+                            enabled = rows.size > 1
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.invoice_shift_remove_action)
+                            )
+                        }
+                    }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(Dimens.sm)
@@ -69,6 +91,17 @@ fun InvoiceWeeklyShiftRows(
                     }
                 }
             }
+        }
+
+        OutlinedButton(
+            onClick = onAddShift,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = null
+            )
+            Text(text = stringResource(R.string.invoice_shift_add_action))
         }
     }
 }

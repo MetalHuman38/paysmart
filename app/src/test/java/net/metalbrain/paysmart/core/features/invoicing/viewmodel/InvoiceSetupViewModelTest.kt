@@ -3,6 +3,7 @@ package net.metalbrain.paysmart.core.features.invoicing.viewmodel
 import android.util.Log
 import com.google.firebase.auth.FirebaseUser
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -11,6 +12,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import net.metalbrain.paysmart.core.auth.AddressLookupResult
 import net.metalbrain.paysmart.core.auth.AddressResolverPolicyHandler
 import net.metalbrain.paysmart.core.features.invoicing.data.InvoiceFinalizeRepository
 import net.metalbrain.paysmart.core.features.invoicing.data.InvoiceProfileDraftRepository
@@ -142,6 +144,120 @@ class InvoiceSetupViewModelTest {
         assertTrue(persistedDraft.weekEndingDate.isBlank())
         assertTrue(persistedDraft.shifts.all { it.workDate.isBlank() && it.hoursInput.isBlank() })
     }
+
+    @Test
+    fun `observeDrafts merges saved profile into active invoice draft`() = runTest {
+        val fixture = InvoiceSetupFixture()
+
+        fixture.venueFlow.value = listOf(fixture.venue)
+        fixture.weeklyFlow.value = validWeeklyDraft(
+            selectedVenueId = fixture.venue.venueId,
+            invoiceDate = "2026-03-09",
+            weekEndingDate = "2026-03-08",
+            hourlyRateInput = "20.00",
+            workedHours = "8"
+        )
+
+        val viewModel = fixture.createViewModel()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.profileDraft.isValid)
+        assertFalse(viewModel.uiState.value.canFinalize)
+
+        fixture.profileFlow.value = validProfileDraft()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.profileDraft.isValid)
+        assertTrue(state.canFinalize)
+        assertEquals("Alex Worker", state.profileDraft.fullName)
+        assertEquals("BADGE-1", state.profileDraft.badgeNumber)
+    }
+
+    @Test
+    fun `searchVenueAddress sends postcode input as postal code`() = runTest {
+        val fixture = InvoiceSetupFixture()
+        val resolved = addressLookupResult(postCode = "SW1A 1AA")
+        coEvery {
+            fixture.addressResolverPolicyHandler.resolveAddress(any(), any())
+        } returns Result.success(resolved)
+
+        val viewModel = fixture.createViewModel()
+        advanceUntilIdle()
+
+        viewModel.updateVenuePostcodeInput("sw1a 1aa")
+        viewModel.searchVenueAddress()
+        advanceUntilIdle()
+
+        coVerify {
+            fixture.addressResolverPolicyHandler.resolveAddress(
+                "token",
+                match { payload ->
+                    payload.line1.isBlank() && payload.postalCode == "SW1A 1AA"
+                }
+            )
+        }
+        assertEquals(resolved, viewModel.uiState.value.suggestedVenueAddress)
+        assertEquals("SW1A 1AA", viewModel.uiState.value.venuePostcodeInput)
+    }
+
+    @Test
+    fun `searchVenueAddress treats address field containing only a UK postcode as postal code`() = runTest {
+        val fixture = InvoiceSetupFixture()
+        coEvery {
+            fixture.addressResolverPolicyHandler.resolveAddress(any(), any())
+        } returns Result.success(addressLookupResult(postCode = "M1 1AE"))
+
+        val viewModel = fixture.createViewModel()
+        advanceUntilIdle()
+
+        viewModel.updateVenueAddressInput("M1 1AE")
+        viewModel.searchVenueAddress()
+        advanceUntilIdle()
+
+        coVerify {
+            fixture.addressResolverPolicyHandler.resolveAddress(
+                "token",
+                match { payload ->
+                    payload.line1.isBlank() && payload.postalCode == "M1 1AE"
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `finalizeInvoice blocks when required worker profile details are missing`() = runTest {
+        val fixture = InvoiceSetupFixture()
+
+        fixture.profileFlow.value = InvoiceProfileDraft(
+            fullName = "Alex Worker",
+            address = "1 Example Street"
+        )
+        fixture.venueFlow.value = listOf(fixture.venue)
+        fixture.weeklyFlow.value = validWeeklyDraft(
+            selectedVenueId = fixture.venue.venueId,
+            invoiceDate = "2026-03-09",
+            weekEndingDate = "2026-03-08",
+            hourlyRateInput = "20.00",
+            workedHours = "8"
+        )
+
+        val viewModel = fixture.createViewModel()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.canFinalize)
+
+        viewModel.finalizeInvoice()
+        advanceUntilIdle()
+
+        assertEquals(
+            "Complete invoice profile details before finalizing",
+            viewModel.uiState.value.error
+        )
+        coVerify(exactly = 0) {
+            fixture.finalizeRepository.finalize(any(), any(), any())
+        }
+    }
 }
 
 private class InvoiceSetupFixture {
@@ -240,10 +356,27 @@ private fun validWeeklyDraft(
         hourlyRateInput = hourlyRateInput,
         shifts = listOf(
             InvoiceShiftDraft(
-                dayLabel = "Monday",
+                dayLabel = "Shift 1",
                 workDate = weekEndingDate,
                 hoursInput = workedHours
             )
         )
-    ).withFullWeek()
+    ).withVisibleShifts()
+}
+
+private fun addressLookupResult(postCode: String): AddressLookupResult {
+    return AddressLookupResult(
+        fullAddress = "Westminster, London, $postCode",
+        fullAddressWithHouse = "Westminster, London, $postCode",
+        postCode = postCode,
+        countryCode = "GB",
+        houseInfo = "",
+        lat = 51.501,
+        lng = -0.141,
+        line1 = "Westminster",
+        line2 = null,
+        city = "London",
+        stateOrRegion = "England",
+        source = "postcodes_io"
+    )
 }

@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.invoicing.viewmodel.InvoiceSetupUiState
@@ -20,6 +21,7 @@ fun InvoiceVenueSetupSection(
     state: InvoiceSetupUiState,
     onVenueNameChanged: (String) -> Unit,
     onVenueAddressChanged: (String) -> Unit,
+    onVenuePostcodeChanged: (String) -> Unit,
     onVenueCountryChanged: (String) -> Unit,
     onVenueRateChanged: (String) -> Unit,
     onSearchAddress: () -> Unit,
@@ -27,6 +29,8 @@ fun InvoiceVenueSetupSection(
     onAddVenue: () -> Unit,
     onSelectVenue: (String) -> Unit
 ) {
+    val canSearchAddress = state.venueAddressInput.isNotBlank() || state.venuePostcodeInput.isNotBlank()
+
     InvoiceSurfaceCard {
         InvoiceSectionHeading(
             title = stringResource(R.string.invoice_setup_venue_title),
@@ -53,9 +57,21 @@ fun InvoiceVenueSetupSection(
                 label = stringResource(R.string.invoice_setup_venue_name_label)
             )
             InvoiceInputField(
+                value = state.venuePostcodeInput,
+                onValueChange = onVenuePostcodeChanged,
+                label = stringResource(R.string.invoice_setup_venue_postcode_label),
+                supportingText = stringResource(R.string.invoice_setup_venue_postcode_supporting),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Characters,
+                    keyboardType = KeyboardType.Text
+                )
+            )
+            InvoiceInputField(
                 value = state.venueAddressInput,
                 onValueChange = onVenueAddressChanged,
                 label = stringResource(R.string.invoice_setup_venue_address_label),
+                placeholder = stringResource(R.string.invoice_setup_venue_address_placeholder),
+                supportingText = stringResource(R.string.invoice_setup_venue_address_supporting),
                 singleLine = false
             )
             InvoiceInputField(
@@ -70,11 +86,27 @@ fun InvoiceVenueSetupSection(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
             SecondaryButton(
-                text = stringResource(R.string.invoice_setup_search_address_action),
+                text = if (state.isAddressSearching) {
+                    stringResource(R.string.invoice_setup_search_address_loading)
+                } else {
+                    stringResource(R.string.invoice_setup_search_address_action)
+                },
                 onClick = onSearchAddress,
-                enabled = !state.isAddressSearching
+                enabled = !state.isAddressSearching && canSearchAddress
             )
-            if (state.suggestedVenueAddress != null) {
+            state.suggestedVenueAddress?.let { suggested ->
+                Column(verticalArrangement = Arrangement.spacedBy(Dimens.xs)) {
+                    Text(
+                        text = stringResource(R.string.invoice_setup_suggested_address_title),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = suggested.fullAddressWithHouse.ifBlank { suggested.fullAddress },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
                 SecondaryButton(
                     text = stringResource(R.string.invoice_setup_apply_address_action),
                     onClick = onApplySuggestedAddress

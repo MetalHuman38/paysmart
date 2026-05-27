@@ -25,6 +25,7 @@ import net.metalbrain.paysmart.core.features.invoicing.data.InvoiceWeeklyDraftRe
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceVenueDraft
 import net.metalbrain.paysmart.core.features.invoicing.domain.InvoiceWeeklyDraft
 import net.metalbrain.paysmart.core.features.invoicing.domain.toDynamicInvoice
+import net.metalbrain.paysmart.core.features.invoicing.domain.toLegacyProfileDraft
 import net.metalbrain.paysmart.core.features.invoicing.domain.toLegacyWeeklyDraft
 import net.metalbrain.paysmart.data.repository.AuthRepository
 import net.metalbrain.paysmart.data.repository.UserProfileCacheRepository
@@ -36,7 +37,6 @@ import net.metalbrain.paysmart.core.invoice.model.Invoice
 import net.metalbrain.paysmart.core.invoice.model.InvoiceField
 import net.metalbrain.paysmart.core.invoice.model.InvoiceFieldKeys
 import net.metalbrain.paysmart.core.invoice.model.InvoiceFormStep
-import net.metalbrain.paysmart.core.invoice.model.InvoiceSection
 import net.metalbrain.paysmart.core.invoice.model.LineItem
 import net.metalbrain.paysmart.core.invoice.model.Profession
 import net.metalbrain.paysmart.core.invoice.model.doubleValue
@@ -194,6 +194,11 @@ class InvoiceSetupViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    fun removeLineItemAt(index: Int) {
+        val lineItemId = _uiState.value.draftInvoice.lineItems.getOrNull(index)?.id ?: return
+        removeLineItem(lineItemId)
     }
 
     fun goToNextFormStep() {
@@ -417,6 +422,17 @@ class InvoiceSetupViewModel @Inject constructor(
         _uiState.update { it.copy(venueNameInput = value, error = null, infoMessage = null) }
     }
 
+    fun updateVenuePostcodeInput(value: String) {
+        _uiState.update {
+            it.copy(
+                venuePostcodeInput = normalizeVenuePostcodeInput(value),
+                suggestedVenueAddress = null,
+                error = null,
+                infoMessage = null
+            )
+        }
+    }
+
     fun updateVenueRateInput(value: String) {
         _uiState.update { it.copy(venueRateInput = sanitizeDecimal(value), error = null, infoMessage = null) }
     }
@@ -432,7 +448,10 @@ class InvoiceSetupViewModel @Inject constructor(
         val venue = InvoiceVenueDraft(
             venueId = "venue_${UUID.randomUUID()}",
             venueName = current.venueNameInput,
-            venueAddress = current.venueAddressInput,
+            venueAddress = buildVenueAddress(
+                address = current.venueAddressInput,
+                postcode = current.venuePostcodeInput
+            ),
             defaultHourlyRateInput = current.venueRateInput
         ).normalized()
 
@@ -452,6 +471,7 @@ class InvoiceSetupViewModel @Inject constructor(
                             isPersisting = false,
                             venueNameInput = "",
                             venueAddressInput = "",
+                            venuePostcodeInput = "",
                             venueRateInput = "",
                             suggestedVenueAddress = null,
                             infoMessage = "Venue added"
@@ -518,8 +538,15 @@ class InvoiceSetupViewModel @Inject constructor(
     }
 
     fun updateShiftDate(dayLabel: String, value: String) {
-        val index = _uiState.value.weeklyRows.indexOfFirst { shift -> sameDay(shift.dayLabel, dayLabel) }
+        val normalizedDayLabel = dayLabel.trim()
+        val index = _uiState.value.weeklyRows.indexOfFirst { shift ->
+            shift.dayLabel.trim().equals(normalizedDayLabel, ignoreCase = true)
+        }
         if (index < 0) return
+        updateShiftDateAt(index, value)
+    }
+
+    fun updateShiftDateAt(index: Int, value: String) {
         updateDraftInvoice(
             persistWeekly = true
         ) { invoice ->
@@ -531,15 +558,18 @@ class InvoiceSetupViewModel @Inject constructor(
         }
     }
 
-    fun updateShiftDateAt(index: Int, value: String) {
-        val dayLabel = _uiState.value.weeklyRows.getOrNull(index)?.dayLabel ?: return
-        updateShiftDate(dayLabel, value)
-    }
-
     fun updateShiftHours(dayLabel: String, value: String) {
         val sanitized = sanitizeDecimal(value)
-        val index = _uiState.value.weeklyRows.indexOfFirst { shift -> sameDay(shift.dayLabel, dayLabel) }
+        val normalizedDayLabel = dayLabel.trim()
+        val index = _uiState.value.weeklyRows.indexOfFirst { shift ->
+            shift.dayLabel.trim().equals(normalizedDayLabel, ignoreCase = true)
+        }
         if (index < 0) return
+        updateShiftHoursAt(index, sanitized)
+    }
+
+    fun updateShiftHoursAt(index: Int, value: String) {
+        val sanitized = sanitizeDecimal(value)
         updateDraftInvoice(
             persistWeekly = true
         ) { invoice ->
@@ -549,11 +579,6 @@ class InvoiceSetupViewModel @Inject constructor(
                 value = sanitized.toDoubleOrNull()
             )
         }
-    }
-
-    fun updateShiftHoursAt(index: Int, value: String) {
-        val dayLabel = _uiState.value.weeklyRows.getOrNull(index)?.dayLabel ?: return
-        updateShiftHours(dayLabel, value)
     }
 
     fun clearError() {
@@ -606,7 +631,7 @@ class InvoiceSetupViewModel @Inject constructor(
             return
         }
 
-        val weekly = current.weeklyDraft.normalized().withFullWeek()
+        val weekly = current.weeklyDraft.normalized().withVisibleShifts()
         if (weekly.invoiceDate.isBlank() || weekly.weekEndingDate.isBlank()) {
             logFinalizeDiagnostics("blocked_missing_dates", current)
             _uiState.update { it.copy(error = "Invoice date and week ending date are required") }
@@ -622,6 +647,12 @@ class InvoiceSetupViewModel @Inject constructor(
         if (weekly.shifts.none { row -> (row.hoursInput.toDoubleOrNull() ?: 0.0) > 0.0 }) {
             logFinalizeDiagnostics("blocked_missing_shift", current)
             _uiState.update { it.copy(error = "Add at least one worked shift before finalizing") }
+            return
+        }
+
+        if (weekly.billableShifts.any { row -> row.workDate.isBlank() }) {
+            logFinalizeDiagnostics("blocked_missing_shift_date", current)
+            _uiState.update { it.copy(error = "Add a date for each worked shift before finalizing") }
             return
         }
 
@@ -654,15 +685,12 @@ class InvoiceSetupViewModel @Inject constructor(
                         )
                     }
                     _uiState.update {
-                        val nextDynamicInvoice = nextDraft.toDynamicInvoice(profile, venue)
-                            .let { drafted ->
-                                applyTemplateToInvoice(
-                                    invoice = drafted,
-                                    templateId = current.draftInvoice.templateId
-                                        ?: "weekly_shift_worker_template",
-                                    professionId = current.draftInvoice.professionId
-                                )
-                            }
+                        val nextDynamicInvoice = applyTemplateToInvoice(
+                            invoice = nextDraft.toDynamicInvoice(profile, venue),
+                            templateId = current.draftInvoice.templateId
+                                ?: "weekly_shift_worker_template",
+                            professionId = current.draftInvoice.professionId
+                        )
                         it.copy(
                             isFinalizing = false,
                             draftInvoice = nextDynamicInvoice,
@@ -693,7 +721,8 @@ class InvoiceSetupViewModel @Inject constructor(
             it.copy(
                 venueAddressInput = value,
                 suggestedVenueAddress = null,
-                error = null
+                error = null,
+                infoMessage = null
             )
         }
     }
@@ -703,20 +732,35 @@ class InvoiceSetupViewModel @Inject constructor(
             it.copy(
                 venueCountryInput = value.trim().uppercase().take(2).ifBlank { "GB" },
                 suggestedVenueAddress = null,
-                error = null
+                error = null,
+                infoMessage = null
             )
         }
     }
 
     fun searchVenueAddress() {
         val current = _uiState.value
-        if (current.venueAddressInput.isBlank()) {
-            _uiState.update { it.copy(error = "Enter venue address to search") }
+        val addressInput = current.venueAddressInput.trim()
+        val postcodeInput = current.venuePostcodeInput.trim()
+        val inferredPostcode = postcodeInput.ifBlank {
+            addressInput.takeIf { candidate ->
+                current.venueCountryInput.equals("GB", ignoreCase = true) &&
+                    candidate.looksLikeUkPostcode()
+            }.orEmpty()
+        }
+        val line1 = if (postcodeInput.isBlank() && inferredPostcode == addressInput) {
+            ""
+        } else {
+            addressInput
+        }
+
+        if (line1.isBlank() && inferredPostcode.isBlank()) {
+            _uiState.update { it.copy(error = "Enter a venue postcode or address to search") }
             return
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isAddressSearching = true, error = null) }
+            _uiState.update { it.copy(isAddressSearching = true, error = null, infoMessage = null) }
             val session = runCatching { authRepository.getCurrentSessionOrThrow() }
                 .getOrElse { error ->
                     _uiState.update {
@@ -729,20 +773,27 @@ class InvoiceSetupViewModel @Inject constructor(
                 }
 
             val payload = AddressLookupPayload(
-                line1 = current.venueAddressInput,
+                line1 = line1,
                 city = "",
                 stateOrRegion = "",
-                postalCode = "",
+                postalCode = inferredPostcode,
                 country = current.venueCountryInput
             )
 
             addressResolverPolicyHandler.resolveAddress(session.idToken, payload)
                 .onSuccess { resolved ->
+                    val postcodeOnlyLookup = line1.isBlank() && inferredPostcode.isNotBlank()
                     _uiState.update {
                         it.copy(
                             isAddressSearching = false,
                             suggestedVenueAddress = resolved,
-                            error = null
+                            venuePostcodeInput = resolved.postCode.ifBlank { it.venuePostcodeInput },
+                            error = null,
+                            infoMessage = if (postcodeOnlyLookup) {
+                                "Postcode matched an area. Add the venue building or street before saving if the invoice needs a full address."
+                            } else {
+                                null
+                            }
                         )
                     }
                 }
@@ -751,7 +802,8 @@ class InvoiceSetupViewModel @Inject constructor(
                         it.copy(
                             isAddressSearching = false,
                             suggestedVenueAddress = null,
-                            error = error.localizedMessage ?: "Unable to resolve venue address"
+                            error = error.localizedMessage ?: "Unable to resolve venue address",
+                            infoMessage = null
                         )
                     }
                 }
@@ -763,9 +815,11 @@ class InvoiceSetupViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 venueAddressInput = suggested.fullAddressWithHouse.ifBlank { suggested.fullAddress },
+                venuePostcodeInput = suggested.postCode.ifBlank { it.venuePostcodeInput },
                 venueCountryInput = suggested.countryCode.trim().uppercase().take(2).ifBlank { it.venueCountryInput },
                 suggestedVenueAddress = null,
-                error = null
+                error = null,
+                infoMessage = null
             )
         }
     }
@@ -803,7 +857,7 @@ class InvoiceSetupViewModel @Inject constructor(
                 val (profile, cachedProfile) = profileAndCache
                 val fallbackProfile = (profile ?: InvoiceProfileDraft())
                     .mergeMissingFrom(defaultProfileDraft(cachedProfile))
-                val hydratedWeekly = (weekly ?: InvoiceWeeklyDraft()).withFullWeek()
+                val hydratedWeekly = (weekly ?: InvoiceWeeklyDraft()).withVisibleShifts()
                 val selectedVenueId = hydratedWeekly.selectedVenueId
                     .takeIf { id -> venues.any { it.venueId == id } }
                     ?: venues.firstOrNull()?.venueId.orEmpty()
@@ -820,7 +874,9 @@ class InvoiceSetupViewModel @Inject constructor(
                         current.userId == userId &&
                         currentInvoice.isMeaningfullyFilled()
                     val nextInvoice = if (shouldPreserveCurrentDraft) {
-                        syncInvoiceWithVenue(currentInvoice, selectedVenue)
+                        currentInvoice
+                            .syncMissingProfileFields(fallbackProfile)
+                            .let { invoice -> syncInvoiceWithVenue(invoice, selectedVenue) }
                     } else {
                         syncInvoiceWithVenue(hydratedInvoice, selectedVenue)
                     }
@@ -882,7 +938,7 @@ class InvoiceSetupViewModel @Inject constructor(
         val weeklyDraft = current.draftInvoice
             .toLegacyWeeklyDraft(current.effectiveSelectedVenueId)
             .normalized()
-            .withFullWeek()
+            .withVisibleShifts()
 
         _uiState.update {
             it.copy(
@@ -929,7 +985,7 @@ class InvoiceSetupViewModel @Inject constructor(
         val next = _uiState.value.draftInvoice
             .toLegacyWeeklyDraft(_uiState.value.effectiveSelectedVenueId)
             .normalized()
-            .withFullWeek()
+            .withVisibleShifts()
         _uiState.update { it.copy(isPersisting = true) }
         viewModelScope.launch {
             runCatching { weeklyDraftRepository.upsert(userId, next) }
@@ -1061,6 +1117,39 @@ private fun syncInvoiceWithVenue(
     return invoice
         .withSectionFieldValue("client_details", InvoiceFieldKeys.CLIENT_NAME, venue.venueName)
         .withSectionFieldValue("client_details", InvoiceFieldKeys.CLIENT_ADDRESS, venue.venueAddress)
+}
+
+private fun Invoice.syncMissingProfileFields(
+    fallbackProfile: InvoiceProfileDraft
+): Invoice {
+    val mergedProfile = toLegacyProfileDraft()
+        .mergeMissingFrom(fallbackProfile)
+        .normalized()
+    return this
+        .withSectionFieldValue("worker_details", InvoiceFieldKeys.WORKER_NAME, mergedProfile.fullName)
+        .withSectionFieldValue("worker_details", InvoiceFieldKeys.WORKER_ADDRESS, mergedProfile.address)
+        .withSectionFieldValue("worker_details", InvoiceFieldKeys.WORKER_BADGE_NUMBER, mergedProfile.badgeNumber)
+        .withSectionFieldValue("worker_details", InvoiceFieldKeys.WORKER_BADGE_EXPIRY, mergedProfile.badgeExpiryDate)
+        .withSectionFieldValue("worker_details", InvoiceFieldKeys.WORKER_UTR, mergedProfile.utrNumber)
+        .withSectionFieldValue("worker_details", InvoiceFieldKeys.WORKER_EMAIL, mergedProfile.email)
+        .withSectionFieldValue("worker_details", InvoiceFieldKeys.WORKER_PHONE, mergedProfile.contactPhone)
+        .withSectionFieldValue(
+            "worker_details",
+            InvoiceFieldKeys.PAYMENT_ACCOUNT_NUMBER,
+            mergedProfile.accountNumber
+        )
+        .withSectionFieldValue("worker_details", InvoiceFieldKeys.PAYMENT_SORT_CODE, mergedProfile.sortCode)
+        .withSectionFieldValue(
+            "worker_details",
+            InvoiceFieldKeys.PAYMENT_INSTRUCTIONS,
+            mergedProfile.paymentInstructions
+        )
+        .withSectionFieldValue(
+            "worker_details",
+            InvoiceFieldKeys.DEFAULT_RATE,
+            mergedProfile.defaultHourlyRateInput.toDoubleOrNull()
+                ?: mergedProfile.defaultHourlyRateInput
+        )
 }
 
 private fun applyTemplateToInvoice(
@@ -1217,7 +1306,7 @@ private fun buildNextWeeklyDraftAfterFinalize(
     return InvoiceWeeklyDraft(
         selectedVenueId = venueId.trim(),
         hourlyRateInput = fallbackHourlyRate.trim()
-    ).withFullWeek()
+    ).withVisibleShifts()
 }
 
 private const val MAX_DYNAMIC_LINE_ITEMS = 7
@@ -1290,10 +1379,10 @@ private fun InvoiceSetupUiState.validationErrorForCurrentStep(): String? {
         }
 
         InvoiceFormStep.REVIEW -> {
-            if (canFinalize) {
-                null
-            } else {
-                "Complete the invoice dates, rate, and at least one worked shift before finalizing"
+            when {
+                !profileDraft.isValid -> "Complete the required worker details before finalizing"
+                canFinalize -> null
+                else -> "Complete the invoice dates, rate, and each worked shift before finalizing"
             }
         }
     }
@@ -1361,3 +1450,38 @@ private fun InvoiceField.coerceInputValue(rawValue: Any?): Any? {
         FieldType.DROPDOWN -> rawValue?.toString()?.trim().orEmpty()
     }
 }
+
+private fun normalizeVenuePostcodeInput(value: String): String {
+    return value
+        .uppercase()
+        .replace(Regex("\\s+"), " ")
+        .take(12)
+}
+
+private fun buildVenueAddress(address: String, postcode: String): String {
+    val normalizedAddress = address.trim()
+    val normalizedPostcode = normalizeVenuePostcodeInput(postcode).trim()
+    if (normalizedAddress.isBlank()) return normalizedPostcode
+    if (normalizedPostcode.isBlank()) return normalizedAddress
+
+    val compactAddress = normalizedAddress.normalizedPostcodeComparable()
+    val compactPostcode = normalizedPostcode.normalizedPostcodeComparable()
+    return if (compactPostcode.isNotBlank() && compactAddress.contains(compactPostcode)) {
+        normalizedAddress
+    } else {
+        "$normalizedAddress, $normalizedPostcode"
+    }
+}
+
+private fun String.looksLikeUkPostcode(): Boolean {
+    return trim().matches(UK_POSTCODE_PATTERN)
+}
+
+private fun String.normalizedPostcodeComparable(): String {
+    return uppercase().replace(Regex("\\s+"), "")
+}
+
+private val UK_POSTCODE_PATTERN = Regex(
+    pattern = "^[A-Z]{1,2}\\d[A-Z\\d]?\\s*\\d[A-Z]{2}$",
+    option = RegexOption.IGNORE_CASE
+)

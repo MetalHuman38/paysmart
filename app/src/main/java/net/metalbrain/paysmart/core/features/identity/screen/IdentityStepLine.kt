@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 enum class IdentityStepStatus {
     PENDING,
@@ -32,11 +32,13 @@ fun IdentityStepLine(
     label: String,
     status: IdentityStepStatus
 ) {
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
     val statusColor = when (status) {
-        IdentityStepStatus.FAILED -> MaterialTheme.colorScheme.error
-        IdentityStepStatus.COMPLETED -> MaterialTheme.colorScheme.primary
-        IdentityStepStatus.IN_PROGRESS -> MaterialTheme.colorScheme.secondary
-        IdentityStepStatus.PENDING -> MaterialTheme.colorScheme.outline
+        IdentityStepStatus.FAILED -> colors.error
+        IdentityStepStatus.COMPLETED -> colors.success
+        IdentityStepStatus.IN_PROGRESS -> colors.brandPrimary
+        IdentityStepStatus.PENDING -> colors.textTertiary
     }
 
     Row(
@@ -61,14 +63,14 @@ fun IdentityStepLine(
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                style = typography.bodyMedium,
+                color = colors.textPrimary
             )
         }
 
         Surface(
             color = badgeContainerColor(statusColor, status),
-            shape = MaterialTheme.shapes.extraLarge
+            shape = PaysmartTheme.radius.pill
         ) {
             Text(
                 text = when (status) {
@@ -78,7 +80,7 @@ fun IdentityStepLine(
                     IdentityStepStatus.FAILED -> stringResource(R.string.identity_resolver_status_failed)
                 },
                 modifier = Modifier.padding(horizontal = Dimens.sm, vertical = Dimens.xs),
-                style = MaterialTheme.typography.labelMedium,
+                style = typography.labelMedium,
                 color = statusColor,
                 fontWeight = FontWeight.SemiBold
             )
@@ -92,7 +94,7 @@ private fun badgeContainerColor(
     status: IdentityStepStatus
 ): Color {
     return when (status) {
-        IdentityStepStatus.PENDING -> MaterialTheme.colorScheme.surfaceVariant
+        IdentityStepStatus.PENDING -> PaysmartTheme.colorTokens.fillDisabled
         else -> statusColor.copy(alpha = 0.14f)
     }
 }

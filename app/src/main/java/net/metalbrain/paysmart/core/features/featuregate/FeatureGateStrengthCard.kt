@@ -1,20 +1,21 @@
 package net.metalbrain.paysmart.core.features.featuregate
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 
 @Composable
@@ -22,33 +23,49 @@ fun FeatureGateStrengthCard(
     current: Int,
     required: Int
 ) {
-    Card(
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)
-        )
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
+    val progress = if (required <= 0) 0f else current.toFloat() / required.toFloat()
+
+    Surface(
+        shape = PaysmartTheme.radius.medium,
+        color = colors.surfacePrimary,
+        contentColor = colors.textPrimary,
+        border = BorderStroke(PaysmartTheme.border.thin, colors.borderSubtle)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Dimens.space8, vertical = Dimens.space6),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(Dimens.md),
+            verticalArrangement = Arrangement.spacedBy(Dimens.sm)
         ) {
-            Text(
-                text = stringResource(R.string.feature_gate_requirement_security_strength_two),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stringResource(R.string.feature_gate_requirement_security_strength_two),
+                    modifier = Modifier.weight(1f),
+                    style = typography.labelLarge,
+                    color = colors.textPrimary
+                )
+                Text(
+                    text = "$current / $required",
+                    style = typography.labelLarge,
+                    color = colors.brandPrimary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            LinearProgressIndicator(
+                progress = { progress.coerceIn(0f, 1f) },
+                modifier = Modifier.fillMaxWidth(),
+                color = colors.brandPrimary,
+                trackColor = colors.fillDisabled
             )
             Text(
-                text = stringResource(
-                    R.string.feature_gate_security_strength_progress,
-                    current,
-                    required
-                ),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold
+                text = stringResource(R.string.feature_gate_security_strength_progress, current, required),
+                style = typography.caption,
+                color = colors.textSecondary
             )
         }
     }

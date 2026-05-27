@@ -774,6 +774,7 @@ how can we help?</string>
     <string name="feature_gate_receive_money_description">Complete these checks to unlock your local funding account.</string>
     <string name="feature_gate_send_money_description">Complete these checks to unlock send money.</string>
     <string name="feature_gate_invoice_description">Protect invoice data with at least two security methods before you create and share invoices.</string>
+    <string name="feature_gate_security_check_title">Security check</string>
     <string name="feature_gate_requirement_security_strength_two">Enable at least two security methods</string>
     <string name="feature_gate_security_strength_progress">Security strength: %1$d of %2$d methods enabled</string>
     <string name="funding_account_title">Receive money</string>

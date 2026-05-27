@@ -14,10 +14,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,11 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.profile.data.type.KycDocumentType
 import net.metalbrain.paysmart.core.features.identity.provider.formattedLabel
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun IdentityDocumentRow(
@@ -38,23 +36,22 @@ fun IdentityDocumentRow(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    Card(
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
+
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = enabled, onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = if (selected && enabled) {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.48f)
-            } else {
-                MaterialTheme.colorScheme.surface
-            }
-        ),
+        shape = PaysmartTheme.radius.medium,
+        color = if (selected && enabled) colors.fillHover else colors.surfaceElevated,
+        contentColor = colors.textPrimary,
         border = BorderStroke(
-            width = 1.dp,
+            width = PaysmartTheme.border.thin,
             color = if (selected && enabled) {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+                colors.brandPrimary.copy(alpha = 0.42f)
             } else {
-                MaterialTheme.colorScheme.outline.copy(alpha = 0.14f)
+                colors.borderSubtle
             }
         )
     ) {
@@ -68,9 +65,9 @@ fun IdentityDocumentRow(
                 imageVector = document.leadingIcon(),
                 contentDescription = null,
                 tint = if (enabled) {
-                    MaterialTheme.colorScheme.onSurfaceVariant
+                    colors.textSecondary
                 } else {
-                    MaterialTheme.colorScheme.outline
+                    colors.textTertiary
                 }
             )
 
@@ -79,19 +76,19 @@ fun IdentityDocumentRow(
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.xs)) {
                 Text(
                     text = document.formattedLabel,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = typography.labelLarge,
                     fontWeight = FontWeight.Medium,
                     color = if (enabled) {
-                        MaterialTheme.colorScheme.onSurface
+                        colors.textPrimary
                     } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        colors.textSecondary
                     }
                 )
                 if (!enabled) {
                     Text(
                         text = stringResource(R.string.sheet_not_accepted_inline),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = typography.bodySmall,
+                        color = colors.textSecondary
                     )
                 }
             }
@@ -106,10 +103,10 @@ fun IdentityDocumentRow(
                 },
                 contentDescription = null,
                 tint = when {
-                    selected && enabled -> MaterialTheme.colorScheme.primary
-                    selected -> MaterialTheme.colorScheme.outline
-                    enabled -> MaterialTheme.colorScheme.outline
-                    else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.72f)
+                    selected && enabled -> colors.brandPrimary
+                    selected -> colors.textTertiary
+                    enabled -> colors.textTertiary
+                    else -> colors.textTertiary.copy(alpha = 0.72f)
                 }
             )
         }

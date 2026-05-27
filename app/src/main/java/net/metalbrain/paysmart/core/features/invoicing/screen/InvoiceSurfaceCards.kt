@@ -1,23 +1,32 @@
 package net.metalbrain.paysmart.core.features.invoicing.screen
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 internal enum class InvoiceCardTone {
     Default,
@@ -40,25 +49,26 @@ private data class InvoiceCardColors(
 
 @Composable
 private fun rememberInvoiceCardColors(tone: InvoiceCardTone): InvoiceCardColors {
+    val colors = PaysmartTheme.colorTokens
     return when (tone) {
         InvoiceCardTone.Default -> InvoiceCardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            containerColor = colors.surfaceElevated,
+            contentColor = colors.textPrimary
         )
 
         InvoiceCardTone.Muted -> InvoiceCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            containerColor = colors.surfacePrimary,
+            contentColor = colors.textPrimary
         )
 
         InvoiceCardTone.Accent -> InvoiceCardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            containerColor = colors.fillHover,
+            contentColor = colors.textPrimary
         )
 
         InvoiceCardTone.Info -> InvoiceCardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            containerColor = colors.buttonSecondaryBackground,
+            contentColor = colors.textPrimary
         )
     }
 }
@@ -72,6 +82,7 @@ internal fun InvoiceSurfaceCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val colors = PaysmartTheme.colorTokens
     val toneColors = rememberInvoiceCardColors(tone)
     Surface(
         modifier = modifier
@@ -83,13 +94,16 @@ internal fun InvoiceSurfaceCard(
                     Modifier.clickable(onClick = onClick)
                 }
             ),
-        shape = MaterialTheme.shapes.medium,
+        shape = PaysmartTheme.radius.medium,
         color = containerColor ?: toneColors.containerColor,
-        contentColor = contentColor ?: toneColors.contentColor
+        contentColor = contentColor ?: toneColors.contentColor,
+        tonalElevation = PaysmartTheme.elevation.subtle,
+        shadowElevation = PaysmartTheme.elevation.none,
+        border = BorderStroke(PaysmartTheme.border.thin, colors.borderSubtle)
     ) {
         Column(
-            modifier = Modifier.padding(Dimens.space6),
-            verticalArrangement = Arrangement.spacedBy(Dimens.xs),
+            modifier = Modifier.padding(Dimens.md),
+            verticalArrangement = Arrangement.spacedBy(Dimens.sm),
             content = content
         )
     }
@@ -99,8 +113,7 @@ internal fun InvoiceSurfaceCard(
 internal fun InvoiceSectionHeading(
     modifier: Modifier = Modifier,
     title: String,
-    body: String? = null,
-
+    body: String? = null
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -108,18 +121,20 @@ internal fun InvoiceSectionHeading(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall
+            style = PaysmartTheme.typographyTokens.heading4,
+            color = PaysmartTheme.colorTokens.textPrimary
         )
         body?.takeIf { it.isNotBlank() }?.let { copy ->
             Text(
                 text = copy,
-                style = MaterialTheme.typography.bodySmall,
-                color = LocalContentColor.current.copy(alpha = 0.76f)
+                style = PaysmartTheme.typographyTokens.bodySmall,
+                color = PaysmartTheme.colorTokens.textSecondary
             )
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun InvoiceInputField(
     value: String,
@@ -136,10 +151,24 @@ internal fun InvoiceInputField(
     trailingIcon: (@Composable (() -> Unit))? = null,
     testTag: String? = null
 ) {
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    val coroutineScope = rememberCoroutineScope()
+    val fieldModifier = (testTag?.let { modifier.testTag(it) } ?: modifier)
+        .bringIntoViewRequester(bringIntoViewRequester)
+        .onFocusChanged { focusState ->
+            if (focusState.isFocused) {
+                coroutineScope.launch {
+                    delay(250)
+                    bringIntoViewRequester.bringIntoView()
+                }
+            }
+        }
+        .fillMaxWidth()
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = (testTag?.let { modifier.testTag(it) } ?: modifier).fillMaxWidth(),
+        modifier = fieldModifier,
         label = { Text(label) },
         placeholder = placeholder?.let { hint -> ({ Text(hint) }) },
         supportingText = supportingText?.let { copy -> ({ Text(copy) }) },
@@ -151,8 +180,8 @@ internal fun InvoiceInputField(
         isError = isError,
         keyboardOptions = keyboardOptions,
         trailingIcon = trailingIcon,
-        shape = MaterialTheme.shapes.medium,
-        textStyle = MaterialTheme.typography.bodyMedium
+        shape = PaysmartTheme.radius.medium,
+        textStyle = PaysmartTheme.typographyTokens.bodyMedium
     )
 }
 
@@ -181,13 +210,13 @@ internal fun InvoiceNoticeCard(
     modifier: Modifier = Modifier
 ) {
     val containerColor = when (tone) {
-        InvoiceNoticeTone.Neutral -> MaterialTheme.colorScheme.surfaceContainer
-        InvoiceNoticeTone.Success -> MaterialTheme.colorScheme.secondaryContainer
+        InvoiceNoticeTone.Neutral -> PaysmartTheme.colorTokens.surfacePrimary
+        InvoiceNoticeTone.Success -> PaysmartTheme.colorTokens.fillHover
         InvoiceNoticeTone.Error -> MaterialTheme.colorScheme.errorContainer
     }
     val contentColor = when (tone) {
-        InvoiceNoticeTone.Neutral -> MaterialTheme.colorScheme.onSurface
-        InvoiceNoticeTone.Success -> MaterialTheme.colorScheme.onSecondaryContainer
+        InvoiceNoticeTone.Neutral -> PaysmartTheme.colorTokens.textPrimary
+        InvoiceNoticeTone.Success -> PaysmartTheme.colorTokens.textPrimary
         InvoiceNoticeTone.Error -> MaterialTheme.colorScheme.onErrorContainer
     }
 
@@ -199,12 +228,12 @@ internal fun InvoiceNoticeCard(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall,
+            style = PaysmartTheme.typographyTokens.labelLarge,
             color = contentColor
         )
         Text(
             text = body,
-            style = MaterialTheme.typography.bodySmall,
+            style = PaysmartTheme.typographyTokens.bodySmall,
             color = contentColor
         )
     }

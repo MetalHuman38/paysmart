@@ -4,7 +4,7 @@ package net.metalbrain.paysmart.core.features.invoicing.domain
  * Represents a draft entry for a single work shift within an invoice.
  *
  * @property workDate The date on which the shift occurred.
- * @property dayLabel The display label for the day of the week (e.g., "Monday").
+ * @property dayLabel The display label for the shift row.
  * @property hoursInput The raw user input representing the number of hours worked.
  */
 data class InvoiceShiftDraft(
@@ -21,26 +21,21 @@ data class InvoiceShiftDraft(
     }
 }
 
-private val WEEKDAY_LABELS: List<String> = listOf(
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday"
-)
-
 data class InvoiceWeeklyDraft(
     val selectedVenueId: String = "",
     val invoiceDate: String = "",
     val weekEndingDate: String = "",
-    val shifts: List<InvoiceShiftDraft> = defaultWeekShifts(),
+    val shifts: List<InvoiceShiftDraft> = defaultShiftRows(),
     val hourlyRateInput: String = "",
     val updatedAtMs: Long = System.currentTimeMillis()
 ) {
     val totalHours: Double
         get() = shifts.sumOf { it.hoursInput.toDoubleOrNull() ?: 0.0 }
+
+    val billableShifts: List<InvoiceShiftDraft>
+        get() = shifts.map { it.normalized() }.filter { shift ->
+            (shift.hoursInput.toDoubleOrNull() ?: 0.0) > 0.0
+        }
 
     fun normalized(nowMs: Long = System.currentTimeMillis()): InvoiceWeeklyDraft {
         return copy(
@@ -53,28 +48,20 @@ data class InvoiceWeeklyDraft(
         )
     }
 
-    fun withFullWeek(): InvoiceWeeklyDraft {
-        val byDayKey = shifts
-            .map { it.normalized() }
-            .associateBy { weekdayKey(it.dayLabel) }
-
+    fun withVisibleShifts(): InvoiceWeeklyDraft {
+        val normalizedShifts = shifts.map { it.normalized() }
         return copy(
-            shifts = WEEKDAY_LABELS.map { label ->
-                val existing = byDayKey[weekdayKey(label)]
-                existing?.copy(dayLabel = label) ?: InvoiceShiftDraft(dayLabel = label)
-            }
+            shifts = normalizedShifts.ifEmpty { defaultShiftRows() }
         )
     }
 
+    fun withBillableShiftsOnly(): InvoiceWeeklyDraft {
+        return copy(shifts = billableShifts)
+    }
+
     companion object {
-        fun defaultWeekShifts(): List<InvoiceShiftDraft> {
-            return WEEKDAY_LABELS.map { label ->
-                InvoiceShiftDraft(dayLabel = label)
-            }
+        fun defaultShiftRows(): List<InvoiceShiftDraft> {
+            return listOf(InvoiceShiftDraft(dayLabel = "Shift 1"))
         }
     }
-}
-
-private fun weekdayKey(raw: String): String {
-    return raw.trim().lowercase().take(3)
 }

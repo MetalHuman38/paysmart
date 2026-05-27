@@ -12,19 +12,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -37,9 +34,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,11 +59,15 @@ fun IdentityCountrySelectionBottomSheet(
             }
         }
     }
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        containerColor = colors.backgroundPrimary,
+        contentColor = colors.textPrimary,
+        shape = PaysmartTheme.radius.xLarge
     ) {
         Column(
             modifier = Modifier
@@ -81,7 +82,8 @@ fun IdentityCountrySelectionBottomSheet(
             ) {
                 Text(
                     text = stringResource(R.string.identity_resolver_country_title),
-                    style = MaterialTheme.typography.titleLarge,
+                    style = typography.heading4,
+                    color = colors.textPrimary,
                     fontWeight = FontWeight.SemiBold
                 )
                 IconButton(onClick = onDismiss) {
@@ -94,6 +96,7 @@ fun IdentityCountrySelectionBottomSheet(
                 onValueChange = { search = it },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                shape = PaysmartTheme.radius.medium,
                 placeholder = { Text(stringResource(R.string.sheet_search_placeholder)) },
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = null)
@@ -106,39 +109,35 @@ fun IdentityCountrySelectionBottomSheet(
             ) {
                 items(filtered, key = { it.iso2 }) { country ->
                     val isSelected = country.iso2.equals(selectedCountryIso2, ignoreCase = true)
-                    Card(
+                    Surface(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 onCountrySelected(country)
                                 onDismiss()
                             },
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected) {
-                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.52f)
-                            } else {
-                                MaterialTheme.colorScheme.surface
-                            }
-                        ),
+                        shape = PaysmartTheme.radius.medium,
+                        color = if (isSelected) colors.fillHover else colors.surfaceElevated,
+                        contentColor = colors.textPrimary,
                         border = BorderStroke(
-                            width = 1.dp,
+                            width = PaysmartTheme.border.thin,
                             color = if (isSelected) {
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.36f)
+                                colors.brandPrimary.copy(alpha = 0.36f)
                             } else {
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.16f)
+                                colors.borderSubtle
                             }
                         )
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(min = 76.dp)
+                                .heightIn(min = Dimens.minimumTouchTarget + Dimens.lg)
                                 .padding(horizontal = Dimens.md, vertical = Dimens.md),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = country.flag,
-                                style = MaterialTheme.typography.headlineSmall
+                                style = typography.heading4
                             )
 
                             Spacer(modifier = Modifier.width(Dimens.md))
@@ -146,15 +145,16 @@ fun IdentityCountrySelectionBottomSheet(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = country.name,
-                                    style = MaterialTheme.typography.bodyLarge,
+                                    style = typography.bodyMedium,
+                                    color = colors.textPrimary,
                                     fontWeight = FontWeight.Medium,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
                                     text = "${country.iso2} - ${country.reviewWindowLabel}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    style = typography.bodySmall,
+                                    color = colors.textSecondary
                                 )
                             }
 
@@ -162,7 +162,7 @@ fun IdentityCountrySelectionBottomSheet(
                                 Icon(
                                     imageVector = Icons.Default.CheckCircle,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = colors.brandPrimary
                                 )
                             }
                         }

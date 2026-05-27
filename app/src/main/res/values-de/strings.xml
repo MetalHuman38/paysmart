@@ -859,6 +859,17 @@
     <string name="post_otp_interest_top_up_title">Guthaben aufladen</string>
     <string name="post_otp_interest_top_up_subtitle">Bereiten Sie Ihr Wallet auf Aufladungen, Salden und spätere Zahlungen vor, sobald die erforderlichen Prüfungen abgeschlossen sind.</string>
 
+    <string name="feature_gate_security_check_title">Sicherheitsprüfung</string>
+    <string name="invoice_shift_add_action">Schicht hinzufügen</string>
+    <string name="invoice_shift_remove_action">Schicht entfernen</string>
+    <string name="invoice_weekly_finalized_title">Rechnung abgeschlossen</string>
+    <string name="invoice_setup_venue_postcode_label">Postleitzahl</string>
+    <string name="invoice_setup_venue_postcode_supporting">Suchen Sie zuerst mit der Postleitzahl und ergänzen Sie dann Gebäude oder Straße.</string>
+    <string name="invoice_setup_venue_address_placeholder">Gebäude oder Straße des Veranstaltungsorts</string>
+    <string name="invoice_setup_venue_address_supporting">Eine Suche nur mit Postleitzahl findet den Bereich, aber nicht den genauen Veranstaltungsort.</string>
+    <string name="invoice_setup_search_address_loading">Adresse wird gesucht…</string>
+    <string name="invoice_setup_suggested_address_title">Vorgeschlagene Adresse</string>
+
     <string name="credit">Kredit</string>
     <string name="i_am_happy_paysmart_share_my_data">Ich stimme zu, dass PaySmart meine Daten (Name, Adresse und Geburtsdatum) sicher mit Kreditauskunfteien teilt, um meine Kreditwürdigkeit zu prüfen und geeignete Kreditprodukte anzubieten.</string>
     <string name="social_media_advertisement_platform">Ich bin damit einverstanden, dass PaySmart meinen Namen, meine E-Mail-Adresse und App-Aktivitäten mit Social-Media-Plattformen teilt.</string>

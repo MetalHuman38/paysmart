@@ -856,6 +856,17 @@
     <string name="post_otp_interest_top_up_title">充值</string>
     <string name="post_otp_interest_top_up_subtitle">在完成所需验证后，为钱包充值、余额和未来付款做好准备.</string>
 
+    <string name="feature_gate_security_check_title">安全检查</string>
+    <string name="invoice_shift_add_action">添加班次</string>
+    <string name="invoice_shift_remove_action">删除班次</string>
+    <string name="invoice_weekly_finalized_title">发票已最终确定</string>
+    <string name="invoice_setup_venue_postcode_label">邮政编码</string>
+    <string name="invoice_setup_venue_postcode_supporting">先用邮政编码搜索，然后补充建筑物或街道。</string>
+    <string name="invoice_setup_venue_address_placeholder">场地建筑物或街道</string>
+    <string name="invoice_setup_venue_address_supporting">仅用邮政编码搜索可以找到区域，但找不到确切场地。</string>
+    <string name="invoice_setup_search_address_loading">正在搜索地址…</string>
+    <string name="invoice_setup_suggested_address_title">建议地址</string>
+
     <string name="credit">信用</string>
     <string name="i_am_happy_paysmart_share_my_data">我同意 PaySmart 安全地将我的个人信息（姓名、地址和出生日期）分享给信用机构，以评估我的信用资格并提供合适的信贷产品。</string>
     <string name="social_media_advertisement_platform">我同意 PaySmart 将我的姓名、电子邮件地址和应用活动与社交媒体平台共享。</string>

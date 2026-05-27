@@ -856,6 +856,17 @@
     <string name="post_otp_interest_top_up_title">Ricarica</string>
     <string name="post_otp_interest_top_up_subtitle">Prepara il tuo wallet per ricariche, saldi e pagamenti futuri una volta completate le verifiche necessarie.</string>
 
+    <string name="feature_gate_security_check_title">Controllo di sicurezza</string>
+    <string name="invoice_shift_add_action">Aggiungi turno</string>
+    <string name="invoice_shift_remove_action">Rimuovi turno</string>
+    <string name="invoice_weekly_finalized_title">Fattura finalizzata</string>
+    <string name="invoice_setup_venue_postcode_label">Codice postale</string>
+    <string name="invoice_setup_venue_postcode_supporting">Cerca prima con il codice postale, poi completa edificio o via.</string>
+    <string name="invoice_setup_venue_address_placeholder">Edificio o via della sede</string>
+    <string name="invoice_setup_venue_address_supporting">La ricerca solo per codice postale trova la zona, ma non la sede esatta.</string>
+    <string name="invoice_setup_search_address_loading">Ricerca indirizzo…</string>
+    <string name="invoice_setup_suggested_address_title">Indirizzo suggerito</string>
+
     <string name="credit">Credito</string>
     <string name="i_am_happy_paysmart_share_my_data">Accetto che PaySmart condivida in modo sicuro i miei dati (nome, indirizzo e data di nascita) con le agenzie di credito per valutare l’idoneità e offrire prodotti di credito adeguati.</string>
     <string name="social_media_advertisement_platform">Accetto che PaySmart condivida il mio nome, indirizzo email e attività nell’app con le piattaforme di social media.</string>

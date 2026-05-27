@@ -858,6 +858,17 @@
     <string name="post_otp_interest_top_up_title">チャージ</string>
     <string name="post_otp_interest_top_up_subtitle">必要な確認が完了したら、残高追加、ウォレット残高、今後の支払いに備えてウォレットを準備します。</string>
 
+    <string name="feature_gate_security_check_title">セキュリティチェック</string>
+    <string name="invoice_shift_add_action">シフトを追加</string>
+    <string name="invoice_shift_remove_action">シフトを削除</string>
+    <string name="invoice_weekly_finalized_title">請求書が確定しました</string>
+    <string name="invoice_setup_venue_postcode_label">郵便番号</string>
+    <string name="invoice_setup_venue_postcode_supporting">まず郵便番号で検索し、その後に建物名または通りを入力してください。</string>
+    <string name="invoice_setup_venue_address_placeholder">会場の建物名または通り</string>
+    <string name="invoice_setup_venue_address_supporting">郵便番号だけの検索では地域は見つかりますが、正確な会場は特定できません。</string>
+    <string name="invoice_setup_search_address_loading">住所を検索中…</string>
+    <string name="invoice_setup_suggested_address_title">候補住所</string>
+
     <string name="credit">クレジット</string>
     <string name="i_am_happy_paysmart_share_my_data">私は、PaySmartが私の個人情報（氏名、住所、生年月日）を信用機関と安全に共有し、信用評価および適切なクレジット商品の提供のために利用することに同意します。</string>
     <string name="social_media_advertisement_platform">私は、PaySmartが私の氏名、メールアドレス、およびアプリの利用状況をソーシャルメディアプラットフォームと共有することに同意します。</string>

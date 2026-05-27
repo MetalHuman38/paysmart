@@ -855,6 +855,17 @@
     <string name="post_otp_interest_top_up_title">Recharger</string>
     <string name="post_otp_interest_top_up_subtitle">Préparez votre portefeuille pour l’alimentation, les soldes et les paiements futurs une fois les vérifications requises terminées.</string>
 
+    <string name="feature_gate_security_check_title">Vérification de sécurité</string>
+    <string name="invoice_shift_add_action">Ajouter un service</string>
+    <string name="invoice_shift_remove_action">Supprimer le service</string>
+    <string name="invoice_weekly_finalized_title">Facture finalisée</string>
+    <string name="invoice_setup_venue_postcode_label">Code postal</string>
+    <string name="invoice_setup_venue_postcode_supporting">Recherchez d’abord avec le code postal, puis complétez le bâtiment ou la rue.</string>
+    <string name="invoice_setup_venue_address_placeholder">Bâtiment ou rue du lieu</string>
+    <string name="invoice_setup_venue_address_supporting">La recherche par code postal seul trouve la zone, mais pas le lieu exact.</string>
+    <string name="invoice_setup_search_address_loading">Recherche de l’adresse…</string>
+    <string name="invoice_setup_suggested_address_title">Adresse suggérée</string>
+
     <string name="credit">Crédit</string>
     <string name="i_am_happy_paysmart_share_my_data">J\'accepte que PaySmart partage en toute sécurité mes informations (nom, adresse et date de naissance) avec les agences d\'évaluation du crédit afin d\'évaluer mon admissibilité et de me proposer des produits de crédit adaptés.</string>
     <string name="social_media_advertisement_platform">J\'autorise PaySmart à partager mon nom, mon adresse e-mail et les événements liés à l\'application avec les plateformes de médias sociaux.</string>

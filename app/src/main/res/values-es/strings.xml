@@ -862,6 +862,17 @@
     <string name="post_otp_interest_top_up_title">Añadir fondos</string>
     <string name="post_otp_interest_top_up_subtitle">Prepara tu cartera para fondos, saldos y futuros pagos una vez completadas las verificaciones necesarias.</string>
 
+    <string name="feature_gate_security_check_title">Comprobación de seguridad</string>
+    <string name="invoice_shift_add_action">Añadir turno</string>
+    <string name="invoice_shift_remove_action">Eliminar turno</string>
+    <string name="invoice_weekly_finalized_title">Factura finalizada</string>
+    <string name="invoice_setup_venue_postcode_label">Código postal</string>
+    <string name="invoice_setup_venue_postcode_supporting">Busca primero con el código postal y luego completa el edificio o la calle.</string>
+    <string name="invoice_setup_venue_address_placeholder">Edificio o calle del lugar</string>
+    <string name="invoice_setup_venue_address_supporting">La búsqueda solo por código postal encuentra la zona, pero no el lugar exacto.</string>
+    <string name="invoice_setup_search_address_loading">Buscando dirección…</string>
+    <string name="invoice_setup_suggested_address_title">Dirección sugerida</string>
+
     <string name="credit">Crédito</string>
     <string name="i_am_happy_paysmart_share_my_data">Acepto que PaySmart comparta de forma segura mis datos (nombre, dirección y fecha de nacimiento) con agencias de crédito para evaluar mi elegibilidad y ofrecer productos de crédito adecuados.</string>
     <string name="social_media_advertisement_platform">Acepto que PaySmart comparta mi nombre, dirección de correo electrónico y actividad en la aplicación con plataformas de redes sociales.</string>

@@ -860,6 +860,17 @@
     <string name="post_otp_interest_top_up_title">Adicionar saldo</string>
     <string name="post_otp_interest_top_up_subtitle">Prepare sua carteira para recargas, saldos e pagamentos futuros assim que as verificações necessárias forem concluídas.</string>
 
+    <string name="feature_gate_security_check_title">Verificação de segurança</string>
+    <string name="invoice_shift_add_action">Adicionar turno</string>
+    <string name="invoice_shift_remove_action">Remover turno</string>
+    <string name="invoice_weekly_finalized_title">Fatura finalizada</string>
+    <string name="invoice_setup_venue_postcode_label">Código postal</string>
+    <string name="invoice_setup_venue_postcode_supporting">Pesquise primeiro pelo código postal e depois preencha o edifício ou a rua.</string>
+    <string name="invoice_setup_venue_address_placeholder">Edifício ou rua do local</string>
+    <string name="invoice_setup_venue_address_supporting">A pesquisa apenas por código postal encontra a área, mas não o local exato.</string>
+    <string name="invoice_setup_search_address_loading">A procurar endereço…</string>
+    <string name="invoice_setup_suggested_address_title">Endereço sugerido</string>
+
     <string name="credit">Crédito</string>
     <string name="i_am_happy_paysmart_share_my_data">Concordo que a PaySmart partilhe de forma segura os meus dados (nome, morada e data de nascimento) com agências de crédito para avaliar a elegibilidade e oferecer produtos de crédito adequados.</string>
     <string name="social_media_advertisement_platform">Concordo que a PaySmart partilhe o meu nome, endereço de endereço eletrónico e atividade na aplicação com plataformas de redes sociais.</string>

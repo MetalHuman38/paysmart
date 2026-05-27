@@ -857,6 +857,17 @@
     <string name="post_otp_interest_top_up_subtitle">필요한 확인이 끝나면 지갑 충전, 잔액 및 향후 결제를 준비하세요.</string>
 
     <!-- Korean (ko) -->
+    <string name="feature_gate_security_check_title">보안 확인</string>
+    <string name="invoice_shift_add_action">근무 추가</string>
+    <string name="invoice_shift_remove_action">근무 삭제</string>
+    <string name="invoice_weekly_finalized_title">인보이스가 확정되었습니다</string>
+    <string name="invoice_setup_venue_postcode_label">우편번호</string>
+    <string name="invoice_setup_venue_postcode_supporting">먼저 우편번호로 검색한 다음 건물 또는 도로명을 입력하세요.</string>
+    <string name="invoice_setup_venue_address_placeholder">장소 건물 또는 도로명</string>
+    <string name="invoice_setup_venue_address_supporting">우편번호만으로는 지역은 찾을 수 있지만 정확한 장소는 찾을 수 없습니다.</string>
+    <string name="invoice_setup_search_address_loading">주소 검색 중…</string>
+    <string name="invoice_setup_suggested_address_title">추천 주소</string>
+
     <string name="credit">신용</string>
     <string name="i_am_happy_paysmart_share_my_data">나는 PaySmart가 내 개인 정보(이름, 주소 및 생년월일)를 신용 평가 기관과 안전하게 공유하여 신용 평가를 수행하고 적절한 신용 상품을 제공하는 데 동의합니다.</string>
     <string name="social_media_advertisement_platform">나는 PaySmart가 내 이름, 이메일 주소 및 앱 활동을 소셜 미디어 플랫폼과 공유하는 데 동의합니다.</string>

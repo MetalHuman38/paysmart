@@ -33,7 +33,7 @@ class InvoiceWeeklyDraftRepository @Inject constructor(
     }
 
     suspend fun upsert(userId: String, draft: InvoiceWeeklyDraft) {
-        dao.upsert(draft.normalized().withFullWeek().toEntity(userId))
+        dao.upsert(draft.normalized().withVisibleShifts().toEntity(userId))
     }
 }
 
@@ -59,13 +59,13 @@ private fun InvoiceWeeklyDraftEntity.toDomain(): InvoiceWeeklyDraft {
         shifts = parseShifts(shiftsJson),
         hourlyRateInput = hourlyRateInput,
         updatedAtMs = updatedAtMs
-    ).withFullWeek()
+    ).withVisibleShifts()
 }
 
 private fun parseShifts(raw: String): List<InvoiceShiftDraft> {
-    if (raw.isBlank()) return InvoiceWeeklyDraft.defaultWeekShifts()
+    if (raw.isBlank()) return InvoiceWeeklyDraft.defaultShiftRows()
     return runCatching {
         val type = object : TypeToken<List<InvoiceShiftDraft>>() {}.type
         gson.fromJson<List<InvoiceShiftDraft>>(raw, type).orEmpty()
-    }.getOrDefault(InvoiceWeeklyDraft.defaultWeekShifts())
+    }.getOrDefault(InvoiceWeeklyDraft.defaultShiftRows())
 }

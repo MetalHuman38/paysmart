@@ -60,11 +60,23 @@ fun LineItem.isReadyForReview(): Boolean {
 }
 
 fun InvoiceSetupUiState.primaryLineRateValue(): String {
-    return draftInvoice.lineItems.firstOrNull()
+    return draftInvoice.lineItems.firstOrNull(LineItem::hasWorkedHours)
+        ?.fields
+        ?.firstOrNull { field -> field.key == InvoiceFieldKeys.LINE_RATE }
+        ?.let(::fieldDisplayValue)
+        ?.takeIf { it.isNotBlank() }
+        ?: draftInvoice.lineItems.firstOrNull()
         ?.fields
         ?.firstOrNull { field -> field.key == InvoiceFieldKeys.LINE_RATE }
         ?.let(::fieldDisplayValue)
         .orEmpty()
+}
+
+private fun LineItem.hasWorkedHours(): Boolean {
+    val workedHours = fields.firstOrNull { field -> field.key == InvoiceFieldKeys.LINE_HOURS }
+        ?.doubleValue()
+        ?: 0.0
+    return workedHours > 0.0
 }
 
 fun InvoiceField.isCompletedForDisplay(): Boolean {

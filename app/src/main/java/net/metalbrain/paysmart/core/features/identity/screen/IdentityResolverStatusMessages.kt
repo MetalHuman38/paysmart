@@ -1,12 +1,11 @@
 package net.metalbrain.paysmart.core.features.identity.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,39 +15,41 @@ import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.identity.state.IdentitySetupResolverUiState
 import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentityResolverStep
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun IdentityResolverStatusMessages(state: IdentitySetupResolverUiState) {
+    val colors = PaysmartTheme.colorTokens
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.sm)) {
         state.error?.takeIf { it.isNotBlank() }?.let { message ->
             IdentityStatusCard(
                 message = message,
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                containerColor = colors.error.copy(alpha = 0.16f),
+                contentColor = colors.error
             )
         }
 
         state.nameMatchWarning?.takeIf { it.isNotBlank() }?.let { warning ->
             IdentityStatusCard(
                 message = warning,
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                containerColor = colors.warning.copy(alpha = 0.16f),
+                contentColor = colors.warning
             )
         }
 
         if (state.isValidatingCapture) {
             IdentityStatusCard(
                 message = stringResource(R.string.identity_resolver_capture_validating),
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                containerColor = colors.info.copy(alpha = 0.16f),
+                contentColor = colors.info
             )
         }
 
         if (state.currentStep == IdentityResolverStep.COMPLETE) {
             IdentityStatusCard(
                 message = stringResource(R.string.identity_resolver_completed_message),
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                containerColor = colors.success.copy(alpha = 0.16f),
+                contentColor = colors.success
             )
         }
     }
@@ -60,15 +61,18 @@ private fun IdentityStatusCard(
     containerColor: Color,
     contentColor: Color
 ) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = containerColor)
+        shape = PaysmartTheme.radius.medium,
+        color = containerColor,
+        contentColor = contentColor,
+        border = BorderStroke(PaysmartTheme.border.thin, contentColor.copy(alpha = 0.18f))
     ) {
         Text(
             text = message,
             modifier = Modifier.padding(Dimens.md),
             color = contentColor,
-            style = MaterialTheme.typography.bodyMedium
+            style = PaysmartTheme.typographyTokens.bodyMedium
         )
     }
 }

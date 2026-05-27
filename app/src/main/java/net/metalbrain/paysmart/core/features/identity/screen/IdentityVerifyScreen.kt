@@ -5,19 +5,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,11 +33,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentitySetupResolverViewModel
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun IdentityVerifyScreen(
@@ -59,30 +61,21 @@ fun IdentityVerifyScreen(
         state.isSelectedDocumentUploadSupported &&
         !state.isProcessing &&
         !state.isValidatingCapture
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Dimens.screenPadding, vertical = Dimens.md)
-            ) {
-                PrimaryButton(
-                    text = stringResource(R.string.continue_text),
-                    onClick = onNext,
-                    enabled = canContinue
-                )
-            }
-        }
+        containerColor = colors.backgroundPrimary
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.lg)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(Dimens.lg)
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .navigationBarsPadding()
+                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.md),
+            verticalArrangement = Arrangement.spacedBy(Dimens.md)
         ) {
             IdentityFlowHeader(
                 title = stringResource(R.string.identity_selection_title),
@@ -94,7 +87,8 @@ fun IdentityVerifyScreen(
             Column(verticalArrangement = Arrangement.spacedBy(Dimens.md)) {
                 Text(
                     text = stringResource(R.string.identity_resolver_country_title),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = typography.labelLarge,
+                    color = colors.textPrimary,
                     fontWeight = FontWeight.Medium
                 )
                 IdentityCountrySelectionCard(
@@ -109,7 +103,8 @@ fun IdentityVerifyScreen(
             Column(verticalArrangement = Arrangement.spacedBy(Dimens.md)) {
                 Text(
                     text = stringResource(R.string.identity_resolver_document_type_title),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = typography.labelLarge,
+                    color = colors.textPrimary,
                     fontWeight = FontWeight.Medium
                 )
 
@@ -127,19 +122,27 @@ fun IdentityVerifyScreen(
                 state.selectedDocument != null && !state.isSelectedDocumentAccepted -> {
                     Text(
                         text = stringResource(R.string.identity_resolver_document_not_accepted),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error
+                        style = typography.bodyMedium,
+                        color = colors.error
                     )
                 }
 
                 state.selectedDocument != null && !state.isSelectedDocumentUploadSupported -> {
                     Text(
                         text = stringResource(R.string.identity_resolver_document_not_supported),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error
+                        style = typography.bodyMedium,
+                        color = colors.error
                     )
                 }
             }
+
+            PrimaryButton(
+                text = stringResource(R.string.continue_text),
+                onClick = onNext,
+                enabled = canContinue
+            )
+
+            Spacer(modifier = Modifier.height(Dimens.xl))
         }
     }
 
@@ -161,17 +164,22 @@ private fun IdentityCountrySelectionCard(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    Card(
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
+
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = enabled, onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = PaysmartTheme.radius.medium,
+        color = colors.surfaceElevated,
+        contentColor = colors.textPrimary,
         border = BorderStroke(
-            width = 1.dp,
+            width = PaysmartTheme.border.thin,
             color = if (enabled) {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.52f)
+                colors.brandPrimary.copy(alpha = 0.52f)
             } else {
-                MaterialTheme.colorScheme.outline.copy(alpha = 0.16f)
+                colors.borderSubtle
             }
         )
     ) {
@@ -184,26 +192,27 @@ private fun IdentityCountrySelectionCard(
         ) {
             Text(
                 text = country.flag,
-                style = MaterialTheme.typography.headlineSmall
+                style = typography.heading4
             )
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = country.iso2,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = typography.heading4,
+                    color = colors.textPrimary,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = country.reviewWindowLabel,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = typography.bodyMedium,
+                    color = colors.textSecondary
                 )
             }
 
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface
+                tint = colors.textPrimary
             )
         }
     }

@@ -1,6 +1,6 @@
 package net.metalbrain.paysmart.core.features.identity.screen
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,16 +8,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import net.metalbrain.paysmart.R
@@ -25,32 +21,26 @@ import net.metalbrain.paysmart.core.features.account.profile.state.resolveStatus
 import net.metalbrain.paysmart.core.features.identity.state.IdentitySetupResolverUiState
 import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentityResolverStep
 import net.metalbrain.paysmart.ui.theme.Dimens
-import net.metalbrain.paysmart.ui.theme.HomeCardTokens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun IdentityVerificationPlanCard(state: IdentitySetupResolverUiState) {
     val completedSteps = resolverPlanSteps.count { step ->
         state.resolveStatus(step) == IdentityStepStatus.COMPLETED
     }
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
 
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = HomeCardTokens.cardShape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = HomeCardTokens.defaultElevation)
+        shape = PaysmartTheme.radius.medium,
+        color = colors.surfaceElevated,
+        contentColor = colors.textPrimary,
+        tonalElevation = PaysmartTheme.elevation.subtle,
+        border = BorderStroke(PaysmartTheme.border.thin, colors.borderSubtle)
     ) {
         Column(
-            modifier = Modifier
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.16f),
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.08f)
-                        )
-                    )
-                )
-                .padding(Dimens.lg),
+            modifier = Modifier.padding(Dimens.md),
             verticalArrangement = Arrangement.spacedBy(Dimens.md)
         ) {
             Row(
@@ -63,25 +53,27 @@ fun IdentityVerificationPlanCard(state: IdentitySetupResolverUiState) {
                 ) {
                     Text(
                         text = stringResource(R.string.identity_resolver_plan_title),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = typography.heading4,
+                        color = colors.textPrimary,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
                         text = state.planHeadline(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = typography.bodyMedium,
+                        color = colors.textSecondary
                     )
                 }
 
                 Surface(
-                    shape = MaterialTheme.shapes.extraLarge,
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.82f)
+                    shape = PaysmartTheme.radius.pill,
+                    color = colors.fillHover,
+                    contentColor = colors.brandPrimary
                 ) {
                     Text(
                         text = "$completedSteps/${resolverPlanSteps.size}",
                         modifier = Modifier.padding(horizontal = Dimens.md, vertical = Dimens.sm),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                        style = typography.labelLarge,
+                        color = colors.brandPrimary
                     )
                 }
             }
@@ -92,11 +84,11 @@ fun IdentityVerificationPlanCard(state: IdentitySetupResolverUiState) {
                     .fillMaxWidth()
                     .height(Dimens.sm)
                     .clip(CircleShape),
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                trackColor = colors.fillDisabled,
                 color = when {
-                    state.failedStep != null -> MaterialTheme.colorScheme.error
-                    state.isProcessing -> MaterialTheme.colorScheme.primary
-                    else -> MaterialTheme.colorScheme.secondary
+                    state.failedStep != null -> colors.error
+                    state.isProcessing -> colors.brandPrimary
+                    else -> colors.success
                 }
             )
 

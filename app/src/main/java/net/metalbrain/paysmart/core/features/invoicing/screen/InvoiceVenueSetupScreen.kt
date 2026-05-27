@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -46,6 +47,7 @@ fun InvoiceVenueSetupRoute(
         onBack = onBack,
         onVenueNameChanged = viewModel::updateVenueNameInput,
         onVenueAddressChanged = viewModel::updateVenueAddressInput,
+        onVenuePostcodeChanged = viewModel::updateVenuePostcodeInput,
         onVenueCountryChanged = viewModel::updateVenueCountryInput,
         onVenueRateChanged = viewModel::updateVenueRateInput,
         onSearchAddress = viewModel::searchVenueAddress,
@@ -63,6 +65,7 @@ fun InvoiceVenueSetupScreen(
     onBack: () -> Unit,
     onVenueNameChanged: (String) -> Unit,
     onVenueAddressChanged: (String) -> Unit,
+    onVenuePostcodeChanged: (String) -> Unit,
     onVenueCountryChanged: (String) -> Unit,
     onVenueRateChanged: (String) -> Unit,
     onSearchAddress: () -> Unit,
@@ -94,7 +97,7 @@ fun InvoiceVenueSetupScreen(
         }
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier.fillMaxSize().imePadding().padding(innerPadding),
             contentPadding = PaddingValues(Dimens.md),
             verticalArrangement = Arrangement.spacedBy(Dimens.md)
         ) {
@@ -109,6 +112,7 @@ fun InvoiceVenueSetupScreen(
                     state = state,
                     onVenueNameChanged = onVenueNameChanged,
                     onVenueAddressChanged = onVenueAddressChanged,
+                    onVenuePostcodeChanged = onVenuePostcodeChanged,
                     onVenueCountryChanged = onVenueCountryChanged,
                     onVenueRateChanged = onVenueRateChanged,
                     onSearchAddress = onSearchAddress,

@@ -3,9 +3,9 @@ package net.metalbrain.paysmart.core.features.invoicing.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +17,7 @@ import net.metalbrain.paysmart.core.features.invoicing.viewmodel.InvoiceSetupUiS
 import net.metalbrain.paysmart.core.invoice.model.InvoiceFormStep
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 
 @Composable
@@ -26,14 +27,17 @@ fun InvoiceSetupBottomBar(
     onContinue: () -> Unit,
     onFinalize: () -> Unit
 ) {
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        tonalElevation = 0.dp,
+        color = colors.surfaceElevated,
+        tonalElevation = PaysmartTheme.elevation.none,
         shadowElevation = 0.dp
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .imePadding()
                 .navigationBarsPadding()
                 .padding(horizontal = Dimens.md, vertical = Dimens.md),
             verticalArrangement = Arrangement.spacedBy(Dimens.sm)
@@ -44,8 +48,8 @@ fun InvoiceSetupBottomBar(
                 } else {
                     stringResource(R.string.invoice_setup_footer_continue_hint)
                 },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = typography.bodySmall,
+                color = colors.textSecondary
             )
             PrimaryButton(
                 text = if (state.formStep == InvoiceFormStep.REVIEW) {

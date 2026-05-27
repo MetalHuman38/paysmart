@@ -80,6 +80,8 @@ fun InvoiceWeeklyEntryRoute(
         onHourlyRateChanged = viewModel::updateHourlyRateInput,
         onShiftDateChanged = viewModel::updateShiftDateAt,
         onShiftHoursChanged = viewModel::updateShiftHoursAt,
+        onAddShift = viewModel::addLineItem,
+        onRemoveShift = viewModel::removeLineItemAt,
         onFinalize = viewModel::finalizeInvoice,
         onOpenInvoice = onOpenInvoice
     )

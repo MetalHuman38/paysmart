@@ -1,16 +1,20 @@
 package net.metalbrain.paysmart.core.features.identity.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,6 +28,7 @@ import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentitySetupResolverViewModel
 import net.metalbrain.paysmart.ui.components.PrimaryButton
 import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun IdentityPendingReviewScreen(
@@ -42,29 +47,21 @@ fun IdentityPendingReviewScreen(
         ?.lowercase()
         ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         ?: stringResource(R.string.identity_resolver_status_pending)
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Dimens.screenPadding, vertical = Dimens.md)
-            ) {
-                PrimaryButton(
-                    text = stringResource(R.string.identity_resolver_done_action),
-                    onClick = onDone
-                )
-            }
-        }
+        containerColor = colors.backgroundPrimary
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.lg)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(Dimens.lg)
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .navigationBarsPadding()
+                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.md),
+            verticalArrangement = Arrangement.spacedBy(Dimens.md)
         ) {
             IdentityFlowHeader(
                 title = stringResource(R.string.identity_pending_title),
@@ -73,14 +70,14 @@ fun IdentityPendingReviewScreen(
                 onHelp = onHelp
             )
 
-            Card(modifier = Modifier.fillMaxWidth()) {
+            IdentityReviewCard {
                 Column(
-                    modifier = Modifier.padding(Dimens.lg),
                     verticalArrangement = Arrangement.spacedBy(Dimens.sm)
                 ) {
                     Text(
                         text = stringResource(R.string.identity_resolver_review_time_title),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = typography.heading4,
+                        color = colors.textPrimary,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
@@ -89,25 +86,26 @@ fun IdentityPendingReviewScreen(
                             selectedCountry.name,
                             selectedCountry.reviewWindowLabel
                         ),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = typography.bodyMedium,
+                        color = colors.textSecondary
                     )
                 }
             }
 
-            Card(modifier = Modifier.fillMaxWidth()) {
+            IdentityReviewCard {
                 Column(
-                    modifier = Modifier.padding(Dimens.lg),
                     verticalArrangement = Arrangement.spacedBy(Dimens.md)
                 ) {
                     Text(
                         text = stringResource(R.string.identity_resolver_title),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = typography.heading4,
+                        color = colors.textPrimary,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
                         text = stringResource(R.string.identity_pending_status_format, formattedStatus),
-                        style = MaterialTheme.typography.bodyLarge
+                        style = typography.bodyMedium,
+                        color = colors.textPrimary
                     )
                     HorizontalDivider()
                     receipt?.verificationId?.takeIf { it.isNotBlank() }?.let { verificationId ->
@@ -116,26 +114,26 @@ fun IdentityPendingReviewScreen(
                                 R.string.identity_pending_reference_format,
                                 verificationId
                             ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = typography.bodyMedium,
+                            color = colors.textSecondary
                         )
                     }
                     Text(
                         text = "${selectedCountry.flag} ${selectedCountry.iso2}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = typography.bodyMedium,
+                        color = colors.textSecondary
                     )
                 }
             }
 
-            Card(modifier = Modifier.fillMaxWidth()) {
+            IdentityReviewCard {
                 Column(
-                    modifier = Modifier.padding(Dimens.lg),
                     verticalArrangement = Arrangement.spacedBy(Dimens.md)
                 ) {
                     Text(
                         text = stringResource(R.string.identity_pending_next_title),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = typography.heading4,
+                        color = colors.textPrimary,
                         fontWeight = FontWeight.SemiBold
                     )
                     PendingStep(text = stringResource(R.string.identity_pending_next_step_1))
@@ -143,15 +141,42 @@ fun IdentityPendingReviewScreen(
                     PendingStep(text = stringResource(R.string.identity_pending_next_step_3))
                 }
             }
+
+            PrimaryButton(
+                text = stringResource(R.string.identity_resolver_done_action),
+                onClick = onDone
+            )
+
+            Spacer(modifier = Modifier.height(Dimens.xl))
         }
     }
 }
 
 @Composable
+private fun IdentityReviewCard(content: @Composable () -> Unit) {
+    val colors = PaysmartTheme.colorTokens
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = PaysmartTheme.radius.medium,
+        color = colors.surfaceElevated,
+        contentColor = colors.textPrimary,
+        tonalElevation = PaysmartTheme.elevation.subtle,
+        border = BorderStroke(PaysmartTheme.border.thin, colors.borderSubtle)
+    ) {
+        Column(
+            modifier = Modifier.padding(Dimens.md),
+            content = { content() }
+        )
+    }
+}
+
+@Composable
 private fun PendingStep(text: String) {
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
     Text(
         text = "- $text",
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        style = typography.bodyMedium,
+        color = colors.textSecondary
     )
 }

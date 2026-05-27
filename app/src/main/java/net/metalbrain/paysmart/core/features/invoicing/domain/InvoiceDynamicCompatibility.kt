@@ -82,12 +82,17 @@ internal fun Invoice.toLegacyWeeklyDraft(
 ): InvoiceWeeklyDraft {
     val invoiceDate = findSectionValue("invoice_info", InvoiceFieldKeys.INVOICE_DATE)
     val weekEndingDate = findSectionValue("invoice_info", InvoiceFieldKeys.WEEK_ENDING)
-    val hourlyRate = lineItems.firstOrNull()
-        ?.fields
-        ?.firstOrNull { it.key == InvoiceFieldKeys.LINE_RATE }
-        ?.value
+    val hourlyRate = lineItems.firstOrNull { it.hasWorkedHours() }
+        ?.fieldValue(InvoiceFieldKeys.LINE_RATE)
         ?.toNumericString()
         .orEmpty()
+        .ifBlank {
+            lineItems.firstNotNullOfOrNull { lineItem ->
+                lineItem.fieldValue(InvoiceFieldKeys.LINE_RATE)
+                    ?.toNumericString()
+                    ?.takeIf { it.isNotBlank() }
+            }.orEmpty()
+        }
 
     return InvoiceWeeklyDraft(
         selectedVenueId = fallbackSelectedVenueId,
@@ -95,19 +100,17 @@ internal fun Invoice.toLegacyWeeklyDraft(
         weekEndingDate = weekEndingDate,
         shifts = lineItems.mapIndexed { index, lineItem ->
             InvoiceShiftDraft(
-                workDate = lineItem.fields.firstOrNull { it.key == InvoiceFieldKeys.LINE_DATE }
-                    ?.value
+                workDate = lineItem.fieldValue(InvoiceFieldKeys.LINE_DATE)
                     ?.toString()
                     .orEmpty(),
-                dayLabel = LEGACY_WEEKDAY_LABELS.getOrElse(index) { "Shift ${index + 1}" },
-                hoursInput = lineItem.fields.firstOrNull { it.key == InvoiceFieldKeys.LINE_HOURS }
-                    ?.value
+                dayLabel = "Shift ${index + 1}",
+                hoursInput = lineItem.fieldValue(InvoiceFieldKeys.LINE_HOURS)
                     ?.toNumericString()
                     .orEmpty()
             )
-        }.ifEmpty { InvoiceWeeklyDraft.defaultWeekShifts() },
+        }.ifEmpty { InvoiceWeeklyDraft.defaultShiftRows() },
         hourlyRateInput = hourlyRate
-    ).withFullWeek()
+    ).withVisibleShifts()
 }
 
 internal fun Invoice.toLegacyProfileDraft(): InvoiceProfileDraft {
@@ -175,6 +178,14 @@ private fun Any?.toNumericString(): String {
     }
 }
 
+private fun LineItem.fieldValue(key: String): Any? {
+    return fields.firstOrNull { it.key == key }?.value
+}
+
+private fun LineItem.hasWorkedHours(): Boolean {
+    return (fieldValue(InvoiceFieldKeys.LINE_HOURS).toNumericString().toDoubleOrNull() ?: 0.0) > 0.0
+}
+
 private fun Double.toPlainNumberString(): String {
     return if (this % 1.0 == 0.0) {
         this.toLong().toString()
@@ -184,13 +195,3 @@ private fun Double.toPlainNumberString(): String {
 }
 
 private fun Float.toPlainNumberString(): String = this.toDouble().toPlainNumberString()
-
-private val LEGACY_WEEKDAY_LABELS = listOf(
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday"
-)

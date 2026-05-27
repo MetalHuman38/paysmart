@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -20,13 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.account.profile.components.DocumentFrameOverlay
 import net.metalbrain.paysmart.core.features.account.profile.state.PermissionState
 import net.metalbrain.paysmart.core.features.identity.provider.CameraFrameShape
 import net.metalbrain.paysmart.ui.components.PrimaryButton
+import net.metalbrain.paysmart.ui.theme.Dimens
 
 @Composable
 fun IdentityDocumentCameraDialogContent(
@@ -72,7 +73,7 @@ fun IdentityDocumentCameraDialogContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopStart)
-                .padding(12.dp),
+                .padding(Dimens.space6),
             horizontalArrangement = Arrangement.End
         ) {
             IconButton(onClick = onDismiss) {
@@ -89,8 +90,9 @@ fun IdentityDocumentCameraDialogContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .navigationBarsPadding()
+                    .padding(Dimens.md),
+                verticalArrangement = Arrangement.spacedBy(Dimens.sm)
             ) {
                 PrimaryButton(
                     text = stringResource(R.string.identity_resolver_camera_capture_action),

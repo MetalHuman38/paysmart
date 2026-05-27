@@ -266,26 +266,26 @@ object InvoiceTemplateCatalog {
                 textField(
                     key = InvoiceFieldKeys.WORKER_BADGE_NUMBER,
                     label = "Badge Number",
-                    required = false,
-                    placeholder = "Optional"
+                    required = true,
+                    placeholder = "Worker badge number"
                 ),
                 field(
                     key = InvoiceFieldKeys.WORKER_BADGE_EXPIRY,
                     label = "Badge Expiry",
                     type = FieldType.DATE,
-                    required = false,
+                    required = true,
                     placeholder = "Select badge expiry"
                 ),
                 textField(
                     key = InvoiceFieldKeys.WORKER_UTR,
                     label = "UTR",
-                    required = false,
+                    required = true,
                     placeholder = "Unique Taxpayer Reference"
                 ),
                 textField(
                     key = InvoiceFieldKeys.WORKER_EMAIL,
                     label = "Email",
-                    required = false,
+                    required = true,
                     placeholder = "name@example.com"
                 ),
                 textField(

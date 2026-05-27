@@ -21,7 +21,7 @@ fun InvoiceDynamicSectionCard(
         InvoiceSectionHeading(
             title = section.title,
             body = if (section.fields.any(InvoiceField::required)) {
-                "Required fields are marked and highlighted until completed."
+                "Complete required fields."
             } else {
                 null
             }

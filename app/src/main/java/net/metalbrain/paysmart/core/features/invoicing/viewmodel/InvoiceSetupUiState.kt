@@ -43,7 +43,7 @@ enum class InvoiceSetupStep {
  * @property suggestedVenueAddress The result of an address lookup to be used for auto-completion.
  * @property error An optional error message to be displayed to the user.
  * @property infoMessage An optional informative message to be displayed to the user.
- * @property weeklyRows Provides a complete list of shifts for a full week based on the current [weeklyDraft].
+ * @property weeklyRows Provides the currently visible shift rows for the invoice draft.
  * @property canContinue Determines if the user has met the requirements to proceed to the next step.
  */
 data class InvoiceSetupUiState(
@@ -53,7 +53,7 @@ data class InvoiceSetupUiState(
     val draftInvoice: Invoice = InvoiceFactory.createFromTemplate(
         templateId = "weekly_shift_worker_template",
         professionId = "zero_hours_worker",
-        initialLineItemCount = 7
+        initialLineItemCount = 1
     ),
     val selectedProfession: Profession? = null,
     val availableProfessions: List<Profession> = InvoiceTemplateCatalog.professions,
@@ -62,6 +62,7 @@ data class InvoiceSetupUiState(
     val selectedVenueId: String = "",
     val venueNameInput: String = "",
     val venueAddressInput: String = "",
+    val venuePostcodeInput: String = "",
     val venueCountryInput: String = "GB",
     val venueRateInput: String = "",
     val isHydrating: Boolean = true,
@@ -82,7 +83,7 @@ data class InvoiceSetupUiState(
         get() = draftInvoice.toLegacyWeeklyDraft(selectedVenueId)
 
     val weeklyRows: List<InvoiceShiftDraft>
-        get() = weeklyDraft.withFullWeek().shifts
+        get() = weeklyDraft.withVisibleShifts().shifts
 
     val selectedTemplate: Template?
         get() = draftInvoice.templateId?.let(InvoiceTemplateCatalog::template)
@@ -96,6 +97,11 @@ data class InvoiceSetupUiState(
         get() = weeklyRows.any { row ->
             (row.hoursInput.toDoubleOrNull() ?: 0.0) > 0.0
         }
+
+    val workedShiftsHaveDates: Boolean
+        get() = weeklyRows
+            .filter { row -> (row.hoursInput.toDoubleOrNull() ?: 0.0) > 0.0 }
+            .all { row -> row.workDate.isIsoLocalDate() }
 
     val hasValidInvoiceDate: Boolean
         get() = weeklyDraft.invoiceDate.isIsoLocalDate()
@@ -113,11 +119,13 @@ data class InvoiceSetupUiState(
         get() = profileDraft.isValid && venues.isNotEmpty() && effectiveSelectedVenueId.isNotBlank()
 
     val canFinalize: Boolean
-        get() = effectiveSelectedVenueId.isNotBlank() &&
+        get() = profileDraft.isValid &&
+            effectiveSelectedVenueId.isNotBlank() &&
             hasValidInvoiceDate &&
             hasValidWeekEndingDate &&
             hasValidHourlyRate &&
-            hasWorkedShift
+            hasWorkedShift &&
+            workedShiftsHaveDates
 
     val canContinue: Boolean
         get() = when (step) {

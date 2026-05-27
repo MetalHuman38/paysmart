@@ -65,7 +65,7 @@ class InvoiceFinalizeRepository @Inject constructor(
         weekly: InvoiceWeeklyDraft
     ): String {
         val shifts = JSONArray(
-            weekly.withFullWeek().shifts.map { row ->
+            weekly.withBillableShiftsOnly().shifts.map { row ->
                 JSONObject()
                     .put("dayLabel", row.dayLabel)
                     .put("workDate", row.workDate)

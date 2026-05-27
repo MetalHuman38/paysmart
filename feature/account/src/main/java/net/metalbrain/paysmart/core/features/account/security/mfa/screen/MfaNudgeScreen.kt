@@ -2,24 +2,14 @@ package net.metalbrain.paysmart.core.features.account.security.mfa.screen
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -28,13 +18,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.feature.account.R
+import net.metalbrain.paysmart.core.features.account.creation.components.AccountCreationScaffold
 import net.metalbrain.paysmart.core.features.account.security.mfa.viewmodel.MfaNudgeViewModel
 import net.metalbrain.paysmart.ui.components.AuthScreenSubtitle
 import net.metalbrain.paysmart.ui.components.AuthScreenTitle
@@ -92,39 +81,15 @@ fun MfaNudgeScreen(
         else -> uiState.verificationCode.length == 6
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.16f),
-                        MaterialTheme.colorScheme.background
-                    )
-                )
-            )
-    ) {
+    AccountCreationScaffold(onBack = onBack) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(WindowInsets.systemBars.asPaddingValues())
-                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.lg)
+                .padding(innerPadding)
+                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.space6)
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(Dimens.lg)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.common_back)
-                    )
-                }
-            }
-
             Column(verticalArrangement = Arrangement.spacedBy(Dimens.sm)) {
                 AuthScreenTitle(text = stringResource(R.string.mfa_prompt_title))
                 AuthScreenSubtitle(text = stringResource(R.string.mfa_prompt_card_description))

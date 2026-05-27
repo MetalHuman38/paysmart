@@ -1,18 +1,6 @@
 package net.metalbrain.paysmart.core.features.invoicing.viewmodel
 
 /**
- * Compares two strings to determine if they represent the same day by comparing
- * their first three characters in a case-insensitive manner after trimming whitespace.
- *
- * @param left The first day string to compare.
- * @param right The second day string to compare.
- * @return `true` if the first three characters of both strings match, `false` otherwise.
- */
-internal fun sameDay(left: String, right: String): Boolean {
-    return left.trim().lowercase().take(3) == right.trim().lowercase().take(3)
-}
-
-/**
  * Sanitizes a string input to ensure it represents a valid decimal format.
  *
  * This function filters the [raw] input to keep only digits and the first occurrence of a

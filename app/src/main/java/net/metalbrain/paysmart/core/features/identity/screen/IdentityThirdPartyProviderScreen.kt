@@ -1,15 +1,17 @@
 package net.metalbrain.paysmart.core.features.identity.screen
 
 import android.content.Intent
-import android.net.Uri
 import androidx.core.net.toUri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,11 +21,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import net.metalbrain.paysmart.R
 import net.metalbrain.paysmart.core.features.identity.viewmodel.IdentityProviderHandoffViewModel
 import net.metalbrain.paysmart.ui.components.OutlinedButton
 import net.metalbrain.paysmart.ui.components.PrimaryButton
+import net.metalbrain.paysmart.ui.theme.Dimens
+import net.metalbrain.paysmart.ui.theme.PaysmartTheme
 
 @Composable
 fun IdentityThirdPartyProviderScreen(
@@ -37,6 +40,8 @@ fun IdentityThirdPartyProviderScreen(
 ) {
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsState()
+    val colors = PaysmartTheme.colorTokens
+    val typography = PaysmartTheme.typographyTokens
 
     LaunchedEffect(callbackEvent, callbackSessionId, callbackProviderRef, callbackDeepLink) {
         viewModel.consumeCallbackArgs(
@@ -47,49 +52,64 @@ fun IdentityThirdPartyProviderScreen(
         )
     }
 
-    Scaffold(topBar = { IdentityResolverTopBar(onBack = onBack) }) { innerPadding ->
+    Scaffold(
+        containerColor = colors.backgroundPrimary
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .navigationBarsPadding()
+                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.md),
+            verticalArrangement = Arrangement.spacedBy(Dimens.md)
         ) {
-            Text(
-                text = stringResource(R.string.identity_provider_title),
-                style = MaterialTheme.typography.titleLarge
-            )
-            Text(
-                text = stringResource(R.string.identity_provider_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            IdentityFlowHeader(
+                title = stringResource(R.string.identity_provider_title),
+                subtitle = stringResource(R.string.identity_provider_subtitle),
+                onBack = onBack,
+                onHelp = null
             )
 
             Text(
-                stringResource(R.string.identity_provider_value, state.provider)
+                text = stringResource(R.string.identity_provider_value, state.provider),
+                style = typography.bodyMedium,
+                color = colors.textPrimary
             )
             Text(
-                stringResource(
+                text = stringResource(
                     R.string.identity_provider_session_value,
                     state.sessionId ?: stringResource(R.string.identity_provider_not_started)
-                )
+                ),
+                style = typography.bodyMedium,
+                color = colors.textPrimary
             )
             Text(
-                stringResource(R.string.identity_provider_status_value, state.status)
+                text = stringResource(R.string.identity_provider_status_value, state.status),
+                style = typography.bodyMedium,
+                color = colors.textPrimary
             )
             state.lastEvent?.let {
-                Text(stringResource(R.string.identity_provider_callback_event_value, it))
+                Text(
+                    text = stringResource(R.string.identity_provider_callback_event_value, it),
+                    style = typography.bodyMedium,
+                    color = colors.textSecondary
+                )
             }
             state.reason?.let {
-                Text(stringResource(R.string.identity_provider_reason_value, it))
+                Text(
+                    text = stringResource(R.string.identity_provider_reason_value, it),
+                    style = typography.bodyMedium,
+                    color = colors.textSecondary
+                )
             }
 
             state.error?.let {
-                Text(text = it, color = MaterialTheme.colorScheme.error)
+                Text(text = it, style = typography.bodyMedium, color = colors.error)
             }
             state.info?.let {
-                Text(text = it, color = MaterialTheme.colorScheme.primary)
+                Text(text = it, style = typography.bodyMedium, color = colors.brandPrimary)
             }
 
             PrimaryButton(
@@ -130,6 +150,8 @@ fun IdentityThirdPartyProviderScreen(
                 },
                 enabled = !state.isBusy
             )
+
+            Spacer(modifier = Modifier.height(Dimens.xl))
         }
     }
 }

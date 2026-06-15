@@ -61,9 +61,11 @@ fun HomeContent(
     onVerifyEmailClick: () -> Unit,
     onAddAddressClick: () -> Unit,
     onVerifyIdentityClick: () -> Unit,
+    onDismissIdentityVerificationPrompt: () -> Unit,
     onViewRatesClick: () -> Unit,
     onViewAllLimitsClick: () -> Unit,
     localSettings: LocalSecuritySettingsModel?,
+    isIdentityVerificationPromptDismissed: Boolean,
     displayName: String,
     transactions: List<Transaction>,
     recentRecipients: List<HomeRecentRecipient>,
@@ -96,10 +98,17 @@ fun HomeContent(
         onReceiveMoneyClick = onReceiveMoneyClick,
         onAddMoneyClick = onAddMoneyClick
     )
+    val isIdentityOnlyRemaining = localSettings?.let { settings ->
+        settings.hasCompletedEmailVerification &&
+            settings.hasCompletedAddress &&
+            !settings.hasCompletedIdentity
+    } == true
     val setupSecurity = localSettings?.takeIf { settings ->
-        !settings.hasCompletedEmailVerification ||
+        val hasIncompleteStep = !settings.hasCompletedEmailVerification ||
             !settings.hasCompletedAddress ||
             !settings.hasCompletedIdentity
+        hasIncompleteStep &&
+            !(isIdentityOnlyRemaining && isIdentityVerificationPromptDismissed)
     }
     val isInvoiceFirst = launchInterest == LaunchInterest.INVOICE
 
@@ -191,7 +200,9 @@ fun HomeContent(
                     security = setupSecurity,
                     onVerifyEmailClick = onVerifyEmailClick,
                     onAddAddressClick = onAddAddressClick,
-                    onVerifyIdentityClick = onVerifyIdentityClick
+                    onVerifyIdentityClick = onVerifyIdentityClick,
+                    onDismissIdentityVerificationPrompt =
+                        onDismissIdentityVerificationPrompt.takeIf { isIdentityOnlyRemaining }
                 )
             }
         }

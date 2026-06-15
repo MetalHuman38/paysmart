@@ -15,6 +15,16 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import net.metalbrain.paysmart.core.locale.LocaleManager
 import net.metalbrain.paysmart.core.features.language.viewmodel.LanguageViewModel
 
+/**
+ * A wrapper Composable that provides localization support to the application.
+ *
+ * It monitors the current language state from the [LanguageViewModel] and updates the
+ * [LocalContext] and [LocalLayoutDirection] accordingly. It ensures that the context
+ * remains compatible with Hilt by maintaining a reference to the underlying [Activity]
+ * while overriding resource and theme access to use the selected locale.
+ *
+ * @param content The Composable content to be rendered with the localized context and layout direction.
+ */
 @Composable
 fun LocalizedAppWrapper(
     content: @Composable () -> Unit

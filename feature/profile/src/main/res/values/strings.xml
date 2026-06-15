@@ -33,6 +33,7 @@
     <string name="verify_email">Verify email</string>
     <string name="add_address">Add address</string>
     <string name="verify_identity">Verify identity</string>
+    <string name="dismiss_identity_verification_prompt">Dismiss identity verification reminder</string>
     <string name="continue_text">Continue</string>
     <string name="i_am_happy_paysmart_share_my_data">I agree to PaySmart securely sharing my details (name, address, and date of birth) with credit bureaus to assess eligibility and offer suitable credit products.</string>
     <string name="identity_resolver_camera_permission_required">Camera permission is required to capture your document.</string>

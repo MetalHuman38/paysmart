@@ -1,6 +1,5 @@
 package net.metalbrain.paysmart.ui.capabilities
 
-import com.google.firebase.Timestamp
 import net.metalbrain.paysmart.core.features.featuregate.FeatureAccessPolicy
 import net.metalbrain.paysmart.core.features.featuregate.FeatureKey
 import net.metalbrain.paysmart.core.features.featuregate.FeatureRequirement
@@ -14,16 +13,17 @@ import org.junit.Test
  * Unit tests for [FeatureAccessPolicy].
  *
  * Verifies that feature access decisions are correctly evaluated based on the user's
- * security configuration, ensuring that sensitive features are blocked or allowed
- * according to the required security strength.
+ * security configuration, ensuring that features are blocked or allowed according
+ * to their current product requirements.
  */
 class FeatureAccessPolicyTest {
 
     @Test
-    fun `create invoice is blocked when only one security method is enabled`() {
+    fun `create invoice is blocked until email and address are complete`() {
         val settings = LocalSecuritySettingsModel(
-            passwordEnabled = true,
-            localPasswordSetAt = Timestamp(1, 0)
+            hasVerifiedEmail = true,
+            hasAddedHomeAddress = false,
+            hasVerifiedIdentity = false
         )
 
         val decision = FeatureAccessPolicy.evaluate(
@@ -32,19 +32,18 @@ class FeatureAccessPolicyTest {
         )
 
         assertFalse(decision.isAllowed)
-        assertEquals(1, decision.currentSecurityStrength)
         assertEquals(
-            listOf(FeatureRequirement.SECURITY_STRENGTH_TWO),
+            listOf(FeatureRequirement.HOME_ADDRESS_VERIFIED),
             decision.missingRequirements
         )
     }
 
     @Test
-    fun `create invoice is allowed when two security methods are enabled`() {
+    fun `create invoice is allowed with email and address without identity`() {
         val settings = LocalSecuritySettingsModel(
-            passcodeEnabled = true,
-            localPassCodeSetAt = Timestamp(1, 0),
-            biometricsEnabled = true
+            hasVerifiedEmail = true,
+            hasAddedHomeAddress = true,
+            hasVerifiedIdentity = false
         )
 
         val decision = FeatureAccessPolicy.evaluate(
@@ -53,8 +52,8 @@ class FeatureAccessPolicyTest {
         )
 
         assertTrue(decision.isAllowed)
-        assertEquals(2, decision.currentSecurityStrength)
-        assertEquals(2, decision.requiredSecurityStrength)
+        assertTrue(decision.missingRequirements.isEmpty())
+        assertEquals(null, decision.requiredSecurityStrength)
     }
 
     @Test

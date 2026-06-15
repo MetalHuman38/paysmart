@@ -18,6 +18,16 @@ import dagger.hilt.android.HiltAndroidApp
 import net.metalbrain.paysmart.core.notifications.NotificationChannelRegistrar
 import net.metalbrain.paysmart.core.service.update.FirebaseRemoteConfigUpdatePolicyConfigProvider
 
+/**
+ * The main [android.app.Application] class for the PaySmart app.
+ *
+ * This class serves as the entry point for the application and is annotated with [HiltAndroidApp]
+ * to trigger Hilt's code generation. It handles the global initialization of:
+ * - Firebase services (App Check, Crashlytics, Performance, Remote Config).
+ * - Local emulator configurations for development environments.
+ * - Firestore offline caching settings.
+ * - Notification channel registration via [NotificationChannelRegistrar].
+ */
 @HiltAndroidApp
 class App : BaseApp() {
     override fun onCreate() {

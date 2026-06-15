@@ -63,6 +63,8 @@ class HomeViewModel @Inject constructor(
     private val transactionSearchQuery = MutableStateFlow("")
     private val selectedTransactionProviders =
         MutableStateFlow<Set<HomeTransactionProviderFilter>>(emptySet())
+    private val identityVerificationPromptDismissedForUser =
+        MutableStateFlow<String?>(null)
 
     private val walletBalances = userManager.authState
         .flatMapLatest { auth ->
@@ -220,6 +222,25 @@ class HomeViewModel @Inject constructor(
                 initialValue = false
             )
 
+    val identityVerificationPromptDismissed: StateFlow<Boolean> =
+        userManager.authState
+            .flatMapLatest { auth ->
+                when (auth) {
+                    is AuthState.Authenticated -> combine(
+                        securityPreference.identityVerificationPromptDismissedFlow(auth.uid),
+                        identityVerificationPromptDismissedForUser
+                    ) { persisted, dismissedUserId ->
+                        persisted || dismissedUserId == auth.uid
+                    }
+                    else -> flowOf(false)
+                }
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = false
+            )
+
     init {
         syncWalletOnAuth()
     }
@@ -240,6 +261,17 @@ class HomeViewModel @Inject constructor(
     fun onToggleBalanceVisibility() {
         viewModelScope.launch {
             securityPreference.setHideBalance(!hideBalanceEnabled.value)
+        }
+    }
+
+    fun onDismissIdentityVerificationPrompt() {
+        val userId = runCatching { userManager.uid }.getOrNull() ?: return
+        identityVerificationPromptDismissedForUser.value = userId
+        viewModelScope.launch {
+            securityPreference.setIdentityVerificationPromptDismissed(
+                userId = userId,
+                dismissed = true
+            )
         }
     }
 

@@ -18,7 +18,8 @@ object FeatureAccessPolicy {
             FeatureRequirement.IDENTITY_VERIFIED
         ),
         FeatureKey.CREATE_INVOICE to listOf(
-            FeatureRequirement.SECURITY_STRENGTH_TWO
+            FeatureRequirement.VERIFIED_EMAIL,
+            FeatureRequirement.HOME_ADDRESS_VERIFIED
         )
     )
 
@@ -34,8 +35,7 @@ object FeatureAccessPolicy {
         return FeatureGateDecision(
             feature = feature,
             missingRequirements = missing,
-            currentSecurityStrength = securityStrengthScore.level,
-            requiredSecurityStrength = minimumSecurityStrengthFor(feature)
+            currentSecurityStrength = securityStrengthScore.level
         )
     }
 
@@ -51,12 +51,6 @@ object FeatureAccessPolicy {
         }
     }
 
-    private fun minimumSecurityStrengthFor(feature: FeatureKey): Int? {
-        return when (feature) {
-            FeatureKey.CREATE_INVOICE -> 2
-            else -> null
-        }
-    }
 }
 
 fun LocalSecuritySettingsModel?.securityStrengthScore(): SecurityStrengthScore {

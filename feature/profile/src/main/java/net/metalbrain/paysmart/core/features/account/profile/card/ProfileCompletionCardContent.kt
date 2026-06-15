@@ -9,10 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -45,7 +49,8 @@ fun ProfileCompletionCardContent(
     security: LocalSecuritySettingsModel,
     onVerifyEmailClick: () -> Unit,
     onAddAddressClick: () -> Unit,
-    onVerifyIdentityClick: () -> Unit
+    onVerifyIdentityClick: () -> Unit,
+    onDismissIdentityVerificationPrompt: (() -> Unit)? = null
 ) {
     val completed = listOf(
         security.hasCompletedEmailVerification,
@@ -63,6 +68,11 @@ fun ProfileCompletionCardContent(
     val verifyEmail = stringResource(id = R.string.verify_email)
     val addAddress = stringResource(id = R.string.add_address)
     val verifyIdentity = stringResource(id = R.string.verify_identity)
+    val dismissIdentityAction = onDismissIdentityVerificationPrompt?.takeIf {
+        security.hasCompletedEmailVerification &&
+            security.hasCompletedAddress &&
+            !security.hasCompletedIdentity
+    }
 
     LaunchedEffect(showSheet.value) {
         if (showSheet.value) sheetState.show() else sheetState.hide()
@@ -118,67 +128,84 @@ fun ProfileCompletionCardContent(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
-        Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Circular progress
-            Box(contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(
-                    progress = { progressPercent },
-                    modifier = Modifier.size(72.dp),
-                    strokeWidth = 6.dp,
-                    color = Color(0xFF00C853)
-                )
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Circular progress
+                Box(contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(
+                        progress = { progressPercent },
+                        modifier = Modifier.size(72.dp),
+                        strokeWidth = 6.dp,
+                        color = Color(0xFF00C853)
+                    )
+                    Text(
+                        text = progressLabel,
+                        style = MaterialTheme.typography.labelMedium,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
                 Text(
-                    text = progressLabel,
-                    style = MaterialTheme.typography.labelMedium,
+                    text = stringResource(R.string.finish_setting_up_account),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )
+
+                // Steps
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ProfileStepItem(verifyEmail, security.hasCompletedEmailVerification)
+                    ProfileStepItem(addAddress, security.hasCompletedAddress)
+                    ProfileStepItem(verifyIdentity, security.hasCompletedIdentity)
+                }
+
+                // CTA
+                when {
+                    !security.hasCompletedEmailVerification -> {
+                        PrimaryButton(
+                            text = stringResource(R.string.verify_email),
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = onVerifyEmailClick
+                        )
+                    }
+                    !security.hasCompletedAddress -> {
+                        PrimaryButton(
+                            text = stringResource(R.string.add_address),
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = onAddAddressClick
+                        )
+                    }
+                    !security.hasCompletedIdentity -> {
+                        PrimaryButton(
+                            text = stringResource(R.string.verify_identity),
+                            contentColor = MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = onVerifyIdentityClick
+                        )
+                    }
+                    else -> {
+                        // All done!
+                    }
+                }
             }
 
-            Text(
-                text = stringResource(R.string.finish_setting_up_account),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center
-            )
-
-            // Steps
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                ProfileStepItem(verifyEmail, security.hasCompletedEmailVerification)
-                ProfileStepItem(addAddress, security.hasCompletedAddress)
-                ProfileStepItem(verifyIdentity, security.hasCompletedIdentity)
-            }
-
-
-            // CTA
-            when {
-                !security.hasCompletedEmailVerification -> {
-                    PrimaryButton(
-                        text = stringResource(R.string.verify_email),
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = onVerifyEmailClick
+            if (dismissIdentityAction != null) {
+                IconButton(
+                    onClick = dismissIdentityAction,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(
+                            R.string.dismiss_identity_verification_prompt
+                        )
                     )
-                }
-                !security.hasCompletedAddress -> {
-                    PrimaryButton(
-                        text = stringResource(R.string.add_address),
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = onAddAddressClick
-                    )
-                }
-                !security.hasCompletedIdentity -> {
-                    PrimaryButton(
-                        text = stringResource(R.string.verify_identity),
-                        contentColor = MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = onVerifyIdentityClick
-                    )
-                }
-                else -> {
-                    // All done!
                 }
             }
         }

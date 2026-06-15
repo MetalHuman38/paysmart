@@ -8,13 +8,15 @@ fun ProfileCompletionCard(
     security: LocalSecuritySettingsModel,
     onVerifyEmailClick: () -> Unit,
     onAddAddressClick: () -> Unit,
-    onVerifyIdentityClick: () -> Unit
+    onVerifyIdentityClick: () -> Unit,
+    onDismissIdentityVerificationPrompt: (() -> Unit)? = null
 ) {
 
     ProfileCompletionCardContent(
         security = security,
         onVerifyEmailClick = onVerifyEmailClick,
         onAddAddressClick = onAddAddressClick,
-        onVerifyIdentityClick = onVerifyIdentityClick
+        onVerifyIdentityClick = onVerifyIdentityClick,
+        onDismissIdentityVerificationPrompt = onDismissIdentityVerificationPrompt
     )
 }

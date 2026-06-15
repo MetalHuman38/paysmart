@@ -35,6 +35,8 @@ fun HomeScreen(
         val homeViewModel = hiltViewModel<HomeViewModel>()
         val uiState by homeViewModel.uiState.collectAsState()
         val isBalanceHidden by homeViewModel.hideBalanceEnabled.collectAsState()
+        val isIdentityVerificationPromptDismissed by
+            homeViewModel.identityVerificationPromptDismissed.collectAsState()
 
         Box(modifier = Modifier.padding(innerPadding)) {
             HomeContent(
@@ -118,6 +120,8 @@ fun HomeScreen(
                 onVerifyIdentityClick = {
                     navController.navigate(Screen.ProfileIdentityResolver.route)
                 },
+                onDismissIdentityVerificationPrompt =
+                    homeViewModel::onDismissIdentityVerificationPrompt,
                 onViewRatesClick = {
                     navController.navigate(
                         Screen.ExchangeRates.routeWithCountry(uiState.countryIso2)
@@ -130,6 +134,7 @@ fun HomeScreen(
                     navController.navigate(Screen.NotificationCenter.route)
                 },
                 localSettings = uiState.security,
+                isIdentityVerificationPromptDismissed = isIdentityVerificationPromptDismissed,
                 displayName = uiState.displayName,
                 transactions = uiState.recentTransactions,
                 recentRecipients = uiState.recentRecipients,

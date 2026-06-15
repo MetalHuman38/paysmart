@@ -48,6 +48,8 @@ class SecurityPreference @Inject constructor(
         private val HAS_SKIPPED_PASSKEY_ENROLLMENT_PROMPT =
             booleanPreferencesKey("has_skipped_passkey_enrollment_prompt")
         private val HIDE_BALANCE = booleanPreferencesKey("hide_balance")
+        private const val IDENTITY_VERIFICATION_PROMPT_DISMISSED_PREFIX =
+            "identity_verification_prompt_dismissed"
         private val PRIVACY_CREDIT_ENABLED = booleanPreferencesKey("privacy_credit_enabled")
         private val PRIVACY_SOCIAL_MEDIA_ENABLED = booleanPreferencesKey("privacy_social_media_enabled")
 
@@ -173,6 +175,13 @@ class SecurityPreference @Inject constructor(
             prefs[HIDE_BALANCE] ?: false
         }
 
+    fun identityVerificationPromptDismissedFlow(userId: String): Flow<Boolean> {
+        val key = identityVerificationPromptDismissedKey(userId)
+        return store.data.map { prefs ->
+            prefs[key] ?: false
+        }
+    }
+
     val privacyCreditEnabledFlow: Flow<Boolean> =
         store.data.map { prefs ->
             prefs[PRIVACY_CREDIT_ENABLED] ?: false
@@ -188,6 +197,20 @@ class SecurityPreference @Inject constructor(
             prefs[HIDE_BALANCE] = hidden
         }
     }
+
+    suspend fun setIdentityVerificationPromptDismissed(
+        userId: String,
+        dismissed: Boolean
+    ) {
+        store.edit { prefs ->
+            prefs[identityVerificationPromptDismissedKey(userId)] = dismissed
+        }
+    }
+
+    private fun identityVerificationPromptDismissedKey(userId: String) =
+        booleanPreferencesKey(
+            "${IDENTITY_VERIFICATION_PROMPT_DISMISSED_PREFIX}_$userId"
+        )
 
     suspend fun setPrivacyCreditEnabled(enabled: Boolean) {
         store.edit { prefs ->

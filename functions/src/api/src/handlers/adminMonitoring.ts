@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { initDeps } from "../dependencies.js";
+import { normalizeRouteParam } from "../http/routeParams.js";
 
 type ActivityEvent = {
   id: string;
@@ -84,8 +85,8 @@ async function queryLatestDocs(
   }
 }
 
-function normalizedUid(raw: string | undefined): string {
-  return (raw || "").trim();
+function normalizedUid(raw: unknown): string {
+  return normalizeRouteParam(raw);
 }
 
 export async function adminUserSessionSnapshotHandler(req: Request, res: Response) {

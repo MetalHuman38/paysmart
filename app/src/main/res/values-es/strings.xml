@@ -292,13 +292,8 @@
     <string name="add_money_status_value">Estado: %1$s</string>
     <string name="profile_theme_title">Apariencia</string>
     <string name="profile_account_info_theme_subtitle">Estilo visual y comodidad de lectura de la app</string>
-    <string name="theme_mode_system">Sistema</string>
     <string name="theme_mode_light">Claro</string>
     <string name="theme_mode_dark">Oscuro</string>
-    <string name="profile_theme_variant_title">Paquete de tema</string>
-    <string name="profile_account_info_theme_variant_subtitle">Cambia el tono visual usado en tarjetas y superficies</string>
-    <string name="theme_variant_paysmart">PaySmart</string>
-    <string name="theme_variant_obsidian">Obsidian</string>
     <string name="home_total_balance_label">Saldo total</string>
     <string name="home_wallet_no_data">Sin datos de billetera aún</string>
     <string name="home_wallet_label">billetera</string>

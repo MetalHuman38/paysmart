@@ -89,8 +89,7 @@
     <string name="profile_account_info_limits_subtitle">Verification-driven account limits</string>
     <string name="profile_account_info_statement_subtitle">Transaction history and statement entries</string>
     <string name="profile_account_info_language_subtitle">Select your preferred language</string>
-    <string name="profile_account_info_theme_subtitle">Light, dark, or follow your device</string>
-    <string name="profile_account_info_theme_variant_subtitle">Switch the visual tone used across cards and surfaces</string>
+    <string name="profile_account_info_theme_subtitle">Switch between premium dark and light</string>
     <string name="profile_menu_account_information_subtitle">Information about your account</string>
     <string name="profile_menu_account_information_title">Account information</string>
     <string name="profile_menu_connected_accounts_subtitle">Stripe cards and Flutterwave funding accounts</string>
@@ -122,17 +121,13 @@
     <string name="profile_security_passkey_title">Passkey</string>
     <string name="profile_security_reset_password">Reset password</string>
     <string name="profile_security_transaction_pin">Transaction PIN</string>
-    <string name="profile_theme_title">Theme mode</string>
-    <string name="profile_theme_variant_title">Theme style</string>
+    <string name="profile_theme_title">Appearance</string>
     <string name="profile_security_view_privacy_settings">View privacy settings</string>
     <string name="profile_title">Profile</string>
     <string name="profile_verified_status_content_description">Verified status</string>
     <string name="profile_version_format">Version: %1$s (%2$d)</string>
-    <string name="theme_mode_system">System</string>
     <string name="theme_mode_light">Light</string>
-    <string name="theme_mode_dark">Dark</string>
-    <string name="theme_variant_paysmart">PaySmart</string>
-    <string name="theme_variant_obsidian">Obsidian</string>
+    <string name="theme_mode_dark">Premium dark</string>
     <string name="social_media_advertisement_platform">I am happy for PaySmart to share my name, email address and app events with social media platforms.</string>
     <string name="terms_of_use">https://pay-smart.net/terms/</string>
 

@@ -293,13 +293,8 @@
     <string name="add_money_status_value">ステータス: %1$s</string>
     <string name="profile_theme_title">表示</string>
     <string name="profile_account_info_theme_subtitle">アプリの見た目と読みやすさ</string>
-    <string name="theme_mode_system">システム</string>
     <string name="theme_mode_light">ライト</string>
     <string name="theme_mode_dark">ダーク</string>
-    <string name="profile_theme_variant_title">テーマパック</string>
-    <string name="profile_account_info_theme_variant_subtitle">カードや各サーフェスに使う視覚トーンを切り替えます</string>
-    <string name="theme_variant_paysmart">PaySmart</string>
-    <string name="theme_variant_obsidian">Obsidian</string>
     <string name="home_total_balance_label">総残高</string>
     <string name="home_wallet_no_data">ウォレットのデータがまだありません</string>
     <string name="home_wallet_label">ウォレット</string>

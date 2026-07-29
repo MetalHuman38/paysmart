@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { DownloadInvoicePdf } from "../application/usecase/DownloadInvoicePdf.js";
 import { initDeps } from "../dependencies.js";
+import { normalizeRouteParam } from "../http/routeParams.js";
 import { authContainer } from "../infrastructure/di/authContainer.js";
 
 export async function downloadInvoicePdfHandler(req: Request, res: Response) {
@@ -10,7 +11,7 @@ export async function downloadInvoicePdfHandler(req: Request, res: Response) {
       return res.status(401).json({ error: "Missing token" });
     }
 
-    const invoiceId = req.params.invoiceId?.trim();
+    const invoiceId = normalizeRouteParam(req.params.invoiceId);
     if (!invoiceId) {
       return res.status(400).json({ error: "Missing invoiceId" });
     }

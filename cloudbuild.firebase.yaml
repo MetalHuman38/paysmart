@@ -1,0 +1,27 @@
+substitutions:
+  _FIREBASE_PROJECT_ID: paysmart-7ee79
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - name: node:22-bookworm
+    entrypoint: npm
+    args: ["--prefix", "functions/src/api", "ci"]
+
+  - name: node:22-bookworm
+    entrypoint: npm
+    args: ["--prefix", "functions/src/auth", "ci"]
+
+  - name: node:22-bookworm
+    entrypoint: npm
+    args: ["--prefix", "functions", "run", "build"]
+
+  - name: us-docker.pkg.dev/firebase-cli/us/firebase
+    args:
+      - deploy
+      - --project
+      - ${_FIREBASE_PROJECT_ID}
+      - --only
+      - functions
+      - --non-interactive

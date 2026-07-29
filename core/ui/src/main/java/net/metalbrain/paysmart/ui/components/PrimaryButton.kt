@@ -1,22 +1,22 @@
 package net.metalbrain.paysmart.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextAlign
@@ -48,8 +48,7 @@ fun PrimaryButton(
     } else {
         contentColor
     }
-    val themePack = LocalAppThemePack.current
-    val buttonStyle = themePack.buttonStyle
+    val buttonStyle = LocalAppThemePack.current.buttonStyle
     val resolvedShape = if (buttonStyle.useFullPillButtons) {
         RoundedCornerShape(percent = 50)
     } else {
@@ -64,17 +63,9 @@ fun PrimaryButton(
             .fillMaxWidth()
             .height(height),
         shape = resolvedShape,
-        contentPadding = if (buttonStyle.usePrimaryGradient) {
-            PaddingValues(0.dp)
-        } else {
-            ButtonTokens.contentPadding
-        },
+        contentPadding = ButtonTokens.contentPadding,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (buttonStyle.usePrimaryGradient) {
-                Color.Transparent
-            } else {
-                containerColor
-            },
+            containerColor = containerColor,
             contentColor = resolvedContentColor,
             disabledContainerColor = colorTokens.fillDisabled,
             disabledContentColor = colorTokens.textDisabled
@@ -87,58 +78,14 @@ fun PrimaryButton(
             disabledElevation = 0.dp
         )
     ) {
-        if (buttonStyle.usePrimaryGradient) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(height)
-                    .background(
-                        brush = if (isButtonEnabled) {
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    colorTokens.buttonPrimaryBackground,
-                                    colorTokens.brandAccent
-                                )
-                            )
-                        } else {
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    colorTokens.fillDisabled,
-                                    colorTokens.fillDisabled.copy(alpha = 0.82f)
-                                )
-                            )
-                        },
-                        shape = resolvedShape
-                    )
-                    .drawWithContent {
-                        drawContent()
-                        val glowHeight = 1.5.dp.toPx()
-                        drawRect(
-                            color = Color.White.copy(alpha = buttonStyle.primaryGlowAlpha),
-                            size = size.copy(height = glowHeight)
-                        )
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                PrimaryButtonLabel(
-                    text = text,
-                    isLoading = isLoading,
-                    loadingText = loadingText,
-                    resolvedContentColor = resolvedContentColor,
-                    textMaxLines = textMaxLines,
-                    textOverflow = textOverflow
-                )
-            }
-        } else {
-            PrimaryButtonLabel(
-                text = text,
-                isLoading = isLoading,
-                loadingText = loadingText,
-                resolvedContentColor = resolvedContentColor,
-                textMaxLines = textMaxLines,
-                textOverflow = textOverflow
-            )
-        }
+        PrimaryButtonLabel(
+            text = text,
+            isLoading = isLoading,
+            loadingText = loadingText,
+            resolvedContentColor = resolvedContentColor,
+            textMaxLines = textMaxLines,
+            textOverflow = textOverflow
+        )
     }
 }
 

@@ -12,7 +12,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -40,7 +39,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.core.features.account.security.viewmodel.SecurityViewModel
-import net.metalbrain.paysmart.core.features.theme.data.AppThemeMode
 import net.metalbrain.paysmart.core.features.theme.viewmodel.AppThemeViewModel
 import net.metalbrain.paysmart.core.common.runtime.AppVersionInfo
 import net.metalbrain.paysmart.core.locale.LocaleManager
@@ -66,6 +64,7 @@ import net.metalbrain.paysmart.ui.screens.loader.LoadingPhase
 import net.metalbrain.paysmart.ui.viewmodel.AppLoadingViewModel
 import net.metalbrain.paysmart.ui.screens.NoConnectionGateScreen
 import net.metalbrain.paysmart.ui.screens.loader.rememberStabilizedLoading
+import net.metalbrain.paysmart.ui.theme.AppThemeConfig
 import net.metalbrain.paysmart.ui.theme.Dimens
 import net.metalbrain.paysmart.ui.theme.PaySmartAppBackground
 import net.metalbrain.paysmart.ui.theme.PaysmartTheme
@@ -160,15 +159,9 @@ class MainActivity : FragmentActivity() {
             val sessionState by sessionStateManager.sessionState.collectAsState()
             val localSecurityState by securityViewModel.localSecurityState.collectAsState()
             val themeMode by appThemeViewModel.themeMode.collectAsState()
-            val themeVariant by appThemeViewModel.themeVariant.collectAsState()
             val loadingPhase by appLoadingViewModel.loadingPhase.collectAsState()
             val isOnline = rememberIsInternetAvailable()
             var showNoConnectionGate by rememberSaveable { mutableStateOf(!isOnline) }
-            val isDarkTheme = when (themeMode) {
-                AppThemeMode.SYSTEM -> isSystemInDarkTheme()
-                AppThemeMode.LIGHT -> false
-                AppThemeMode.DARK -> true
-            }
             val localSettings = (localSecurityState as? LocalSecurityState.Ready)?.settings
             val sessionLocked = localSettings?.sessionLocked
             val hasUnlockMethod = localSettings?.let {
@@ -345,8 +338,7 @@ class MainActivity : FragmentActivity() {
             }
 
             PaysmartTheme(
-                darkTheme = isDarkTheme,
-                themeVariant = themeVariant
+                config = AppThemeConfig(mode = themeMode)
             ) {
                 ProvideAppVersionInfo(appVersionInfo = appVersionInfo) {
                     LocalizedAppWrapper {

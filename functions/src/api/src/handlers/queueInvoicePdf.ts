@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { QueueInvoicePdf } from "../application/usecase/QueueInvoicePdf.js";
 import { initDeps } from "../dependencies.js";
+import { normalizeRouteParam } from "../http/routeParams.js";
 import { authContainer } from "../infrastructure/di/authContainer.js";
 import { GoogleCloudAccessTokenProvider } from "../services/googleCloudAccessTokenProvider.js";
 import { InvoicePdfTaskService } from "../services/invoicePdfTaskService.js";
@@ -13,7 +14,7 @@ export async function queueInvoicePdfHandler(req: Request, res: Response) {
       return res.status(401).json({ error: "Missing token" });
     }
 
-    const invoiceId = req.params.invoiceId?.trim();
+    const invoiceId = normalizeRouteParam(req.params.invoiceId);
     if (!invoiceId) {
       return res.status(400).json({ error: "Missing invoiceId" });
     }

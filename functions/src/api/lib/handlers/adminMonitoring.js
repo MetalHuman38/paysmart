@@ -1,4 +1,5 @@
 import { initDeps } from "../dependencies.js";
+import { normalizeRouteParam } from "../http/routeParams.js";
 const DEFAULT_LIMIT = 25;
 const MAX_LIMIT = 100;
 function parseLimit(raw) {
@@ -72,7 +73,7 @@ async function queryLatestDocs(collectionRef, limit, preferredOrderField = "upda
     }
 }
 function normalizedUid(raw) {
-    return (raw || "").trim();
+    return normalizeRouteParam(raw);
 }
 export async function adminUserSessionSnapshotHandler(req, res) {
     try {

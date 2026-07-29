@@ -130,12 +130,10 @@ internal fun NavGraphBuilder.profileNavGraph(
         val profileState by profileViewModel.uiState.collectAsState()
         val languageCode by languageViewModel.currentLanguage.collectAsState()
         val themeMode by appThemeViewModel.themeMode.collectAsState()
-        val themeVariant by appThemeViewModel.themeVariant.collectAsState()
 
         AccountInformationScreen(
             currentLanguage = languageCode,
             currentThemeMode = themeMode,
-            currentThemeVariant = themeVariant,
             profileStatusLabel = when {
                 profileState.isLocked -> stringResource(R.string.profile_status_locked)
                 profileState.isIncomplete -> stringResource(R.string.profile_status_incomplete)
@@ -160,9 +158,6 @@ internal fun NavGraphBuilder.profileNavGraph(
             },
             onThemeModeClick = {
                 appThemeViewModel.cycleThemeMode()
-            },
-            onThemeVariantClick = {
-                appThemeViewModel.cycleThemeVariant()
             }
         )
     }

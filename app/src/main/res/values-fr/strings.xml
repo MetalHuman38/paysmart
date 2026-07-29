@@ -293,13 +293,8 @@
     <string name="add_money_status_value">Statut : %1$s</string>
     <string name="profile_theme_title">Apparence</string>
     <string name="profile_account_info_theme_subtitle">Style visuel et confort de lecture</string>
-    <string name="theme_mode_system">Système</string>
     <string name="theme_mode_light">Clair</string>
     <string name="theme_mode_dark">Sombre</string>
-    <string name="profile_theme_variant_title">Pack de thème</string>
-    <string name="profile_account_info_theme_variant_subtitle">Changer la tonalité visuelle utilisée sur les cartes et les surfaces</string>
-    <string name="theme_variant_paysmart">PaySmart</string>
-    <string name="theme_variant_obsidian">Obsidian</string>
     <string name="home_total_balance_label">Solde total</string>
     <string name="home_wallet_no_data">Aucune donnée de portefeuille</string>
     <string name="home_wallet_label">portefeuille</string>

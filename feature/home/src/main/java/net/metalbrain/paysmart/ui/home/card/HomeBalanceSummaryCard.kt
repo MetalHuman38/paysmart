@@ -1,6 +1,5 @@
 package net.metalbrain.paysmart.ui.home.card
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import net.metalbrain.paysmart.feature.home.R
@@ -52,15 +50,6 @@ fun HomeBalanceSummaryCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            colors.surfaceElevated,
-                            colors.brandPrimary.copy(alpha = 0.20f),
-                            colors.brandSecondary.copy(alpha = 0.24f)
-                        )
-                    )
-                )
                 .padding(HomeCardTokens.contentPadding),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -124,7 +113,6 @@ private fun HomeBalanceSnapshot.walletBreakdownLabel(
 private fun formatAmount(amount: Double): String {
     return String.format(Locale.US, "%.2f", amount)
 }
-
 
 
 

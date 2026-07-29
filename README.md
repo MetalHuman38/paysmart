@@ -61,6 +61,7 @@ Backend shape:
 - `app/docs/in_app_update_testing.md` - in-app update testing notes.
 - `app/docs/playstore_release_notes.md` - current Play Store release-note draft.
 - `app/docs/admin_panel_roadmap.md` - admin panel scope and hardening model.
+- `functions/continuous-deployment.md` - GitHub to GCP continuous deployment setup for Firebase Functions and Cloud Run alternatives.
 
 ## Local Development
 

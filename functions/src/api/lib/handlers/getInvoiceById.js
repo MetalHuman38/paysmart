@@ -1,5 +1,6 @@
 import { GetInvoiceById } from "../application/usecase/GetInvoiceById.js";
 import { initDeps } from "../dependencies.js";
+import { normalizeRouteParam } from "../http/routeParams.js";
 import { authContainer } from "../infrastructure/di/authContainer.js";
 export async function getInvoiceByIdHandler(req, res) {
     try {
@@ -7,7 +8,7 @@ export async function getInvoiceByIdHandler(req, res) {
         if (!authHeader?.startsWith("Bearer ")) {
             return res.status(401).json({ error: "Missing token" });
         }
-        const invoiceId = req.params.invoiceId?.trim();
+        const invoiceId = normalizeRouteParam(req.params.invoiceId);
         if (!invoiceId) {
             return res.status(400).json({ error: "Missing invoiceId" });
         }

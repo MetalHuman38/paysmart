@@ -51,9 +51,8 @@ fun AccountInformationCards(
                 modifier = Modifier.width(HomeCardTokens.accountInfoCardWidth),
                 gradient = Brush.verticalGradient(
                     colors = listOf(
-                        colors.surfaceElevated,
-                        colors.info.copy(alpha = 0.12f),
-                        colors.brandPrimary.copy(alpha = 0.08f)
+                        colors.surfacePrimary,
+                        colors.surfacePrimary
                     )
                 ),
                 kicker = stringResource(R.string.home_exchange_rate_label),
@@ -75,9 +74,8 @@ fun AccountInformationCards(
                 modifier = Modifier.width(HomeCardTokens.accountInfoCardWidth),
                 gradient = Brush.verticalGradient(
                     colors = listOf(
-                        colors.surfaceElevated,
-                        colors.brandPrimary.copy(alpha = 0.12f),
-                        colors.brandSecondary.copy(alpha = 0.08f)
+                        colors.surfacePrimary,
+                        colors.surfacePrimary
                     )
                 ),
                 kicker = stringResource(R.string.home_daily_limits_title),

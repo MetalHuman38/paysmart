@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import net.metalbrain.paysmart.core.features.theme.data.AppThemeMode
 import net.metalbrain.paysmart.core.features.theme.data.AppThemePreferenceRepository
-import net.metalbrain.paysmart.core.features.theme.data.AppThemeVariant
 
 @HiltViewModel
 class AppThemeViewModel @Inject constructor(
@@ -24,13 +23,6 @@ class AppThemeViewModel @Inject constructor(
             AppThemeMode.DARK
         )
 
-    val themeVariant: StateFlow<AppThemeVariant> = repository.observeThemeVariant()
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000),
-            AppThemeVariant.OBSIDIAN
-        )
-
     fun cycleThemeMode() {
         viewModelScope.launch {
             repository.setThemeMode(themeMode.value.next())
@@ -40,18 +32,6 @@ class AppThemeViewModel @Inject constructor(
     fun setThemeMode(mode: AppThemeMode) {
         viewModelScope.launch {
             repository.setThemeMode(mode)
-        }
-    }
-
-    fun cycleThemeVariant() {
-        viewModelScope.launch {
-            repository.setThemeVariant(themeVariant.value.next())
-        }
-    }
-
-    fun setThemeVariant(variant: AppThemeVariant) {
-        viewModelScope.launch {
-            repository.setThemeVariant(variant)
         }
     }
 }
